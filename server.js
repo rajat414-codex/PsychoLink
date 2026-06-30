@@ -653,7 +653,7 @@ if (process.env.RESEND_API_KEY) {
 
 console.log('🔑 NVIDIA_API_KEY loaded:', API_KEY ? `${API_KEY.slice(0,12)}... (length ${API_KEY.length})` : '❌ NOT FOUND');
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
   console.log('   - POST /api/analyze (emotion report)');
