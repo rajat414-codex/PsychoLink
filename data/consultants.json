@@ -1,0 +1,111 @@
+[
+  {
+    "id": 1,
+    "name": "Dr. Priya Sharma",
+    "spec": "Anxiety & CBT",
+    "rating": 4.9,
+    "sessions": 240,
+    "color": "#ec4899",
+    "avail": true,
+    "exp": "8 yrs",
+    "price": 199
+  },
+  {
+    "id": 2,
+    "name": "Dr. Arjun Mehta",
+    "spec": "Depression & Mindfulness",
+    "rating": 4.8,
+    "sessions": 180,
+    "color": "#8b5cf6",
+    "avail": true,
+    "exp": "6 yrs",
+    "price": 199
+  },
+  {
+    "id": 3,
+    "name": "Dr. Sara Ali",
+    "spec": "Trauma & PTSD",
+    "rating": 4.9,
+    "sessions": 320,
+    "color": "#2dd4bf",
+    "avail": false,
+    "exp": "12 yrs",
+    "price": 249
+  },
+  {
+    "id": 4,
+    "name": "Dr. Ravi Nair",
+    "spec": "Stress & Burnout",
+    "rating": 4.7,
+    "sessions": 150,
+    "color": "#f59e0b",
+    "avail": true,
+    "exp": "5 yrs",
+    "price": 199
+  },
+  {
+    "id": 1781714187732,
+    "name": "Rajat",
+    "spec": "therapeutic, Traumatic , CBT , Relationship Consultant",
+    "rating": 5,
+    "sessions": 0,
+    "color": "#3b82f6",
+    "avail": true,
+    "exp": "New",
+    "price": 199,
+    "qualifications": "B.Tech Student (2025–Present), Mental Health & Psychology Enthusiast, Certified in Basic Psychological First Aid and Active Listening (if applicable), Experience in peer support, student mentoring, and wellness awareness.",
+    "therapyApproach": "Active Listening, Person-Centered Support, CBT-informed techniques, Solution-Focused Guidance, Psychoeducation, Stress Management, Empathetic Communication and Practical solutions to handle Traumatic feelings."
+  },
+  {
+    "id": 1781803960732,
+    "name": "Aniket",
+    "spec": "bacha hu bhai",
+    "rating": 5,
+    "sessions": 0,
+    "color": "#10b981",
+    "avail": true,
+    "exp": "New",
+    "price": 199,
+    "qualifications": "10th  mein 91%  hai pls select krlo",
+    "therapyApproach": "sdhiashdi"
+  },
+  {
+    "id": 1781805487787,
+    "name": "Seema kumri",
+    "spec": "CBT",
+    "rating": 5,
+    "sessions": 0,
+    "color": "#f43f5e",
+    "avail": true,
+    "exp": "New",
+    "price": 199,
+    "qualifications": "CBT",
+    "therapyApproach": "CBT"
+  },
+  {
+    "id": 1781805488888,
+    "name": "Jana DOe",
+    "spec": "CBT",
+    "rating": 5,
+    "sessions": 0,
+    "color": "#a78bfa",
+    "avail": true,
+    "exp": "New",
+    "price": 199,
+    "qualifications": "ufhhfkhfhuj",
+    "therapyApproach": "kdhcdshc"
+  },
+  {
+    "id": 1781805490315,
+    "name": "Dr  Jane DOe",
+    "spec": "CBT",
+    "rating": 5,
+    "sessions": 0,
+    "color": "#ec4899",
+    "avail": true,
+    "exp": "New",
+    "price": 199,
+    "qualifications": "CBt",
+    "therapyApproach": "CBT "
+  }
+]
