@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE } from './config';
 import {
   FaBrain, FaRobot, FaHistory, FaSignOutAlt, FaPlus,
   FaPaperPlane, FaMicrophone, FaStop, FaVolumeUp,
@@ -157,19 +158,19 @@ export default function Home({ userProfile, onLogout }) {
 
   // Fetch consultants from backend
   useEffect(() => {
-    fetch('http://localhost:3001/api/consultants')
+    fetch(`${API_BASE}/api/consultants`)
       .then(r => r.json()).then(setConsultants).catch(() => setConsultants([]));
   }, []);
 
   const fetchApplications = () => {
-    fetch('http://localhost:3001/api/admin/applications')
+    fetch(`${API_BASE}/api/admin/applications`)
       .then(r => r.json()).then(setApplications).catch(() => setApplications([]));
   };
 
   const removeConsultant = async (c) => {
     if (!window.confirm(`Remove ${c.name} from the platform?`)) return;
     try {
-      await fetch(`http://localhost:3001/api/consultants/${c.id}`, { method:'DELETE' });
+      await fetch(`${API_BASE}/api/consultants/${c.id}`, { method:'DELETE' });
       setConsultants(prev => prev.filter(x => x.id !== c.id));
     } catch (e) { alert('Could not remove — check server.'); }
   };
@@ -216,7 +217,7 @@ export default function Home({ userProfile, onLogout }) {
     setLoading(true);
     playTone('send');
     try {
-      const res = await fetch('http://localhost:3001/api/chat', {
+      const res = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type':'application/json' },
         body: JSON.stringify({
@@ -351,7 +352,7 @@ export default function Home({ userProfile, onLogout }) {
         setLoading(true);
         playTone('send');
         try {
-          const res = await fetch('http://localhost:3001/api/chat', {
+          const res = await fetch(`${API_BASE}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -410,7 +411,7 @@ export default function Home({ userProfile, onLogout }) {
     if (!journalEntries.length) return;
     setJournalLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/journal/summarize', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ entries: journalEntries.slice(0,10).map(e=>e.text) }) });
+      const res = await fetch(`${API_BASE}/api/journal/summarize`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ entries: journalEntries.slice(0,10).map(e=>e.text) }) });
       const data = await res.json();
       setJournalInsight(data.insight || 'No insight generated.');
     } catch { setJournalInsight('Could not get insight — check server.'); }
@@ -421,7 +422,7 @@ export default function Home({ userProfile, onLogout }) {
     if (messages.length < 2) return;
     setSummaryLoading(true); setSummaryOpen(true);
     try {
-      const res = await fetch('http://localhost:3001/api/session/summary', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ messages: messages.map(m=>({role:m.role,content:m.content})), persona:activeAI }) });
+      const res = await fetch(`${API_BASE}/api/session/summary`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ messages: messages.map(m=>({role:m.role,content:m.content})), persona:activeAI }) });
       const data = await res.json();
       setSessionSummary(data.summary || 'Unable to generate summary.');
     } catch { setSessionSummary('Could not generate summary.'); }
@@ -925,7 +926,7 @@ export default function Home({ userProfile, onLogout }) {
               <ApplicationsPanel applications={applications} accent={accent}
                 onRefresh={() => {
                   fetchApplications();
-                  fetch('http://localhost:3001/api/consultants').then(r=>r.json()).then(setConsultants).catch(()=>{});
+                  fetch(`${API_BASE}/api/consultants`).then(r=>r.json()).then(setConsultants).catch(()=>{});
                 }}
               />
             </motion.div>

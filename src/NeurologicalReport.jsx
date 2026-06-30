@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from './config';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceDot } from 'recharts';
 import { FaBrain, FaSync, FaLightbulb, FaShieldAlt, FaArrowUp } from 'react-icons/fa';
@@ -290,7 +291,7 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
     setIsDemo(false);
     try {
       // Calls your local API route — add ANTHROPIC_API_KEY to .env.local
-      const res = await fetch('http://localhost:3001/api/analyze', {
+      const res = await fetch(`${API_BASE}/api/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: userMessages }),

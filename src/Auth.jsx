@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE } from './config';
 // ── ORIGINAL GOOGLE ICON ──
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple, FaPhoneAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaEnvelope } from 'react-icons/fa';
@@ -263,7 +264,7 @@ export default function Auth({ onComplete }) {
     if (!emailInput.includes('@') || ecSending) return;
     setEcSending(true); setEcError('');
     try {
-      const r = await fetch('http://localhost:3001/api/send-email-code', {
+      const r = await fetch(`${API_BASE}/api/send-email-code`, {
         method:'POST', headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({ email: emailInput })
       });
@@ -286,7 +287,7 @@ export default function Auth({ onComplete }) {
     if (code.length < 6 || ecVerifying) return;
     setEcVerifying(true); setEcError('');
     try {
-      const r = await fetch('http://localhost:3001/api/verify-email-code', {
+      const r = await fetch(`${API_BASE}/api/verify-email-code`, {
         method:'POST', headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({ email: emailInput, code })
       });

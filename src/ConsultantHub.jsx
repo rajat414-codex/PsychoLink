@@ -6,7 +6,7 @@ const J = "'Plus Jakarta Sans', sans-serif";
 const G = "'Cormorant Garamond', serif";
 const S = "'Space Grotesk', sans-serif";
 
-const API_BASE = 'http://localhost:3001';
+import { API_BASE } from './config';
 
 // ─────────────────────────────────────────────────────────────────
 // Shared modal shell

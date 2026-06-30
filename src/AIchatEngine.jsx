@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useRef, useEffect } from 'react'
+import { API_BASE } from './config'
 
 function AIChatEngine({ user, setUser }) {
   // Check identity to deploy specific core
@@ -41,7 +42,7 @@ function AIChatEngine({ user, setUser }) {
           content: m.text,
         }));
 
-      const res = await fetch('http://localhost:3001/api/chat', {
+      const res = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history, persona: ai.name }),
@@ -58,7 +59,7 @@ function AIChatEngine({ user, setUser }) {
 
     } catch (err) {
       console.error('Chat error:', err);
-      setError('Connection to AI core failed. Make sure the server is running on port 3001.');
+      setError('Connection to AI core failed. Make sure the backend server is running.');
       setMessages(prev => [...prev, {
         role: 'ai',
         text: `[${ai.name} System Log]: ⚠️ Connection lost. Could not reach the AI core. Check that your local server is running.`,
