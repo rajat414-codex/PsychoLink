@@ -6,6 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>equilibrium</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- ════════════════════════════════════════════════════════
+         BACKEND (Railway) — permanent live backend
+         ════════════════════════════════════════════════════════ -->
+    <script>
+      // 👇 Railway backend URL (permanent)
+      window.API_BASE = "https://psycholink-production.up.railway.app";
+
+      // Auto-rewrite: saari localhost:3001 calls ko Railway backend pe bhejta hai
+      (function () {
+        var _fetch = window.fetch;
+        window.fetch = function (url, opts) {
+          if (window.API_BASE && typeof url === 'string' && url.indexOf('localhost:3001') !== -1) {
+            url = url.replace('http://localhost:3001', window.API_BASE)
+                     .replace('https://localhost:3001', window.API_BASE);
+          }
+          return _fetch(url, opts);
+        };
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

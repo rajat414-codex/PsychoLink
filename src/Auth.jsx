@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// ── AAPKA ORIGINAL GOOGLE ICON ──
+// ── ORIGINAL GOOGLE ICON ──
 import { FcGoogle } from 'react-icons/fc';
-import { FaApple, FaPhoneAlt, FaChevronRight, FaLock, FaEye, FaEyeSlash, FaCheck, FaPlus } from 'react-icons/fa';
-
-const GOOGLE_ACCOUNTS = [
-  { name:'Rajat Kamal', email:'rajatkamal20089@gmail.com', initial:'R', color:'#4285F4' },
-  { name:'Sarwesh Kumar Kamal', email:'sarwesh.kamal@gmail.com', initial:'S', color:'#34A853' }
-];
+import { FaApple, FaPhoneAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaEnvelope } from 'react-icons/fa';
 
 // ── SPINNER ──────────────────────────────────────────────
 const Spinner = ({ color='#8b87f5', size=22 }) => (
@@ -127,6 +122,16 @@ export default function Auth({ onComplete }) {
   const [canResend,  setCanResend]    = useState(false);
   const otpRefs = useRef([]);
 
+  // ── EMAIL CODE LOGIN (new glass screen) ──
+  const [ecSent,     setEcSent]       = useState(false);   // code sent?
+  const [ecCode,     setEcCode]       = useState(['','','','','','']);
+  const [ecSending,  setEcSending]    = useState(false);   // send in progress
+  const [ecVerifying,setEcVerifying]  = useState(false);   // verify in progress
+  const [ecTimer,    setEcTimer]      = useState(30);
+  const [ecResend,   setEcResend]     = useState(false);
+  const [ecError,    setEcError]      = useState('');
+  const ecRefs = useRef([]);
+
   // Signup
   const [su,        setSu]            = useState({ fullName:'', nickname:'', mobile:'', email:'' });
   const [suMobSent, setSuMobSent]     = useState(false);
@@ -144,12 +149,12 @@ export default function Auth({ onComplete }) {
 
   const tokenClientRef = useRef(null);
 
-  // ── FONTS DEFINITION ──
+  // ── FONTS ──
   const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
   const P = "'Playfair Display', serif";
-  const L = "'Lexend', sans-serif"; // ── LEXEND SOURCE ENGINE DEFINED ──
+  const L = "'Lexend', sans-serif";
 
   const card = {
     background:'linear-gradient(160deg,rgba(16,12,32,0.95) 0%,rgba(10,8,24,0.98) 100%)',
@@ -159,12 +164,20 @@ export default function Auth({ onComplete }) {
     position:'relative', zIndex:2, overflow:'hidden'
   };
 
+  // frosted glass card (reference style — lighter, glassy)
+  const glassCard = {
+    background:'linear-gradient(160deg,rgba(255,255,255,0.10) 0%,rgba(255,255,255,0.04) 100%)',
+    backdropFilter:'blur(40px)', WebkitBackdropFilter:'blur(40px)',
+    borderRadius:'30px', border:'1px solid rgba(255,255,255,0.18)',
+    boxShadow:'0 40px 90px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.25)',
+    position:'relative', zIndex:2, overflow:'hidden'
+  };
+
   const shine = <div style={{ position:'absolute', top:0, left:'15%', right:'15%', height:'1px', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)' }}/>;
 
   useEffect(()=>{
     const l = document.createElement('link');
-    // ── INJECTED LEXEND BOLD PATH INTO THE DOM STREAM ──
-    l.href='https://fonts.googleapis.com/css2?family=Lexend:wght@700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Space+Grotesk:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600;1,700&display=swap';
+    l.href='https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Space+Grotesk:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600;1,700&display=swap';
     document.head.appendChild(l);
     const s = document.createElement('style');
     s.innerHTML='*{-webkit-font-smoothing:antialiased;box-sizing:border-box;}input,textarea{outline:none;}input::placeholder{color:rgba(255,255,255,0.2);}';
@@ -179,7 +192,15 @@ export default function Auth({ onComplete }) {
     return ()=>clearTimeout(t);
   },[otpSent,timer]);
 
-  // ── 🌐 OFFICIAL VANILLA GOOGLE NATIVE SDK INITIALIZER ──
+  // email-code resend timer
+  useEffect(()=>{
+    if(!ecSent) return;
+    if(ecTimer===0){ setEcResend(true); return; }
+    const t = setTimeout(()=>setEcTimer(p=>p-1),1000);
+    return ()=>clearTimeout(t);
+  },[ecSent,ecTimer]);
+
+  // ── GOOGLE NATIVE SDK INITIALIZER ──
   useEffect(() => {
     const googleScript = document.createElement('script');
     googleScript.src = "https://accounts.google.com/gsi/client";
@@ -190,7 +211,7 @@ export default function Auth({ onComplete }) {
     googleScript.onload = () => {
       if (window.google) {
         tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
-          client_id: "996022316929-8g0ov183hp224kg68cps575s9o507jac.apps.googleusercontent.com",
+          client_id: "1015385845980-734dv4alnt7khbsfd6jvt6c0ejjlj0bd.apps.googleusercontent.com",
           scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
           callback: async (tokenResponse) => {
             if (tokenResponse.access_token) {
@@ -199,7 +220,6 @@ export default function Auth({ onComplete }) {
                   headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
                 });
                 const googleUserData = await res.json();
-                
                 const dynamicProfile = {
                   name: googleUserData.name || 'Google User',
                   email: googleUserData.email,
@@ -207,12 +227,10 @@ export default function Auth({ onComplete }) {
                   color: '#4285F4',
                   picture: googleUserData.picture
                 };
-
                 localStorage.setItem("user_email", dynamicProfile.email);
                 localStorage.setItem("user_name", dynamicProfile.name);
                 localStorage.setItem("user_photo", dynamicProfile.picture || '');
                 localStorage.setItem("isLoggedIn", "true");
-
                 goAIHub(dynamicProfile);
               } catch (err) {
                 console.error("Failed mapping active profile stream:", err);
@@ -232,7 +250,60 @@ export default function Auth({ onComplete }) {
     }
   };
 
-  // ── VOICE SPEAK ─────────────────────────────────────────
+  // ── EMAIL CODE: open screen ──
+  const openEmailCode = () => {
+    if (!emailInput.includes('@')) { return; }
+    setEcSent(false); setEcCode(['','','','','','']); setEcError('');
+    setEcTimer(30); setEcResend(false);
+    setScreen('emailCode');
+  };
+
+  // ── EMAIL CODE: send code to user's email ──
+  const sendEmailCode = async () => {
+    if (!emailInput.includes('@') || ecSending) return;
+    setEcSending(true); setEcError('');
+    try {
+      const r = await fetch('http://localhost:3001/api/send-email-code', {
+        method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ email: emailInput })
+      });
+      const data = await r.json();
+      if (r.ok && data.success) {
+        setEcSent(true); setEcTimer(30); setEcResend(false);
+        setTimeout(()=>ecRefs.current[0]?.focus(), 200);
+      } else {
+        setEcError(data.error || 'Could not send code. Try again.');
+      }
+    } catch {
+      setEcError('Server not reachable. Make sure backend is running.');
+    }
+    setEcSending(false);
+  };
+
+  // ── EMAIL CODE: verify ──
+  const verifyEmailCode = async () => {
+    const code = ecCode.join('');
+    if (code.length < 6 || ecVerifying) return;
+    setEcVerifying(true); setEcError('');
+    try {
+      const r = await fetch('http://localhost:3001/api/verify-email-code', {
+        method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ email: emailInput, code })
+      });
+      const data = await r.json();
+      if (data.valid) {
+        const nm = emailInput.split('@')[0];
+        goAIHub({ name: nm.charAt(0).toUpperCase()+nm.slice(1), email: emailInput, initial: (nm[0]||'U').toUpperCase() });
+      } else {
+        setEcError(data.reason === 'expired' ? 'Code expired. Resend a new one.' : 'Wrong code. Check & try again.');
+      }
+    } catch {
+      setEcError('Server not reachable. Make sure backend is running.');
+    }
+    setEcVerifying(false);
+  };
+
+  // ── VOICE SPEAK ──
   const speak = (core, text, profile) => {
     setDialogue(text); setEyes('normal');
     if('speechSynthesis' in window){
@@ -308,7 +379,6 @@ export default function Auth({ onComplete }) {
           <motion.div key="landing" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, scale:0.98 }} transition={{ duration:0.9 }}
             style={{ position:'absolute', inset:0, display:'flex', width: '100vw' }}>
 
-            {/* Left Background Area */}
             <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
               <OceanBg opacity={0}/>
               <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right,rgba(4,3,14,0.05) 40%,rgba(4,3,14,0.75) 100%)', zIndex:1 }}/>
@@ -336,7 +406,6 @@ export default function Auth({ onComplete }) {
               </motion.div>
             </div>
 
-            {/* Right — Glass Login Form */}
             <div style={{ width:'440px', flexShrink:0, position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'60px 40px' }}>
               <div style={{ position:'absolute', inset:0 }}>
                 <motion.div animate={{ scale:[1,1.06,1] }} transition={{ duration:20, repeat:Infinity, ease:'easeInOut' }}
@@ -352,30 +421,28 @@ export default function Auth({ onComplete }) {
                 <h1 style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'2.6rem', color:'#fff', marginBottom:'8px', textShadow:'none' }}>Welcome back</h1>
                 <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', marginBottom:'28px' }}>Sign in to your account</p>
 
-                {/* Email row */}
+                {/* Email row → opens glass email-code screen */}
                 <div style={{ marginBottom:'18px' }}>
                   <p style={{ fontSize:'0.63rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>EMAIL</p>
                   <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                     <input type="email" placeholder="you@example.com" value={emailInput} onChange={e=>setEmailInput(e.target.value)}
-                      onKeyDown={e=>e.key==='Enter'&&triggerGoogleLoginPopup()}
+                      onKeyDown={e=>e.key==='Enter'&&openEmailCode()}
                       style={{ flex:1, height:'50px', padding:'0 16px', background:'rgba(255,255,255,0.055)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', color:'#fff', fontSize:'0.95rem', fontFamily:J, transition:'all 0.25s' }}
                       onFocus={e=>{ e.target.style.borderColor='rgba(139,135,245,0.6)'; e.target.style.boxShadow='0 0 0 3px rgba(139,135,245,0.12)'; }}
                       onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
-                    <motion.button whileHover={{ scale:1.08 }} whileTap={{ scale:0.92 }} onClick={()=>triggerGoogleLoginPopup()}
+                    <motion.button whileHover={{ scale:1.08 }} whileTap={{ scale:0.92 }} onClick={openEmailCode}
                       style={{ width:'50px', height:'50px', flexShrink:0, borderRadius:'14px', background:'linear-gradient(135deg,#8b87f5,#8b87f5)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 20px rgba(139,135,245,0.55)' }}>
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9h10M10 5l4 4-4 4" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </motion.button>
                   </div>
                 </div>
 
-                {/* OR */}
                 <div style={{ display:'flex', alignItems:'center', gap:'14px', marginBottom:'16px' }}>
                   <div style={{ flex:1, height:'1px', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.1)' }}/>
                   <span style={{ color:'rgba(255,255,255,0.22)', fontSize:'0.7rem', fontFamily:S, letterSpacing:'2px' }}>OR</span>
                   <div style={{ flex:1, height:'1px', background:'linear-gradient(270deg,transparent,rgba(255,255,255,0.1)' }}/>
                 </div>
 
-                {/* ── 🔥 SOCIAL BUTTONS WITH STRICT LEXEND BOLD PACKET ── */}
                 <div style={{ display:'flex', flexDirection:'column', gap:'10px', marginBottom:'26px' }}>
                   {[
                     { icon: <FcGoogle size={20}/>, label:'Continue with Google', action:()=>triggerGoogleLoginPopup(), hb:'rgba(66,133,244,0.08)', hbr:'rgba(66,133,244,0.3)' },
@@ -399,6 +466,91 @@ export default function Auth({ onComplete }) {
         )}
 
         {/* ═══════════════════════════════════════════
+            EMAIL CODE — glass verification panel
+        ═══════════════════════════════════════════ */}
+        {screen==='emailCode' && (
+          <motion.div key="emailCode" initial={{ opacity:0, scale:0.96 }} animate={{ opacity:1, scale:1 }} exit={{ opacity:0 }} transition={{ duration:0.5 }}
+            style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <OceanBg opacity={0.9}/>
+            {[{c:'rgba(99,102,241,0.16)',x:'8%',y:'10%',d:12},{c:'rgba(139,135,245,0.14)',x:'66%',y:'58%',d:15},{c:'rgba(168,85,247,0.12)',x:'42%',y:'18%',d:14}].map((g,i)=>(
+              <motion.div key={i} animate={{ scale:[1,1.25,1], opacity:[0.5,1,0.5] }} transition={{ duration:g.d, repeat:Infinity, delay:i*1.4 }}
+                style={{ position:'absolute', left:g.x, top:g.y, width:'380px', height:'380px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(60px)', zIndex:1, pointerEvents:'none' }}/>
+            ))}
+
+            <motion.div initial={{ y:20, opacity:0 }} animate={{ y:0, opacity:1 }} transition={{ delay:0.1 }}
+              style={{ ...glassCard, width:'430px', padding:'46px 40px', zIndex:2 }}>
+              {shine}
+
+              {/* Icon */}
+              <div style={{ width:'64px', height:'64px', borderRadius:'20px', background:'linear-gradient(135deg,rgba(139,135,245,0.9),rgba(99,102,241,0.85))', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', boxShadow:'0 12px 30px rgba(139,135,245,0.4)' }}>
+                <FaEnvelope size={26} color="#fff"/>
+              </div>
+
+              <h2 style={{ fontFamily:L, fontWeight:'800', fontSize:'1.75rem', color:'#fff', textAlign:'center', margin:'0 0 6px', letterSpacing:'-0.5px' }}>Verify your email</h2>
+              <p style={{ color:'rgba(255,255,255,0.55)', fontSize:'0.84rem', textAlign:'center', margin:'0 0 26px', fontFamily:J }}>
+                {ecSent ? 'Enter the 6-digit code we sent you' : "We'll send a 6-digit code to your inbox"}
+              </p>
+
+              {/* Email pill + Send Code */}
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'18px' }}>
+                <div style={{ flex:1, height:'52px', padding:'0 16px', display:'flex', alignItems:'center', gap:'10px', background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.16)', borderRadius:'14px', overflow:'hidden' }}>
+                  <FaEnvelope size={13} color="rgba(255,255,255,0.45)" style={{ flexShrink:0 }}/>
+                  <span style={{ color:'rgba(255,255,255,0.92)', fontSize:'0.9rem', fontWeight:'600', fontFamily:J, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{emailInput}</span>
+                </div>
+                {!ecSent && (
+                  <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={sendEmailCode} disabled={ecSending}
+                    style={{ height:'52px', padding:'0 20px', flexShrink:0, borderRadius:'14px', border:'none', cursor:ecSending?'wait':'pointer', background:'linear-gradient(135deg,#8b87f5,#7975d4)', color:'#fff', fontSize:'0.84rem', fontWeight:'800', fontFamily:L, boxShadow:'0 6px 20px rgba(139,135,245,0.45)', display:'flex', alignItems:'center', justifyContent:'center', minWidth:'108px' }}>
+                    {ecSending
+                      ? <motion.div animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }} style={{ width:'16px', height:'16px', borderRadius:'50%', border:'2px solid rgba(255,255,255,0.25)', borderTopColor:'#fff' }}/>
+                      : 'Send Code'}
+                  </motion.button>
+                )}
+              </div>
+
+              <AnimatePresence>
+                {ecSent && (
+                  <motion.div initial={{ opacity:0, height:0 }} animate={{ opacity:1, height:'auto' }} exit={{ opacity:0, height:0 }}>
+                    {/* Code sent banner */}
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', marginBottom:'18px', padding:'9px', borderRadius:'12px', background:'rgba(86,160,111,0.12)', border:'1px solid rgba(86,160,111,0.3)' }}>
+                      <FaCheck size={11} color="#56a06f"/>
+                      <span style={{ color:'#56a06f', fontSize:'0.8rem', fontWeight:'700', fontFamily:J }}>Code sent to your email</span>
+                    </div>
+
+                    {/* OTP boxes */}
+                    <div style={{ marginBottom:'16px' }}>
+                      <OtpBoxes arr={ecCode} setter={setEcCode} refs={ecRefs} color="#8b87f5" disabled={ecVerifying}/>
+                    </div>
+
+                    {/* Timer / resend */}
+                    <div style={{ textAlign:'center', minHeight:'22px', marginBottom:'16px' }}>
+                      {ecResend
+                        ? <button onClick={sendEmailCode} disabled={ecSending} style={{ background:'none', border:'none', color:'#8b87f5', fontSize:'0.84rem', fontWeight:'700', cursor:'pointer', fontFamily:J }}>Request new code</button>
+                        : <p style={{ color:'rgba(255,255,255,0.45)', fontSize:'0.82rem', margin:0, fontFamily:S }}>Request new code after <span style={{ color:'rgba(255,255,255,0.8)', fontWeight:'700' }}>{ecTimer}s</span></p>
+                      }
+                    </div>
+
+                    {/* Verify button */}
+                    {ecVerifying ? <Spinner color="#8b87f5"/> : (
+                      <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} onClick={verifyEmailCode}
+                        style={{ width:'100%', padding:'15px', borderRadius:'14px', border:'none', cursor:ecCode.join('').length===6?'pointer':'not-allowed',
+                          background:ecCode.join('').length===6?'linear-gradient(135deg,#8b87f5,#7975d4)':'rgba(255,255,255,0.06)',
+                          color:ecCode.join('').length===6?'#fff':'rgba(255,255,255,0.25)', fontSize:'0.95rem', fontWeight:'800', fontFamily:L, transition:'all 0.3s',
+                          boxShadow:ecCode.join('').length===6?'0 8px 24px rgba(139,135,245,0.4)':'none' }}>
+                        Verify & Continue ✓
+                      </motion.button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {ecError && <p style={{ color:'#e0524d', fontSize:'0.78rem', textAlign:'center', margin:'14px 0 0', fontFamily:J }}>{ecError}</p>}
+
+              <button onClick={()=>setScreen('landing')} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.4)', fontSize:'0.8rem', cursor:'pointer', fontFamily:J, display:'block', margin:'18px auto 0' }}>← Back to sign in</button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* ═══════════════════════════════════════════
             SIGN UP
         ═══════════════════════════════════════════ */}
         {screen==='signup' && (
@@ -417,7 +569,6 @@ export default function Auth({ onComplete }) {
 
               <div style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
 
-                {/* Full Name */}
                 <div>
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>FULL NAME</p>
                   <input type="text" placeholder="Enter your full name" value={su.fullName} onChange={e=>setSu(p=>({...p,fullName:e.target.value}))}
@@ -426,7 +577,6 @@ export default function Auth({ onComplete }) {
                     onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
                 </div>
 
-                {/* Nickname */}
                 <div>
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>NICKNAME</p>
                   <input type="text" placeholder="What should we call you?" value={su.nickname} onChange={e=>setSu(p=>({...p,nickname:e.target.value}))}
@@ -435,7 +585,6 @@ export default function Auth({ onComplete }) {
                     onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
                 </div>
 
-                {/* Mobile */}
                 <div>
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>MOBILE NUMBER</p>
                   <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
@@ -480,7 +629,6 @@ export default function Auth({ onComplete }) {
                   </AnimatePresence>
                 </div>
 
-                {/* Email */}
                 <div>
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>EMAIL ADDRESS</p>
                   <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
@@ -521,7 +669,6 @@ export default function Auth({ onComplete }) {
                   </AnimatePresence>
                 </div>
 
-                {/* Progress pills */}
                 <div style={{ display:'flex', gap:'8px', justifyContent:'center', flexWrap:'wrap' }}>
                   {[{l:'Full Name',d:!!su.fullName},{l:'Nickname',d:!!su.nickname},{l:'Mobile',d:suMobOk},{l:'Email',d:suEmOk}].map((item,i)=>(
                     <div key={i} style={{ display:'flex', alignItems:'center', gap:'5px', padding:'4px 10px', borderRadius:'20px', background:item.d?'rgba(86,160,111,0.12)':'rgba(255,255,255,0.04)', border:`1px solid ${item.d?'rgba(86,160,111,0.35)':'rgba(255,255,255,0.08)'}`, transition:'all 0.3s' }}>
@@ -531,9 +678,9 @@ export default function Auth({ onComplete }) {
                   ))}
                 </div>
 
-                <motion.button 
-                  whileHover={suDone ? { scale: 1.02 } : {}} 
-                  whileTap={suDone ? { scale: 0.98 } : {}} 
+                <motion.button
+                  whileHover={suDone ? { scale: 1.02 } : {}}
+                  whileTap={suDone ? { scale: 0.98 } : {}}
                   onClick={suCreate}
                   style={{ width:'100%', padding:'16px', background:suDone?'linear-gradient(135deg,#8b87f5,#8b87f5)':'rgba(255,255,255,0.05)', border:'none', borderRadius:'16px', color:suDone?'#fff':'rgba(255,255,255,0.25)', fontSize:'1rem', fontWeight:'700', cursor:suDone?'pointer':'not-allowed', fontFamily:J, transition:'all 0.4s', boxShadow:suDone?'0 10px 30px rgba(139,135,245,0.4)':'none', letterSpacing:'0.3px' }}
                 >
@@ -543,58 +690,6 @@ export default function Auth({ onComplete }) {
                 <button onClick={()=>setScreen('landing')} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.22)', fontSize:'0.8rem', cursor:'pointer', fontFamily:J, display:'block', margin:'0 auto' }}>
                   ← Back to Sign in
                 </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* ═══════════════════════════════════════════
-            GOOGLE PICKER
-        ═══════════════════════════════════════════ */}
-        {false && screen==='selection' && (
-          <motion.div key="selection" initial={{ opacity:0,scale:0.96 }} animate={{ opacity:1,scale:1 }} exit={{ opacity:0 }} transition={{ duration:0.5 }}
-            style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <OceanBg opacity={0.9}/>
-            {[{c:'rgba(66,133,244,0.15)',x:'5%',y:'5%'},{c:'rgba(52,168,83,0.1)',x:'65%',y:'60%'},{c:'rgba(139,135,245,0.12)',x:'45%',y:'15%'}].map((g,i)=>(
-              <motion.div key={i} animate={{ scale:[1,1.25,1], opacity:[0.5,1,0.5] }} transition={{ duration:5+i, repeat:Infinity, delay:i*1.5 }}
-                style={{ position:'absolute', left:g.x, top:g.y, width:'380px', height:'380px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(60px)', zIndex:1, pointerEvents:'none' }}/>
-            ))}
-            <div style={{ ...card, width:'420px', padding:'46px 42px', textAlign:'center', zIndex:2 }}>
-              {shine}
-              <div style={{ marginBottom:'16px' }}>
-                <span style={{ fontSize:'1.7rem', fontWeight:'700', letterSpacing:'-0.5px' }}>
-                  <span style={{ color:'#4285F4' }}>G</span><span style={{ color:'#EA4335' }}>o</span>
-                  <span style={{ color:'#FBBC05' }}>o</span><span style={{ color:'#4285F4' }}>g</span>
-                  <span style={{ color:'#34A853' }}>l</span><span style={{ color:'#EA4335' }}>e</span>
-                </span>
-              </div>
-              <h3 style={{ fontFamily:G, fontStyle:'italic', fontSize:'1.65rem', fontWeight:'600', marginBottom:'5px', color:'#fff' }}>Choose an account</h3>
-              <p style={{ color:'rgba(255,255,255,0.28)', fontSize:'0.8rem', marginBottom:'22px', fontFamily:J }}>to continue to Cognitive Social</p>
-              <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginBottom:'14px' }}>
-                {GOOGLE_ACCOUNTS.map((p,i)=>(
-                  <motion.div key={i} whileHover={{ background:'rgba(255,255,255,0.08)', borderColor:'rgba(255,255,255,0.18)', x:3 }} whileTap={{ scale:0.98 }} onClick={()=>goAIHub(p)}
-                    style={{ display:'flex', alignItems:'center', gap:'14px', padding:'12px 16px', background:'rgba(255,255,255,0.04)', borderRadius:'16px', cursor:'pointer', border:'1px solid rgba(255,255,255,0.08)', transition:'all 0.2s' }}>
-                    <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:`linear-gradient(135deg,${p.color},${i===0?'#34A853':'#4285F4'})`, color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'1rem', flexShrink:0, boxShadow:'0 4px 14px rgba(0,0,0,0.4)' }}>{p.initial}</div>
-                    <div style={{ textAlign:'left', flex:1 }}>
-                      <div style={{ fontSize:'0.92rem', fontWeight:'700', color:'#fff', marginBottom:'2px' }}>{p.name}</div>
-                      <div style={{ fontSize:'0.75rem', color:'rgba(255,255,255,0.38)' }}>{p.email}</div>
-                    </div>
-                    <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      <FaChevronRight size={9} style={{ opacity:0.45 }}/>
-                    </div>
-                  </motion.div>
-                ))}
-                {/* ── NATIVE SELECTOR PROMPT SHEET LINK ── */}
-                <motion.div whileHover={{ background:'rgba(255,255,255,0.06)' }} onClick={()=>triggerGoogleLoginPopup()}
-                  style={{ display:'flex', alignItems:'center', gap:'14px', padding:'12px 16px', borderRadius:'16px', cursor:'pointer', border:'1px dashed rgba(255,255,255,0.09)', transition:'all 0.2s' }}>
-                  <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    <FaPlus size={14} color="rgba(255,255,255,0.45)"/>
-                  </div>
-                  <span style={{ fontSize:'0.88rem', color:'rgba(255,255,255,0.4)', fontWeight:'500' }}>Use another account</span>
-                </motion.div>
-              </div>
-              <div style={{ paddingTop:'14px', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
-                <button onClick={()=>setScreen('landing')} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.22)', fontSize:'0.78rem', cursor:'pointer', fontFamily:J }}>← Back</button>
               </div>
             </div>
           </motion.div>
@@ -733,7 +828,7 @@ export default function Auth({ onComplete }) {
         )}
 
         {/* ═══════════════════════════════════════════
-            AI HUB (RESTORED ORIGINAL 3D AURA/MAX STRUCTURE)
+            AI HUB
         ═══════════════════════════════════════════ */}
         {screen==='aiHub' && (
           <motion.div key="ai-hub" initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ duration:0.8 }}
@@ -741,7 +836,6 @@ export default function Auth({ onComplete }) {
             <SpaceBg activeAI={activeAI}/>
             <div style={{ position:'absolute', inset:0, zIndex:1, backgroundImage:'linear-gradient(rgba(255,255,255,0.004) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.004) 1px,transparent 1px)', backgroundSize:'30px 30px', pointerEvents:'none' }}/>
 
-            {/* Toggle */}
             <div style={{ position:'relative', zIndex:20, marginTop:'16px', marginBottom:'16px' }}>
               <div style={{ background:'rgba(255,255,255,0.04)', backdropFilter:'blur(30px)', padding:'5px', borderRadius:'40px', border:'1px solid rgba(255,255,255,0.08)', display:'flex', gap:'4px', boxShadow:'0 16px 40px rgba(0,0,0,0.5)' }}>
                 {[{k:'AURA',l:'Feminine Core · Aura',g:'linear-gradient(135deg,#e0524d,#c0392b)',sh:'0 4px 12px rgba(0,0,0,0.35)'},{k:'MAX',l:'Analytic Engine · Max',g:'linear-gradient(135deg,#5eb8ad,#4a9488)',sh:'0 8px 20px rgba(13,148,136,0.35)'}].map(ai=>(
@@ -753,16 +847,13 @@ export default function Auth({ onComplete }) {
               </div>
             </div>
 
-            {/* Character */}
             <motion.div animate={{ y:[0,-8,0] }} transition={{ duration:5, repeat:Infinity, ease:'easeInOut' }}
               style={{ position:'relative', zIndex:5, display:'flex', flexDirection:'column', alignItems:'center' }}>
-              {/* Antenna */}
               <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:'-10px', position:'relative', zIndex:6 }}>
                 <motion.div animate={{ scale:eyes==='laughing'?[1,1.15,1]:[1,1.04,1], filter:activeAI==='AURA'?'drop-shadow(0 4px 10px rgba(224,82,77,0.5))':'drop-shadow(0 4px 10px rgba(94,184,173,0.5))' }} transition={{ duration:2, repeat:Infinity }}
                   style={{ width:'30px', height:'30px', borderRadius:'50%', background:'radial-gradient(circle at 35% 35%,#ffffff,#f1f5f9 50%,#cbd5e1)', boxShadow:'inset -2px -2px 8px rgba(0,0,0,0.15)' }}/>
                 <div style={{ width:'12px', height:'18px', marginTop:'-4px', background:activeAI==='AURA'?'linear-gradient(to bottom,#ffffff,rgba(224,82,77,0.4))':'linear-gradient(to bottom,#ffffff,rgba(94,184,173,0.4))', borderRadius:'3px 3px 0 0', opacity:0.9, transition:'all 0.5s' }}/>
               </div>
-              {/* Head */}
               <div style={{ width:'240px', height:'204px', borderRadius:'50% 50% 46% 46%/56% 56% 44% 44%', background:'linear-gradient(135deg,#f8fafc,#edf2f7 35%,#cbd5e1 75%,#94a3b8)', position:'relative', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 35px 64px rgba(0,0,0,0.5),inset 0 13px 20px #ffffff,inset 0 -11px 24px rgba(148,163,184,0.35)', zIndex:4 }}>
                 <div style={{ position:'absolute', left:'-13px', width:'32px', height:'54px', borderRadius:'50% 30% 30% 50%/50% 40% 40% 50%', background:activeAI==='AURA'?'linear-gradient(135deg,rgba(255,255,255,0.9),#e0524d)':'linear-gradient(135deg,rgba(255,255,255,0.9),#5eb8ad)', boxShadow:'-5px 7px 13px rgba(0,0,0,0.2)' }}/>
                 <div style={{ position:'absolute', right:'-13px', width:'32px', height:'54px', borderRadius:'30% 50% 50% 30%/40% 50% 50% 40%', background:activeAI==='AURA'?'linear-gradient(135deg,rgba(255,255,255,0.9),#e0524d)':'linear-gradient(135deg,rgba(255,255,255,0.9),#5eb8ad)', boxShadow:'5px 7px 13px rgba(0,0,0,0.2)' }}/>
@@ -788,7 +879,6 @@ export default function Auth({ onComplete }) {
                   </AnimatePresence>
                 </div>
               </div>
-              {/* Body */}
               <div style={{ width:'136px', height:'116px', marginTop:'-18px', position:'relative', zIndex:2, display:'flex', flexDirection:'column', alignItems:'center' }}>
                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,#edf2f7,#cbd5e1 70%,#94a3b8)', borderRadius:'45% 45% 35% 35%/30% 30% 70% 70%', boxShadow:'0 20px 36px rgba(0,0,0,0.3),inset 0 8px 11px #ffffff' }}/>
                 <div style={{ position:'absolute', bottom:'-10px', width:'117px', height:'27px', background:'linear-gradient(to bottom,#ffffff,#e2e8f0)', borderRadius:'0 0 30px 30px', zIndex:1, boxShadow:'0 12px 20px rgba(0,0,0,0.2)' }}/>
@@ -802,7 +892,6 @@ export default function Auth({ onComplete }) {
                   {[['left','4px'],['right','4px']].map(([p,v],i)=><div key={i} style={{ position:'absolute', [p]:v, width:'4px', height:'13px', background:'#cbd5e1', borderRadius:'2px' }}/>)}
                 </div>
               </div>
-              {/* Email pill */}
               {selectedProfile && (
                 <motion.div initial={{ opacity:0,y:8 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.5 }}
                   style={{ marginTop:'16px', display:'flex', alignItems:'center', gap:'9px', background:'rgba(255,255,255,0.05)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.09)', borderRadius:'50px', padding:'6px 14px 6px 7px' }}>
@@ -821,7 +910,6 @@ export default function Auth({ onComplete }) {
               )}
             </motion.div>
 
-            {/* Conversation node */}
             <motion.div key={dialogue} initial={{ opacity:0,y:12 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.6 }}
               style={{ marginTop:'16px', marginBottom:'10px', textAlign:'center', width:'560px', maxWidth:'90vw', background:'rgba(8,8,20,0.88)', backdropFilter:'blur(40px)', WebkitBackdropFilter:'blur(40px)', padding:'18px 28px', borderRadius:'22px', border:'1px solid rgba(255,255,255,0.1)', boxShadow:'0 20px 44px rgba(0,0,0,0.7)', position:'relative', zIndex:20 }}>
               <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', marginBottom:'10px' }}>
@@ -832,7 +920,6 @@ export default function Auth({ onComplete }) {
               <p style={{ fontSize:'0.95rem', fontFamily:P, fontStyle:'italic', lineHeight:'1.7', color:'rgba(255,255,255,0.95)', margin:0 }}>"{dialogue}"</p>
             </motion.div>
 
-            {/* Status */}
             <div style={{ display:'flex', gap:'20px', zIndex:20, position:'relative', marginBottom:'8px' }}>
               <span style={{ fontFamily:S, fontSize:'0.7rem', fontWeight:'700', letterSpacing:'1px', color:activeAI==='AURA'?'#8b87f5':'rgba(255,255,255,0.2)', transition:'all 0.4s' }}>AURA: {activeAI==='AURA'?'ACTIVE':'STANDBY'}</span>
               <span style={{ color:'rgba(255,255,255,0.12)' }}>·</span>

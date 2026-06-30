@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
+import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
 import path from 'path';
@@ -74,6 +75,19 @@ const CONSULTANT_COLORS = ['#ec4899','#8b5cf6','#2dd4bf','#f59e0b','#3b82f6','#1
 // ── GET /api/consultants — public list of APPROVED consultants ──
 app.get('/api/consultants', (req, res) => {
   res.json(readJSON(CONSULTANTS_FILE));
+});
+
+// ── DELETE /api/consultants/:id — remove a consultant from the platform ──
+app.delete('/api/consultants/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const consultants = readJSON(CONSULTANTS_FILE);
+  const filtered = consultants.filter(c => c.id !== id);
+  if (filtered.length === consultants.length) {
+    return res.status(404).json({ error: 'Consultant not found' });
+  }
+  writeJSON(CONSULTANTS_FILE, filtered);
+  console.log('🗑️  Consultant removed:', id);
+  res.json({ success: true, removed: id });
 });
 
 // ── POST /api/consultants/apply — "Join as Consultant" form submit ──
@@ -533,116 +547,105 @@ ${conversation}` }
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ─────────────────────────────────────────────────────────
-// PAYMENT APIS — Razorpay Order creation and signature verification
-// ─────────────────────────────────────────────────────────
-app.post('/api/payment/create-order', async (req, res) => {
-  const { amount, consultantId } = req.body;
-  const keyId = process.env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-  if (!keyId || !keySecret) {
-    // If keys are not set, return simulated demo order
-    console.log('💰 Razorpay keys not configured. Running in Demo Mode.');
-    return res.json({
-      success: true,
-      isDemo: true,
-      id: `order_demo_${Date.now()}`,
-      amount: amount || 199,
-      currency: 'INR'
-    });
-  }
 
+// ─────────────────────────────────────────────────────────
+// RAZORPAY PAYMENT
+// .env: RAZORPAY_KEY_ID=rzp_live_xxx  RAZORPAY_KEY_SECRET=xxx
+// ─────────────────────────────────────────────────────────
+const razorpay = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
+  ? new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET })
+  : null;
+
+// POST /api/payment/order — create Razorpay order
+app.post('/api/payment/order', async (req, res) => {
+  if (!razorpay) return res.status(500).json({ error: 'Razorpay not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env' });
+  const { amount, consultantName } = req.body;
   try {
-    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
-    const response = await fetch('https://api.razorpay.com/v1/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${auth}`
-      },
-      body: JSON.stringify({
-        amount: Math.round((amount || 199) * 100), // convert to paise
-        currency: 'INR',
-        receipt: `receipt_consultation_${Date.now()}`
-      })
+    const order = await razorpay.orders.create({
+      amount: (amount || 199) * 100, // paise
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}`,
+      notes: { consultant: consultantName || 'PsychoLink Session' },
     });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error('Razorpay Order API error:', data);
-      return res.status(response.status).json({ error: data.error?.description || 'Razorpay Order Creation Failed' });
-    }
-
-    res.json({
-      success: true,
-      isDemo: false,
-      keyId,
-      id: data.id,
-      amount: data.amount / 100,
-      currency: data.currency
-    });
-  } catch (err) {
-    console.error('Payment order creation error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.json({ order, key: process.env.RAZORPAY_KEY_ID });
+  } catch (e) {
+    console.error('Razorpay order error:', e.message);
+    res.status(500).json({ error: e.message });
   }
 });
 
-app.post('/api/payment/verify', async (req, res) => {
-  const { razorpay_payment_id, razorpay_order_id, razorpay_signature, isDemo, upiId } = req.body;
-
-  if (isDemo) {
-    // Verify UPI ID format (simple verification if provided)
-    if (upiId && !upiId.includes('@')) {
-      return res.status(400).json({ error: 'Invalid UPI ID format. Please use format like username@bank' });
-    }
-    console.log(`✅ Demo payment verified successfully for UPI ID: ${upiId || 'Direct UPI QR Code'}`);
-    return res.json({ success: true, msg: 'Demo transaction approved!' });
-  }
-
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
-  if (!keySecret) {
-    return res.status(500).json({ error: 'Razorpay secret not configured on server' });
-  }
-
+// POST /api/payment/verify — verify payment signature
+app.post('/api/payment/verify', (req, res) => {
+  if (!process.env.RAZORPAY_KEY_SECRET) return res.status(500).json({ success: false });
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
   try {
-    const text = razorpay_order_id + "|" + razorpay_payment_id;
-    const generated_signature = crypto
-      .createHmac('sha256', keySecret)
-      .update(text)
-      .digest('hex');
-
-    if (generated_signature === razorpay_signature) {
-      console.log(`✅ Live Razorpay Payment verified successfully for Order ${razorpay_order_id}`);
-      res.json({ success: true });
+    const sign     = razorpay_order_id + '|' + razorpay_payment_id;
+    const expected = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(sign).digest('hex');
+    if (expected === razorpay_signature) {
+      console.log('💰 Payment verified:', razorpay_payment_id);
+      res.json({ success: true, paymentId: razorpay_payment_id });
     } else {
-      console.error('❌ Razorpay Payment Verification failed - Signature mismatch');
-      res.status(400).json({ error: 'Signature verification failed' });
+      res.status(400).json({ success: false, error: 'Invalid signature' });
     }
-  } catch (err) {
-    console.error('Payment verification error:', err.message);
-    res.status(500).json({ error: err.message });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
   }
 });
 
+// Razorpay status
+if (process.env.RAZORPAY_KEY_ID) {
+  console.log('💳 Razorpay configured ✅ (', process.env.RAZORPAY_KEY_ID.startsWith('rzp_live') ? 'LIVE MODE 🟢' : 'TEST MODE 🟡', ')');
+} else {
+  console.log('⚠️  Razorpay NOT configured — add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env');
+}
+
+// ─────────────────────────────────────────────────────────
+// EMAIL LOGIN CODE — send + verify a 6-digit code
+// ─────────────────────────────────────────────────────────
+const emailCodes = new Map(); // email -> { code, expires }
+
+app.post('/api/send-email-code', async (req, res) => {
+  const { email } = req.body || {};
+  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Invalid email' });
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  emailCodes.set(email.toLowerCase(), { code, expires: Date.now() + 10 * 60 * 1000 });
+  console.log(`🔐 Login code for ${email}: ${code}`); // visible in server terminal as backup
+  try {
+    await sendMail({
+      to: email,
+      subject: `${code} is your Equilibrium sign-in code`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:440px;margin:auto;padding:32px;background:#0f1020;border-radius:16px;color:#fff">
+          <h2 style="margin:0 0 8px;font-size:1.4rem">Your sign-in code</h2>
+          <p style="color:#a8a8c0;margin:0 0 24px;font-size:0.9rem">Enter this code in Equilibrium to continue.</p>
+          <div style="font-size:2.4rem;font-weight:800;letter-spacing:10px;text-align:center;padding:18px;background:#1a1b35;border-radius:12px;color:#8b87f5">${code}</div>
+          <p style="color:#6b6b85;margin:22px 0 0;font-size:0.78rem">This code expires in 10 minutes. If you didn't request it, ignore this email.</p>
+        </div>`,
+    });
+    res.json({ success: true });
+  } catch (e) {
+    console.error('send-email-code error:', e.message);
+    res.status(500).json({ error: 'Failed to send code' });
+  }
+});
+
+app.post('/api/verify-email-code', (req, res) => {
+  const { email, code } = req.body || {};
+  if (!email || !code) return res.status(400).json({ valid: false, reason: 'missing' });
+  const rec = emailCodes.get(String(email).toLowerCase());
+  if (!rec) return res.json({ valid: false, reason: 'no_code' });
+  if (Date.now() > rec.expires) { emailCodes.delete(email.toLowerCase()); return res.json({ valid: false, reason: 'expired' }); }
+  if (rec.code !== String(code)) return res.json({ valid: false, reason: 'mismatch' });
+  emailCodes.delete(email.toLowerCase());
+  res.json({ valid: true });
+});
 
 // Email status check at startup
 if (process.env.RESEND_API_KEY) {
   console.log('📧 Resend email configured ✅ → notifications go to:', process.env.FOUNDER_EMAIL || 'FOUNDER_EMAIL not set');
 } else {
   console.log('⚠️  Email NOT configured — add RESEND_API_KEY to .env');
-}
-
-// Razorpay key and UPI status check at startup
-if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-  console.log('💳 Razorpay Payment gateway configured ✅');
-} else {
-  console.log('⚠️  Razorpay keys NOT configured in .env — payment running in Demo/Sandbox mode.');
-}
-if (process.env.MERCHANT_UPI_ID) {
-  console.log(`🏦 Fallback Merchant UPI ID: ${process.env.MERCHANT_UPI_ID} ✅`);
-} else {
-  console.log('⚠️  MERCHANT_UPI_ID not set in .env — direct QR codes will default to owner account.');
 }
 
 console.log('🔑 NVIDIA_API_KEY loaded:', API_KEY ? `${API_KEY.slice(0,12)}... (length ${API_KEY.length})` : '❌ NOT FOUND');
