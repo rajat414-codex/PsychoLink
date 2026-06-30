@@ -190,7 +190,7 @@ export default function Auth({ onComplete }) {
     googleScript.onload = () => {
       if (window.google) {
         tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
-          client_id: "1015385845980-734dv4alnt7khbsfd6jvt6c0ejjlj0bd.apps.googleusercontent.com",
+          client_id: "996022316929-8g0ov183hp224kg68cps575s9o507jac.apps.googleusercontent.com",
           scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
           callback: async (tokenResponse) => {
             if (tokenResponse.access_token) {
