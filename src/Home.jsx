@@ -1,1073 +1,683 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { API_BASE } from './config';
-import {
-  FaBrain, FaRobot, FaHistory, FaSignOutAlt, FaPlus,
-  FaPaperPlane, FaMicrophone, FaStop, FaVolumeUp,
-  FaHome, FaComments, FaUserMd, FaChartLine, FaBell,
-  FaHeart, FaFire, FaSmile, FaArrowRight, FaLeaf, FaBolt,
-  FaBook, FaWind, FaCloudSun
-} from 'react-icons/fa';
-import BrainReport from './NeurologicalReport';
-import BreathingModal from './BreathingModal';
-import CrisisButton from './CrisisButton';
-import CalmLibrary from './CalmLibrary';
-import DashboardHome from './DashboardHome';
-import VideoCall from './VideoCall';
-import { FaVideo, FaPhone } from 'react-icons/fa';
-import ProgressDashboard from './ProgressDashboard';
-import { FaSpa, FaCrown } from 'react-icons/fa';
-import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast } from './ConsultantHub';
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import fs from 'fs';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
 
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const AURA_PROMPT = `You are AURA (Affective Understanding and Reflective AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Use gentle supportive language. Ask reflective questions. Detect emotional states: anxiety, depression, stress, loneliness. Suggest coping strategies. Never diagnose. Keep responses concise (2-4 sentences). Use occasional emojis 🌸 Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. Always respond with empathy first, then guidance.`;
+const app = express();
+app.use(cors({ origin: '*' }));
+app.use(express.json());
 
-const MAX_PROMPT = `You are MAX (Mental Analytical eXpert), a logical structured AI consultant inside PsychoLink app. Personality: Analytical, precise, solution-focused. Break down problems logically. Identify cognitive distortions. Use CBT frameworks. Direct but compassionate. Keep responses structured and actionable. Specialization: cognitive restructuring, behavioral patterns, productivity + mental health, habit formation. Always provide: 1) Pattern 2) Analysis 3) Action steps.`;
+const API_KEY = process.env.NVIDIA_API_KEY;
+const MODEL = 'meta/llama-3.1-8b-instruct';
 
-const SUGGESTIONS = {
-  AURA: ["I've been feeling anxious lately", "I'm struggling with stress", "Help me with self-esteem", "I feel lonely"],
-  MAX:  ["Analyze my thought patterns", "I procrastinate too much", "Break a bad habit", "Anxiety affecting work"]
-};
+// ─────────────────────────────────────────────────────────
+// CONSULTANT SYSTEM — simple JSON-file storage (no DB needed)
+// ─────────────────────────────────────────────────────────
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+const DATA_DIR             = path.join(__dirname, 'data');
+const CONSULTANTS_FILE     = path.join(DATA_DIR, 'consultants.json');
+const APPLICATIONS_FILE    = path.join(DATA_DIR, 'applications.json');
 
-// Consultants loaded from backend
+const SEED_CONSULTANTS = [
+  { id: 1, name:'Dr. Priya Sharma', spec:'Anxiety & CBT',            rating:4.9, sessions:240, color:'#ec4899', avail:true,  exp:'8 yrs',  price:199 },
+  { id: 2, name:'Dr. Arjun Mehta',  spec:'Depression & Mindfulness', rating:4.8, sessions:180, color:'#8b5cf6', avail:true,  exp:'6 yrs',  price:199 },
+  { id: 3, name:'Dr. Sara Ali',     spec:'Trauma & PTSD',            rating:4.9, sessions:320, color:'#2dd4bf', avail:false, exp:'12 yrs', price:249 },
+  { id: 4, name:'Dr. Ravi Nair',    spec:'Stress & Burnout',         rating:4.7, sessions:150, color:'#f59e0b', avail:true,  exp:'5 yrs',  price:199 },
+  { id: 5, name:'Rajat Kamal',      spec:'Founder · Peer Support',   rating:5.0, sessions:60,  color:'#5eb8ad', avail:true,  exp:'2 yrs',  price:199 },
+];
 
-const MOOD_DATA = [62, 71, 55, 80, 66, 74, 82];
-const DAYS      = ['M','T','W','T','F','S','S'];
+function ensureDataFiles() {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  // Always reset consultants to the fixed list (clears any extra/test names)
+  fs.writeFileSync(CONSULTANTS_FILE, JSON.stringify(SEED_CONSULTANTS, null, 2));
+  if (!fs.existsSync(APPLICATIONS_FILE)) fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify([], null, 2));
+}
+ensureDataFiles();
 
-function TypingDots({ color }) {
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'12px 16px', background:'rgba(255,255,255,0.05)', borderRadius:'18px 18px 18px 4px', border:`1px solid ${color}20`, width:'fit-content' }}>
-      {[0,1,2].map(i=>(
-        <motion.div key={i} animate={{ scale:[1,1.5,1], opacity:[0.3,1,0.3] }} transition={{ duration:0.8, repeat:Infinity, delay:i*0.2 }}
-          style={{ width:'6px', height:'6px', borderRadius:'50%', background:color }}/>
-      ))}
-    </div>
-  );
+// ─────────────────────────────────────────────────────────
+// EMAIL — Resend.com (simple API key, no Gmail setup needed)
+// .env: RESEND_API_KEY=re_xxxx  FOUNDER_EMAIL=you@gmail.com
+// ─────────────────────────────────────────────────────────
+async function sendMail({ to, subject, html }) {
+  if (!process.env.RESEND_API_KEY) {
+    console.log('📧 Email skipped (RESEND_API_KEY not set in .env)');
+    return;
+  }
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'PsychoLink <onboarding@resend.dev>',
+        to,
+        subject,
+        html,
+      }),
+    });
+    const data = await res.json();
+    if (res.ok) { console.log(`📧 Email sent → ${to}`); }
+    else { console.error('Resend error:', data); }
+  } catch (e) { console.error('Email error:', e.message); }
 }
 
-function MoodChart({ color, data }) {
-  const max = Math.max(...data), min = Math.min(...data) - 5;
-  const W = 220, H = 65;
-  const pts = data.map((v,i) => `${(i/(data.length-1))*W},${H-((v-min)/(max-min))*H}`).join(' ');
-  return (
-    <svg width={W} height={H+10} style={{ overflow:'visible' }}>
-      <defs>
-        <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.35"/>
-          <stop offset="100%" stopColor={color} stopOpacity="0"/>
-        </linearGradient>
-      </defs>
-      <polygon points={`0,${H+5} ${pts} ${W},${H+5}`} fill="url(#cg)"/>
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      {data.map((v,i) => (
-        <motion.circle key={i} cx={(i/(data.length-1))*W} cy={H-((v-min)/(max-min))*H} r="4"
-          initial={{ scale:0 }} animate={{ scale:1 }} transition={{ delay:i*0.08, type:'spring' }}
-          fill={color} opacity="0.9" stroke="#0a0a0c" strokeWidth="2"/>
-      ))}
-    </svg>
-  );
-}
+function readJSON(file)  { return JSON.parse(fs.readFileSync(file, 'utf-8')); }
+function writeJSON(file, data) { fs.writeFileSync(file, JSON.stringify(data, null, 2)); }
 
+const CONSULTANT_COLORS = ['#ec4899','#8b5cf6','#2dd4bf','#f59e0b','#3b82f6','#10b981','#f43f5e','#a78bfa'];
 
+// ── GET /api/consultants — public list of APPROVED consultants ──
+app.get('/api/consultants', (req, res) => {
+  res.json(readJSON(CONSULTANTS_FILE));
+});
 
+// ── DELETE /api/consultants/:id — remove a consultant from the platform ──
+app.delete('/api/consultants/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const consultants = readJSON(CONSULTANTS_FILE);
+  const filtered = consultants.filter(c => c.id !== id);
+  if (filtered.length === consultants.length) {
+    return res.status(404).json({ error: 'Consultant not found' });
+  }
+  writeJSON(CONSULTANTS_FILE, filtered);
+  console.log('🗑️  Consultant removed:', id);
+  res.json({ success: true, removed: id });
+});
 
-export default function Home({ userProfile, onLogout }) {
-  const [tab,       setTab]       = useState('home');
-  const [activeAI,  setActiveAI]  = useState('AURA');
-  const [sessions,  setSessions]  = useState({
-    AURA: [{ id:1, title:'New conversation', messages:[], active:true }],
-    MAX:  [{ id:1, title:'New conversation', messages:[], active:true }],
-  });
-  const [input,     setInput]     = useState('');
-  const [loading,   setLoading]   = useState(false);
-  const [listening, setListening] = useState(false);
-  const [sidebar,   setSidebar]   = useState(true);
-  const [moodToday,      setMoodToday]      = useState(null);
-  const [showBreath,     setShowBreath]     = useState(false);
-  const [showSOS,        setShowSOS]        = useState(false);
-  const [isRecording,    setIsRecording]    = useState(false);
-  const [recordDuration, setRecordDuration] = useState(0);
-  const mediaRecRef    = useRef(null);
-  const recordTimerRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const durationRef    = useRef(0);
-  const transcriptRef  = useRef('');
-  const [journalInput,   setJournalInput]   = useState('');
-  const [journalEntries, setJournalEntries] = useState(() => { try { return JSON.parse(localStorage.getItem('eq_journal')||'[]'); } catch { return []; } });
-  const [journalInsight, setJournalInsight] = useState('');
-  const [journalLoading, setJournalLoading] = useState(false);
-  const [sessionSummary, setSessionSummary] = useState('');
-  const [summaryLoading, setSummaryLoading] = useState(false);
-  const [summaryOpen,    setSummaryOpen]    = useState(false);
-  const [consultants,    setConsultants]    = useState([]);
-  const [applications,   setApplications]   = useState([]);
-  const [showJoin,       setShowJoin]       = useState(false);
-  const [showApps,       setShowApps]       = useState(false);
-  const [payConsultant,  setPayConsultant]  = useState(null);
-  const [freeConsultant, setFreeConsultant] = useState(null);
-  const [isPremium,      setIsPremium]      = useState(() => {
-    try { return localStorage.getItem('eq_premium') === 'true'; } catch { return false; }
-  });
-  const [showUpgrade,    setShowUpgrade]    = useState(false);
-  const [call,           setCall]           = useState(null); // { consultant, audioOnly }
-  const [usedFree,       setUsedFree]       = useState(() => {
-    try { return JSON.parse(localStorage.getItem('eq_used_free') || '{}'); } catch { return {}; }
-  });
-  const bottomRef   = useRef(null);
-  const textareaRef = useRef(null);
-  const srRef       = useRef(null);
+// ── POST /api/consultants/apply — "Join as Consultant" form submit ──
+app.post('/api/consultants/apply', async (req, res) => {
+  const { fullName, email, skills, therapyApproach, qualifications, multilingualAggressive } = req.body;
 
-  const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
-  const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
-  const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
+  if (!fullName || !email) {
+    return res.status(400).json({ error: 'fullName and email are required' });
+  }
 
-  const accent   = activeAI === 'AURA' ? '#e0524d' : '#5eb8ad';
-  const accentB  = activeAI === 'AURA' ? 'rgba(224,82,77,0.10)' : 'rgba(94,184,173,0.10)';
-  const accentBr = activeAI === 'AURA' ? 'rgba(224,82,77,0.22)'  : 'rgba(94,184,173,0.22)';
-
-  const activeSession = sessions[activeAI].find(s => s.active) || sessions[activeAI][0];
-  const messages      = activeSession?.messages || [];
-  const firstName     = (userProfile?.name || 'User').split(' ')[0];
-  const hour          = new Date().getHours();
-  const greeting      = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-
-  const MOODS = [
-    { e:'😊', l:'Great' }, { e:'😌', l:'Calm' }, { e:'😐', l:'Okay' },
-    { e:'😟', l:'Low'   }, { e:'😔', l:'Sad'  }
-  ];
-
-  const navItems = [
-    { id:'home',     icon:<FaHome size={15}/>,      label:'Home'         },
-    { id:'chat',     icon:<FaComments size={15}/>,   label:'AI Chat'      },
-    { id:'report',   icon:<FaBrain size={15}/>,      label:'Brain Report' },
-    { id:'consult',  icon:<FaUserMd size={15}/>,     label:'Consultants'  },
-    { id:'progress', icon:<FaChartLine size={15}/>,  label:'Progress'     },
-    { id:'journal',  icon:<FaBook size={15}/>,       label:'Journal'      },
-    { id:'calm',     icon:<FaSpa size={15}/>,        label:'Calm Studio'  },
-  ];
-
-  useEffect(() => {
-    const l = document.createElement('link');
-    l.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;1,600;1,700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap';
-    document.head.appendChild(l);
-    const s = document.createElement('style');
-    s.innerHTML = '*{-webkit-font-smoothing:antialiased;box-sizing:border-box;}textarea,input{outline:none;}textarea::placeholder,input::placeholder{color:rgba(255,255,255,0.2);}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}';
-    document.head.appendChild(s);
-    return () => { try { document.head.removeChild(l); document.head.removeChild(s); } catch(e) {} }
-  }, []);
-
-  // Fetch consultants from backend
-  useEffect(() => {
-    fetch(`${API_BASE}/api/consultants`)
-      .then(r => r.json()).then(setConsultants).catch(() => setConsultants([]));
-  }, []);
-
-  const fetchApplications = () => {
-    fetch(`${API_BASE}/api/admin/applications`)
-      .then(r => r.json()).then(setApplications).catch(() => setApplications([]));
+  const applications = readJSON(APPLICATIONS_FILE);
+  const application = {
+    id: Date.now(),
+    fullName,
+    email,
+    skills:         skills || '',
+    therapyApproach: therapyApproach || '',
+    qualifications: qualifications || '',
+    multilingualAggressive: multilingualAggressive || '',
+    submittedAt: new Date().toISOString(),
+    status: 'pending',
   };
+  applications.push(application);
+  writeJSON(APPLICATIONS_FILE, applications);
 
-  const removeConsultant = async (c) => {
-    if (!window.confirm(`Remove ${c.name} from the platform?`)) return;
-    try {
-      await fetch(`${API_BASE}/api/consultants/${c.id}`, { method:'DELETE' });
-      setConsultants(prev => prev.filter(x => x.id !== c.id));
-    } catch (e) { alert('Could not remove — check server.'); }
-  };
-
-  const handleBookConsultant = (c) => {
-    if (usedFree[c.id]) {
-      setPayConsultant(c);
-    } else {
-      setFreeConsultant(c);
-      const updated = { ...usedFree, [c.id]: true };
-      setUsedFree(updated);
-      localStorage.setItem('eq_used_free', JSON.stringify(updated));
-    }
-  };
-
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:'smooth' }); }, [messages, loading]);
-
-  const getMsgs = () => sessions[activeAI].find(s => s.active)?.messages || [];
-
-  const updateSession = (msgs, title) => {
-    setSessions(prev => ({
-      ...prev,
-      [activeAI]: prev[activeAI].map(s => s.active ? { ...s, messages:msgs, title:title||s.title } : s)
-    }));
-  };
-
-  // ─────────────────────────────────────────────────────────
-  // sendMsg — now calls the LOCAL server (server.js) on
-  // http://localhost:3001/api/chat instead of hitting
-  // api.anthropic.com directly from the browser.
-  // Sends AURA_PROMPT / MAX_PROMPT as a custom systemPrompt
-  // so the local server uses these detailed personas.
-  // ─────────────────────────────────────────────────────────
-  const sendMsg = async (text) => {
-    const t = (text || input).trim();
-    if (!t || loading) return;
-    setInput('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
-    const cur     = getMsgs();
-    const uMsg    = { role:'user', content:t, ts:new Date() };
-    const newMsgs = [...cur, uMsg];
-    const title   = cur.length === 0 ? t.slice(0,36) + (t.length > 36 ? '...' : '') : undefined;
-    updateSession(newMsgs, title);
-    setLoading(true);
-    playTone('send');
-    try {
-      const res = await fetch(`${API_BASE}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({
-          messages: newMsgs.map(m => ({ role:m.role, content:m.content })),
-          persona: activeAI,
-          systemPrompt: activeAI === 'AURA' ? AURA_PROMPT : MAX_PROMPT,
-        })
-      });
-      if (!res.ok) {
-        let detail = '';
-        try { const ej = await res.json(); detail = ej.error || ''; } catch {}
-        throw new Error(`${res.status}${detail ? ' - ' + detail : ''}`);
-      }
-      const data  = await res.json();
-      const reply = data.reply || "I'm here for you 🌸";
-      updateSession([...newMsgs, { role:'assistant', content:reply, ts:new Date() }], title);
-      playTone('receive');
-    } catch(e) {
-      console.error('Chat error:', e);
-      updateSession([...newMsgs, { role:'assistant', content:`⚠️ Connection lost (${e.message}). Please try again.`, ts:new Date() }], title);
-    }
-    setLoading(false);
-  };
-
-  const newChat = () => {
-    const id = Date.now();
-    setSessions(prev => ({
-      ...prev,
-      [activeAI]: [...prev[activeAI].map(s => ({ ...s, active:false })), { id, title:'New conversation', messages:[], active:true }]
-    }));
-  };
-
-  const switchSession = id => {
-    setSessions(prev => ({ ...prev, [activeAI]: prev[activeAI].map(s => ({ ...s, active:s.id===id })) }));
-  };
-
-  const toggleMic = () => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
-    if (listening) { srRef.current?.stop(); setListening(false); return; }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    srRef.current = new SR();
-    srRef.current.lang = 'en-IN';
-    srRef.current.continuous = false;
-    srRef.current.interimResults = false;
-    srRef.current.onresult = e => { setInput(e.results[0][0].transcript); setListening(false); };
-    srRef.current.onerror  = () => setListening(false);
-    srRef.current.onend    = () => setListening(false);
-    srRef.current.start();
-    setListening(true);
-  };
-
-  const speakText = text => {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const u      = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    const v      = activeAI === 'AURA'
-      ? voices.find(v => v.name.includes('Zira') || v.name.includes('Samantha'))
-      : voices.find(v => v.name.includes('David') || v.name.includes('Google UK English Male'));
-    if (v) u.voice = v;
-    u.rate  = 0.9;
-    u.pitch = activeAI === 'AURA' ? 1.2 : 0.8;
-    window.speechSynthesis.speak(u);
-  };
-
-  const fmt = d => d ? new Date(d).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' }) : '';
-
-  const playTone = (type) => {
-    try {
-      const ctx = new (window.AudioContext||window.webkitAudioContext)();
-      const osc=ctx.createOscillator(), gain=ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination); osc.type='sine';
-      if (type==='send') { osc.frequency.setValueAtTime(880,ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(660,ctx.currentTime+0.12); gain.gain.setValueAtTime(0.07,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.2); }
-      else { osc.frequency.setValueAtTime(440,ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(550,ctx.currentTime+0.18); gain.gain.setValueAtTime(0.05,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3); }
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.35);
-    } catch {}
-  };
-
-  // ── Voice recording: MediaRecorder (audio) + SpeechRecognition (transcript → AI) ──
-  const startVoiceRecord = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunksRef.current = [];
-      durationRef.current   = 0;
-      transcriptRef.current = '';
-
-      // 1. SpeechRecognition — use ref so transcript is always fresh in callbacks
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SR) {
-        srRef.current = new SR();
-        srRef.current.lang           = 'en-IN';
-        srRef.current.continuous     = true;
-        srRef.current.interimResults = true;
-        srRef.current.onresult = (e) => {
-          let finalText = '';
-          for (let i = 0; i < e.results.length; i++) {
-            if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
-          }
-          if (finalText.trim()) transcriptRef.current = finalText.trim();
-        };
-        srRef.current.onerror = () => {}; // silently ignore SR errors
-        try { srRef.current.start(); } catch {}
-      }
-
-      // 2. MediaRecorder for audio blob
-      const mr = new MediaRecorder(stream);
-      mediaRecRef.current = mr;
-      mr.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-
-      mr.onstop = async () => {
-        stream.getTracks().forEach(t => t.stop());
-        // Give SpeechRecognition 600ms to flush final results
-        await new Promise(r => setTimeout(r, 600));
-        try { srRef.current?.stop(); } catch {}
-        await new Promise(r => setTimeout(r, 200));
-
-        const blob       = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const url        = URL.createObjectURL(blob);
-        const dur        = durationRef.current;      // ref — always correct
-        const transcript = transcriptRef.current || '🎤 Voice message';
-
-        // Show audio bubble + transcript
-        const cur      = getMsgs();
-        const voiceMsg = { role:'user', content: transcript, audioUrl: url, audioDuration: dur, ts: new Date() };
-        const newMsgs  = [...cur, voiceMsg];
-        updateSession(newMsgs);
-        setIsRecording(false);
-        setRecordDuration(0);
-        clearInterval(recordTimerRef.current);
-
-        // Send to AI
-        setLoading(true);
-        playTone('send');
-        try {
-          const res = await fetch(`${API_BASE}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              messages: newMsgs.map(m => ({ role: m.role, content: m.content })),
-              persona: activeAI,
-              systemPrompt: activeAI === 'AURA' ? AURA_PROMPT : MAX_PROMPT,
-            })
-          });
-          if (!res.ok) throw new Error(res.status);
-          const data  = await res.json();
-          const reply = data.reply || "I'm here for you 🌸";
-          updateSession([...newMsgs, { role:'assistant', content: reply, ts: new Date() }]);
-          playTone('receive');
-        } catch (e) {
-          updateSession([...newMsgs, { role:'assistant', content:`⚠️ Connection lost (${e.message}).`, ts: new Date() }]);
-        }
-        setLoading(false);
-      };
-
-      mr.start(200);
-      setIsRecording(true);
-      setRecordDuration(0);
-      // Update both state (for display) and ref (for callback)
-      recordTimerRef.current = setInterval(() => {
-        durationRef.current += 1;
-        setRecordDuration(d => d + 1);
-      }, 1000);
-
-    } catch (e) {
-      alert('Microphone access denied. Please allow mic in browser settings.');
-    }
-  };
-
-  const stopVoiceRecord = () => {
-    if (mediaRecRef.current && mediaRecRef.current.state !== 'inactive') {
-      mediaRecRef.current.stop();
-    }
-    clearInterval(recordTimerRef.current);
-  };
-
-  const handleMicClick = () => {
-    if (isRecording) { stopVoiceRecord(); }
-    else { startVoiceRecord(); }
-  };
-
-  const saveJournal = () => {
-    if (!journalInput.trim()) return;
-    const entry = { id:Date.now(), text:journalInput.trim(), date:new Date().toISOString() };
-    const updated = [entry,...journalEntries].slice(0,50);
-    setJournalEntries(updated);
-    localStorage.setItem('eq_journal', JSON.stringify(updated));
-    setJournalInput('');
-  };
-
-  const getJournalInsight = async () => {
-    if (!journalEntries.length) return;
-    setJournalLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/journal/summarize`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ entries: journalEntries.slice(0,10).map(e=>e.text) }) });
-      const data = await res.json();
-      setJournalInsight(data.insight || 'No insight generated.');
-    } catch { setJournalInsight('Could not get insight — check server.'); }
-    setJournalLoading(false);
-  };
-
-  const getSessionSummary = async () => {
-    if (messages.length < 2) return;
-    setSummaryLoading(true); setSummaryOpen(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/session/summary`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ messages: messages.map(m=>({role:m.role,content:m.content})), persona:activeAI }) });
-      const data = await res.json();
-      setSessionSummary(data.summary || 'Unable to generate summary.');
-    } catch { setSessionSummary('Could not generate summary.'); }
-    setSummaryLoading(false);
-  };
-
-  return (
-    <div style={{ width:'100vw', height:'100vh', display:'flex', background:'#0a0a0c', fontFamily:J, overflow:'hidden', position:'relative' }}>
-
-      {/* ── GLOBAL BG ──────────────────────────────────────────── */}
-      <div style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none' }}>
-        <motion.div animate={{ backgroundPosition:['0% 0%','100% 100%'] }} transition={{ duration:40, repeat:Infinity, ease:'linear', repeatType:'mirror' }}
-          style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&q=80&w=2000')`, backgroundSize:'130% 130%', opacity:0.04 }}/>
-        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 20% 0%, rgba(139,92,246,0.12) 0%, transparent 55%)' }}/>
-        <motion.div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse at 80% 100%, ${activeAI==='AURA'?'rgba(236,72,153,0.09)':'rgba(45,212,191,0.09)'} 0%, transparent 55%)`, transition:'background 1.2s' }}/>
-        <motion.div animate={{ backgroundPosition:['0px 0px','80px 160px'] }} transition={{ duration:50, repeat:Infinity, ease:'linear' }}
-          style={{ position:'absolute', inset:0, opacity:0.04, backgroundImage:`radial-gradient(circle,rgba(255,255,255,0.9) 1px,transparent 1px)`, backgroundSize:'60px 60px' }}/>
-      </div>
-
-      {/* ══ SIDEBAR ════════════════════════════════════════════════ */}
-      <AnimatePresence>
-        {sidebar && (
-          <motion.aside initial={{ x:-270, opacity:0 }} animate={{ x:0, opacity:1 }} exit={{ x:-270, opacity:0 }}
-            transition={{ type:'spring', stiffness:300, damping:30 }}
-            style={{ width:'255px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'rgba(6,4,14,0.98)', backdropFilter:'blur(40px)', borderRight:'1px solid rgba(255,255,255,0.06)', position:'relative', zIndex:20 }}>
-
-            {/* Brand */}
-            <div style={{ padding:'22px 16px 16px', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'9px', marginBottom:'20px', userSelect:'none' }}>
-                <motion.div animate={{ scale:[1,1.4,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
-                  style={{ width:'9px', height:'9px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},#8b5cf6)`, boxShadow:'0 2px 8px rgba(0,0,0,0.3)', transition:'background 0.5s' }}/>
-                <span style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'1rem', color:'rgba(255,255,255,0.75)' }}>Cognitive Social</span>
-              </div>
-              {/* AI Toggle */}
-              <div style={{ display:'flex', background:'rgba(255,255,255,0.04)', borderRadius:'14px', padding:'4px', gap:'3px', border:'1px solid rgba(255,255,255,0.07)' }}>
-                {[{ k:'AURA', g:'#e0524d' }, { k:'MAX', g:'#5eb8ad' }].map(ai => (
-                  <button key={ai.k} onClick={() => setActiveAI(ai.k)}
-                    style={{ flex:1, padding:'9px 0', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'0.76rem', fontWeight:'700', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s', background:activeAI===ai.k?ai.g:'transparent', color:activeAI===ai.k?'#fff':'rgba(255,255,255,0.28)', boxShadow:activeAI===ai.k?`0 4px 14px ${accent}45`:'none', userSelect:'none' }}>
-                    {ai.k}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Nav */}
-            <div style={{ padding:'12px 10px 6px' }}>
-              {navItems.map(item => (
-                <motion.button key={item.id} whileHover={{ background:'rgba(255,255,255,0.055)' }} whileTap={{ scale:0.97 }}
-                  onClick={() => setTab(item.id)}
-                  style={{ width:'100%', padding:'11px 14px', background:tab===item.id?accentB:'transparent', border:`1px solid ${tab===item.id?accentBr:'transparent'}`, borderRadius:'12px', color:tab===item.id?accent:'rgba(255,255,255,0.4)', fontSize:'0.86rem', fontWeight:'600', cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'12px', transition:'all 0.2s', marginBottom:'3px' }}>
-                  <span style={{ color:tab===item.id?accent:'rgba(255,255,255,0.25)', transition:'color 0.2s' }}>{item.icon}</span>
-                  {item.label}
-                  {tab === item.id && (
-                    <motion.div layoutId="nav-dot" style={{ width:'5px', height:'5px', borderRadius:'50%', background:accent, marginLeft:'auto', boxShadow:'0 2px 8px rgba(0,0,0,0.3)' }}/>
-                  )}
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Chat history */}
-            {tab === 'chat' && (
-              <div style={{ flex:1, overflow:'hidden', display:'flex', flexDirection:'column', padding:'6px 10px 0' }}>
-                <motion.button whileHover={{ background:accentB }} whileTap={{ scale:0.97 }} onClick={newChat}
-                  style={{ width:'100%', padding:'9px 13px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'11px', color:'rgba(255,255,255,0.6)', fontSize:'0.82rem', fontWeight:'600', cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'9px', transition:'all 0.2s', marginBottom:'8px' }}>
-                  <FaPlus size={10} color={accent}/> New conversation
-                </motion.button>
-                <p style={{ fontSize:'0.6rem', color:'rgba(255,255,255,0.2)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', padding:'2px 4px 6px', margin:0 }}>HISTORY</p>
-                <div style={{ overflowY:'auto', flex:1 }}>
-                  {[...sessions[activeAI]].reverse().map(s => (
-                    <motion.div key={s.id} whileHover={{ background:'rgba(255,255,255,0.05)' }} onClick={() => switchSession(s.id)}
-                      style={{ padding:'8px 11px', borderRadius:'10px', cursor:'pointer', marginBottom:'2px', background:s.active?accentB:'transparent', border:`1px solid ${s.active?accentBr:'transparent'}`, transition:'all 0.2s', display:'flex', alignItems:'center', gap:'8px' }}>
-                      <FaHistory size={9} color={s.active?accent:'rgba(255,255,255,0.2)'}/>
-                      <span style={{ fontSize:'0.79rem', color:s.active?'rgba(255,255,255,0.85)':'rgba(255,255,255,0.35)', fontWeight:s.active?'600':'400', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{s.title}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {tab !== 'chat' && <div style={{ flex:1 }}/>}
-
-            {/* User + Logout */}
-            <div style={{ padding:'10px 12px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'9px', padding:'10px 12px', borderRadius:'14px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ width:'34px', height:'34px', borderRadius:'50%', background: userProfile?.picture ? 'transparent' : `linear-gradient(135deg,${accent},#8b5cf6)`, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'0.85rem', flexShrink:0, color:'#fff', transition:'background 0.5s', boxShadow:'0 4px 12px rgba(0,0,0,0.4)', overflow:'hidden' }}>
-                  {userProfile?.picture
-                    ? <img src={userProfile.picture} alt="" referrerPolicy="no-referrer" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
-                    : (userProfile?.name || 'U')[0].toUpperCase()}
-                </div>
-                <div style={{ flex:1, overflow:'hidden', minWidth:0 }}>
-                  <p style={{ margin:0, fontSize:'0.8rem', fontWeight:'700', color:'rgba(255,255,255,0.75)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{userProfile?.name || 'User'}</p>
-                  <p style={{ margin:0, fontSize:'0.66rem', color:'rgba(255,255,255,0.25)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{userProfile?.email || ''}</p>
-                </div>
-                <motion.button whileHover={{ color:'#ef4444' }} whileTap={{ scale:0.9 }} onClick={onLogout}
-                  style={{ background:'none', border:'none', color:'rgba(255,255,255,0.2)', cursor:'pointer', padding:'4px', transition:'color 0.2s', flexShrink:0 }}>
-                  <FaSignOutAlt size={13}/>
-                </motion.button>
-              </div>
-            </div>
-          </motion.aside>
-        )}
-      </AnimatePresence>
-
-      {/* ══ MAIN ════════════════════════════════════════════════════ */}
-      <div style={{ flex:1, display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden', position:'relative', zIndex:5 }}>
-
-        {/* Top bar */}
-        <div style={{ height:'54px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 18px', borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(6,4,14,0.85)', backdropFilter:'blur(24px)' }}>
-          <motion.button whileHover={{ background:'rgba(255,255,255,0.07)' }} whileTap={{ scale:0.95 }} onClick={() => setSidebar(s => !s)}
-            style={{ width:'34px', height:'34px', borderRadius:'9px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'4px', flexShrink:0 }}>
-            {[0,1,2].map(i => <div key={i} style={{ width:'14px', height:'1.5px', background:'rgba(255,255,255,0.5)', borderRadius:'1px' }}/>)}
-          </motion.button>
-
-          <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-            <motion.div animate={{ scale:[1,1.25,1], opacity:[0.6,1,0.6] }} transition={{ duration:2, repeat:Infinity }}
-              style={{ width:'7px', height:'7px', borderRadius:'50%', background:accent, boxShadow:'0 2px 8px rgba(0,0,0,0.3)', transition:'background 0.5s' }}/>
-            <span style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'1rem', color:'rgba(255,255,255,0.82)' }}>
-              {tab==='home'    ? 'Dashboard'
-              :tab==='chat'    ? (activeAI==='AURA' ? 'Aura · Emotional AI' : 'Max · Cognitive AI')
-              :tab==='report'  ? 'Neural Brain Report'
-              :tab==='consult' ? 'Consultants'
-              :                  'My Progress'}
-            </span>
+  // ── Email to founder (you) ──────────────────────────────
+  await sendMail({
+    to: process.env.FOUNDER_EMAIL || process.env.GMAIL_USER,
+    subject: `🆕 New Consultant Application — ${fullName}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8f5ff;border-radius:16px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#7c3aed,#be185d);padding:32px 28px;">
+          <h1 style="color:#fff;margin:0;font-size:1.5rem;">🧠 PsychoLink</h1>
+          <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:0.9rem;">Founder Notification</p>
+        </div>
+        <div style="padding:28px;">
+          <h2 style="color:#1a1a2e;margin:0 0 20px;">New Consultant Application 🎉</h2>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:0.85rem;width:40%;">Full Name</td><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:700;color:#1a1a2e;">${fullName}</td></tr>
+            <tr><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:0.85rem;">Email</td><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#7c3aed;">${email}</td></tr>
+            <tr><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:0.85rem;">Skills</td><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#1a1a2e;">${skills||'—'}</td></tr>
+            <tr><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:0.85rem;">Therapy Approach</td><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#1a1a2e;">${therapyApproach||'—'}</td></tr>
+            <tr><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:0.85rem;">Qualifications</td><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#1a1a2e;">${qualifications||'—'}</td></tr>
+            <tr><td style="padding:10px 0;color:#6b7280;font-size:0.85rem;">Multilingual/Aggressive</td><td style="padding:10px 0;color:#1a1a2e;">${multilingualAggressive||'—'}</td></tr>
+          </table>
+          <div style="margin-top:28px;display:flex;gap:14px;justify-content:center;">
+            <a href="http://localhost:3001/api/admin/applications/${application.id}/interview"
+              style="padding:16px 32px;background:linear-gradient(135deg,#7c3aed,#be185d);color:#fff;text-decoration:none;border-radius:14px;font-weight:700;font-size:1rem;display:inline-block;">
+              🎯 Send Interview Invite
+            </a>
+            <a href="http://localhost:3001/api/admin/applications/${application.id}/reject"
+              style="padding:16px 24px;background:#f1f5f9;color:#64748b;text-decoration:none;border-radius:14px;font-weight:600;font-size:0.9rem;display:inline-block;border:1px solid #e2e8f0;">
+              ✕ Not a Fit
+            </a>
           </div>
-
-          <motion.button whileHover={{ background:'rgba(255,255,255,0.07)' }} whileTap={{ scale:0.95 }}
-            style={{ width:'34px', height:'34px', borderRadius:'9px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
-            <FaBell size={13} color="rgba(255,255,255,0.5)"/>
-            <div style={{ position:'absolute', top:'7px', right:'7px', width:'6px', height:'6px', borderRadius:'50%', background:'#e0524d', boxShadow:'none' }}/>
-          </motion.button>
+          <p style="text-align:center;color:#9ca3af;font-size:0.75rem;margin-top:10px;">One click — no login needed</p>
         </div>
-
-        {/* ════ TABS ═══════════════════════════════════════════════ */}
-        <div style={{ flex:1, overflow:'hidden', position:'relative' }}>
-          <AnimatePresence mode="wait">
-
-            {/* ══ HOME ═══════════════════════════════════════════════ */}
-            {tab === 'home' && (
-              <DashboardHome
-                firstName={firstName}
-                greeting={greeting}
-                accent={accent}
-                accentB={accentB}
-                accentBr={accentBr}
-                activeAI={activeAI}
-                moodToday={moodToday}
-                setMoodToday={setMoodToday}
-                MOODS={MOODS}
-                setShowBreath={setShowBreath}
-                setTab={setTab}
-                setActiveAI={setActiveAI}
-                consultants={consultants}
-                journalCount={journalEntries.length}
-                sessionCount={sessions[activeAI].length}
-              />
-            )}
-
-            {/* ══ CHAT ═══════════════════════════════════════════════ */}
-            {tab === 'chat' && (
-              <motion.div key="chat" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} transition={{ duration:0.3 }}
-                style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', overflow:'hidden' }}>
-
-                {/* Chat background */}
-                <div style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none', overflow:'hidden' }}>
-                  {activeAI==='AURA' ? (
-                    <>
-                      <motion.div animate={{ x:['-20%','20%','-20%'], y:['0%','12%','0%'] }} transition={{ duration:14, repeat:Infinity, ease:'easeInOut' }}
-                        style={{ position:'absolute', top:'-20%', left:'-10%', width:'60%', height:'60%', borderRadius:'50%', background:'radial-gradient(circle,rgba(236,72,153,0.07),transparent 70%)', filter:'blur(40px)' }}/>
-                      <motion.div animate={{ x:['20%','-20%','20%'], y:['10%','-10%','10%'] }} transition={{ duration:18, repeat:Infinity, ease:'easeInOut' }}
-                        style={{ position:'absolute', bottom:'-10%', right:'-10%', width:'55%', height:'55%', borderRadius:'50%', background:'radial-gradient(circle,rgba(139,92,246,0.06),transparent 70%)', filter:'blur(40px)' }}/>
-                    </>
-                  ) : (
-                    <>
-                      <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(45,212,191,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(45,212,191,0.03) 1px,transparent 1px)', backgroundSize:'40px 40px' }}/>
-                      <motion.div animate={{ opacity:[0.04,0.1,0.04] }} transition={{ duration:4, repeat:Infinity }}
-                        style={{ position:'absolute', top:'20%', right:'15%', width:'35%', height:'35%', borderRadius:'50%', background:'radial-gradient(circle,rgba(45,212,191,0.1),transparent 70%)', filter:'blur(30px)' }}/>
-                    </>
-                  )}
-                </div>
-                {messages.length > 1 && (
-                  <div style={{ flexShrink:0, display:'flex', justifyContent:'flex-end', padding:'8px 20px 0', position:'relative', zIndex:2 }}>
-                    <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={getSessionSummary}
-                      style={{ padding:'7px 14px', borderRadius:20, border:`1px solid ${accentBr}`, background:accentB, color:accent, fontSize:'0.75rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:6 }}>
-                      📋 Session Summary
-                    </motion.button>
-                  </div>
-                )}
-                <div style={{ flex:1, overflowY:'auto', padding:'8px 20px 10px', display:'flex', flexDirection:'column', gap:'14px', position:'relative', zIndex:1 }}>
-                  {messages.length === 0 && (
-                    <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}
-                      style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'30px 20px', minHeight:'50vh' }}>
-
-                      <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'1.8rem', color:'#fff', marginBottom:'8px' }}>
-                        {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : "Hello, I'm Max"}
-                      </h2>
-                      <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.86rem', lineHeight:'1.75', maxWidth:'340px', marginBottom:'24px', fontFamily:J }}>
-                        {activeAI === 'AURA'
-                          ? "I'm your emotional anchor. Here to listen and support you through anything."
-                          : "I'm your cognitive analyst. Ready to break down patterns and build solutions."}
-                      </p>
-                      <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', justifyContent:'center', maxWidth:'460px' }}>
-                        {SUGGESTIONS[activeAI].map((s,i) => (
-                          <motion.button key={i} whileHover={{ background:accentB, borderColor:accentBr, scale:1.02 }} whileTap={{ scale:0.97 }}
-                            onClick={() => sendMsg(s)}
-                            style={{ padding:'9px 14px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.09)', borderRadius:'20px', color:'rgba(255,255,255,0.55)', fontSize:'0.81rem', cursor:'pointer', fontFamily:J, transition:'all 0.2s', fontWeight:'500' }}>
-                            {s}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {messages.map((msg,i) => (
-                    <motion.div key={i} initial={{ opacity:0, y:8, scale:0.98 }} animate={{ opacity:1, y:0, scale:1 }} transition={{ duration:0.25 }}
-                      style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start', alignItems:'flex-end', gap:'8px' }}>
-
-                      <div style={{ maxWidth:'72%' }}>
-                        <div style={{ padding:'12px 16px', background:msg.role==='user'?`linear-gradient(135deg,${accent}28,${accent}14)`:'rgba(255,255,255,0.055)', border:`1px solid ${msg.role==='user'?accent+'38':'rgba(255,255,255,0.08)'}`, borderRadius:msg.role==='user'?'18px 18px 4px 18px':'18px 18px 18px 4px', color:'rgba(255,255,255,0.9)', fontSize:'0.88rem', lineHeight:'1.65', fontFamily:J, whiteSpace:'pre-wrap' }}>
-                          {msg.audioUrl ? (
-                            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                              <audio src={msg.audioUrl} controls style={{ height:32, maxWidth:200, filter:'invert(1) hue-rotate(180deg)', opacity:0.85 }}/>
-                              <span style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:S }}>{msg.audioDuration}s</span>
-                            </div>
-                          ) : msg.content}
-                        </div>
-                        <div style={{ display:'flex', alignItems:'center', gap:'7px', marginTop:'3px', justifyContent:msg.role==='user'?'flex-end':'flex-start' }}>
-                          <span style={{ fontSize:'0.61rem', color:'rgba(255,255,255,0.16)', fontFamily:S }}>{fmt(msg.ts)}</span>
-                          {msg.role === 'assistant' && (
-                            <motion.button whileHover={{ color:accent }} whileTap={{ scale:0.9 }} onClick={() => speakText(msg.content)}
-                              style={{ background:'none', border:'none', color:'rgba(255,255,255,0.16)', cursor:'pointer', padding:0, transition:'color 0.2s' }}>
-                              <FaVolumeUp size={9}/>
-                            </motion.button>
-                          )}
-                        </div>
-                      </div>
-                      {msg.role === 'user' && (
-                        <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},#8b5cf6)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginBottom:'18px', fontWeight:'800', fontSize:'0.72rem', color:'#fff' }}>
-                          {(userProfile?.name || 'U')[0].toUpperCase()}
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-
-                  {loading && (
-                    <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} style={{ display:'flex', alignItems:'flex-end', gap:'8px' }}>
-
-                      <TypingDots color={accent}/>
-                    </motion.div>
-                  )}
-                  <div ref={bottomRef}/>
-                </div>
-
-                {/* Input */}
-                <div style={{ padding:'10px 16px 14px', background:'rgba(6,4,14,0.95)', backdropFilter:'blur(24px)', borderTop:'1px solid rgba(255,255,255,0.05)', flexShrink:0 }}>
-                  <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'rgba(255,255,255,0.05)', border:`1px solid ${listening?accentBr:'rgba(255,255,255,0.08)'}`, borderRadius:'20px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?'0 0 0 3px rgba(139,135,245,0.15)':'' }}>
-                    <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={handleMicClick}
-                      animate={isRecording ? { scale:[1,1.1,1] } : {}} transition={isRecording ? { duration:0.8, repeat:Infinity } : {}}
-                      style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'rgba(255,255,255,0.06)', border:`1px solid ${isRecording?'#ef4444':'rgba(255,255,255,0.09)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 1px 3px rgba(204,102,102,0.4)':'' }}>
-                      {isRecording ? <FaStop size={11} color="#fff"/> : <FaMicrophone size={12} color="rgba(255,255,255,0.4)"/>}
-                    </motion.button>
-                    <textarea ref={textareaRef} value={input}
-                      onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight,110) + 'px'; }}
-                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
-                      placeholder={isRecording ? `🔴 Recording... ${recordDuration}s (click mic to send)` : `Message ${activeAI==='AURA'?'Aura':'Max'}...`}
-                      rows={1}
-                      style={{ flex:1, background:'none', border:'none', color:'rgba(255,255,255,0.88)', fontSize:'0.9rem', fontFamily:J, resize:'none', lineHeight:'1.5', maxHeight:'110px', minHeight:'22px', padding:'7px 0', overflowY:'auto' }}/>
-                    <motion.button whileHover={input.trim()?{scale:1.06}:{}} whileTap={input.trim()?{scale:0.94}:{}} onClick={() => sendMsg()}
-                      style={{ width:'36px', height:'36px', borderRadius:'50%', background:input.trim()?`linear-gradient(135deg,${accent},#8b5cf6)`:'rgba(255,255,255,0.05)', border:`1px solid ${input.trim()?accent:'rgba(255,255,255,0.07)'}`, cursor:input.trim()?'pointer':'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:input.trim()?`0 4px 14px ${accent}45`:'' }}>
-                      <FaPaperPlane size={13} color={input.trim()?'#fff':'rgba(255,255,255,0.22)'} style={{ marginLeft:'1px' }}/>
-                    </motion.button>
-                  </div>
-                  <p style={{ textAlign:'center', fontSize:'0.61rem', color:'rgba(255,255,255,0.14)', fontFamily:S, letterSpacing:'0.5px', margin:'7px 0 0' }}>
-                    {activeAI==='AURA'?'Aura · Emotional Support AI':'Max · Cognitive Analysis AI'} — Not a substitute for professional therapy
-                  </p>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ══ BRAIN REPORT ════════════════════════════════════════ */}
-            {tab === 'report' && (
-              <motion.div key="report" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} transition={{ duration:0.3 }}
-                style={{ position:'absolute', inset:0 }}>
-                <BrainReport
-                  messages={messages}
-                  userProfile={userProfile}
-                  activeAI={activeAI}
-                  onHighStress={() => setShowSOS(true)}
-                />
-              </motion.div>
-            )}
-
-            {/* ══ CONSULTANTS ═════════════════════════════════════════ */}
-            {tab === 'consult' && (
-              <motion.div key="consult" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
-                style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
-
-                {/* Header */}
-                <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:20, flexWrap:'wrap', gap:12 }}>
-                  <div>
-                    <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.7rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>Our Experts</h2>
-                    <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', margin:0, fontFamily:J }}>First session free · ₹199/session thereafter</p>
-                  </div>
-                  <div style={{ display:'flex', gap:10 }}>
-                    <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
-                      onClick={() => { setShowApps(true); fetchApplications(); }}
-                      style={{ padding:'9px 16px', borderRadius:12, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.55)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
-                      ⚙️ Applications
-                    </motion.button>
-                    <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={() => setShowJoin(true)}
-                      style={{ padding:'9px 16px', borderRadius:12, border:`1px solid ${accentBr}`, background:accentB, color:accent, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
-                      + Join as Consultant
-                    </motion.button>
-                  </div>
-                </div>
-
-                {/* Empty state */}
-                {consultants.length === 0 && (
-                  <div style={{ textAlign:'center', padding:'60px 20px', color:'rgba(255,255,255,0.25)', fontSize:'0.88rem', fontFamily:J }}>
-                    <div style={{ fontSize:'2.5rem', marginBottom:12 }}>🔍</div>
-                    No consultants yet. Be the first to join!
-                  </div>
-                )}
-
-                {/* Consultant cards */}
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:16 }}>
-                  {consultants.map((c,i) => (
-                    <motion.div key={c.id||i} initial={{ opacity:0, y:14 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.05+i*0.07 }}
-                      whileHover={{ y:-4, boxShadow:'0 20px 48px rgba(0,0,0,0.4)' }}
-                      style={{ background:'linear-gradient(165deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))', border:`1px solid ${c.color}22`, borderRadius:22, padding:22, transition:'all 0.3s', position:'relative', overflow:'hidden', boxShadow:`0 1px 2px rgba(0,0,0,0.3), 0 0 30px ${c.color}10, inset 0 1px 0 rgba(255,255,255,0.05)` }}>
-                      <div style={{ position:'absolute', top:'-20px', right:'-20px', width:100, height:100, borderRadius:'50%', background:`radial-gradient(circle,${c.color}15,transparent 70%)`, pointerEvents:'none' }}/>
-                      {/* Remove button (admin) */}
-                      <motion.button whileHover={{ scale:1.12 }} whileTap={{ scale:0.9 }} onClick={(e)=>{ e.stopPropagation(); removeConsultant(c); }}
-                        title="Remove consultant"
-                        style={{ position:'absolute', top:14, left:14, width:26, height:26, borderRadius:8, background:'rgba(204,102,102,0.12)', border:'1px solid rgba(204,102,102,0.3)', color:'#cc6666', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.7rem', fontWeight:800, zIndex:5 }}>
-                        ✕
-                      </motion.button>
-                      {/* Availability badge */}
-                      <div style={{ position:'absolute', top:16, right:16, display:'flex', alignItems:'center', gap:5, padding:'3px 9px', borderRadius:20, background:c.avail?'rgba(86,160,111,0.12)':'rgba(255,255,255,0.05)', border:`1px solid ${c.avail?'rgba(86,160,111,0.3)':'rgba(255,255,255,0.08)'}` }}>
-                        <div style={{ width:5, height:5, borderRadius:'50%', background:c.avail?'#56a06f':'rgba(255,255,255,0.2)', boxShadow:c.avail?'none':'' }}/>
-                        <span style={{ fontSize:'0.65rem', fontWeight:700, color:c.avail?'#56a06f':'rgba(255,255,255,0.3)', fontFamily:S }}>{c.avail?'Online':'Busy'}</span>
-                      </div>
-                      {/* Info */}
-                      <div style={{ display:'flex', gap:14, marginBottom:14, alignItems:'flex-start' }}>
-                        <div style={{ width:52, height:52, borderRadius:'50%', background:`linear-gradient(135deg,${c.color}55,${c.color}25)`, border:`2px solid ${c.color}45`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontWeight:800, fontSize:'1.1rem', color:c.color, boxShadow:'0 4px 16px rgba(0,0,0,0.4)' }}>
-                          {(c.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2)}
-                        </div>
-                        <div>
-                          <p style={{ margin:'0 0 2px', fontSize:'0.95rem', fontWeight:700, color:'#fff' }}>{c.name}</p>
-                          <p style={{ margin:'0 0 4px', fontSize:'0.76rem', color:'rgba(255,255,255,0.38)' }}>{c.spec}</p>
-                          <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                            <span style={{ fontSize:'0.72rem', color:'#c79552', fontWeight:700 }}>★ {c.rating}</span>
-                            <span style={{ fontSize:'0.68rem', color:'rgba(255,255,255,0.25)' }}>{c.sessions} sessions</span>
-                            <span style={{ fontSize:'0.68rem', color:'rgba(255,255,255,0.25)' }}>{c.exp}</span>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Free / paid badge */}
-                      {!usedFree[c.id] && (
-                        <div style={{ marginBottom:10, padding:'4px 10px', borderRadius:20, background:'rgba(86,160,111,0.1)', border:'1px solid rgba(86,160,111,0.25)', display:'inline-flex', alignItems:'center', gap:5 }}>
-                          <span style={{ fontSize:'0.68rem', color:'#56a06f', fontWeight:700 }}>🎁 First session free</span>
-                        </div>
-                      )}
-                      {usedFree[c.id] && (
-                        <div style={{ marginBottom:10, padding:'4px 10px', borderRadius:20, background:accentB, border:`1px solid ${accentBr}`, display:'inline-flex', alignItems:'center', gap:5 }}>
-                          <span style={{ fontSize:'0.68rem', color:accent, fontWeight:700 }}>₹{c.price||199} / session</span>
-                        </div>
-                      )}
-                      <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }} onClick={() => c.avail && handleBookConsultant(c)}
-                        style={{ width:'100%', padding:'11px', background:c.avail?`linear-gradient(135deg,${c.color},${c.color}cc)`:'rgba(255,255,255,0.04)', border:`1px solid ${c.avail?c.color:'rgba(255,255,255,0.08)'}`, borderRadius:12, color:c.avail?'#fff':'rgba(255,255,255,0.28)', fontSize:'0.84rem', fontWeight:700, cursor:c.avail?'pointer':'not-allowed', fontFamily:J, transition:'all 0.2s', boxShadow:c.avail?`0 6px 18px ${c.color}40`:'' }}>
-                        {!c.avail ? 'Unavailable' : usedFree[c.id] ? `Pay ₹${c.price||199} & Book →` : 'Book Free Session →'}
-                      </motion.button>
-                      {/* In-app call buttons */}
-                      {c.avail && (
-                        <div style={{ display:'flex', gap:8, marginTop:8 }}>
-                          <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
-                            onClick={() => setCall({ consultant:c, audioOnly:false })}
-                            style={{ flex:1, padding:'10px', background:'rgba(255,255,255,0.04)', border:`1px solid ${c.color}44`, borderRadius:12, color:c.color, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-                            <FaVideo size={12}/> Video
-                          </motion.button>
-                          <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
-                            onClick={() => setCall({ consultant:c, audioOnly:true })}
-                            style={{ flex:1, padding:'10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:12, color:'rgba(255,255,255,0.7)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-                            <FaPhone size={11}/> Voice
-                          </motion.button>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Join CTA banner */}
-                <motion.div initial={{ opacity:0, y:14 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.3 }}
-                  style={{ padding:'22px 26px', borderRadius:22, background:'linear-gradient(135deg,rgba(139,92,246,0.14),rgba(236,72,153,0.14))', border:'1px solid rgba(139,92,246,0.2)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:20 }}>
-                  <div>
-                    <p style={{ margin:'0 0 4px', fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.2rem', color:'#fff' }}>Are you a mental health professional? 🌟</p>
-                    <p style={{ margin:0, fontSize:'0.82rem', color:'rgba(255,255,255,0.4)', fontFamily:J }}>Join our platform — reach thousands of people who need your help.</p>
-                  </div>
-                  <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={() => setShowJoin(true)}
-                    style={{ padding:'13px 22px', background:'#8b87f5', border:'none', borderRadius:14, color:'#0a0a0c', fontSize:'0.88rem', fontWeight:700, cursor:'pointer', fontFamily:J, flexShrink:0, boxShadow:'0 4px 12px rgba(0,0,0,0.35)', whiteSpace:'nowrap' }}>
-                    Apply Now →
-                  </motion.button>
-                </motion.div>
-
-              </motion.div>
-            )}
-
-            {/* ══ PROGRESS ════════════════════════════════════════════ */}
-            {tab === 'progress' && (
-              <ProgressDashboard accent={accent} accentB={accentB} accentBr={accentBr}/>
-            )}
-
-
-            {/* ══ CALM STUDIO ════════════════════════════════════════ */}
-            {tab === 'calm' && (
-              <motion.div key="calm" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
-                style={{ position:'absolute', inset:0 }}>
-                <CalmLibrary accent={accent} accentB={accentB} accentBr={accentBr} isPremium={isPremium} onUpgrade={() => setShowUpgrade(true)}/>
-              </motion.div>
-            )}
-
-            {/* ══ JOURNAL ════════════════════════════════════════════ */}
-            {tab === 'journal' && (
-              <motion.div key="journal" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
-                style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
-                <div style={{ marginBottom:20 }}>
-                  <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.7rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>My Journal</h2>
-                  <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', margin:0, fontFamily:J }}>Write your thoughts freely — AI gives you weekly insights</p>
-                </div>
-                <div style={{ background:'linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))', border:'1px solid rgba(255,255,255,0.08)', borderRadius:20, padding:20, marginBottom:14, boxShadow:'0 1px 2px rgba(0,0,0,0.3)' }}>
-                  <textarea value={journalInput} onChange={e => setJournalInput(e.target.value)}
-                    placeholder="What's on your mind today? How are you feeling? Write freely..."
-                    style={{ width:'100%', minHeight:120, background:'none', border:'none', outline:'none', color:'rgba(255,255,255,0.85)', fontSize:'0.9rem', fontFamily:J, lineHeight:1.7, resize:'vertical' }}/>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:12 }}>
-                    <span style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.25)', fontFamily:S }}>{journalInput.length} chars</span>
-                    <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={saveJournal} disabled={!journalInput.trim()}
-                      style={{ padding:'9px 20px', borderRadius:12, border:'none', cursor:journalInput.trim()?'pointer':'not-allowed', background:journalInput.trim()?`linear-gradient(135deg,${accent},#8b5cf6)`:'rgba(255,255,255,0.05)', color:'#fff', fontSize:'0.82rem', fontWeight:700, fontFamily:J, display:'flex', alignItems:'center', gap:6, opacity:journalInput.trim()?1:0.4 }}>
-                      💾 Save Entry
-                    </motion.button>
-                  </div>
-                </div>
-                {journalEntries.length > 0 && (
-                  <div style={{ marginBottom:16 }}>
-                    <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} onClick={getJournalInsight} disabled={journalLoading}
-                      style={{ width:'100%', padding:'13px', borderRadius:16, border:`1px solid ${accentBr}`, background:accentB, color:accent, fontSize:'0.86rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
-                      {journalLoading ? '⏳ Analyzing...' : `✨ Get AI Insight (${Math.min(journalEntries.length,10)} entries)`}
-                    </motion.button>
-                    {journalInsight && (
-                      <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
-                        style={{ marginTop:12, padding:'16px 18px', borderRadius:16, background:accentB, border:`1px solid ${accentBr}` }}>
-                        <p style={{ margin:'0 0 6px', fontSize:'0.68rem', color:accent, fontWeight:700, fontFamily:S, letterSpacing:'1px' }}>AI INSIGHT</p>
-                        <p style={{ margin:0, fontSize:'0.85rem', color:'rgba(255,255,255,0.8)', lineHeight:1.7, fontFamily:J, whiteSpace:'pre-wrap' }}>{journalInsight}</p>
-                      </motion.div>
-                    )}
-                  </div>
-                )}
-                {journalEntries.length === 0 ? (
-                  <div style={{ textAlign:'center', padding:'40px 20px', color:'rgba(255,255,255,0.25)', fontSize:'0.85rem', fontFamily:J }}>No entries yet. Write your first journal entry above 📝</div>
-                ) : (
-                  <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                    <p style={{ margin:'0 0 8px', fontSize:'0.68rem', color:'rgba(255,255,255,0.25)', fontFamily:S, letterSpacing:'1.5px', fontWeight:600 }}>PAST ENTRIES ({journalEntries.length})</p>
-                    {journalEntries.map((entry, i) => (
-                      <motion.div key={entry.id} initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} transition={{ delay:i*0.04 }}
-                        style={{ background:'linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'14px 16px', boxShadow:'0 1px 2px rgba(0,0,0,0.3)' }}>
-                        <p style={{ margin:'0 0 6px', fontSize:'0.68rem', color:'rgba(255,255,255,0.28)', fontFamily:S }}>
-                          {new Date(entry.date).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})} · {new Date(entry.date).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}
-                        </p>
-                        <p style={{ margin:0, fontSize:'0.84rem', color:'rgba(255,255,255,0.65)', lineHeight:1.65, fontFamily:J }}>
-                          {entry.text.length > 200 ? entry.text.slice(0,200)+'...' : entry.text}
-                        </p>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-          </AnimatePresence>
+        <div style="padding:16px 28px;background:#f1f5f9;text-align:center;">
+          <p style="margin:0;color:#94a3b8;font-size:0.75rem;">PsychoLink · Cognitive Social Consultation Platform</p>
         </div>
       </div>
+    `,
+  });
+  console.log('📩 Application received:', fullName, '-', email);
 
-      {/* ── JOIN MODAL ── */}
-      <AnimatePresence>
-        {showJoin && <JoinConsultantModal onClose={() => setShowJoin(false)} accent={accent}/>}
-      </AnimatePresence>
+  res.json({ success: true, application });
+});
 
-      {/* ── APPLICATIONS PANEL MODAL ── */}
-      <AnimatePresence>
-        {showApps && (
-          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} onClick={() => setShowApps(false)}
-            style={{ position:'fixed', inset:0, background:'rgba(4,3,14,0.88)', backdropFilter:'blur(10px)', zIndex:150, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'20px', overflowY:'auto' }}>
-            <motion.div initial={{ scale:0.94, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:0.94, y:20 }}
-              onClick={e => e.stopPropagation()}
-              style={{ width:'100%', maxWidth:560, background:'rgba(10,8,20,0.98)', border:'1px solid rgba(139,92,246,0.2)', borderRadius:28, padding:28, marginTop:20 }}>
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
-                <div>
-                  <h3 style={{ fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.4rem', color:'#fff', margin:'0 0 3px' }}>Pending Applications</h3>
-                  <p style={{ margin:0, fontSize:'0.78rem', color:'rgba(255,255,255,0.3)', fontFamily:J }}>Approve to add consultant to live list</p>
-                </div>
-                <button onClick={() => setShowApps(false)}
-                  style={{ width:32, height:32, borderRadius:10, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.5)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700 }}>✕</button>
-              </div>
-              <ApplicationsPanel applications={applications} accent={accent}
-                onRefresh={() => {
-                  fetchApplications();
-                  fetch(`${API_BASE}/api/consultants`).then(r=>r.json()).then(setConsultants).catch(()=>{});
-                }}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+// ── GET /api/admin/applications — pending applications (Admin tab) ──
+app.get('/api/admin/applications', (req, res) => {
+  const applications = readJSON(APPLICATIONS_FILE);
+  res.json(applications.filter(a => a.status === 'pending'));
+});
 
-      {/* ── FREE SESSION TOAST ── */}
-      <AnimatePresence>
-        {freeConsultant && <FreeSessionToast consultant={freeConsultant} onClose={() => setFreeConsultant(null)}/>}
-      </AnimatePresence>
+// ── POST /api/admin/applications/:id/approve — promote to real consultant ──
+app.post('/api/admin/applications/:id/approve', async (req, res) => {
+  const id = Number(req.params.id);
+  const applications = readJSON(APPLICATIONS_FILE);
+  const idx = applications.findIndex(a => a.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'Application not found' });
 
-      {/* ── PAYMENT MODAL ── */}
-      <AnimatePresence>
-        {payConsultant && (
-          <PaymentModal consultant={payConsultant} onClose={() => setPayConsultant(null)}
-            onSuccess={() => { setPayConsultant(null); }}
-          />
-        )}
-      </AnimatePresence>
+  const application = applications[idx];
+  const consultants = readJSON(CONSULTANTS_FILE);
 
-      {/* ── IN-APP VIDEO / VOICE CALL ── */}
-      <AnimatePresence>
-        {call && (
-          <VideoCall
-            roomName={`${call.consultant.id}-${userProfile?.email||'guest'}`}
-            displayName={userProfile?.name || 'User'}
-            audioOnly={call.audioOnly}
-            accent={accent}
-            onEnd={() => setCall(null)}
-          />
-        )}
-      </AnimatePresence>
+  const newConsultant = {
+    id: Date.now(),
+    name: application.fullName,
+    spec: application.skills || 'General Counseling',
+    rating: 5.0,
+    sessions: 0,
+    color: CONSULTANT_COLORS[consultants.length % CONSULTANT_COLORS.length],
+    avail: true,
+    exp: 'New',
+    price: 199,
+    qualifications:  application.qualifications,
+    therapyApproach: application.therapyApproach,
+  };
+  consultants.push(newConsultant);
+  writeJSON(CONSULTANTS_FILE, consultants);
 
-      {/* ── PREMIUM UPGRADE MODAL ── */}
-      <AnimatePresence>
-        {showUpgrade && (
-          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} onClick={() => setShowUpgrade(false)}
-            style={{ position:'fixed', inset:0, background:'rgba(4,3,10,0.8)', backdropFilter:'blur(8px)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-            <motion.div initial={{ scale:0.94, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:0.94, y:20 }} onClick={e => e.stopPropagation()}
-              style={{ width:'100%', maxWidth:420, background:'#141417', border:'1px solid rgba(199,149,82,0.25)', borderRadius:24, padding:30, position:'relative', boxShadow:'0 24px 60px rgba(0,0,0,0.55)' }}>
-              <button onClick={() => setShowUpgrade(false)} style={{ position:'absolute', top:16, right:16, width:30, height:30, borderRadius:9, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.5)', cursor:'pointer', fontWeight:700 }}>✕</button>
+  applications[idx].status = 'approved';
+  writeJSON(APPLICATIONS_FILE, applications);
 
-              <div style={{ textAlign:'center', marginBottom:22 }}>
-                <div style={{ width:56, height:56, borderRadius:'50%', background:'rgba(199,149,82,0.12)', border:'1px solid rgba(199,149,82,0.3)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 14px' }}>
-                  <FaCrown size={22} color="#c79552"/>
-                </div>
-                <h3 style={{ fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.6rem', color:'#fff', margin:'0 0 6px' }}>Go Premium</h3>
-                <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.85rem', margin:0, fontFamily:J }}>Unlock everything PsychoLink offers</p>
-              </div>
+  // Email to approved consultant
+  await sendMail({
+    to: application.email,
+    subject: '🎉 Your PsychoLink Consultant Application is Approved!',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8f5ff;border-radius:16px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#7c3aed,#be185d);padding:32px 28px;">
+          <h1 style="color:#fff;margin:0;font-size:1.5rem;">🧠 PsychoLink</h1>
+        </div>
+        <div style="padding:28px;">
+          <h2 style="color:#1a1a2e;margin:0 0 12px;">Congratulations, ${application.fullName}! 🎉</h2>
+          <p style="color:#374151;line-height:1.7;">Your application to join PsychoLink as a consultant has been <b style="color:#059669;">approved</b>. You are now live on our platform and clients can book sessions with you.</p>
+          <div style="margin:20px 0;padding:16px;background:#ecfdf5;border-radius:10px;border-left:4px solid #10b981;">
+            <p style="margin:0;color:#065f46;font-size:0.88rem;">✅ Your profile is now visible to all PsychoLink users<br/>✅ First session with each client is free — you'll be notified of bookings<br/>✅ Subsequent sessions: ₹199/session</p>
+          </div>
+          <p style="color:#6b7280;font-size:0.85rem;">Welcome to the PsychoLink family. Together we make mental health accessible for everyone. 💜</p>
+        </div>
+        <div style="padding:16px 28px;background:#f1f5f9;text-align:center;">
+          <p style="margin:0;color:#94a3b8;font-size:0.75rem;">PsychoLink · Cognitive Social Consultation Platform</p>
+        </div>
+      </div>
+    `,
+  });
 
-              {/* Benefits */}
-              <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:22 }}>
-                {[
-                  'Unlimited meditation & breathwork tracks',
-                  'Unlimited AI chat with Aura & Max',
-                  'Advanced brain reports & analytics',
-                  'Priority consultant booking',
-                ].map((b,i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10 }}>
-                    <div style={{ width:20, height:20, borderRadius:'50%', background:'rgba(86,160,111,0.15)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      <span style={{ color:'#56a06f', fontSize:'0.7rem', fontWeight:800 }}>✓</span>
-                    </div>
-                    <span style={{ fontSize:'0.84rem', color:'rgba(255,255,255,0.75)', fontFamily:J }}>{b}</span>
-                  </div>
-                ))}
-              </div>
+  res.json({ success: true, consultant: newConsultant });
+});
 
-              {/* Price */}
-              <div style={{ textAlign:'center', marginBottom:18, padding:'16px', borderRadius:16, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)' }}>
-                <div style={{ display:'flex', alignItems:'baseline', justifyContent:'center', gap:6 }}>
-                  <span style={{ fontSize:'2rem', fontWeight:800, color:'#fff', fontFamily:S }}>₹199</span>
-                  <span style={{ fontSize:'0.85rem', color:'rgba(255,255,255,0.4)', fontFamily:J }}>/month</span>
-                </div>
-                <p style={{ margin:'4px 0 0', fontSize:'0.72rem', color:'rgba(255,255,255,0.3)', fontFamily:J }}>Cancel anytime · 7-day money back</p>
-              </div>
+// ── POST /api/admin/applications/:id/reject ──
+app.post('/api/admin/applications/:id/reject', async (req, res) => {
+  const id = Number(req.params.id);
+  const applications = readJSON(APPLICATIONS_FILE);
+  const idx = applications.findIndex(a => a.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'Application not found' });
 
-              <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}
-                onClick={() => { setIsPremium(true); localStorage.setItem('eq_premium','true'); setShowUpgrade(false); }}
-                style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', cursor:'pointer', background:'linear-gradient(135deg,#c79552,#b8843f)', color:'#0a0a0c', fontSize:'0.95rem', fontWeight:800, fontFamily:J, marginBottom:8 }}>
-                Subscribe Now →
-              </motion.button>
-              <p style={{ textAlign:'center', margin:0, fontSize:'0.68rem', color:'rgba(255,255,255,0.25)', fontFamily:J }}>
-                Secure payment via Razorpay
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+  applications[idx].status = 'rejected';
+  writeJSON(APPLICATIONS_FILE, applications);
 
-      {/* ── CONDITIONAL SOS BAR (shown when report detects high stress) ── */}
-      <AnimatePresence>
-        {showSOS && (
-          <motion.div initial={{ y:-80, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:-80, opacity:0 }}
-            style={{ position:'fixed', top:16, left:'50%', transform:'translateX(-50%)', zIndex:200, display:'flex', alignItems:'center', gap:12, padding:'12px 20px', borderRadius:30, background:'linear-gradient(135deg,rgba(239,68,68,0.95),rgba(185,28,28,0.95))', boxShadow:'0 8px 32px rgba(239,68,68,0.5)', backdropFilter:'blur(10px)', border:'1px solid rgba(239,68,68,0.3)' }}>
-            <motion.span animate={{ opacity:[1,0.5,1] }} transition={{ duration:1.2, repeat:Infinity }} style={{ fontSize:'1.1rem' }}>🆘</motion.span>
-            <span style={{ color:'#fff', fontSize:'0.85rem', fontWeight:700, fontFamily:J }}>High stress detected — You're not alone</span>
-            <motion.button whileHover={{ scale:1.05 }} onClick={() => { setShowSOS(false); setShowBreath(true); }}
-              style={{ padding:'6px 14px', borderRadius:20, border:'1px solid rgba(255,255,255,0.4)', background:'rgba(255,255,255,0.15)', color:'#fff', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
-              Breathe
-            </motion.button>
-            <motion.button whileHover={{ scale:1.05 }} onClick={() => { setShowSOS(false); setActiveAI('AURA'); setTab('chat'); }}
-              style={{ padding:'6px 14px', borderRadius:20, border:'1px solid rgba(255,255,255,0.4)', background:'rgba(255,255,255,0.15)', color:'#fff', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
-              Talk to Aura
-            </motion.button>
-            <button onClick={() => setShowSOS(false)} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.6)', cursor:'pointer', fontSize:'1rem', padding:'0 4px' }}>✕</button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+  // Email to rejected applicant
+  await sendMail({
+    to: applications[idx].email,
+    subject: 'Your PsychoLink Consultant Application Update',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8f5ff;border-radius:16px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#7c3aed,#be185d);padding:32px 28px;">
+          <h1 style="color:#fff;margin:0;font-size:1.5rem;">🧠 PsychoLink</h1>
+        </div>
+        <div style="padding:28px;">
+          <h2 style="color:#1a1a2e;margin:0 0 12px;">Application Update</h2>
+          <p style="color:#374151;line-height:1.7;">Hi ${applications[idx].fullName},<br/><br/>Thank you for your interest in joining PsychoLink. After careful review, we are unable to move forward with your application at this time.</p>
+          <p style="color:#374151;line-height:1.7;">We encourage you to reapply in the future with additional qualifications or experience. We appreciate your commitment to mental health support.</p>
+          <p style="color:#6b7280;font-size:0.85rem;margin-top:20px;">Warm regards,<br/>PsychoLink Team</p>
+        </div>
+        <div style="padding:16px 28px;background:#f1f5f9;text-align:center;">
+          <p style="margin:0;color:#94a3b8;font-size:0.75rem;">PsychoLink · Cognitive Social Consultation Platform</p>
+        </div>
+      </div>
+    `,
+  });
 
-      {/* ── BREATHING MODAL ── */}
-      <AnimatePresence>{showBreath && <BreathingModal onClose={() => setShowBreath(false)}/>}</AnimatePresence>
+  res.json({ success: true });
+});
 
-      {/* ── SESSION SUMMARY ── */}
-      <AnimatePresence>
-        {summaryOpen && (
-          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} onClick={() => setSummaryOpen(false)}
-            style={{ position:'fixed', inset:0, background:'rgba(4,3,14,0.88)', backdropFilter:'blur(10px)', zIndex:150, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
-            <motion.div initial={{ scale:0.92, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:0.92, y:20 }} onClick={e => e.stopPropagation()}
-              style={{ width:'100%', maxWidth:460, background:'rgba(10,8,20,0.98)', border:`1px solid ${accentBr}`, borderRadius:28, padding:28, maxHeight:'80vh', overflowY:'auto' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
-                <div style={{ width:36, height:36, borderRadius:12, background:accentB, border:`1px solid ${accentBr}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem' }}>📋</div>
-                <h3 style={{ fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.3rem', color:'#fff', margin:0 }}>Session Summary</h3>
-              </div>
-              {summaryLoading ? (
-                <div style={{ display:'flex', alignItems:'center', gap:12, padding:'20px 0' }}>
-                  <motion.div animate={{ rotate:360 }} transition={{ duration:1, repeat:Infinity, ease:'linear' }} style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${accent}30`, borderTopColor:accent }}/>
-                  <span style={{ color:'rgba(255,255,255,0.5)', fontSize:'0.85rem', fontFamily:J }}>Generating summary...</span>
-                </div>
-              ) : (
-                <p style={{ color:'rgba(255,255,255,0.78)', fontSize:'0.86rem', lineHeight:1.8, fontFamily:J, whiteSpace:'pre-wrap', margin:0 }}>{sessionSummary}</p>
-              )}
-              <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} onClick={() => setSummaryOpen(false)}
-                style={{ marginTop:20, width:'100%', padding:'11px', borderRadius:14, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', color:'rgba(255,255,255,0.6)', fontSize:'0.86rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
-                Close
-              </motion.button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
+// ─────────────────────────────────────────────────────────
+// GET approve/reject — triggered from email buttons
+// ─────────────────────────────────────────────────────────
+app.get('/api/admin/applications/:id/approve', async (req, res) => {
+  const id = Number(req.params.id);
+  const applications = readJSON(APPLICATIONS_FILE);
+  const idx = applications.findIndex(a => a.id === id);
+
+  if (idx === -1) return res.send(htmlPage('❌ Not Found', 'Application not found or already processed.', '#ef4444'));
+  if (applications[idx].status !== 'pending') {
+    return res.send(htmlPage('Already Processed', `This application was already ${applications[idx].status}.`, '#f59e0b'));
+  }
+
+  const application = applications[idx];
+  const consultants  = readJSON(CONSULTANTS_FILE);
+  const newConsultant = {
+    id: Date.now(), name: application.fullName,
+    spec: application.skills || 'General Counseling',
+    rating: 5.0, sessions: 0,
+    color: CONSULTANT_COLORS[consultants.length % CONSULTANT_COLORS.length],
+    avail: true, exp: 'New', price: 199,
+    qualifications: application.qualifications,
+    therapyApproach: application.therapyApproach,
+  };
+  consultants.push(newConsultant);
+  writeJSON(CONSULTANTS_FILE, consultants);
+  applications[idx].status = 'approved';
+  writeJSON(APPLICATIONS_FILE, applications);
+
+  await sendMail({
+    to: application.email,
+    subject: "🎉 PsychoLink — You're Approved as a Consultant!",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8f5ff;border-radius:16px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#7c3aed,#be185d);padding:32px 28px;">
+          <h1 style="color:#fff;margin:0;font-size:1.5rem;">🧠 PsychoLink</h1>
+        </div>
+        <div style="padding:28px;">
+          <h2 style="color:#1a1a2e;">Congratulations, ${application.fullName}! 🎉</h2>
+          <p style="color:#374151;line-height:1.7;">Your application has been <b style="color:#059669;">approved</b>. You are now live on PsychoLink and clients can book sessions with you.</p>
+          <div style="padding:16px;background:#ecfdf5;border-radius:10px;border-left:4px solid #10b981;margin:20px 0;">
+            <p style="margin:0;color:#065f46;">✅ Profile live on PsychoLink<br/>✅ First session with each client is free<br/>✅ Subsequent sessions: ₹199/session</p>
+          </div>
+          <p style="color:#6b7280;">Welcome aboard! 💜</p>
+        </div>
+      </div>
+    `,
+  });
+
+  res.send(htmlPage('✅ Approved!', `${application.fullName} has been approved and added to PsychoLink. A confirmation email has been sent to ${application.email}.`, '#10b981'));
+});
+
+app.get('/api/admin/applications/:id/reject', async (req, res) => {
+  const id = Number(req.params.id);
+  const applications = readJSON(APPLICATIONS_FILE);
+  const idx = applications.findIndex(a => a.id === id);
+
+  if (idx === -1) return res.send(htmlPage('❌ Not Found', 'Application not found or already processed.', '#ef4444'));
+  if (applications[idx].status !== 'pending') {
+    return res.send(htmlPage('Already Processed', `This application was already ${applications[idx].status}.`, '#f59e0b'));
+  }
+
+  const application = applications[idx];
+  applications[idx].status = 'rejected';
+  writeJSON(APPLICATIONS_FILE, applications);
+
+  await sendMail({
+    to: application.email,
+    subject: 'PsychoLink — Consultant Application Update',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f8f5ff;border-radius:16px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#7c3aed,#be185d);padding:32px 28px;">
+          <h1 style="color:#fff;margin:0;font-size:1.5rem;">🧠 PsychoLink</h1>
+        </div>
+        <div style="padding:28px;">
+          <h2 style="color:#1a1a2e;">Application Update</h2>
+          <p style="color:#374151;line-height:1.7;">Hi ${application.fullName},<br/><br/>Thank you for applying to PsychoLink. After careful review, we are unable to move forward at this time. We encourage you to reapply in the future.</p>
+          <p style="color:#6b7280;">Warm regards,<br/>PsychoLink Team</p>
+        </div>
+      </div>
+    `,
+  });
+
+  res.send(htmlPage('❌ Rejected', `${application.fullName}'s application has been rejected. A notification email has been sent to ${application.email}.`, '#ef4444'));
+});
+
+function htmlPage(title, message, color) {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title></head>
+  <body style="font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f1f5f9;">
+    <div style="text-align:center;padding:40px;background:#fff;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.1);max-width:460px;">
+      <div style="font-size:3rem;margin-bottom:16px;">${title.split(' ')[0]}</div>
+      <h2 style="color:${color};margin:0 0 12px;">${title}</h2>
+      <p style="color:#6b7280;line-height:1.6;">${message}</p>
+      <a href="http://localhost:5173" style="display:inline-block;margin-top:20px;padding:12px 24px;background:linear-gradient(135deg,#7c3aed,#be185d);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;">Go to PsychoLink →</a>
     </div>
-  );
+  </body></html>`;
 }
+
+// ─────────────────────────────────────────────────────────
+// /api/test-email  — quick test to verify Gmail works
+// ─────────────────────────────────────────────────────────
+app.get('/api/test-email', async (req, res) => {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASS) {
+    return res.json({ ok: false, reason: 'GMAIL_USER or GMAIL_APP_PASS missing in .env' });
+  }
+  try {
+    await sendMail({
+      to: process.env.GMAIL_USER,
+      subject: '✅ PsychoLink Email Test',
+      html: '<h2>PsychoLink email is working! 🎉</h2><p>Your Gmail notification system is set up correctly.</p>',
+    });
+    res.json({ ok: true, msg: `Test email sent to ${process.env.GMAIL_USER}` });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// /api/analyze  — Emotion analysis for Neurological Report
+// ─────────────────────────────────────────────────────────
+app.post('/api/analyze', async (req, res) => {
+  const { messages } = req.body;
+
+  if (!API_KEY) {
+    return res.status(500).json({ error: 'NVIDIA_API_KEY not set in .env' });
+  }
+
+  try {
+    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 900,
+        messages: [
+          {
+            role: 'system',
+            content: `You are an emotion analysis AI. Analyze user messages and return ONLY valid JSON, no extra text:
+{"negative":{"anxiety":0,"depression":0,"stress":0,"loneliness":0,"overwhelm":0,"burnout":0},"projected":{"calmness":0,"happiness":0,"focus":0,"energy":0,"confidence":0,"peace":0},"overallStress":0,"dominantEmotion":"anxiety","summary":"2 sentences about emotional state","urgency":"low","insights":["insight1","insight2","insight3"]}
+All scores 0-100. urgency = low | moderate | high | critical. Return ONLY the JSON object.`,
+          },
+          {
+            role: 'user',
+            content: `Analyze emotional state from: "${messages || 'No messages yet. Give neutral baseline.'}"`,
+          },
+        ],
+      }),
+    });
+
+    const data = await response.json();
+    const text = data?.choices?.[0]?.message?.content || '{}';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+    res.json(result);
+
+  } catch (err) {
+    console.error('Analyze error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ─────────────────────────────────────────────────────────
+// /api/chat  — Real-time AI conversation (AURA / MAX)
+// Accepts an optional `systemPrompt` so the frontend can send
+// its own detailed persona prompts (AURA_PROMPT / MAX_PROMPT).
+// ─────────────────────────────────────────────────────────
+app.post('/api/chat', async (req, res) => {
+  const { messages, persona, systemPrompt } = req.body;
+  // messages    = [{ role:'user'|'assistant', content:'...' }, ...]
+  // persona     = 'AURA' | 'MAX'  (fallback if no systemPrompt sent)
+  // systemPrompt = optional custom system prompt from frontend
+
+  if (!API_KEY) {
+    return res.status(500).json({ error: 'NVIDIA_API_KEY not set in .env' });
+  }
+
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: 'messages array is required' });
+  }
+
+  const defaultPrompt = persona === 'AURA'
+    ? `You are AURA, a warm, empathetic AI psychological companion. Keep responses concise (2-4 sentences), conversational, and emotionally attuned. Not a licensed therapist — for serious concerns gently suggest professional help.`
+    : `You are MAX, a sharp, supportive AI psychological companion. Keep responses concise and structured. Not a licensed therapist — for serious concerns gently suggest professional help.`;
+
+  const finalSystemPrompt = systemPrompt || defaultPrompt;
+
+  try {
+    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 700,
+        temperature: 0.8,
+        messages: [
+          { role: 'system', content: finalSystemPrompt },
+          ...messages,
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error('NVIDIA API error:', response.status, errBody);
+      return res.status(response.status).json({ error: `NVIDIA API error ${response.status}` });
+    }
+
+    const data = await response.json();
+    const reply = data?.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+
+    res.json({ reply });
+
+  } catch (err) {
+    console.error('Chat error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ─────────────────────────────────────────────────────────
+// /api/journal/summarize  — AI weekly insight from journal entries
+// ─────────────────────────────────────────────────────────
+app.post('/api/journal/summarize', async (req, res) => {
+  const { entries } = req.body;
+  if (!API_KEY) return res.status(500).json({ error: 'NVIDIA_API_KEY not set' });
+  if (!entries || !entries.length) return res.status(400).json({ error: 'entries required' });
+  try {
+    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+      body: JSON.stringify({
+        model: MODEL, max_tokens: 400, temperature: 0.7,
+        messages: [
+          { role: 'system', content: `You are a compassionate AI psychologist. Analyze these journal entries and give a warm, insightful 3-4 paragraph summary covering: emotional patterns you notice, positive progress, areas to focus on, and one practical suggestion. Be warm, encouraging, and specific. Don't use bullet points.` },
+          { role: 'user', content: `Here are my recent journal entries:\n\n${entries.map((e,i)=>'Entry '+(i+1)+': '+e).join('\n\n')}\n\nPlease give me your insight.` }
+        ],
+      }),
+    });
+    const data = await response.json();
+    const insight = data?.choices?.[0]?.message?.content || 'Unable to generate insight.';
+    res.json({ insight });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ─────────────────────────────────────────────────────────
+// /api/session/summary  — AI session summary card
+// ─────────────────────────────────────────────────────────
+app.post('/api/session/summary', async (req, res) => {
+  const { messages, persona } = req.body;
+  if (!API_KEY) return res.status(500).json({ error: 'NVIDIA_API_KEY not set' });
+  if (!messages || !messages.length) return res.status(400).json({ error: 'messages required' });
+  try {
+    const conversation = messages.map(m => `${m.role === 'user' ? 'User' : persona || 'AI'}: ${m.content}`).join('\n');
+    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+      body: JSON.stringify({
+        model: MODEL, max_tokens: 500, temperature: 0.6,
+        messages: [
+          { role: 'system', content: `You are a psychologist creating a brief session summary. Format your response exactly like this (use these exact headings):
+
+🧠 Emotional State
+[1-2 sentences about how the user felt]
+
+💡 Key Insights
+[2-3 key themes or patterns noticed]
+
+✅ Progress Made
+[What positive shifts or realizations happened]
+
+🎯 Next Steps
+[1-2 actionable suggestions for the user]
+
+Keep each section concise and warm.` },
+          { role: 'user', content: `Please summarize this therapy session:
+
+${conversation}` }
+        ],
+      }),
+    });
+    const data = await response.json();
+    const summary = data?.choices?.[0]?.message?.content || 'Unable to generate summary.';
+    res.json({ summary });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+
+
+// ─────────────────────────────────────────────────────────
+// RAZORPAY PAYMENT
+// .env: RAZORPAY_KEY_ID=rzp_live_xxx  RAZORPAY_KEY_SECRET=xxx
+// ─────────────────────────────────────────────────────────
+const razorpay = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
+  ? new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET })
+  : null;
+
+// POST /api/payment/order — create Razorpay order
+app.post('/api/payment/order', async (req, res) => {
+  if (!razorpay) return res.status(500).json({ error: 'Razorpay not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env' });
+  const { amount, consultantName } = req.body;
+  try {
+    const order = await razorpay.orders.create({
+      amount: (amount || 199) * 100, // paise
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}`,
+      notes: { consultant: consultantName || 'PsychoLink Session' },
+    });
+    res.json({ order, key: process.env.RAZORPAY_KEY_ID });
+  } catch (e) {
+    console.error('Razorpay order error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/payment/verify — verify payment signature
+app.post('/api/payment/verify', (req, res) => {
+  if (!process.env.RAZORPAY_KEY_SECRET) return res.status(500).json({ success: false });
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+  try {
+    const sign     = razorpay_order_id + '|' + razorpay_payment_id;
+    const expected = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(sign).digest('hex');
+    if (expected === razorpay_signature) {
+      console.log('💰 Payment verified:', razorpay_payment_id);
+      res.json({ success: true, paymentId: razorpay_payment_id });
+    } else {
+      res.status(400).json({ success: false, error: 'Invalid signature' });
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// Razorpay status
+if (process.env.RAZORPAY_KEY_ID) {
+  console.log('💳 Razorpay configured ✅ (', process.env.RAZORPAY_KEY_ID.startsWith('rzp_live') ? 'LIVE MODE 🟢' : 'TEST MODE 🟡', ')');
+} else {
+  console.log('⚠️  Razorpay NOT configured — add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env');
+}
+
+// ─────────────────────────────────────────────────────────
+// EMAIL LOGIN CODE — send + verify a 6-digit code
+// ─────────────────────────────────────────────────────────
+const emailCodes = new Map(); // email -> { code, expires }
+
+app.post('/api/send-email-code', async (req, res) => {
+  const { email } = req.body || {};
+  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Invalid email' });
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  emailCodes.set(email.toLowerCase(), { code, expires: Date.now() + 10 * 60 * 1000 });
+  console.log(`🔐 Login code for ${email}: ${code}`); // visible in server terminal as backup
+  try {
+    await sendMail({
+      to: email,
+      subject: `${code} is your Equilibrium sign-in code`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:440px;margin:auto;padding:32px;background:#0f1020;border-radius:16px;color:#fff">
+          <h2 style="margin:0 0 8px;font-size:1.4rem">Your sign-in code</h2>
+          <p style="color:#a8a8c0;margin:0 0 24px;font-size:0.9rem">Enter this code in Equilibrium to continue.</p>
+          <div style="font-size:2.4rem;font-weight:800;letter-spacing:10px;text-align:center;padding:18px;background:#1a1b35;border-radius:12px;color:#8b87f5">${code}</div>
+          <p style="color:#6b6b85;margin:22px 0 0;font-size:0.78rem">This code expires in 10 minutes. If you didn't request it, ignore this email.</p>
+        </div>`,
+    });
+    res.json({ success: true });
+  } catch (e) {
+    console.error('send-email-code error:', e.message);
+    res.status(500).json({ error: 'Failed to send code' });
+  }
+});
+
+app.post('/api/verify-email-code', (req, res) => {
+  const { email, code } = req.body || {};
+  if (!email || !code) return res.status(400).json({ valid: false, reason: 'missing' });
+  const rec = emailCodes.get(String(email).toLowerCase());
+  if (!rec) return res.json({ valid: false, reason: 'no_code' });
+  if (Date.now() > rec.expires) { emailCodes.delete(email.toLowerCase()); return res.json({ valid: false, reason: 'expired' }); }
+  if (rec.code !== String(code)) return res.json({ valid: false, reason: 'mismatch' });
+  emailCodes.delete(email.toLowerCase());
+  res.json({ valid: true });
+});
+
+// Email status check at startup
+if (process.env.RESEND_API_KEY) {
+  console.log('📧 Resend email configured ✅ → notifications go to:', process.env.FOUNDER_EMAIL || 'FOUNDER_EMAIL not set');
+} else {
+  console.log('⚠️  Email NOT configured — add RESEND_API_KEY to .env');
+}
+
+console.log('🔑 NVIDIA_API_KEY loaded:', API_KEY ? `${API_KEY.slice(0,12)}... (length ${API_KEY.length})` : '❌ NOT FOUND');
+
+const PORT = process.env.PORT || 3001;
+const server = app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log('   - POST /api/analyze (emotion report)');
+  console.log('   - POST /api/chat    (live AI chat)');
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error('');
+    console.error('========================================================');
+    console.error('  PORT ' + PORT + ' IS ALREADY IN USE');
+    console.error('========================================================');
+    console.error('');
+    console.error('Another process (an old "node server.js") is still');
+    console.error('running and occupying this port. Fix:');
+    console.error('');
+    console.error('  Windows: Open Task Manager (Ctrl+Shift+Esc)');
+    console.error('           -> Details tab');
+    console.error('           -> find ALL "Node.js JavaScript Runtime" entries');
+    console.error('           -> select each one -> click "End Task"');
+    console.error('  Then run: node server.js   again.');
+    console.error('');
+    process.exit(1);
+  } else {
+    console.error('Server error:', err);
+    process.exit(1);
+  }
+});

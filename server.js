@@ -15,9 +15,6 @@ app.use(express.json());
 const API_KEY = process.env.NVIDIA_API_KEY;
 const MODEL = 'meta/llama-3.1-8b-instruct';
 
-const BACKEND_URL = process.env.BACKEND_URL || (process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : 'http://localhost:3001');
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-
 // ─────────────────────────────────────────────────────────
 // CONSULTANT SYSTEM — simple JSON-file storage (no DB needed)
 // ─────────────────────────────────────────────────────────
@@ -32,11 +29,13 @@ const SEED_CONSULTANTS = [
   { id: 2, name:'Dr. Arjun Mehta',  spec:'Depression & Mindfulness', rating:4.8, sessions:180, color:'#8b5cf6', avail:true,  exp:'6 yrs',  price:199 },
   { id: 3, name:'Dr. Sara Ali',     spec:'Trauma & PTSD',            rating:4.9, sessions:320, color:'#2dd4bf', avail:false, exp:'12 yrs', price:249 },
   { id: 4, name:'Dr. Ravi Nair',    spec:'Stress & Burnout',         rating:4.7, sessions:150, color:'#f59e0b', avail:true,  exp:'5 yrs',  price:199 },
+  { id: 5, name:'Rajat Kamal',      spec:'Founder · Peer Support',   rating:5.0, sessions:60,  color:'#5eb8ad', avail:true,  exp:'2 yrs',  price:199 },
 ];
 
 function ensureDataFiles() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(CONSULTANTS_FILE)) fs.writeFileSync(CONSULTANTS_FILE, JSON.stringify(SEED_CONSULTANTS, null, 2));
+  // Always reset consultants to the fixed list (clears any extra/test names)
+  fs.writeFileSync(CONSULTANTS_FILE, JSON.stringify(SEED_CONSULTANTS, null, 2));
   if (!fs.existsSync(APPLICATIONS_FILE)) fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify([], null, 2));
 }
 ensureDataFiles();
@@ -137,11 +136,11 @@ app.post('/api/consultants/apply', async (req, res) => {
             <tr><td style="padding:10px 0;color:#6b7280;font-size:0.85rem;">Multilingual/Aggressive</td><td style="padding:10px 0;color:#1a1a2e;">${multilingualAggressive||'—'}</td></tr>
           </table>
           <div style="margin-top:28px;display:flex;gap:14px;justify-content:center;">
-            <a href="${BACKEND_URL}/api/admin/applications/${application.id}/interview"
+            <a href="http://localhost:3001/api/admin/applications/${application.id}/interview"
               style="padding:16px 32px;background:linear-gradient(135deg,#7c3aed,#be185d);color:#fff;text-decoration:none;border-radius:14px;font-weight:700;font-size:1rem;display:inline-block;">
               🎯 Send Interview Invite
             </a>
-            <a href="${BACKEND_URL}/api/admin/applications/${application.id}/reject"
+            <a href="http://localhost:3001/api/admin/applications/${application.id}/reject"
               style="padding:16px 24px;background:#f1f5f9;color:#64748b;text-decoration:none;border-radius:14px;font-weight:600;font-size:0.9rem;display:inline-block;border:1px solid #e2e8f0;">
               ✕ Not a Fit
             </a>
@@ -350,7 +349,7 @@ function htmlPage(title, message, color) {
       <div style="font-size:3rem;margin-bottom:16px;">${title.split(' ')[0]}</div>
       <h2 style="color:${color};margin:0 0 12px;">${title}</h2>
       <p style="color:#6b7280;line-height:1.6;">${message}</p>
-      <a href="${FRONTEND_URL}" style="display:inline-block;margin-top:20px;padding:12px 24px;background:linear-gradient(135deg,#7c3aed,#be185d);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;">Go to PsychoLink →</a>
+      <a href="http://localhost:5173" style="display:inline-block;margin-top:20px;padding:12px 24px;background:linear-gradient(135deg,#7c3aed,#be185d);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;">Go to PsychoLink →</a>
     </div>
   </body></html>`;
 }
