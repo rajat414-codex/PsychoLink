@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE } from './config';
 // ── ORIGINAL GOOGLE ICON ──
 import { FcGoogle } from 'react-icons/fc';
-import { FaApple, FaPhoneAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaEnvelope } from 'react-icons/fa';
+import { FaApple, FaPhoneAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaEnvelope, FaChevronRight, FaPlus } from 'react-icons/fa';
 
-// ── SPINNER ──────────────────────────────────────────────
+// ── FAST2SMS GATEWAY CONFIGURATION ──
+const FAST2SMS_API_KEY = "zp8QEuUqIaerK5Rt9FYhojwcPLis31BbJVTW6fxGN70MmZAOHd53klRIvr6wQVAi1a84EjceLuUODgzb";
+
 const Spinner = ({ color='#8b87f5', size=22 }) => (
   <div style={{ display:'flex', justifyContent:'center', padding:'12px' }}>
     <motion.div animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }}
@@ -106,6 +108,16 @@ export default function Auth({ onComplete }) {
   const [eyes, setEyes] = useState('laughing');
   const [emailInput, setEmailInput] = useState('');
 
+  // ── NEW NOTIFICATION SYSTEM (To replace native alerts) ──
+  const [notification, setNotification] = useState({ message: '', type: 'info', show: false });
+
+  const triggerNotification = (message, type = 'info') => {
+    setNotification({ message, type, show: true });
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }));
+    }, 4500);
+  };
+
   // Apple
   const [appleEmail, setAppleEmail]   = useState('');
   const [applePass,  setApplePass]    = useState('');
@@ -113,7 +125,7 @@ export default function Auth({ onComplete }) {
   const [appleStep,  setAppleStep]    = useState('email');
   const [appleLoad,  setAppleLoad]    = useState(false);
 
-  // Phone OTP
+  // Phone OTP State
   const [phone,      setPhone]        = useState('');
   const [otp,        setOtp]          = useState(['','','','','','']);
   const [otpSent,    setOtpSent]      = useState(false);
@@ -121,13 +133,14 @@ export default function Auth({ onComplete }) {
   const [otpLoad,    setOtpLoad]      = useState(false);
   const [timer,      setTimer]        = useState(30);
   const [canResend,  setCanResend]    = useState(false);
+  const [activePhoneCode, setActivePhoneCode] = useState(''); // Stores the real sent OTP code
   const otpRefs = useRef([]);
 
   // ── EMAIL CODE LOGIN (new glass screen) ──
-  const [ecSent,     setEcSent]       = useState(false);   // code sent?
+  const [ecSent,     setEcSent]       = useState(false);   
   const [ecCode,     setEcCode]       = useState(['','','','','','']);
-  const [ecSending,  setEcSending]    = useState(false);   // send in progress
-  const [ecVerifying,setEcVerifying]  = useState(false);   // verify in progress
+  const [ecSending,  setEcSending]    = useState(false);   
+  const [ecVerifying,setEcVerifying]  = useState(false);   
   const [ecTimer,    setEcTimer]      = useState(30);
   const [ecResend,   setEcResend]     = useState(false);
   const [ecError,    setEcError]      = useState('');
@@ -140,6 +153,7 @@ export default function Auth({ onComplete }) {
   const [suMobOk,   setSuMobOk]       = useState(false);
   const [suMobSend, setSuMobSend]     = useState(false);
   const [suMobVfy,  setSuMobVfy]      = useState(false);
+  const [activeSuMobCode, setActiveSuMobCode] = useState(''); // Stores the signup SMS code
   const [suEmSent,  setSuEmSent]      = useState(false);
   const [suEmCode,  setSuEmCode]      = useState(['','','','','','']);
   const [suEmOk,    setSuEmOk]        = useState(false);
@@ -165,7 +179,6 @@ export default function Auth({ onComplete }) {
     position:'relative', zIndex:2, overflow:'hidden'
   };
 
-  // frosted glass card (reference style — lighter, glassy)
   const glassCard = {
     background:'linear-gradient(160deg,rgba(255,255,255,0.10) 0%,rgba(255,255,255,0.04) 100%)',
     backdropFilter:'blur(40px)', WebkitBackdropFilter:'blur(40px)',
@@ -193,7 +206,6 @@ export default function Auth({ onComplete }) {
     return ()=>clearTimeout(t);
   },[otpSent,timer]);
 
-  // email-code resend timer
   useEffect(()=>{
     if(!ecSent) return;
     if(ecTimer===0){ setEcResend(true); return; }
@@ -247,13 +259,34 @@ export default function Auth({ onComplete }) {
     if (tokenClientRef.current) {
       tokenClientRef.current.requestAccessToken({ prompt: 'select_account' });
     } else {
-      alert("Google Identity Core loading, please tap again in 2 seconds.");
+      triggerNotification("Google Identity Core loading, please tap again in 2 seconds.", "info");
+    }
+  };
+
+  // ── 🌐 REAL SMS DISPATCH ENGINE ──
+  const sendRealSms = async (phoneNumber, otpCode) => {
+    try {
+      const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${FAST2SMS_API_KEY}&route=otp&variables_values=${otpCode}&numbers=${phoneNumber}`;
+      const response = await fetch(url, { method: 'GET' });
+      const data = await response.json();
+      if (data.return === true) {
+        return { success: true };
+      } else {
+        console.warn("Fast2SMS API Response Error:", data);
+        return { success: false, error: data.message };
+      }
+    } catch (err) {
+      console.error("Fast2SMS fetch request failed:", err);
+      return { success: false, error: "Network block/CORS limits" };
     }
   };
 
   // ── EMAIL CODE: open screen ──
   const openEmailCode = () => {
-    if (!emailInput.includes('@')) { return; }
+    if (!emailInput.includes('@')) {
+      triggerNotification("Please enter a valid email address.", "error");
+      return;
+    }
     setEcSent(false); setEcCode(['','','','','','']); setEcError('');
     setEcTimer(30); setEcResend(false);
     setScreen('emailCode');
@@ -271,12 +304,15 @@ export default function Auth({ onComplete }) {
       const data = await r.json();
       if (r.ok && data.success) {
         setEcSent(true); setEcTimer(30); setEcResend(false);
+        triggerNotification("Verification code sent to your email address!", "success");
         setTimeout(()=>ecRefs.current[0]?.focus(), 200);
       } else {
         setEcError(data.error || 'Could not send code. Try again.');
+        triggerNotification(data.error || 'Could not send code. Try again.', "error");
       }
     } catch {
       setEcError('Server not reachable. Make sure backend is running.');
+      triggerNotification("Server not reachable. Make sure backend is running.", "error");
     }
     setEcSending(false);
   };
@@ -294,12 +330,16 @@ export default function Auth({ onComplete }) {
       const data = await r.json();
       if (data.valid) {
         const nm = emailInput.split('@')[0];
+        triggerNotification("Email authenticated successfully!", "success");
         goAIHub({ name: nm.charAt(0).toUpperCase()+nm.slice(1), email: emailInput, initial: (nm[0]||'U').toUpperCase() });
       } else {
-        setEcError(data.reason === 'expired' ? 'Code expired. Resend a new one.' : 'Wrong code. Check & try again.');
+        const errMsg = data.reason === 'expired' ? 'Code expired. Resend a new one.' : 'Wrong code. Check & try again.';
+        setEcError(errMsg);
+        triggerNotification(errMsg, "error");
       }
     } catch {
       setEcError('Server not reachable. Make sure backend is running.');
+      triggerNotification("Server not reachable. Make sure backend is running.", "error");
     }
     setEcVerifying(false);
   };
@@ -344,23 +384,87 @@ export default function Auth({ onComplete }) {
     setTimeout(()=>{ setAppleLoad(false); goAIHub({ name:appleEmail.split('@')[0]||'User', email:appleEmail, initial:(appleEmail[0]||'U').toUpperCase() }); },2000);
   };
 
-  // Phone OTP
-  const sendOtp = ()=>{
-    if(phone.length<10) return;
+  // Phone OTP - Sending Real SMS with random code generator
+  const sendOtp = async () => {
+    if(phone.length<10) {
+      triggerNotification("Please enter a valid 10-digit phone number.", "error");
+      return;
+    }
     setPhoneLoad(true);
-    setTimeout(()=>{ setPhoneLoad(false); setOtpSent(true); setTimer(30); setCanResend(false); },1800);
-  };
-  const verifyOtp = ()=>{
-    if(otp.join('').length<6) return;
-    setOtpLoad(true);
-    setTimeout(()=>{ setOtpLoad(false); goAIHub({ name:'User', email:`+91 ${phone}`, initial:'U' }); },1800);
+    // Generating real random 6-digit verification code
+    const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+    setActivePhoneCode(generatedCode);
+
+    const result = await sendRealSms(phone, generatedCode);
+    setPhoneLoad(false);
+    setOtpSent(true);
+    setTimer(30);
+    setCanResend(false);
+
+    if (result.success) {
+      triggerNotification(`OTP sent successfully to +91 ${phone}!`, "success");
+    } else {
+      triggerNotification(`CORS block/Testing Mode: Code is ${generatedCode}`, "info");
+    }
   };
 
-  // Signup Actions
-  const suSendMob  = ()=>{ if(su.mobile.length<10) return; setSuMobSend(true); setTimeout(()=>{ setSuMobSend(false); setSuMobSent(true); },1600); };
-  const suVfyMob   = ()=>{ if(suMobOtp.join('').length<6) return; setSuMobVfy(true); setTimeout(()=>{ setSuMobVfy(false); setSuMobOk(true); },1400); };
-  const suSendEm   = ()=>{ if(!su.email.includes('@')) return; setSuEmSend(true); setTimeout(()=>{ setSuEmSend(false); setSuEmSent(true); },1600); };
-  const suVfyEm    = ()=>{ if(suEmCode.join('').length<6) return; setSuEmVfy(true); setTimeout(()=>{ setSuEmVfy(false); setSuEmOk(true); },1400); };
+  const verifyOtp = () => {
+    const code = otp.join('');
+    if(code.length < 6) return;
+    setOtpLoad(true);
+    
+    setTimeout(() => {
+      setOtpLoad(false);
+      // Validating against generated SMS code or static admin bypass
+      if (code === activePhoneCode || code === '123456') {
+        triggerNotification("OTP verified successfully!", "success");
+        goAIHub({ name:'User', email:`+91 ${phone}`, initial:'U' });
+      } else {
+        triggerNotification("Invalid Verification Code! Check and try again.", "error");
+        setOtp(['','','','','','']);
+        setTimeout(() => otpRefs.current[0]?.focus(), 100);
+      }
+    }, 1200);
+  };
+
+  // Signup Mobile Verification with Fast2SMS delivery
+  const suSendMob = async () => {
+    if(su.mobile.length<10) return;
+    setSuMobSend(true);
+    const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+    setActiveSuMobCode(generatedCode);
+
+    const result = await sendRealSms(su.mobile, generatedCode);
+    setSuMobSend(false);
+    setSuMobSent(true);
+
+    if (result.success) {
+      triggerNotification(`Signup OTP sent to +91 ${su.mobile}!`, "success");
+    } else {
+      triggerNotification(`CORS block/Testing Mode: Code is ${generatedCode}`, "info");
+    }
+  };
+
+  const suVfyMob = () => {
+    const code = suMobOtp.join('');
+    if(code.length < 6) return;
+    setSuMobVfy(true);
+    
+    setTimeout(() => {
+      setSuMobVfy(false);
+      if (code === activeSuMobCode || code === '123456') {
+        setSuMobOk(true);
+        triggerNotification("Mobile number verified successfully!", "success");
+      } else {
+        triggerNotification("Incorrect Verification Code!", "error");
+        setSuMobOtp(['','','','','','']);
+        setTimeout(() => mobRefs.current[0]?.focus(), 100);
+      }
+    }, 1400);
+  };
+
+  const suSendEm   = ()=>{ if(!su.email.includes('@')) return; setSuEmSend(true); setTimeout(()=>{ setSuEmSend(false); setSuEmSent(true); triggerNotification("Testing Code '123456' generated for email verification.", "info"); },1600); };
+  const suVfyEm    = ()=>{ if(suEmCode.join('').length<6) return; setSuEmVfy(true); setTimeout(()=>{ setSuEmVfy(false); if(suEmCode.join('') === '123456') { setSuEmOk(true); triggerNotification("Email verified successfully!", "success"); } else { triggerNotification("Wrong code! Use backdoor key '123456'", "error"); } },1400); };
   const suCreate   = () => {
     if(!suMobOk || !suEmOk || !su.fullName || !su.nickname) return;
     goAIHub({ name:su.fullName, email:su.email, initial:su.fullName[0].toUpperCase() });
@@ -371,6 +475,38 @@ export default function Auth({ onComplete }) {
 
   return (
     <div style={{ minHeight:'100vh', width:'100vw', backgroundColor:'#020308', color:'#fff', fontFamily:J, overflow:'hidden', position:'relative', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      
+      {/* ── HIGH FIDELITY FLOATING NOTIFICATION BANNER ── */}
+      <AnimatePresence>
+        {notification.show && (
+          <motion.div
+            initial={{ opacity:0, y:-40, filter:'blur(8px)' }}
+            animate={{ opacity:1, y:0, filter:'blur(0px)' }}
+            exit={{ opacity:0, y:-30, filter:'blur(6px)' }}
+            transition={{ type:'spring', stiffness:180, damping:16 }}
+            style={{
+              position:'fixed', top:'24px', zIndex:9999,
+              display:'flex', alignItems:'center', gap:'12px',
+              padding:'14px 22px', borderRadius:'18px',
+              background:'linear-gradient(135deg, rgba(16,12,32,0.92) 0%, rgba(10,8,24,0.95) 100%)',
+              border: notification.type === 'error' ? '1px solid rgba(224,82,77,0.45)' : notification.type === 'info' ? '1px solid rgba(139,135,245,0.45)' : '1px solid rgba(94,184,173,0.45)',
+              boxShadow: notification.type === 'error' ? '0 12px 35px rgba(224,82,77,0.22)' : '0 12px 35px rgba(139,135,245,0.22)',
+              backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+              pointerEvents:'auto', userSelect:'none'
+            }}
+          >
+            <div style={{
+              width:'8px', height:'8px', borderRadius:'50%',
+              background: notification.type === 'error' ? '#e0524d' : notification.type === 'info' ? '#8b87f5' : '#5eb8ad',
+              boxShadow: `0 0 10px ${notification.type === 'error' ? '#e0524d' : notification.type === 'info' ? '#8b87f5' : '#5eb8ad'}`
+            }}/>
+            <span style={{ fontSize:'0.9rem', fontWeight:'600', color:'rgba(255,255,255,0.92)', letterSpacing:'0.2px', fontFamily:J }}>
+              {notification.message}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
 
         {/* ═══════════════════════════════════════════
@@ -380,6 +516,7 @@ export default function Auth({ onComplete }) {
           <motion.div key="landing" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, scale:0.98 }} transition={{ duration:0.9 }}
             style={{ position:'absolute', inset:0, display:'flex', width: '100vw' }}>
 
+            {/* Left Background Area */}
             <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
               <OceanBg opacity={0}/>
               <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right,rgba(4,3,14,0.05) 40%,rgba(4,3,14,0.75) 100%)', zIndex:1 }}/>
@@ -407,10 +544,11 @@ export default function Auth({ onComplete }) {
               </motion.div>
             </div>
 
+            {/* Right — Glass Login Form */}
             <div style={{ width:'440px', flexShrink:0, position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'60px 40px' }}>
               <div style={{ position:'absolute', inset:0 }}>
                 <motion.div animate={{ scale:[1,1.06,1] }} transition={{ duration:20, repeat:Infinity, ease:'easeInOut' }}
-                  style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=90&w=1600')`, backgroundSize:'cover', backgroundPosition:'right center' }}/>
+                  style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80&w=1600')`, backgroundSize:'cover', backgroundPosition:'right center' }}/>
                 <div style={{ position:'absolute', inset:0, background:'rgba(4,3,14,0.88)' }}/>
                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to left,rgba(4,3,14,0.96),rgba(4,3,14,0.75))' }}/>
               </div>
@@ -422,7 +560,7 @@ export default function Auth({ onComplete }) {
                 <h1 style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'2.6rem', color:'#fff', marginBottom:'8px', textShadow:'none' }}>Welcome back</h1>
                 <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', marginBottom:'28px' }}>Sign in to your account</p>
 
-                {/* Email row → opens glass email-code screen */}
+                {/* Email row FIXED TO RUN EMAIL SUBMIT GRID */}
                 <div style={{ marginBottom:'18px' }}>
                   <p style={{ fontSize:'0.63rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>EMAIL</p>
                   <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
@@ -438,12 +576,14 @@ export default function Auth({ onComplete }) {
                   </div>
                 </div>
 
+                {/* OR */}
                 <div style={{ display:'flex', alignItems:'center', gap:'14px', marginBottom:'16px' }}>
                   <div style={{ flex:1, height:'1px', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.1)' }}/>
                   <span style={{ color:'rgba(255,255,255,0.22)', fontSize:'0.7rem', fontFamily:S, letterSpacing:'2px' }}>OR</span>
                   <div style={{ flex:1, height:'1px', background:'linear-gradient(270deg,transparent,rgba(255,255,255,0.1)' }}/>
                 </div>
 
+                {/* ── SOCIAL BUTTONS ── */}
                 <div style={{ display:'flex', flexDirection:'column', gap:'10px', marginBottom:'26px' }}>
                   {[
                     { icon: <FcGoogle size={20}/>, label:'Continue with Google', action:()=>triggerGoogleLoginPopup(), hb:'rgba(66,133,244,0.08)', hbr:'rgba(66,133,244,0.3)' },
@@ -570,6 +710,7 @@ export default function Auth({ onComplete }) {
 
               <div style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
 
+                {/* Full Name */}
                 <div>
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>FULL NAME</p>
                   <input type="text" placeholder="Enter your full name" value={su.fullName} onChange={e=>setSu(p=>({...p,fullName:e.target.value}))}
@@ -578,6 +719,7 @@ export default function Auth({ onComplete }) {
                     onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
                 </div>
 
+                {/* Nickname */}
                 <div>
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>NICKNAME</p>
                   <input type="text" placeholder="What should we call you?" value={su.nickname} onChange={e=>setSu(p=>({...p,nickname:e.target.value}))}
@@ -586,6 +728,7 @@ export default function Auth({ onComplete }) {
                     onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
                 </div>
 
+                {/* Mobile */}
                 <div>
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>MOBILE NUMBER</p>
                   <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
@@ -630,6 +773,7 @@ export default function Auth({ onComplete }) {
                   </AnimatePresence>
                 </div>
 
+                {/* Email */}
                 <div>
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>EMAIL ADDRESS</p>
                   <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
@@ -670,6 +814,7 @@ export default function Auth({ onComplete }) {
                   </AnimatePresence>
                 </div>
 
+                {/* Progress pills */}
                 <div style={{ display:'flex', gap:'8px', justifyContent:'center', flexWrap:'wrap' }}>
                   {[{l:'Full Name',d:!!su.fullName},{l:'Nickname',d:!!su.nickname},{l:'Mobile',d:suMobOk},{l:'Email',d:suEmOk}].map((item,i)=>(
                     <div key={i} style={{ display:'flex', alignItems:'center', gap:'5px', padding:'4px 10px', borderRadius:'20px', background:item.d?'rgba(86,160,111,0.12)':'rgba(255,255,255,0.04)', border:`1px solid ${item.d?'rgba(86,160,111,0.35)':'rgba(255,255,255,0.08)'}`, transition:'all 0.3s' }}>
@@ -697,7 +842,7 @@ export default function Auth({ onComplete }) {
         )}
 
         {/* ═══════════════════════════════════════════
-            APPLE LOGIN
+            APPLE ID LOGIN SCREEN
         ═══════════════════════════════════════════ */}
         {screen==='apple' && (
           <motion.div key="apple" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} transition={{ duration:0.5 }}
@@ -757,7 +902,7 @@ export default function Auth({ onComplete }) {
         )}
 
         {/* ═══════════════════════════════════════════
-            PHONE NUMBER
+            PHONE NUMBER SCREEN
         ═══════════════════════════════════════════ */}
         {screen==='phone' && !otpSent && (
           <motion.div key="phone" initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} exit={{ opacity:0 }} transition={{ duration:0.5 }}
@@ -813,7 +958,7 @@ export default function Auth({ onComplete }) {
               <OtpBoxes arr={otp} setter={setOtp} refs={otpRefs} color="#56a06f" disabled={otpLoad}/>
               <div style={{ margin:'16px 0', minHeight:'24px' }}>
                 {canResend
-                  ? <button onClick={()=>{ setOtp(['','','','','','']); setTimer(30); setCanResend(false); otpRefs.current[0]?.focus(); }} style={{ background:'none', border:'none', color:'#a855f7', fontSize:'0.85rem', cursor:'pointer', fontWeight:'600', fontFamily:J }}>Resend OTP</button>
+                  ? <button onClick={sendOtp} style={{ background:'none', border:'none', color:'#a855f7', fontSize:'0.85rem', cursor:'pointer', fontWeight:'600', fontFamily:J }}>Resend OTP</button>
                   : <p style={{ color:'rgba(255,255,255,0.28)', fontSize:'0.82rem', margin:0, fontFamily:S }}>Resend in <span style={{ color:'rgba(255,255,255,0.6)', fontWeight:'700' }}>{timer}s</span></p>
                 }
               </div>
@@ -829,7 +974,7 @@ export default function Auth({ onComplete }) {
         )}
 
         {/* ═══════════════════════════════════════════
-            AI HUB
+            AI HUB (RESTORED ORIGINAL 3D AURA/MAX STRUCTURE)
         ═══════════════════════════════════════════ */}
         {screen==='aiHub' && (
           <motion.div key="ai-hub" initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ duration:0.8 }}
@@ -837,6 +982,7 @@ export default function Auth({ onComplete }) {
             <SpaceBg activeAI={activeAI}/>
             <div style={{ position:'absolute', inset:0, zIndex:1, backgroundImage:'linear-gradient(rgba(255,255,255,0.004) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.004) 1px,transparent 1px)', backgroundSize:'30px 30px', pointerEvents:'none' }}/>
 
+            {/* Toggle */}
             <div style={{ position:'relative', zIndex:20, marginTop:'16px', marginBottom:'16px' }}>
               <div style={{ background:'rgba(255,255,255,0.04)', backdropFilter:'blur(30px)', padding:'5px', borderRadius:'40px', border:'1px solid rgba(255,255,255,0.08)', display:'flex', gap:'4px', boxShadow:'0 16px 40px rgba(0,0,0,0.5)' }}>
                 {[{k:'AURA',l:'Feminine Core · Aura',g:'linear-gradient(135deg,#e0524d,#c0392b)',sh:'0 4px 12px rgba(0,0,0,0.35)'},{k:'MAX',l:'Analytic Engine · Max',g:'linear-gradient(135deg,#5eb8ad,#4a9488)',sh:'0 8px 20px rgba(13,148,136,0.35)'}].map(ai=>(
@@ -848,13 +994,16 @@ export default function Auth({ onComplete }) {
               </div>
             </div>
 
+            {/* Character */}
             <motion.div animate={{ y:[0,-8,0] }} transition={{ duration:5, repeat:Infinity, ease:'easeInOut' }}
               style={{ position:'relative', zIndex:5, display:'flex', flexDirection:'column', alignItems:'center' }}>
+              {/* Antenna */}
               <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:'-10px', position:'relative', zIndex:6 }}>
                 <motion.div animate={{ scale:eyes==='laughing'?[1,1.15,1]:[1,1.04,1], filter:activeAI==='AURA'?'drop-shadow(0 4px 10px rgba(224,82,77,0.5))':'drop-shadow(0 4px 10px rgba(94,184,173,0.5))' }} transition={{ duration:2, repeat:Infinity }}
                   style={{ width:'30px', height:'30px', borderRadius:'50%', background:'radial-gradient(circle at 35% 35%,#ffffff,#f1f5f9 50%,#cbd5e1)', boxShadow:'inset -2px -2px 8px rgba(0,0,0,0.15)' }}/>
                 <div style={{ width:'12px', height:'18px', marginTop:'-4px', background:activeAI==='AURA'?'linear-gradient(to bottom,#ffffff,rgba(224,82,77,0.4))':'linear-gradient(to bottom,#ffffff,rgba(94,184,173,0.4))', borderRadius:'3px 3px 0 0', opacity:0.9, transition:'all 0.5s' }}/>
               </div>
+              {/* Head */}
               <div style={{ width:'240px', height:'204px', borderRadius:'50% 50% 46% 46%/56% 56% 44% 44%', background:'linear-gradient(135deg,#f8fafc,#edf2f7 35%,#cbd5e1 75%,#94a3b8)', position:'relative', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 35px 64px rgba(0,0,0,0.5),inset 0 13px 20px #ffffff,inset 0 -11px 24px rgba(148,163,184,0.35)', zIndex:4 }}>
                 <div style={{ position:'absolute', left:'-13px', width:'32px', height:'54px', borderRadius:'50% 30% 30% 50%/50% 40% 40% 50%', background:activeAI==='AURA'?'linear-gradient(135deg,rgba(255,255,255,0.9),#e0524d)':'linear-gradient(135deg,rgba(255,255,255,0.9),#5eb8ad)', boxShadow:'-5px 7px 13px rgba(0,0,0,0.2)' }}/>
                 <div style={{ position:'absolute', right:'-13px', width:'32px', height:'54px', borderRadius:'30% 50% 50% 30%/40% 50% 50% 40%', background:activeAI==='AURA'?'linear-gradient(135deg,rgba(255,255,255,0.9),#e0524d)':'linear-gradient(135deg,rgba(255,255,255,0.9),#5eb8ad)', boxShadow:'5px 7px 13px rgba(0,0,0,0.2)' }}/>
@@ -880,6 +1029,7 @@ export default function Auth({ onComplete }) {
                   </AnimatePresence>
                 </div>
               </div>
+              {/* Body */}
               <div style={{ width:'136px', height:'116px', marginTop:'-18px', position:'relative', zIndex:2, display:'flex', flexDirection:'column', alignItems:'center' }}>
                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,#edf2f7,#cbd5e1 70%,#94a3b8)', borderRadius:'45% 45% 35% 35%/30% 30% 70% 70%', boxShadow:'0 20px 36px rgba(0,0,0,0.3),inset 0 8px 11px #ffffff' }}/>
                 <div style={{ position:'absolute', bottom:'-10px', width:'117px', height:'27px', background:'linear-gradient(to bottom,#ffffff,#e2e8f0)', borderRadius:'0 0 30px 30px', zIndex:1, boxShadow:'0 12px 20px rgba(0,0,0,0.2)' }}/>
@@ -893,6 +1043,7 @@ export default function Auth({ onComplete }) {
                   {[['left','4px'],['right','4px']].map(([p,v],i)=><div key={i} style={{ position:'absolute', [p]:v, width:'4px', height:'13px', background:'#cbd5e1', borderRadius:'2px' }}/>)}
                 </div>
               </div>
+              {/* Email pill */}
               {selectedProfile && (
                 <motion.div initial={{ opacity:0,y:8 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.5 }}
                   style={{ marginTop:'16px', display:'flex', alignItems:'center', gap:'9px', background:'rgba(255,255,255,0.05)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.09)', borderRadius:'50px', padding:'6px 14px 6px 7px' }}>
@@ -911,6 +1062,7 @@ export default function Auth({ onComplete }) {
               )}
             </motion.div>
 
+            {/* Conversation node */}
             <motion.div key={dialogue} initial={{ opacity:0,y:12 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.6 }}
               style={{ marginTop:'16px', marginBottom:'10px', textAlign:'center', width:'560px', maxWidth:'90vw', background:'rgba(8,8,20,0.88)', backdropFilter:'blur(40px)', WebkitBackdropFilter:'blur(40px)', padding:'18px 28px', borderRadius:'22px', border:'1px solid rgba(255,255,255,0.1)', boxShadow:'0 20px 44px rgba(0,0,0,0.7)', position:'relative', zIndex:20 }}>
               <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', marginBottom:'10px' }}>
@@ -921,6 +1073,7 @@ export default function Auth({ onComplete }) {
               <p style={{ fontSize:'0.95rem', fontFamily:P, fontStyle:'italic', lineHeight:'1.7', color:'rgba(255,255,255,0.95)', margin:0 }}>"{dialogue}"</p>
             </motion.div>
 
+            {/* Status */}
             <div style={{ display:'flex', gap:'20px', zIndex:20, position:'relative', marginBottom:'8px' }}>
               <span style={{ fontFamily:S, fontSize:'0.7rem', fontWeight:'700', letterSpacing:'1px', color:activeAI==='AURA'?'#8b87f5':'rgba(255,255,255,0.2)', transition:'all 0.4s' }}>AURA: {activeAI==='AURA'?'ACTIVE':'STANDBY'}</span>
               <span style={{ color:'rgba(255,255,255,0.12)' }}>·</span>
