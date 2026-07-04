@@ -643,6 +643,35 @@ app.post('/api/verify-email-code', (req, res) => {
   res.json({ valid: true });
 });
 
+// ── PHONE SMS OTP — send a 6-digit code via Fast2SMS ──
+app.post('/api/send-sms', async (req, res) => {
+  const { phoneNumber, otpCode } = req.body || {};
+  if (!phoneNumber || !otpCode) {
+    return res.status(400).json({ success: false, error: 'phoneNumber and otpCode are required' });
+  }
+
+  const apiKey = process.env.FAST2SMS_API_KEY || "zp8QEuUqIaerK5Rt9FYhojwcPLis31BbJVTW6fxGN70MmZAOHd53klRIvr6wQVAi1a84EjceLuUODgzb";
+  console.log(`💬 Attempting to send SMS to ${phoneNumber} with code: ${otpCode}`);
+
+  try {
+    const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${apiKey}&route=otp&variables_values=${otpCode}&numbers=${phoneNumber}`;
+    const response = await fetch(url, { method: 'GET' });
+    const data = await response.json();
+    
+    if (data.return === true) {
+      console.log(`✅ SMS successfully sent to ${phoneNumber}`);
+      res.json({ success: true });
+    } else {
+      console.warn("⚠️ Fast2SMS API error response:", data);
+      res.status(400).json({ success: false, error: data.message });
+    }
+  } catch (err) {
+    console.error("❌ Fast2SMS server fetch failed:", err);
+    res.status(500).json({ success: false, error: err.message || "Internal server error during SMS dispatch" });
+  }
+});
+
+
 // Email status check at startup
 if (process.env.RESEND_API_KEY) {
   console.log('📧 Resend email configured ✅ → notifications go to:', process.env.FOUNDER_EMAIL || 'FOUNDER_EMAIL not set');

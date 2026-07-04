@@ -5,9 +5,6 @@ import { API_BASE } from './config';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple, FaPhoneAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaEnvelope, FaChevronRight, FaPlus } from 'react-icons/fa';
 
-// ── FAST2SMS GATEWAY CONFIGURATION ──
-const FAST2SMS_API_KEY = "zp8QEuUqIaerK5Rt9FYhojwcPLis31BbJVTW6fxGN70MmZAOHd53klRIvr6wQVAi1a84EjceLuUODgzb";
-
 const Spinner = ({ color='#8b87f5', size=22 }) => (
   <div style={{ display:'flex', justifyContent:'center', padding:'12px' }}>
     <motion.div animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }}
@@ -266,17 +263,20 @@ export default function Auth({ onComplete }) {
   // ── 🌐 REAL SMS DISPATCH ENGINE ──
   const sendRealSms = async (phoneNumber, otpCode) => {
     try {
-      const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${FAST2SMS_API_KEY}&route=otp&variables_values=${otpCode}&numbers=${phoneNumber}`;
-      const response = await fetch(url, { method: 'GET' });
+      const response = await fetch(`${API_BASE}/api/send-sms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber, otpCode })
+      });
       const data = await response.json();
-      if (data.return === true) {
+      if (response.ok && data.success) {
         return { success: true };
       } else {
-        console.warn("Fast2SMS API Response Error:", data);
-        return { success: false, error: data.message };
+        console.warn("Fast2SMS Backend API Response Error:", data);
+        return { success: false, error: data.error || 'Server error sending SMS' };
       }
     } catch (err) {
-      console.error("Fast2SMS fetch request failed:", err);
+      console.error("Fast2SMS backend fetch request failed:", err);
       return { success: false, error: "Network block/CORS limits" };
     }
   };

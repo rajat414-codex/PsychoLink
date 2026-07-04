@@ -15,10 +15,13 @@
       // 👇 Railway backend URL (permanent)
       window.API_BASE = "https://psycholink-production.up.railway.app";
 
-      // Auto-rewrite: saari localhost:3001 calls ko Railway backend pe bhejta hai
+      // Auto-rewrite: saari localhost:3001 calls ko Railway backend pe bhejta hai (bypass if local=true in URL or use_local=true in localStorage)
       (function () {
         var _fetch = window.fetch;
         window.fetch = function (url, opts) {
+          if (localStorage.getItem('use_local') === 'true' || window.location.search.includes('local=true')) {
+            return _fetch(url, opts);
+          }
           if (window.API_BASE && typeof url === 'string' && url.indexOf('localhost:3001') !== -1) {
             url = url.replace('http://localhost:3001', window.API_BASE)
                      .replace('https://localhost:3001', window.API_BASE);
