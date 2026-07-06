@@ -145,9 +145,9 @@ function PeakChart({ negScores = {}, posScores = {} }) {
   const getInterpolatedScore = (x, scoresList) => {
     let numerator = 0;
     let denominator = 0;
-    const epsilon = 200; // smooth peaks
+    const epsilon = 180; // smooth peaks
     for (let i = 0; i < 12; i++) {
-      const x_i = 40 + i * (420 / 11); // range 40 to 460
+      const x_i = 50 + i * (380 / 11); // Center range 50 to 430
       const val = scoresList[i] || 0;
       const distSq = Math.pow(x - x_i, 2);
       const weight = 1 / (distSq + epsilon);
@@ -162,20 +162,20 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     const pathsList = [];
     const steps = 8;
     for (let j = 0; j < steps; j++) {
-      const offX = (steps - 1 - j) * 3.5;
+      const offX = 10 + j * 4;
       const offY = j * 6;
       let pathStr = '';
       
-      for (let x = 35; x <= 465; x += 4) {
+      for (let x = 50; x <= 430; x += 4) {
         const baseH = getInterpolatedScore(x, scores);
         // Add realistic 3D terrain wave deformation
         const wave = 0.72 + 0.28 * Math.sin(j * 0.7 + x * 0.018);
         const h = baseH * 1.35 * wave;
         
         const px = x + offX;
-        const py = 230 - offY - h;
+        const py = 220 - offY - h; // Base curve center_y shifted to 220
         
-        if (x === 35) {
+        if (x === 50) {
           pathStr += `M ${px} ${py}`;
         } else {
           pathStr += ` L ${px} ${py}`;
@@ -194,11 +194,11 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     const names = ['Anxiety', 'Depression', 'Stress', 'Loneliness', 'Overwhelm', 'Burnout', 'Calmness', 'Happiness', 'Focus', 'Energy', 'Confidence', 'Inner Peace'];
     
     for (let i = 0; i < 12; i++) {
-      const x_i = 40 + i * (420 / 11);
+      const x_i = 50 + i * (380 / 11);
       const val = scores[i] || 0;
       
-      // Calculate top point on front curve (j = 0 => offX = 24.5, offY = 0)
-      const offX = 24.5; 
+      // j = 0 has offX = 10
+      const offX = 10; 
       const h = val * 1.35 * (0.72 + 0.28 * Math.sin(0 * 0.7 + x_i * 0.018));
       
       list.push({
@@ -208,9 +208,9 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         icon: icons[i],
         score: val,
         xBase: x_i + offX,
-        yBase: 250,
+        yBase: 240, // Base line y coordinate set to 240
         xTop: x_i + offX,
-        yTop: 230 - h
+        yTop: 220 - h
       });
     }
     return list;
@@ -247,13 +247,13 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         </div>
       </div>
 
-      <div style={{ height:350, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
+      <div style={{ height:310, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
         <motion.div
-          animate={{ y: [0, -8, 0] }}
+          animate={{ y: [0, -6, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
         >
-          <svg width="100%" height="100%" viewBox="0 0 500 360" style={{ overflow:'visible' }}>
+          <svg width="100%" height="100%" viewBox="0 0 500 300" style={{ overflow:'visible' }}>
             <defs>
               <filter id="neon-glow-peaks" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur stdDeviation="5" result="blur" />
@@ -268,7 +268,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
             </defs>
 
             {/* Base Horizontal Axis line */}
-            <line x1="30" y1="250" x2="480" y2="250" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+            <line x1="40" y1="240" x2="460" y2="240" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
 
             {/* Back Contour Lines (Dashed grey) */}
             {curvesPaths.map((c, idx) => {
@@ -281,6 +281,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                   stroke="rgba(255,255,255,0.18)"
                   strokeWidth="1"
                   strokeDasharray="2 3"
+                  opacity={1.0 - c.index * 0.08}
                 />
               );
             })}
@@ -341,7 +342,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                   {/* Score label in yellow */}
                   <text
                     x={pin.xBase}
-                    y={pin.yBase + 18}
+                    y={pin.yBase + 16}
                     textAnchor="middle"
                     fill="#fbbf24"
                     style={{ fontFamily: SF, fontSize: 8.5, fontWeight: '700' }}
@@ -352,7 +353,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                   {/* Emotion short name below score */}
                   <text
                     x={pin.xBase}
-                    y={pin.yBase + 32}
+                    y={pin.yBase + 28}
                     textAnchor="middle"
                     fill="rgba(255,255,255,0.4)"
                     style={{ fontFamily: SF, fontSize: 7.5, fontWeight: '600' }}
@@ -366,7 +367,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     cy={pin.yTop}
                     r={isHovered ? 6.5 : 5}
                     fill="#000000"
-                    stroke="#fbbf24"
+                    stroke={pin.index === 12 ? '#ffffff' : '#fbbf24'}
                     strokeWidth="2"
                     style={{ transition: 'all 0.2s' }}
                   />
@@ -374,7 +375,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     cx={pin.xTop}
                     cy={pin.yTop}
                     r="2"
-                    fill="#fbbf24"
+                    fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
                   />
 
                   {/* Label above the pin */}
@@ -382,7 +383,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     x={pin.xTop}
                     y={pin.yTop - 11}
                     textAnchor="middle"
-                    fill={isHovered ? '#fbbf24' : '#fff'}
+                    fill={isHovered ? (pin.index === 12 ? '#ffffff' : '#fbbf24') : '#fff'}
                     style={{ fontFamily: SF, fontSize: 8.5, fontWeight: 'bold' }}
                   >
                     {pin.index}
