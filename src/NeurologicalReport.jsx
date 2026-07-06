@@ -232,129 +232,148 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         </div>
       </div>
 
-      <div style={{ height:260, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
-        <svg width="100%" height="100%" viewBox="0 0 500 320" style={{ overflow:'visible' }}>
-          {/* Floor grid bounding box */}
-          <polygon
-            points={`${250 - 8*22} ${200}, 250 ${200 - 8*11}, ${250 + 8*22} ${200}, 250 ${200 + 8*11}`}
-            fill="rgba(255,255,255,0.015)"
-            stroke="rgba(255,255,255,0.06)"
-            strokeWidth="1.5"
-          />
+      <div style={{ height:350, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
+        <motion.div
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+        >
+          <svg width="100%" height="100%" viewBox="0 0 500 360" style={{ overflow:'visible' }}>
+            <defs>
+              <filter id="neon-glow-peaks" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="6" result="blur" />
+                <feComponentTransfer in="blur" result="glow">
+                  <feFuncA type="linear" slope="0.5"/>
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode in="glow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-          {/* Grid lines on floor */}
-          {[...Array(9)].map((_, i) => {
-            const x1 = 250 + (i - 4) * 22;
-            const y1 = 200 + (i - 4) * 11;
-            const x2 = x1 - 8 * 22;
-            const y2 = y1 + 8 * 11;
-            
-            const xa1 = 250 + (i - 4) * -22;
-            const ya1 = 200 + (i - 4) * 11;
-            const xa2 = xa1 + 8 * 22;
-            const ya2 = ya1 + 8 * 11;
+            {/* Floor grid bounding box */}
+            <polygon
+              points={`${250 - 8*25} ${220}, 250 ${220 - 8*12.5}, ${250 + 8*25} ${220}, 250 ${220 + 8*12.5}`}
+              fill="rgba(255,255,255,0.015)"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth="1.5"
+            />
 
-            return (
-              <g key={i}>
-                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-                <line x1={xa1} y1={ya1} x2={xa2} y2={ya2} stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-              </g>
-            );
-          })}
+            {/* Grid lines on floor */}
+            {[...Array(9)].map((_, i) => {
+              const x1 = 250 + (i - 4) * 25;
+              const y1 = 220 + (i - 4) * 12.5;
+              const x2 = x1 - 8 * 25;
+              const y2 = y1 + 8 * 12.5;
+              
+              const xa1 = 250 + (i - 4) * -25;
+              const ya1 = 220 + (i - 4) * 12.5;
+              const xa2 = xa1 + 8 * 25;
+              const ya2 = ya1 + 8 * 12.5;
 
-          {/* Left Height Axis */}
-          <line x1={250 - 4*22} y1={200} x2={250 - 4*22} y2={90} stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
-          {[0, 25, 50, 75, 100].map((tick, idx) => {
-            const h = (tick / 100) * 105;
-            const yPos = 200 - h;
-            return (
-              <g key={idx}>
-                <line x1={250 - 4*22 - 4} y1={yPos} x2={250 - 4*22} y2={yPos} stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-                <text
-                  x={250 - 4*22 - 8}
-                  y={yPos + 3}
-                  textAnchor="end"
-                  fill="rgba(255,255,255,0.35)"
-                  style={{ fontFamily:SF, fontSize:8, fontWeight:'bold' }}
+              return (
+                <g key={i}>
+                  <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+                  <line x1={xa1} y1={ya1} x2={xa2} y2={ya2} stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+                </g>
+              );
+            })}
+
+            {/* Left Height Axis */}
+            <line x1={250 - 4*25} y1={220} x2={250 - 4*25} y2={75} stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
+            {[0, 25, 50, 75, 100].map((tick, idx) => {
+              const h = (tick / 100) * 145;
+              const yPos = 220 - h;
+              return (
+                <g key={idx}>
+                  <line x1={250 - 4*25 - 4} y1={yPos} x2={250 - 4*25} y2={yPos} stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+                  <text
+                    x={250 - 4*25 - 8}
+                    y={yPos + 3}
+                    textAnchor="end"
+                    fill="rgba(255,255,255,0.4)"
+                    style={{ fontFamily:SF, fontSize:8.5, fontWeight:'bold' }}
+                  >
+                    {tick}%
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* 3D Isometric columns */}
+            {grid.map((item, idx) => {
+              const dr = item.r - 3.5;
+              const dc = item.c - 3.5;
+              const x = 250 + (dc - dr) * 25;
+              const y = 220 + (dc + dr) * 12.5;
+              const h = (item.score / 100) * 145;
+
+              const colors = getFaceColors(item.score);
+
+              const isMain = item.isMain;
+              const sizeW = isMain ? 12 : 7;
+              const sizeH = isMain ? 6 : 3.5;
+
+              const topPoints = `${x} ${y - h - sizeH}, ${x + sizeW} ${y - h}, ${x} ${y - h + sizeH}, ${x - sizeW} ${y - h}`;
+              const leftPoints = `${x - sizeW} ${y - h}, ${x} ${y - h + sizeH}, ${x} ${y + sizeH}, ${x - sizeW} ${y}`;
+              const rightPoints = `${x} ${y - h + sizeH}, ${x + sizeW} ${y - h}, ${x + sizeW} ${y}, ${x} ${y + sizeH}`;
+
+              return (
+                <g
+                  key={idx}
+                  style={{ cursor: isMain ? 'pointer' : 'default' }}
+                  filter={isMain ? 'url(#neon-glow-peaks)' : 'none'}
+                  onMouseEnter={() => {
+                    if (isMain) {
+                      setHovered({
+                        name: item.name,
+                        score: item.score,
+                        x: x,
+                        y: y - h - 10,
+                        color: colors.top
+                      });
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (isMain) setHovered(null);
+                  }}
                 >
-                  {tick}%
-                </text>
-              </g>
-            );
-          })}
+                  {isMain && item.score > 50 && (
+                    <ellipse
+                      cx={x}
+                      cy={y}
+                      rx={sizeW * 2.2}
+                      ry={sizeH * 2.2}
+                      fill={colors.glow}
+                      opacity="0.08"
+                      style={{ filter: 'blur(8px)' }}
+                    />
+                  )}
 
-          {/* 3D Isometric columns */}
-          {grid.map((item, idx) => {
-            const dr = item.r - 3.5;
-            const dc = item.c - 3.5;
-            const x = 250 + (dc - dr) * 22;
-            const y = 200 + (dc + dr) * 11;
-            const h = (item.score / 100) * 105;
-
-            const colors = getFaceColors(item.score);
-
-            const isMain = item.isMain;
-            const sizeW = isMain ? 10 : 6;
-            const sizeH = isMain ? 5 : 3;
-
-            const topPoints = `${x} ${y - h - sizeH}, ${x + sizeW} ${y - h}, ${x} ${y - h + sizeH}, ${x - sizeW} ${y - h}`;
-            const leftPoints = `${x - sizeW} ${y - h}, ${x} ${y - h + sizeH}, ${x} ${y + sizeH}, ${x - sizeW} ${y}`;
-            const rightPoints = `${x} ${y - h + sizeH}, ${x + sizeW} ${y - h}, ${x + sizeW} ${y}, ${x} ${y + sizeH}`;
-
-            return (
-              <g
-                key={idx}
-                style={{ cursor: isMain ? 'pointer' : 'default' }}
-                onMouseEnter={() => {
-                  if (isMain) {
-                    setHovered({
-                      name: item.name,
-                      score: item.score,
-                      x: x,
-                      y: y - h - 10,
-                      color: colors.top
-                    });
-                  }
-                }}
-                onMouseLeave={() => {
-                  if (isMain) setHovered(null);
-                }}
-              >
-                {isMain && item.score > 50 && (
-                  <ellipse
-                    cx={x}
-                    cy={y}
-                    rx={sizeW * 2.2}
-                    ry={sizeH * 2.2}
-                    fill={colors.glow}
-                    opacity="0.08"
-                    style={{ filter: 'blur(8px)' }}
-                  />
-                )}
-
-                <polygon points={leftPoints} fill={colors.left} />
-                <polygon points={rightPoints} fill={colors.right} />
-                <polygon points={topPoints} fill={colors.top} />
-                
-                {isMain && (
-                  <polygon
-                    points={topPoints}
-                    fill="none"
-                    stroke="#ffffff"
-                    strokeWidth="0.75"
-                    opacity="0.5"
-                  />
-                )}
-              </g>
-            );
-          })}
-        </svg>
+                  <polygon points={leftPoints} fill={colors.left} opacity={isMain ? 0.95 : 0.88} />
+                  <polygon points={rightPoints} fill={colors.right} opacity={isMain ? 0.95 : 0.88} />
+                  <polygon points={topPoints} fill={colors.top} opacity={isMain ? 0.95 : 0.88} />
+                  
+                  {isMain && (
+                    <polygon
+                      points={topPoints}
+                      fill="none"
+                      stroke="rgba(255,255,255,0.4)"
+                      strokeWidth="0.75"
+                    />
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+        </motion.div>
 
         {hovered && (
           <div style={{
             position: 'absolute',
             left: `${hovered.x}px`,
-            top: `${hovered.y}px`,
+            top: `${hovered.y - 12}px`,
             transform: 'translate(-50%, -100%)',
             background: 'rgba(10, 11, 28, 0.96)',
             backdropFilter: 'blur(12px)',
