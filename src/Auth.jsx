@@ -1152,44 +1152,56 @@ export default function Auth({ onComplete }) {
                 justifyContent:'center',
                 borderLeft:'1px solid rgba(255,255,255,0.08)'
               }}>
-                {/* Floating Retro Screen Overlay Logo */}
+                {/* Floating Scenic Anime Artwork with Glowing Borders */}
                 <motion.div 
-                  animate={{ y:[0, -8, 0] }}
-                  transition={{ duration:4, repeat:Infinity, ease:'easeInOut' }}
+                  animate={{ y:[0, -10, 0], rotate:[0, 0.5, -0.5, 0] }}
+                  transition={{ duration:5, repeat:Infinity, ease:'easeInOut' }}
                   style={{
-                    width:'140px',
-                    height:'120px',
+                    width:'320px',
+                    height:'240px',
                     background:'rgba(255, 255, 255, 0.03)',
-                    border:'1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius:'20px',
-                    boxShadow:'0 25px 50px rgba(0,0,0,0.3)',
+                    border:'1.5px solid rgba(255, 255, 255, 0.25)',
+                    borderRadius:'24px',
+                    boxShadow:'0 25px 50px rgba(0,0,0,0.5), 0 0 30px rgba(224,82,77,0.25), 0 0 50px rgba(139,135,245,0.15)',
+                    overflow:'hidden',
+                    position:'relative',
                     display:'flex',
-                    flexDirection:'column',
                     alignItems:'center',
                     justifyContent:'center',
-                    position:'relative',
-                    backdropFilter:'blur(5px)'
+                    backdropFilter:'blur(5px)',
+                    cursor:'pointer'
                   }}
                 >
+                  <img src="/anime_calm.png" alt="Fresh Mind Anime Scenery" style={{
+                    width:'100%',
+                    height:'100%',
+                    objectFit:'cover',
+                    borderRadius:'22px',
+                    transition:'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
+                  onMouseOver={e=>e.currentTarget.style.transform='scale(1.06)'}
+                  onMouseOut={e=>e.currentTarget.style.transform='scale(1.0)'}/>
+                  
+                  {/* Bottom glass overlay branding */}
                   <div style={{
-                    width:'88px',
-                    height:'66px',
-                    background:'radial-gradient(circle at center, #ffd060 0%, #e0524d 100%)',
-                    borderRadius:'8px',
-                    boxShadow:'inset 0 2px 5px rgba(255,255,255,0.5), 0 0 20px rgba(224,82,77,0.4)',
+                    position:'absolute',
+                    bottom:'12px',
+                    left:'12px',
+                    right:'12px',
+                    background:'rgba(19, 17, 20, 0.72)',
+                    backdropFilter:'blur(8px)',
+                    WebkitBackdropFilter:'blur(8px)',
+                    border:'1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius:'12px',
+                    padding:'8px 14px',
                     display:'flex',
                     alignItems:'center',
-                    justifyContent:'center'
+                    justifyContent:'space-between',
+                    boxShadow:'0 8px 32px rgba(0,0,0,0.25)'
                   }}>
-                    <span style={{ fontFamily:S, fontWeight:'900', fontSize:'1.1rem', color:'#131114', letterSpacing:'1px' }}>EQ.fi</span>
+                    <span style={{ fontFamily:J, fontSize:'0.75rem', fontWeight:'700', color:'#fff', letterSpacing:'0.5px' }}>Mind Space ✨</span>
+                    <span style={{ fontFamily:S, fontSize:'0.68rem', fontWeight:'600', color:'#e0524d' }}>EQ.fi</span>
                   </div>
-                  <div style={{
-                    width:'30px',
-                    height:'8px',
-                    background:'rgba(255, 255, 255, 0.12)',
-                    marginTop:'12px',
-                    borderRadius:'4px'
-                  }}/>
                 </motion.div>
               </div>
 
