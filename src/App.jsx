@@ -7,154 +7,235 @@ import Home from './Home'
 
 // ── TRANSITION SCREEN ────────────────────────────────────
 function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
-  const [step, setStep] = useState(0);
-
-  const accent  = activeAI === 'AURA' ? '#e0524d' : '#5eb8ad';
-  const accent2 = activeAI === 'AURA' ? '#c0392b' : '#4a9488';
-  const label   = activeAI === 'AURA' ? 'Feminine Core · Aura' : 'Analytic Engine · Max';
-  const name    = (profile?.name || 'User').split(' ')[0];
+  const name = (profile?.name || 'User').split(' ')[0];
 
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
   const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
-
-  const steps = [
-    'Initializing secure session...',
-    'Loading your wellness profile...',
-    'Connecting to ' + (activeAI === 'AURA' ? 'Aura' : 'Max') + '...',
-    'Almost ready...',
-  ];
-
-  useEffect(() => {
-    const timers = [
-      setTimeout(() => setStep(1), 600),
-      setTimeout(() => setStep(2), 1300),
-      setTimeout(() => setStep(3), 2000),
-      setTimeout(() => setStep(4), 2700),
-      setTimeout(() => onDone(), 3400),
-    ];
-    return () => timers.forEach(clearTimeout);
-  }, []);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
-      transition={{ duration: 0.5 }}
-      style={{ position: 'absolute', inset: 0, background: '#0a0a0c', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+      transition={{ duration: 0.8 }}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        background: '#0d0c0e',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '50px 70px',
+        overflow: 'hidden'
+      }}
     >
-      {/* BG orbs */}
-      {[
-        { top: '-15%', left: '-10%', color: 'rgba(139,92,246,0.18)', size: '500px' },
-        { bottom: '-15%', right: '-10%', color: activeAI === 'AURA' ? 'rgba(236,72,153,0.15)' : 'rgba(45,212,191,0.15)', size: '500px' },
-        { top: '40%', left: '40%', color: activeAI === 'AURA' ? 'rgba(236,72,153,0.08)' : 'rgba(45,212,191,0.08)', size: '300px' },
-      ].map((o, i) => (
-        <motion.div key={i}
-          animate={{ scale: [1, 1.15, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 4 + i, repeat: Infinity, delay: i * 0.8 }}
-          style={{ position: 'absolute', width: o.size, height: o.size, borderRadius: '50%', background: `radial-gradient(circle, ${o.color}, transparent 70%)`, filter: 'blur(60px)', pointerEvents: 'none', ...o }}
+      {/* Background noise grid and grain overlay */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        opacity: 0.04,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        pointerEvents: 'none',
+        zIndex: 1
+      }} />
+
+      {/* Axis crosshairs */}
+      <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: '1.5px', background: 'rgba(255,255,255,0.025)', zIndex: 1, pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: '1.5px', background: 'rgba(255,255,255,0.025)', zIndex: 1, pointerEvents: 'none' }}/>
+
+      {/* Corner Bracket Framework */}
+      <div style={{ position: 'absolute', top: '40px', left: '40px', width: '14px', height: '14px', borderLeft: '1px solid rgba(255,255,255,0.12)', borderTop: '1px solid rgba(255,255,255,0.12)', zIndex: 2 }}/>
+      <div style={{ position: 'absolute', top: '40px', right: '40px', width: '14px', height: '14px', borderRight: '1px solid rgba(255,255,255,0.12)', borderTop: '1px solid rgba(255,255,255,0.12)', zIndex: 2 }}/>
+      <div style={{ position: 'absolute', bottom: '40px', left: '40px', width: '14px', height: '14px', borderLeft: '1px solid rgba(255,255,255,0.12)', borderBottom: '1px solid rgba(255,255,255,0.12)', zIndex: 2 }}/>
+      <div style={{ position: 'absolute', bottom: '40px', right: '40px', width: '14px', height: '14px', borderRight: '1px solid rgba(255,255,255,0.12)', borderBottom: '1px solid rgba(255,255,255,0.12)', zIndex: 2 }}/>
+
+      {/* Header Area */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10, position: 'relative' }}>
+        <div style={{ fontFamily: S, fontWeight: '600', fontSize: '1rem', letterSpacing: '5px', color: '#fff' }}>
+          | SOLVANA |
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+          {['How It Works', 'Sessions', 'Pricing', 'Blog'].map((link, idx) => (
+            <span key={idx} style={{ fontFamily: J, fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontWeight: '500', transition: 'color 0.25s' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.4)'}>{link}</span>
+          ))}
+          <button style={{
+            padding: '9px 22px',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.14)',
+            borderRadius: '9px',
+            color: '#fff',
+            fontFamily: J,
+            fontSize: '0.82rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.25s'
+          }}
+          onMouseOver={e=>{e.currentTarget.style.background='rgba(255,255,255,0.08)';e.currentTarget.style.borderColor='rgba(255,255,255,0.3)';}}
+          onMouseOut={e=>{e.currentTarget.style.background='rgba(255,255,255,0.03)';e.currentTarget.style.borderColor='rgba(255,255,255,0.14)';}}>
+            Sign Up
+          </button>
+        </div>
+      </div>
+
+      {/* Centered Waving Soul */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '450px',
+        height: '450px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 2
+      }}>
+        {/* Pulsing ambient background aura */}
+        <motion.div
+          animate={{ scale: [0.95, 1.1, 0.95], opacity: [0.35, 0.5, 0.35] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            position: 'absolute',
+            width: '260px',
+            height: '260px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%)',
+            filter: 'blur(45px)',
+            pointerEvents: 'none'
+          }}
         />
-      ))}
 
-      {/* Star dots */}
-      <motion.div
-        animate={{ backgroundPosition: ['0px 0px', '60px 120px'] }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-        style={{ position: 'absolute', inset: 0, opacity: 0.08, backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px)`, backgroundSize: '50px 50px', pointerEvents: 'none' }}
-      />
+        <svg width="100%" height="100%" viewBox="0 0 300 300">
+          <defs>
+            <filter id="soul-glow-full" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur1" />
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur2" />
+              <feMerge>
+                <feMergeNode in="blur1" />
+                <feMergeNode in="blur2" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            
+            <linearGradient id="soul-gradient-full" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+              <stop offset="35%" stopColor="#f5f5f7" stopOpacity="0.9" />
+              <stop offset="70%" stopColor="#e2e2e8" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+            </linearGradient>
+          </defs>
 
-      {/* Center content */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px', position: 'relative', zIndex: 2 }}>
+          {/* Faint Concentric rotating orbital rings */}
+          <motion.g
+            animate={{ rotate: 360 }}
+            transition={{ duration: 50, repeat: Infinity, ease: 'linear' }}
+            style={{ transformOrigin: '150px 110px' }}
+          >
+            <circle cx="150" cy="110" r="54" stroke="rgba(255,255,255,0.06)" strokeWidth="0.75" fill="none" strokeDasharray="3 6" />
+            <circle cx="150" cy="110" r="95" stroke="rgba(255,255,255,0.04)" strokeWidth="0.75" fill="none" strokeDasharray="6 8" />
+          </motion.g>
 
-        {/* Pulsing AI orb */}
-        <div style={{ position: 'relative', width: '120px', height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {/* Outer rings */}
-          {[1, 2, 3].map(i => (
-            <motion.div key={i}
-              animate={{ scale: [1, 1.5 + i * 0.3, 1], opacity: [0.4, 0, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
-              style={{ position: 'absolute', width: `${100 + i * 28}px`, height: `${100 + i * 28}px`, borderRadius: '50%', border: `1px solid ${accent}40` }}
+          <motion.g
+            animate={{ rotate: -360 }}
+            transition={{ duration: 70, repeat: Infinity, ease: 'linear' }}
+            style={{ transformOrigin: '150px 110px' }}
+          >
+            <circle cx="150" cy="110" r="140" stroke="rgba(255,255,255,0.03)" strokeWidth="0.75" fill="none" strokeDasharray="4 12" />
+          </motion.g>
+
+          {/* Stars */}
+          {[
+            { x: 125, y: 85, delay: 0.2 },
+            { x: 175, y: 115, delay: 0.7 },
+            { x: 140, y: 145, delay: 1.2 },
+            { x: 160, y: 65, delay: 1.7 },
+            { x: 105, y: 125, delay: 2.2 },
+            { x: 195, y: 90, delay: 2.7 }
+          ].map((star, idx) => (
+            <motion.circle
+              key={idx}
+              cx={star.x}
+              cy={star.y}
+              r="1"
+              fill="#ffffff"
+              animate={{ opacity: [0.15, 0.95, 0.15], scale: [0.8, 1.4, 0.8] }}
+              transition={{ duration: 3.5, repeat: Infinity, delay: star.delay }}
             />
           ))}
-          {/* Core orb */}
-          <motion.div
-            animate={{ scale: [1, 1.08, 1], boxShadow: [`0 0 30px ${accent}60`, `0 0 60px ${accent}90`, `0 0 30px ${accent}60`] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            style={{ width: '90px', height: '90px', borderRadius: '50%', background: `radial-gradient(circle at 35% 35%, ${accent2}, ${accent})`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
-          >
-            {/* Inner shine */}
-            <div style={{ position: 'absolute', top: '12px', left: '12px', width: '28px', height: '18px', borderRadius: '50%', background: 'rgba(255,255,255,0.25)', filter: 'blur(3px)' }}/>
-            {/* Letter */}
-            <span style={{ fontFamily: G, fontStyle: 'italic', fontWeight: '600', fontSize: '2rem', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
-              {activeAI === 'AURA' ? 'A' : 'M'}
-            </span>
-          </motion.div>
-        </div>
 
-        {/* Text block */}
-        <div style={{ textAlign: 'center' }}>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            style={{ fontFamily: J, fontStyle: 'normal', fontWeight: '800', fontSize: '2.1rem', letterSpacing: '-0.5px', color: '#fff', margin: '0 0 8px', textShadow: 'none' }}
-          >
-            Welcome, {name} ✨
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            style={{ fontFamily: S, fontSize: '0.75rem', letterSpacing: '2px', color: accent, margin: 0, fontWeight: '600' }}
-          >
-            {label.toUpperCase()}
-          </motion.p>
-        </div>
-
-        {/* Loading steps */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '240px' }}>
-          {steps.map((s, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: step > i ? 1 : 0.2, x: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+          {/* Waving Soul body */}
+          <g filter="url(#soul-glow-full)">
+            <circle cx="150" cy="60" r="13" fill="url(#soul-gradient-full)" />
+            <path
+              d="M 145,72 C 145,72 132,77 132,80 C 132,83 136,98 136,104 C 136,115 142,130 142,145 C 142,165 136,185 144,235 C 145,240 155,240 156,235 C 164,185 158,165 158,145 C 158,130 164,115 164,104 C 164,98 168,83 168,80 C 168,77 155,72 155,72 Z"
+              fill="url(#soul-gradient-full)"
+            />
+            <path
+              d="M 132,80 C 122,95 116,115 115,135 C 115,138 118,138 119,135 C 121,118 127,100 136,92 Z"
+              fill="url(#soul-gradient-full)"
+            />
+            <motion.g
+              animate={{ rotate: [-6, 12, -6] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut', repeatType: 'mirror' }}
+              style={{ transformOrigin: '168px 80px' }}
             >
-              {/* Check or dot */}
-              <div style={{ width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: step > i ? `${accent}25` : 'rgba(255,255,255,0.05)', border: `1px solid ${step > i ? accent : 'rgba(255,255,255,0.1)'}`, transition: 'all 0.3s' }}>
-                {step > i
-                  ? <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300 }}>
-                      <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 5L4 7.5L8.5 2.5" stroke={accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
-                    </motion.div>
-                  : <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity }}
-                      style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'rgba(255,255,255,0.3)' }}/>
-                }
-              </div>
-              <span style={{ fontFamily: J, fontSize: '0.82rem', color: step > i ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)', fontWeight: step > i ? '500' : '400', transition: 'all 0.3s' }}>{s}</span>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Progress bar */}
-        <div style={{ width: '240px', height: '3px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
-          <motion.div
-            animate={{ width: `${(step / steps.length) * 100}%` }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            style={{ height: '100%', background: `linear-gradient(90deg, ${accent}, #8b5cf6)`, borderRadius: '2px', boxShadow: `0 0 8px ${accent}80` }}
-          />
-        </div>
-
-        {/* Brand */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          style={{ fontFamily: G, fontStyle: 'italic', fontSize: '0.85rem', color: 'rgba(255,255,255,0.2)', margin: 0 }}
-        >
-          Cognitive Social Consultation
-        </motion.p>
+              <path
+                d="M 168,80 C 178,72 186,60 192,44 C 195,40 201,37 203,40 C 205,43 199,48 195,47 C 188,62 178,76 166,86 Z"
+                fill="url(#soul-gradient-full)"
+              />
+            </motion.g>
+          </g>
+        </svg>
       </div>
+
+      {/* Bottom Area */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', zIndex: 10, position: 'relative' }}>
+        
+        {/* Bottom Left Typography */}
+        <div style={{ maxWidth: '520px', textAlign: 'left' }}>
+          <h2 style={{ fontFamily: G, fontSize: '2.8rem', fontWeight: '400', color: '#fff', lineHeight: '1.2', margin: '0 0 16px', letterSpacing: '-0.5px' }}>
+            Quiet the noise.<br />Let your mind wander home.
+          </h2>
+          <p style={{ fontFamily: J, fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)', lineHeight: '1.6', margin: 0 }}>
+            Solvana helps you build a peaceful evening ritual, where your thoughts settle and your breath leads the way.
+          </p>
+        </div>
+
+        {/* Bottom Right Action Button */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onDone}
+          style={{
+            padding: '15px 32px',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1.5px solid rgba(255, 255, 255, 0.22)',
+            borderRadius: '12px',
+            color: '#ffffff',
+            fontFamily: J,
+            fontSize: '0.85rem',
+            fontWeight: '700',
+            cursor: 'pointer',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'border 0.25s'
+          }}
+          onMouseOver={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.5)'}
+          onMouseOut={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.22)'}
+        >
+          Begin Your Journey
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginLeft: '4px' }}>
+            <path d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </motion.button>
+      </div>
+
     </motion.div>
   );
 }
