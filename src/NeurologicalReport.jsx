@@ -170,25 +170,25 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     return numerator / denominator;
   };
 
-  // Generate 14 parallel curve paths shifted in 3D perspective to form the solid ribbon sheet
+  // Generate 16 parallel curve paths shifted in 3D perspective to form the solid ribbon sheet
   const curvesPaths = React.useMemo(() => {
     const pathsList = [];
-    const steps = 14;
+    const steps = 16;
     for (let k = 0; k < steps; k++) {
-      const offX = k * 2.2;
-      const offY = -k * 1.5;
+      const offX = k * 1.5;
+      const offY = -k * 1.0;
       let pathStr = '';
       
       const startX = 65;
       const endX = width - 65;
-      const step = Math.max(4, Math.round((endX - startX) / 100)); // step size dynamically scaled
+      const step = Math.max(2, Math.round((endX - startX) / 150)); // higher resolution steps
       
       for (let x = startX; x <= endX; x += step) {
         const baseH = getInterpolatedScore(x, scores, width);
         // Add realistic 3D terrain wave deformation
-        const wave = 0.72 + 0.28 * Math.sin(0 * 0.7 + x * (10 / width)); // scale frequency with width
-        const h = baseH * 1.15 * wave;
-        const y_base = 205 + (x - (width / 2)) * 0.15; // tilted baseline
+        const wave = 0.72 + 0.28 * Math.sin(0 * 0.7 + x * (10 / width));
+        const h = baseH * 1.18 * wave;
+        const y_base = 205 + (x - (width / 2)) * 0.15; // tilted baseline on floor
         
         const px = x + offX;
         const py = y_base + offY - h;
@@ -209,7 +209,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     let pathStr = '';
     const startX = 65;
     const endX = width - 65;
-    const step = Math.max(4, Math.round((endX - startX) / 100));
+    const step = Math.max(2, Math.round((endX - startX) / 150));
     
     for (let x = startX; x <= endX; x += step) {
       const baseH = getInterpolatedScore(x, scores, width);
@@ -219,8 +219,8 @@ function PeakChart({ negScores = {}, posScores = {} }) {
       const y_base = 205 + (x - (width / 2)) * 0.15;
       
       // slightly shifted in depth (k = 6)
-      const px = x + 6 * 2.2;
-      const py = y_base - 6 * 1.5 - h;
+      const px = x + 6 * 1.5;
+      const py = y_base - 6 * 1.0 - h;
       
       if (x === startX) {
         pathStr += `M ${px} ${py}`;
@@ -243,7 +243,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
       const val = scores[i] || 0;
       
       const offX = 0; // Front edge of the ribbon
-      const h = val * 1.15 * (0.72 + 0.28 * Math.sin(0 * 0.7 + x_i * (10 / width)));
+      const h = val * 1.18 * (0.72 + 0.28 * Math.sin(0 * 0.7 + x_i * (10 / width)));
       const y_base = 205 + (x_i - (width / 2)) * 0.15;
       
       list.push({
@@ -362,7 +362,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                   fill="none"
                   stroke="url(#ribbonGradient)"
                   strokeWidth={isFront ? 3 : 2.5}
-                  opacity={isFront ? 0.95 : 0.08 + (14 - c.index) * 0.01}
+                  opacity={isFront ? 0.95 : 0.08 + (16 - c.index) * 0.01}
                 />
               );
             })}
@@ -427,6 +427,16 @@ function PeakChart({ negScores = {}, posScores = {} }) {
               745 R  495 B
             </text>
 
+            {/* Front vertical post measurement ticks */}
+            {[0.2, 0.4, 0.6, 0.8].map((p, idx) => {
+              const ty = boxTopFront.y + p * (boxBottomFront.y - boxTopFront.y);
+              return (
+                <g key={idx}>
+                  <line x1={boxTopFront.x - 3} y1={ty} x2={boxTopFront.x + 3} y2={ty} stroke="rgba(255,255,255,0.35)" strokeWidth="1" />
+                </g>
+              );
+            })}
+
             {/* Dashed vertical coordinate lines & pins */}
             {pins.map((pin, idx) => {
               const isHovered = hovered && hovered.name === pin.name;
@@ -467,10 +477,10 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
                   />
 
-                  {/* Score label in yellow */}
+                  {/* Score label in yellow (Flat horizontal alignment) */}
                   <text
                     x={pin.xBase}
-                    y={pin.yBase + 16}
+                    y={300}
                     textAnchor="middle"
                     fill="#fbbf24"
                     style={{ fontFamily: SF, fontSize: 8.5, fontWeight: '700' }}
@@ -478,10 +488,10 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     {pin.score}%
                   </text>
 
-                  {/* Emotion short name below score */}
+                  {/* Emotion short name below score (Flat horizontal alignment) */}
                   <text
                     x={pin.xBase}
-                    y={pin.yBase + 28}
+                    y={312}
                     textAnchor="middle"
                     fill="rgba(255,255,255,0.3)"
                     style={{ fontFamily: SF, fontSize: 7.2, fontWeight: '600', letterSpacing: '0.4px' }}
