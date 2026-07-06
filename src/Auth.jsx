@@ -96,6 +96,21 @@ function OtpBoxes({ arr, setter, refs, color, disabled }) {
   );
 }
 
+// ── SUNSET BACKGROUND ────────────────────────────────────
+function SunsetBg({ opacity=0.88 }) {
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden', zIndex:0 }}>
+      <motion.div animate={{ scale:[1,1.03,1] }} transition={{ duration:25, repeat:Infinity, ease:'easeInOut' }}
+        style={{ position:'absolute', inset:0, backgroundImage:`url('/sunset_retro.png')`, backgroundSize:'cover', backgroundPosition:'center' }}/>
+      <div style={{ position:'absolute', inset:0, background:`rgba(4,3,14,${1 - opacity})` }}/>
+      {[{c:'rgba(224,82,77,0.15)',x:'10%',y:'10%',d:14},{c:'rgba(249,115,22,0.1)',x:'65%',y:'55%',d:18},{c:'rgba(236,72,153,0.12)',x:'40%',y:'25%',d:16}].map((g,i)=>(
+        <motion.div key={i} animate={{ scale:[1,1.2,1], opacity:[0.5,1,0.5], x:[0,25,-15,0], y:[0,-30,15,0] }} transition={{ duration:g.d, repeat:Infinity, ease:'easeInOut', delay:i*2 }}
+          style={{ position:'absolute', left:g.x, top:g.y, width:'400px', height:'400px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(60px)', pointerEvents:'none' }}/>
+      ))}
+    </div>
+  );
+}
+
 // ── MAIN ─────────────────────────────────────────────────
 export default function Auth({ onComplete }) {
   const [screen, setScreen] = useState('landing');
@@ -132,6 +147,13 @@ export default function Auth({ onComplete }) {
   const [canResend,  setCanResend]    = useState(false);
   const [activePhoneCode, setActivePhoneCode] = useState(''); // Stores the real sent OTP code
   const otpRefs = useRef([]);
+
+  // Phone Registration State (form details)
+  const [regEmail,   setRegEmail]     = useState('');
+  const [regName,    setRegName]      = useState('');
+  const [regNickname,setRegNickname]  = useState('');
+  const [regAgreed,  setRegAgreed]    = useState(false);
+  const [regSubmitLoad, setRegSubmitLoad] = useState(false);
 
   // ── EMAIL CODE LOGIN (new glass screen) ──
   const [ecSent,     setEcSent]       = useState(false);   
@@ -418,13 +440,36 @@ export default function Auth({ onComplete }) {
       // Validating against generated SMS code or static admin bypass
       if (code === activePhoneCode || code === '123456') {
         triggerNotification("OTP verified successfully!", "success");
-        goAIHub({ name:'User', email:`+91 ${phone}`, initial:'U' });
+        setScreen('phoneRegistration');
       } else {
         triggerNotification("Invalid Verification Code! Check and try again.", "error");
         setOtp(['','','','','','']);
         setTimeout(() => otpRefs.current[0]?.focus(), 100);
       }
     }, 1200);
+  };
+
+  // Profile save after phone verification
+  const handleProfileSave = () => {
+    if (!regName || !regNickname || !regEmail || !regAgreed) {
+      triggerNotification("Please fill in all details and agree to terms.", "error");
+      return;
+    }
+    if (!regEmail.includes('@')) {
+      triggerNotification("Please enter a valid email address.", "error");
+      return;
+    }
+    setRegSubmitLoad(true);
+    setTimeout(() => {
+      setRegSubmitLoad(false);
+      localStorage.setItem("user_email", regEmail);
+      localStorage.setItem("user_name", regName);
+      localStorage.setItem("user_photo", "");
+      localStorage.setItem("isLoggedIn", "true");
+      
+      triggerNotification("Profile completed successfully!", "success");
+      goAIHub({ name: regName, email: regEmail, initial: regName[0].toUpperCase() });
+    }, 1500);
   };
 
   // Signup Mobile Verification with Fast2SMS delivery
@@ -970,6 +1015,185 @@ export default function Auth({ onComplete }) {
               )}
               <button onClick={()=>{ setOtpSent(false); setOtp(['','','','','','']); }} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.22)', fontSize:'0.78rem', cursor:'pointer', fontFamily:J, marginTop:'14px' }}>← Change Number</button>
             </div>
+          </motion.div>
+        )}
+
+        {/* ═══════════════════════════════════════════
+            PHONE REGISTRATION (Form Template like Photo)
+        ═══════════════════════════════════════════ */}
+        {screen==='phoneRegistration' && (
+          <motion.div key="phone-registration" initial={{ opacity:0, scale:0.96 }} animate={{ opacity:1, scale:1 }} exit={{ opacity:0 }} transition={{ duration:0.6 }}
+            style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:10 }}>
+            
+            {/* Scenic warm sunset background */}
+            <SunsetBg opacity={0.65}/>
+            
+            {/* The main container box split 50-50 */}
+            <motion.div initial={{ y:25, opacity:0 }} animate={{ y:0, opacity:1 }} transition={{ delay:0.1 }}
+              style={{
+                width:'920px',
+                height:'580px',
+                display:'flex',
+                borderRadius:'28px',
+                border:'1px solid rgba(255,255,255,0.12)',
+                boxShadow:'0 50px 100px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.15)',
+                overflow:'hidden',
+                zIndex:2
+              }}
+            >
+              {/* Left Side: Solid Dark Charcoal Form */}
+              <div style={{
+                width:'460px',
+                background:'#131114',
+                padding:'44px 40px',
+                display:'flex',
+                flexDirection:'column',
+                justifyContent:'space-between',
+                position:'relative'
+              }}>
+                {shine}
+                
+                {/* Logo Top Left */}
+                <div style={{ display:'flex', alignItems:'center', gap:'4px', userSelect:'none' }}>
+                  <span style={{ fontFamily:S, fontWeight:'800', fontSize:'1.65rem', color:'#e0524d', letterSpacing:'1.5px' }}>EQ</span>
+                  <span style={{ fontFamily:S, fontWeight:'300', fontSize:'1.65rem', color:'rgba(255,255,255,0.95)', letterSpacing:'0.5px' }}>.fi</span>
+                </div>
+
+                {/* Main Form Fields */}
+                <div style={{ marginTop:'20px', flex:1, display:'flex', flexDirection:'column', justifyContent:'center' }}>
+                  <h1 style={{ fontFamily:J, fontWeight:'700', fontSize:'2.0rem', color:'#fff', margin:'0 0 4px', letterSpacing:'-0.5px' }}>Sign up</h1>
+                  <p style={{ color:'rgba(255,255,255,0.35)', fontSize:'0.82rem', marginBottom:'22px', fontFamily:J }}>
+                    Create your profile and start your consultation journey.
+                  </p>
+
+                  <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
+                    {/* Full Name */}
+                    <div>
+                      <input type="text" placeholder="Enter Full Name" value={regName} onChange={e=>setRegName(e.target.value)}
+                        style={{ width:'100%', height:'46px', padding:'0 16px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', color:'#fff', fontSize:'0.88rem', fontFamily:J, transition:'all 0.25s' }}
+                        onFocus={e=>{ e.target.style.borderColor='rgba(224,82,77,0.6)'; e.target.style.background='rgba(255,255,255,0.08)'; }}
+                        onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.background='rgba(255,255,255,0.05)'; }}/>
+                    </div>
+
+                    {/* Nickname */}
+                    <div>
+                      <input type="text" placeholder="Nickname" value={regNickname} onChange={e=>setRegNickname(e.target.value)}
+                        style={{ width:'100%', height:'46px', padding:'0 16px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', color:'#fff', fontSize:'0.88rem', fontFamily:J, transition:'all 0.25s' }}
+                        onFocus={e=>{ e.target.style.borderColor='rgba(224,82,77,0.6)'; e.target.style.background='rgba(255,255,255,0.08)'; }}
+                        onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.background='rgba(255,255,255,0.05)'; }}/>
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <input type="email" placeholder="Enter Email" value={regEmail} onChange={e=>setRegEmail(e.target.value)}
+                        style={{ width:'100%', height:'46px', padding:'0 16px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', color:'#fff', fontSize:'0.88rem', fontFamily:J, transition:'all 0.25s' }}
+                        onFocus={e=>{ e.target.style.borderColor='rgba(224,82,77,0.6)'; e.target.style.background='rgba(255,255,255,0.08)'; }}
+                        onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.background='rgba(255,255,255,0.05)'; }}/>
+                    </div>
+
+                    {/* Contact details (read-only prefilled phone number) */}
+                    <div>
+                      <input type="text" disabled value={`+91 ${phone}`}
+                        style={{ width:'100%', height:'46px', padding:'0 16px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:'12px', color:'rgba(255,255,255,0.4)', fontSize:'0.88rem', fontFamily:J, cursor:'not-allowed' }}/>
+                    </div>
+                  </div>
+
+                  {/* Agree Checkbox */}
+                  <label style={{ display:'flex', alignItems:'center', gap:'10px', margin:'16px 0 20px 2px', cursor:'pointer', userSelect:'none' }}>
+                    <input type="checkbox" checked={regAgreed} onChange={e=>setRegAgreed(e.target.checked)}
+                      style={{ accentColor:'#e0524d', width:'15px', height:'15px', cursor:'pointer' }}/>
+                    <span style={{ fontSize:'0.78rem', color:'rgba(255,255,255,0.45)', fontFamily:J }}>
+                      I Agree To The Terms & Privacy Policy
+                    </span>
+                  </label>
+
+                  {/* Submit Button */}
+                  {regSubmitLoad ? <Spinner color="#e0524d"/> : (
+                    <motion.button
+                      whileHover={{ scale:1.01 }}
+                      whileTap={{ scale:0.99 }}
+                      onClick={handleProfileSave}
+                      style={{
+                        width:'100%',
+                        height:'48px',
+                        background:'#ffffff',
+                        border:'none',
+                        borderRadius:'24px',
+                        color:'#131114',
+                        fontWeight:'700',
+                        fontSize:'0.9rem',
+                        fontFamily:J,
+                        cursor:'pointer',
+                        boxShadow:'0 10px 25px rgba(255,255,255,0.15)',
+                        transition:'all 0.3s'
+                      }}
+                    >
+                      Create Account
+                    </motion.button>
+                  )}
+                </div>
+
+                {/* Footer text */}
+                <p style={{ margin:0, textAlign:'center', color:'rgba(255,255,255,0.22)', fontSize:'0.75rem', fontFamily:J }}>
+                  Already Have An Account? <span onClick={()=>setScreen('landing')} style={{ color:'#e0524d', cursor:'pointer', fontWeight:'600' }}>Login</span>
+                </p>
+              </div>
+
+              {/* Right Side: Transparent Glassmorphism card overlay */}
+              <div style={{
+                width:'460px',
+                background:'linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                backdropFilter:'blur(24px)',
+                WebkitBackdropFilter:'blur(24px)',
+                padding:'44px',
+                display:'flex',
+                flexDirection:'column',
+                alignItems:'center',
+                justifyContent:'center',
+                borderLeft:'1px solid rgba(255,255,255,0.08)'
+              }}>
+                {/* Floating Retro Screen Overlay Logo */}
+                <motion.div 
+                  animate={{ y:[0, -8, 0] }}
+                  transition={{ duration:4, repeat:Infinity, ease:'easeInOut' }}
+                  style={{
+                    width:'140px',
+                    height:'120px',
+                    background:'rgba(255, 255, 255, 0.03)',
+                    border:'1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius:'20px',
+                    boxShadow:'0 25px 50px rgba(0,0,0,0.3)',
+                    display:'flex',
+                    flexDirection:'column',
+                    alignItems:'center',
+                    justifyContent:'center',
+                    position:'relative',
+                    backdropFilter:'blur(5px)'
+                  }}
+                >
+                  <div style={{
+                    width:'88px',
+                    height:'66px',
+                    background:'radial-gradient(circle at center, #ffd060 0%, #e0524d 100%)',
+                    borderRadius:'8px',
+                    boxShadow:'inset 0 2px 5px rgba(255,255,255,0.5), 0 0 20px rgba(224,82,77,0.4)',
+                    display:'flex',
+                    alignItems:'center',
+                    justifyContent:'center'
+                  }}>
+                    <span style={{ fontFamily:S, fontWeight:'900', fontSize:'1.1rem', color:'#131114', letterSpacing:'1px' }}>EQ.fi</span>
+                  </div>
+                  <div style={{
+                    width:'30px',
+                    height:'8px',
+                    background:'rgba(255, 255, 255, 0.12)',
+                    marginTop:'12px',
+                    borderRadius:'4px'
+                  }}/>
+                </motion.div>
+              </div>
+
+            </motion.div>
           </motion.div>
         )}
 
