@@ -160,7 +160,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     let denominator = 0;
     const epsilon = Math.max(100, (currentWidth / 500) * 180); // scale smoothness with width
     for (let i = 0; i < 12; i++) {
-      const x_i = 50 + i * ((currentWidth - 100) / 11); // Center range 50 to width - 50
+      const x_i = 65 + i * ((currentWidth - 130) / 11); // Center range 65 to width - 65
       const val = scoresList[i] || 0;
       const distSq = Math.pow(x - x_i, 2);
       const weight = 1 / (distSq + epsilon);
@@ -170,27 +170,28 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     return numerator / denominator;
   };
 
-  // Generate 8 parallel curve paths shifted in 3D perspective
+  // Generate 14 parallel curve paths shifted in 3D perspective to form the solid ribbon sheet
   const curvesPaths = React.useMemo(() => {
     const pathsList = [];
-    const steps = 8;
-    for (let j = 0; j < steps; j++) {
-      const offX = 10 + j * 4;
-      const offY = j * 6;
+    const steps = 14;
+    for (let k = 0; k < steps; k++) {
+      const offX = k * 2.2;
+      const offY = -k * 1.5;
       let pathStr = '';
       
-      const startX = 50;
-      const endX = width - 50;
+      const startX = 65;
+      const endX = width - 65;
       const step = Math.max(4, Math.round((endX - startX) / 100)); // step size dynamically scaled
       
       for (let x = startX; x <= endX; x += step) {
         const baseH = getInterpolatedScore(x, scores, width);
         // Add realistic 3D terrain wave deformation
-        const wave = 0.72 + 0.28 * Math.sin(j * 0.7 + x * (10 / width)); // scale frequency with width
-        const h = baseH * 1.35 * wave;
+        const wave = 0.72 + 0.28 * Math.sin(0 * 0.7 + x * (10 / width)); // scale frequency with width
+        const h = baseH * 1.15 * wave;
+        const y_base = 205 + (x - (width / 2)) * 0.15; // tilted baseline
         
         const px = x + offX;
-        const py = 220 - offY - h; // Base curve center_y shifted to 220
+        const py = y_base + offY - h;
         
         if (x === startX) {
           pathStr += `M ${px} ${py}`;
@@ -198,9 +199,36 @@ function PeakChart({ negScores = {}, posScores = {} }) {
           pathStr += ` L ${px} ${py}`;
         }
       }
-      pathsList.push({ path: pathStr, index: j });
+      pathsList.push({ path: pathStr, index: k });
     }
     return pathsList;
+  }, [scores, width]);
+
+  // Secondary Intersecting Wave (opposite phase / wavelength guide)
+  const secondaryCurve = React.useMemo(() => {
+    let pathStr = '';
+    const startX = 65;
+    const endX = width - 65;
+    const step = Math.max(4, Math.round((endX - startX) / 100));
+    
+    for (let x = startX; x <= endX; x += step) {
+      const baseH = getInterpolatedScore(x, scores, width);
+      // opposite phase wave
+      const wave = 0.55 * Math.sin((x * 12) / width);
+      const h = baseH * 0.75 * wave;
+      const y_base = 205 + (x - (width / 2)) * 0.15;
+      
+      // slightly shifted in depth (k = 6)
+      const px = x + 6 * 2.2;
+      const py = y_base - 6 * 1.5 - h;
+      
+      if (x === startX) {
+        pathStr += `M ${px} ${py}`;
+      } else {
+        pathStr += ` L ${px} ${py}`;
+      }
+    }
+    return pathStr;
   }, [scores, width]);
 
   // Guides and Pins metadata
@@ -211,12 +239,12 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     const names = ['Anxiety', 'Depression', 'Stress', 'Loneliness', 'Overwhelm', 'Burnout', 'Calmness', 'Happiness', 'Focus', 'Energy', 'Confidence', 'Inner Peace'];
     
     for (let i = 0; i < 12; i++) {
-      const x_i = 50 + i * ((width - 100) / 11);
+      const x_i = 65 + i * ((width - 130) / 11);
       const val = scores[i] || 0;
       
-      // j = 0 has offX = 10
-      const offX = 10; 
-      const h = val * 1.35 * (0.72 + 0.28 * Math.sin(0 * 0.7 + x_i * (10 / width)));
+      const offX = 0; // Front edge of the ribbon
+      const h = val * 1.15 * (0.72 + 0.28 * Math.sin(0 * 0.7 + x_i * (10 / width)));
+      const y_base = 205 + (x_i - (width / 2)) * 0.15;
       
       list.push({
         index: i + 1,
@@ -225,13 +253,24 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         icon: icons[i],
         score: val,
         xBase: x_i + offX,
-        yBase: 240, // Base line y coordinate set to 240
+        yBase: y_base,
         xTop: x_i + offX,
-        yTop: 220 - h
+        yTop: y_base - h
       });
     }
     return list;
   }, [scores, width]);
+
+  // Bounding box key points
+  const midX = width / 2;
+  const boxTopBack = { x: midX, y: 45 };
+  const boxBottomBack = { x: midX, y: 165 };
+  const boxTopLeft = { x: 60, y: 115 };
+  const boxBottomLeft = { x: 60, y: 235 };
+  const boxTopRight = { x: width - 60, y: 115 };
+  const boxBottomRight = { x: width - 60, y: 235 };
+  const boxTopFront = { x: midX, y: 185 };
+  const boxBottomFront = { x: midX, y: 305 };
 
   return (
     <div style={{ position:'relative', borderRadius:'18px', overflow:'hidden', padding:'16px 8px 4px',
@@ -264,80 +303,129 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         </div>
       </div>
 
-      <div ref={containerRef} style={{ height:310, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
+      <div ref={containerRef} style={{ height:350, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
         <motion.div
           animate={{ y: [0, -6, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
         >
-          <svg width={width} height={270} viewBox={`0 0 ${width} 270`} style={{ overflow:'visible' }}>
+          <svg width={width} height={320} viewBox={`0 0 ${width} 320`} style={{ overflow:'visible' }}>
             <defs>
-              <filter id="neon-glow-peaks" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="5" result="blur" />
-                <feComponentTransfer in="blur" result="glow">
-                  <feFuncA type="linear" slope="0.6"/>
-                </feComponentTransfer>
-                <feMerge>
-                  <feMergeNode in="glow" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
+              {/* Volumetric Color-shifting Linear Gradient */}
+              <linearGradient id="ribbonGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#2563eb" />
+                <stop offset="25%" stopColor="#06b6d4" />
+                <stop offset="50%" stopColor="#10b981" />
+                <stop offset="75%" stopColor="#8b5cf6" />
+                <stop offset="100%" stopColor="#ec4899" />
+              </linearGradient>
             </defs>
 
-            {/* Background Grid Meshes */}
-            {[1, 2, 3, 4].map((gridIdx) => {
-              const yGrid = 240 - gridIdx * 35;
+            {/* 3D Glass Box - Back Faded Wireframe Grid */}
+            <g opacity="0.6">
+              <path d={`M ${boxTopLeft.x} ${boxTopLeft.y} L ${boxTopBack.x} ${boxTopBack.y} L ${boxTopRight.x} ${boxTopRight.y}`} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="2 3" />
+              <path d={`M ${boxBottomLeft.x} ${boxBottomLeft.y} L ${boxBottomBack.x} ${boxBottomBack.y} L ${boxBottomRight.x} ${boxBottomRight.y}`} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="2 3" />
+              <line x1={boxBottomBack.x} y1={boxBottomBack.y} x2={boxTopBack.x} y2={boxTopBack.y} stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="2 3" />
+            </g>
+
+            {/* 3D Glass Box - Inner Horizontal Coordinate Guideline Grid */}
+            {[1, 2, 3].map((gridIdx) => {
+              const yOffset = gridIdx * 35;
               return (
-                <line
+                <path
                   key={gridIdx}
-                  x1="40"
-                  y1={yGrid}
-                  x2={width - 40}
-                  y2={yGrid}
-                  stroke="rgba(255,255,255,0.035)"
-                  strokeDasharray="2 6"
+                  d={`M ${boxBottomLeft.x} ${boxBottomLeft.y - yOffset} L ${boxBottomBack.x} ${boxBottomBack.y - yOffset} L ${boxBottomRight.x} ${boxBottomRight.y - yOffset}`}
+                  fill="none"
+                  stroke="rgba(255,255,255,0.02)"
                   strokeWidth="0.75"
+                  strokeDasharray="2 6"
                 />
               );
             })}
 
-            {/* Base Horizontal Axis line */}
-            <line x1="40" y1="240" x2={width - 40} y2="240" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+            {/* Secondary Intersecting Wave (wavelength guide) */}
+            <path
+              d={secondaryCurve}
+              fill="none"
+              stroke="rgba(255,255,255,0.16)"
+              strokeWidth="1.2"
+              strokeDasharray="3 4"
+            />
 
-            {/* Back Contour Lines (Dashed grey) */}
+            {/* 3D Ribbon Paths (Overlapping to build density sheet) */}
             {curvesPaths.map((c, idx) => {
-              if (c.index === 0) return null; // draw front solid curve last for overlap
+              const isFront = c.index === 0;
               return (
                 <path
                   key={idx}
                   d={c.path}
                   fill="none"
-                  stroke="rgba(255,255,255,0.18)"
-                  strokeWidth="1"
-                  strokeDasharray="2 3"
-                  opacity={1.0 - c.index * 0.08}
+                  stroke="url(#ribbonGradient)"
+                  strokeWidth={isFront ? 3 : 2.5}
+                  opacity={isFront ? 0.95 : 0.08 + (14 - c.index) * 0.01}
                 />
               );
             })}
 
-            {/* Front Highlight Curve (Double-stroke vector glow) */}
+            {/* Front Crisp White Highlight Line representing light reflection edge */}
             {curvesPaths[0] && (
-              <>
-                <path
-                  d={curvesPaths[0].path}
-                  fill="none"
-                  stroke="#fbbf24"
-                  strokeWidth="5.5"
-                  opacity="0.14"
-                />
-                <path
-                  d={curvesPaths[0].path}
-                  fill="none"
-                  stroke="#fbbf24"
-                  strokeWidth="2.2"
-                />
-              </>
+              <path
+                d={curvesPaths[0].path}
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="1"
+                opacity="0.88"
+              />
             )}
+
+            {/* 3D Glass Box - Front Solid Wireframe Frame */}
+            <g>
+              {/* Bottom floor edges */}
+              <path d={`M ${boxBottomLeft.x} ${boxBottomLeft.y} L ${boxBottomFront.x} ${boxBottomFront.y} L ${boxBottomRight.x} ${boxBottomRight.y}`} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
+              {/* Top ceiling edges */}
+              <path d={`M ${boxTopLeft.x} ${boxTopLeft.y} L ${boxTopFront.x} ${boxTopFront.y} L ${boxTopRight.x} ${boxTopRight.y}`} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
+              {/* Corner vertical posts */}
+              <line x1={boxBottomLeft.x} y1={boxBottomLeft.y} x2={boxTopLeft.x} y2={boxTopLeft.y} stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
+              <line x1={boxBottomRight.x} y1={boxBottomRight.y} x2={boxTopRight.x} y2={boxTopRight.y} stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
+              <line x1={boxBottomFront.x} y1={boxBottomFront.y} x2={boxTopFront.x} y2={boxTopFront.y} stroke="rgba(255,255,255,0.22)" strokeWidth="1.4" />
+            </g>
+
+            {/* Decal - Bounding Box Ticks & Labels */}
+            {/* Wavelength Ticks at Top Front ceiling edge */}
+            {[0, 0.25, 0.5, 0.75, 1].map((p, idx) => {
+              const tx = boxTopLeft.x + p * (boxTopRight.x - boxTopLeft.x);
+              const ty = boxTopLeft.y + p * (boxTopRight.y - boxTopLeft.y);
+              return (
+                <g key={idx}>
+                  <line x1={tx} y1={ty} x2={tx} y2={ty - 4} stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+                </g>
+              );
+            })}
+            <text
+              x={midX}
+              y={boxTopFront.y - 12}
+              textAnchor="middle"
+              fill="rgba(255,255,255,0.45)"
+              style={{ fontFamily:SF, fontSize:7.5, fontWeight:'600', letterSpacing:'1.5px' }}
+            >
+              WAVELENGTH
+            </text>
+
+            {/* Scientific Crosshair Target Marker in Center */}
+            <g transform={`translate(${midX - 35}, 160)`}>
+              <circle r="8" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+              <line x1="-4" y1="0" x2="4" y2="0" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+              <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+            </g>
+            <text
+              x={midX - 35}
+              y={182}
+              textAnchor="middle"
+              fill="rgba(255,255,255,0.25)"
+              style={{ fontFamily:SF, fontSize:6.5, fontWeight:'600' }}
+            >
+              745 R  495 B
+            </text>
 
             {/* Dashed vertical coordinate lines & pins */}
             {pins.map((pin, idx) => {
@@ -359,15 +447,15 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     setHovered(null);
                   }}
                 >
-                  {/* Vertical dashed line */}
+                  {/* Vertical dashed guide line */}
                   <line
                     x1={pin.xBase}
                     y1={pin.yBase}
                     x2={pin.xTop}
                     y2={pin.yTop}
-                    stroke={isHovered ? '#fbbf24' : 'rgba(255,255,255,0.22)'}
-                    strokeDasharray="3 3"
-                    strokeWidth={isHovered ? 1.5 : 1}
+                    stroke={isHovered ? '#fbbf24' : 'rgba(255,255,255,0.2)'}
+                    strokeDasharray="2 3"
+                    strokeWidth={isHovered ? 1.5 : 0.75}
                     style={{ transition: 'stroke 0.25s' }}
                   />
 
@@ -375,7 +463,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                   <circle
                     cx={pin.xBase}
                     cy={pin.yBase}
-                    r="2.5"
+                    r="2"
                     fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
                   />
 
