@@ -312,12 +312,11 @@ function PeakChart({ negScores = {}, posScores = {} }) {
               const colors = getFaceColors(item.score);
 
               const isMain = item.isMain;
-              const sizeW = isMain ? 12 : 7;
-              const sizeH = isMain ? 6 : 3.5;
+              const rx = isMain ? 11 : 6.5;
+              const ry = rx * 0.48;
 
-              const topPoints = `${x} ${y - h - sizeH}, ${x + sizeW} ${y - h}, ${x} ${y - h + sizeH}, ${x - sizeW} ${y - h}`;
-              const leftPoints = `${x - sizeW} ${y - h}, ${x} ${y - h + sizeH}, ${x} ${y + sizeH}, ${x - sizeW} ${y}`;
-              const rightPoints = `${x} ${y - h + sizeH}, ${x + sizeW} ${y - h}, ${x + sizeW} ${y}, ${x} ${y + sizeH}`;
+              const leftPath = `M ${x - rx} ${y - h} A ${rx} ${ry} 0 0 0 ${x} ${y - h + ry} L ${x} ${y + ry} A ${rx} ${ry} 0 0 1 ${x - rx} ${y} Z`;
+              const rightPath = `M ${x} ${y - h + ry} A ${rx} ${ry} 0 0 0 ${x + rx} ${y - h} L ${x + rx} ${y} A ${rx} ${ry} 0 0 1 ${x} ${y + ry} Z`;
 
               return (
                 <g
@@ -343,21 +342,24 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     <ellipse
                       cx={x}
                       cy={y}
-                      rx={sizeW * 2.2}
-                      ry={sizeH * 2.2}
+                      rx={rx * 2.2}
+                      ry={ry * 2.2}
                       fill={colors.glow}
                       opacity="0.08"
                       style={{ filter: 'blur(8px)' }}
                     />
                   )}
 
-                  <polygon points={leftPoints} fill={colors.left} opacity={isMain ? 0.95 : 0.88} />
-                  <polygon points={rightPoints} fill={colors.right} opacity={isMain ? 0.95 : 0.88} />
-                  <polygon points={topPoints} fill={colors.top} opacity={isMain ? 0.95 : 0.88} />
+                  <path d={leftPath} fill={colors.left} opacity={isMain ? 0.95 : 0.88} />
+                  <path d={rightPath} fill={colors.right} opacity={isMain ? 0.95 : 0.88} />
+                  <ellipse cx={x} cy={y - h} rx={rx} ry={ry} fill={colors.top} opacity={isMain ? 0.95 : 0.88} />
                   
                   {isMain && (
-                    <polygon
-                      points={topPoints}
+                    <ellipse
+                      cx={x}
+                      cy={y - h}
+                      rx={rx}
+                      ry={ry}
                       fill="none"
                       stroke="rgba(255,255,255,0.4)"
                       strokeWidth="0.75"
