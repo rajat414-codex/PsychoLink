@@ -284,6 +284,23 @@ function PeakChart({ negScores = {}, posScores = {} }) {
               </filter>
             </defs>
 
+            {/* Background Grid Meshes */}
+            {[1, 2, 3, 4].map((gridIdx) => {
+              const yGrid = 240 - gridIdx * 35;
+              return (
+                <line
+                  key={gridIdx}
+                  x1="40"
+                  y1={yGrid}
+                  x2={width - 40}
+                  y2={yGrid}
+                  stroke="rgba(255,255,255,0.035)"
+                  strokeDasharray="2 6"
+                  strokeWidth="0.75"
+                />
+              );
+            })}
+
             {/* Base Horizontal Axis line */}
             <line x1="40" y1="240" x2={width - 40} y2="240" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
 
@@ -303,15 +320,23 @@ function PeakChart({ negScores = {}, posScores = {} }) {
               );
             })}
 
-            {/* Front Highlight Curve (Solid Yellow with Glow) */}
+            {/* Front Highlight Curve (Double-stroke vector glow) */}
             {curvesPaths[0] && (
-              <path
-                d={curvesPaths[0].path}
-                fill="none"
-                stroke="#fbbf24"
-                strokeWidth="2.5"
-                filter="url(#neon-glow-peaks)"
-              />
+              <>
+                <path
+                  d={curvesPaths[0].path}
+                  fill="none"
+                  stroke="#fbbf24"
+                  strokeWidth="5.5"
+                  opacity="0.14"
+                />
+                <path
+                  d={curvesPaths[0].path}
+                  fill="none"
+                  stroke="#fbbf24"
+                  strokeWidth="2.2"
+                />
+              </>
             )}
 
             {/* Dashed vertical coordinate lines & pins */}
@@ -346,14 +371,12 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     style={{ transition: 'stroke 0.25s' }}
                   />
 
-                  {/* Horizontal tick at axis */}
-                  <line
-                    x1={pin.xBase}
-                    y1={pin.yBase}
-                    x2={pin.xBase}
-                    y2={pin.yBase + 5}
-                    stroke="rgba(255,255,255,0.3)"
-                    strokeWidth="1"
+                  {/* Axis solid base dot */}
+                  <circle
+                    cx={pin.xBase}
+                    cy={pin.yBase}
+                    r="2.5"
+                    fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
                   />
 
                   {/* Score label in yellow */}
@@ -372,8 +395,8 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     x={pin.xBase}
                     y={pin.yBase + 28}
                     textAnchor="middle"
-                    fill="rgba(255,255,255,0.4)"
-                    style={{ fontFamily: SF, fontSize: 7.5, fontWeight: '600' }}
+                    fill="rgba(255,255,255,0.3)"
+                    style={{ fontFamily: SF, fontSize: 7.2, fontWeight: '600', letterSpacing: '0.4px' }}
                   >
                     {pin.label}
                   </text>
@@ -400,7 +423,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     x={pin.xTop}
                     y={pin.yTop - 11}
                     textAnchor="middle"
-                    fill={isHovered ? (pin.index === 12 ? '#ffffff' : '#fbbf24') : '#fff'}
+                    fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
                     style={{ fontFamily: SF, fontSize: 8.5, fontWeight: 'bold' }}
                   >
                     {pin.index}
