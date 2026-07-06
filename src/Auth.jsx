@@ -111,6 +111,167 @@ function SunsetBg({ opacity=0.88 }) {
   );
 }
 
+// ── GLOWING SOUL COMPONENT ────────────────────────────────
+function GlowingSoul() {
+  const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
+  const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
+
+  return (
+    <div style={{
+      position: 'relative',
+      width: '320px',
+      height: '320px',
+      background: 'radial-gradient(circle at center, #18161b 0%, #0d0c0e 100%)',
+      borderRadius: '24px',
+      border: '1.5px solid rgba(255, 255, 255, 0.15)',
+      boxShadow: '0 25px 50px rgba(0,0,0,0.6), 0 0 30px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)',
+      overflow: 'hidden',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      {/* Background grain texture effect */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        opacity: 0.04,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        pointerEvents: 'none'
+      }} />
+
+      {/* Pulsing ambient aura in background */}
+      <motion.div
+        animate={{ scale: [0.9, 1.1, 0.9], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute',
+          width: '180px',
+          height: '180px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%)',
+          filter: 'blur(30px)',
+          zIndex: 1,
+          pointerEvents: 'none'
+        }}
+      />
+
+      <svg width="100%" height="100%" viewBox="0 0 300 300" style={{ position: 'relative', zIndex: 2 }}>
+        <defs>
+          <filter id="soul-glow-heavy" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur1" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur2" />
+            <feMerge>
+              <feMergeNode in="blur1" />
+              <feMergeNode in="blur2" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          
+          <linearGradient id="soul-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+            <stop offset="35%" stopColor="#f5f5f7" stopOpacity="0.9" />
+            <stop offset="70%" stopColor="#e2e2e8" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* Target axis crosshairs */}
+        <line x1="20" y1="110" x2="280" y2="110" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+        <line x1="150" y1="20" x2="150" y2="280" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+
+        {/* Concentric rotating orbital rings */}
+        <motion.g
+          animate={{ rotate: 360 }}
+          transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
+          style={{ transformOrigin: '150px 110px' }}
+        >
+          <circle cx="150" cy="110" r="50" stroke="rgba(255,255,255,0.05)" strokeWidth="0.75" fill="none" strokeDasharray="3 6" />
+          <circle cx="150" cy="110" r="90" stroke="rgba(255,255,255,0.04)" strokeWidth="0.75" fill="none" strokeDasharray="6 8" />
+        </motion.g>
+
+        <motion.g
+          animate={{ rotate: -360 }}
+          transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
+          style={{ transformOrigin: '150px 110px' }}
+        >
+          <circle cx="150" cy="110" r="130" stroke="rgba(255,255,255,0.03)" strokeWidth="0.75" fill="none" strokeDasharray="4 12" />
+        </motion.g>
+
+        {/* Sparkling stars inside and around */}
+        {[
+          { x: 130, y: 90, delay: 0 },
+          { x: 170, y: 120, delay: 0.5 },
+          { x: 145, y: 150, delay: 1 },
+          { x: 155, y: 70, delay: 1.5 },
+          { x: 110, y: 130, delay: 2 },
+          { x: 190, y: 95, delay: 2.5 }
+        ].map((star, idx) => (
+          <motion.circle
+            key={idx}
+            cx={star.x}
+            cy={star.y}
+            r="1"
+            fill="#ffffff"
+            animate={{ opacity: [0.1, 0.9, 0.1], scale: [0.8, 1.3, 0.8] }}
+            transition={{ duration: 3, repeat: Infinity, delay: star.delay }}
+          />
+        ))}
+
+        {/* The Soul Figure Group */}
+        <g filter="url(#soul-glow-heavy)">
+          {/* Head */}
+          <circle cx="150" cy="60" r="13" fill="url(#soul-gradient)" />
+
+          {/* Torso & Legs */}
+          <path
+            d="M 145,72 C 145,72 132,77 132,80 C 132,83 136,98 136,104 C 136,115 142,130 142,145 C 142,165 136,185 144,235 C 145,240 155,240 156,235 C 164,185 158,165 158,145 C 158,130 164,115 164,104 C 164,98 168,83 168,80 C 168,77 155,72 155,72 Z"
+            fill="url(#soul-gradient)"
+          />
+
+          {/* Left Arm (relaxed at side) */}
+          <path
+            d="M 132,80 C 122,95 116,115 115,135 C 115,138 118,138 119,135 C 121,118 127,100 136,92 Z"
+            fill="url(#soul-gradient)"
+          />
+
+          {/* Right Arm (Waving animation group) */}
+          <motion.g
+            animate={{ rotate: [-6, 12, -6] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut', repeatType: 'mirror' }}
+            style={{ transformOrigin: '168px 80px' }}
+          >
+            <path
+              d="M 168,80 C 178,72 186,60 192,44 C 195,40 201,37 203,40 C 205,43 199,48 195,47 C 188,62 178,76 166,86 Z"
+              fill="url(#soul-gradient)"
+            />
+          </motion.g>
+        </g>
+      </svg>
+
+      {/* Bottom info glass tag */}
+      <div style={{
+        position: 'absolute',
+        bottom: '12px',
+        left: '12px',
+        right: '12px',
+        background: 'rgba(19, 17, 20, 0.72)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '12px',
+        padding: '6px 12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        zIndex: 3
+      }}>
+        <span style={{ fontFamily: J, fontSize: '0.72rem', fontWeight: '700', color: '#fff', letterSpacing: '0.5px' }}>Therapy Core</span>
+        <span style={{ fontFamily: S, fontSize: '0.65rem', fontWeight: '600', color: 'rgba(255,255,255,0.4)' }}>Solvana</span>
+      </div>
+    </div>
+  );
+}
+
 // ── MAIN ─────────────────────────────────────────────────
 export default function Auth({ onComplete }) {
   const [screen, setScreen] = useState('landing');
@@ -1152,56 +1313,12 @@ export default function Auth({ onComplete }) {
                 justifyContent:'center',
                 borderLeft:'1px solid rgba(255,255,255,0.08)'
               }}>
-                {/* Floating Scenic Anime Artwork with Glowing Borders */}
-                <motion.div 
-                  animate={{ y:[0, -10, 0], rotate:[0, 0.5, -0.5, 0] }}
-                  transition={{ duration:5, repeat:Infinity, ease:'easeInOut' }}
-                  style={{
-                    width:'320px',
-                    height:'240px',
-                    background:'rgba(255, 255, 255, 0.03)',
-                    border:'1.5px solid rgba(255, 255, 255, 0.25)',
-                    borderRadius:'24px',
-                    boxShadow:'0 25px 50px rgba(0,0,0,0.5), 0 0 30px rgba(224,82,77,0.25), 0 0 50px rgba(139,135,245,0.15)',
-                    overflow:'hidden',
-                    position:'relative',
-                    display:'flex',
-                    alignItems:'center',
-                    justifyContent:'center',
-                    backdropFilter:'blur(5px)',
-                    cursor:'pointer'
-                  }}
+                {/* Floating Animated Glowing Soul */}
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  <img src="/anime_calm.png" alt="Fresh Mind Anime Scenery" style={{
-                    width:'100%',
-                    height:'100%',
-                    objectFit:'cover',
-                    borderRadius:'22px',
-                    transition:'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
-                  }}
-                  onMouseOver={e=>e.currentTarget.style.transform='scale(1.06)'}
-                  onMouseOut={e=>e.currentTarget.style.transform='scale(1.0)'}/>
-                  
-                  {/* Bottom glass overlay branding */}
-                  <div style={{
-                    position:'absolute',
-                    bottom:'12px',
-                    left:'12px',
-                    right:'12px',
-                    background:'rgba(19, 17, 20, 0.72)',
-                    backdropFilter:'blur(8px)',
-                    WebkitBackdropFilter:'blur(8px)',
-                    border:'1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius:'12px',
-                    padding:'8px 14px',
-                    display:'flex',
-                    alignItems:'center',
-                    justifyContent:'space-between',
-                    boxShadow:'0 8px 32px rgba(0,0,0,0.25)'
-                  }}>
-                    <span style={{ fontFamily:J, fontSize:'0.75rem', fontWeight:'700', color:'#fff', letterSpacing:'0.5px' }}>Mind Space ✨</span>
-                    <span style={{ fontFamily:S, fontSize:'0.68rem', fontWeight:'600', color:'#e0524d' }}>EQ.fi</span>
-                  </div>
+                  <GlowingSoul />
                 </motion.div>
               </div>
 
