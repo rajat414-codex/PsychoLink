@@ -170,65 +170,51 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     return numerator / denominator;
   };
 
-  // Generate 16 parallel curve paths shifted in 3D perspective to form the solid ribbon sheet
-  const curvesPaths = React.useMemo(() => {
-    const pathsList = [];
-    const steps = 16;
-    for (let k = 0; k < steps; k++) {
-      const offX = k * 1.5;
-      const offY = -k * 1.0;
-      let pathStr = '';
-      
-      const startX = 65;
-      const endX = width - 65;
-      const step = Math.max(2, Math.round((endX - startX) / 150)); // higher resolution steps
-      
-      for (let x = startX; x <= endX; x += step) {
-        const baseH = getInterpolatedScore(x, scores, width);
-        // Add realistic 3D terrain wave deformation
-        const wave = 0.72 + 0.28 * Math.sin(0 * 0.7 + x * (10 / width));
-        const h = baseH * 1.18 * wave;
-        const y_base = 205 + (x - (width / 2)) * 0.15; // tilted baseline on floor
-        
-        const px = x + offX;
-        const py = y_base + offY - h;
-        
-        if (x === startX) {
-          pathStr += `M ${px} ${py}`;
-        } else {
-          pathStr += ` L ${px} ${py}`;
-        }
-      }
-      pathsList.push({ path: pathStr, index: k });
-    }
-    return pathsList;
-  }, [scores, width]);
-
-  // Secondary Intersecting Wave (opposite phase / wavelength guide)
-  const secondaryCurve = React.useMemo(() => {
-    let pathStr = '';
-    const startX = 65;
-    const endX = width - 65;
-    const step = Math.max(2, Math.round((endX - startX) / 150));
+  // Generate foreground wave path, background wave path, and locate highest peak coordinates
+  const waveData = React.useMemo(() => {
+    const startX = 50;
+    const endX = width - 50;
+    const step = 2; // high resolution smoothness
     
+    let mainPath = '';
+    let bgPath = '';
+    let bgAreaPath = '';
+    
+    let peakCoord = { x: width / 2, y: 120, val: 0 };
+
     for (let x = startX; x <= endX; x += step) {
+      // Main foreground wave
       const baseH = getInterpolatedScore(x, scores, width);
-      // opposite phase wave
-      const wave = 0.55 * Math.sin((x * 12) / width);
-      const h = baseH * 0.75 * wave;
-      const y_base = 205 + (x - (width / 2)) * 0.15;
+      const h = baseH * 1.55;
+      const py = 230 - h;
       
-      // slightly shifted in depth (k = 6)
-      const px = x + 6 * 1.5;
-      const py = y_base - 6 * 1.0 - h;
+      if (baseH > peakCoord.val) {
+        peakCoord = { x, y: py, val: baseH };
+      }
       
       if (x === startX) {
-        pathStr += `M ${px} ${py}`;
+        mainPath += `M ${x} ${py}`;
       } else {
-        pathStr += ` L ${px} ${py}`;
+        mainPath += ` L ${x} ${py}`;
+      }
+      
+      // Secondary background area wave (phase-shifted and lower)
+      const baseH_bg = getInterpolatedScore(x - 32, scores, width);
+      const bgWaveDisp = 6 * Math.sin(x * 0.02);
+      const h_bg = Math.max(10, baseH_bg * 0.76 + bgWaveDisp);
+      const py_bg = 230 - h_bg;
+      
+      if (x === startX) {
+        bgPath += `M ${x} ${py_bg}`;
+        bgAreaPath += `M ${x} 230 L ${x} ${py_bg}`;
+      } else {
+        bgPath += ` L ${x} ${py_bg}`;
+        bgAreaPath += ` L ${x} ${py_bg}`;
       }
     }
-    return pathStr;
+    bgAreaPath += ` L ${endX} 230 Z`;
+    
+    return { mainPath, bgPath, bgAreaPath, peakCoord };
   }, [scores, width]);
 
   // Guides and Pins metadata
@@ -242,9 +228,8 @@ function PeakChart({ negScores = {}, posScores = {} }) {
       const x_i = 65 + i * ((width - 130) / 11);
       const val = scores[i] || 0;
       
-      const offX = 0; // Front edge of the ribbon
-      const h = val * 1.18 * (0.72 + 0.28 * Math.sin(0 * 0.7 + x_i * (10 / width)));
-      const y_base = 205 + (x_i - (width / 2)) * 0.15;
+      const h = val * 1.55;
+      const yTop = 230 - h;
       
       list.push({
         index: i + 1,
@@ -252,25 +237,14 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         label: labels[i],
         icon: icons[i],
         score: val,
-        xBase: x_i + offX,
-        yBase: y_base,
-        xTop: x_i + offX,
-        yTop: y_base - h
+        xBase: x_i,
+        yBase: 230,
+        xTop: x_i,
+        yTop: yTop
       });
     }
     return list;
   }, [scores, width]);
-
-  // Bounding box key points
-  const midX = width / 2;
-  const boxTopBack = { x: midX, y: 45 };
-  const boxBottomBack = { x: midX, y: 165 };
-  const boxTopLeft = { x: 60, y: 115 };
-  const boxBottomLeft = { x: 60, y: 235 };
-  const boxTopRight = { x: width - 60, y: 115 };
-  const boxBottomRight = { x: width - 60, y: 235 };
-  const boxTopFront = { x: midX, y: 185 };
-  const boxBottomFront = { x: midX, y: 305 };
 
   return (
     <div style={{ position:'relative', borderRadius:'18px', overflow:'hidden', padding:'16px 8px 4px',
@@ -303,139 +277,137 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         </div>
       </div>
 
-      <div ref={containerRef} style={{ height:350, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
+      <div ref={containerRef} style={{ height:320, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
         <motion.div
-          animate={{ y: [0, -6, 0] }}
+          animate={{ y: [0, -4, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
         >
           <svg width={width} height={320} viewBox={`0 0 ${width} 320`} style={{ overflow:'visible' }}>
             <defs>
-              {/* Volumetric Color-shifting Linear Gradient */}
-              <linearGradient id="ribbonGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#2563eb" />
-                <stop offset="25%" stopColor="#06b6d4" />
-                <stop offset="50%" stopColor="#10b981" />
-                <stop offset="75%" stopColor="#8b5cf6" />
-                <stop offset="100%" stopColor="#ec4899" />
+              {/* Foreground Neon Color Gradient */}
+              <linearGradient id="glowPathGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#8b5cf6" />
+                <stop offset="35%" stopColor="#ec4899" />
+                <stop offset="65%" stopColor="#f97316" />
+                <stop offset="100%" stopColor="#fbbf24" />
               </linearGradient>
+
+              {/* Background Wave Translucent Area Gradient */}
+              <linearGradient id="bgAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(139,92,246,0.18)" />
+                <stop offset="100%" stopColor="rgba(139,92,246,0.0)" />
+              </linearGradient>
+
+              {/* Vertical Glowing Peak Beam Gradient */}
+              <linearGradient id="verticalBeamGradient" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#ec4899" stopOpacity="0" />
+              </linearGradient>
+
+              {/* Radial Peak Flare Gradient */}
+              <radialGradient id="peakFlareGradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.55" />
+                <stop offset="60%" stopColor="#ec4899" stopOpacity="0.1" />
+                <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+              </radialGradient>
             </defs>
 
-            {/* 3D Glass Box - Back Faded Wireframe Grid */}
-            <g opacity="0.6">
-              <path d={`M ${boxTopLeft.x} ${boxTopLeft.y} L ${boxTopBack.x} ${boxTopBack.y} L ${boxTopRight.x} ${boxTopRight.y}`} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="2 3" />
-              <path d={`M ${boxBottomLeft.x} ${boxBottomLeft.y} L ${boxBottomBack.x} ${boxBottomBack.y} L ${boxBottomRight.x} ${boxBottomRight.y}`} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="2 3" />
-              <line x1={boxBottomBack.x} y1={boxBottomBack.y} x2={boxTopBack.x} y2={boxTopBack.y} stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="2 3" />
-            </g>
-
-            {/* 3D Glass Box - Inner Horizontal Coordinate Guideline Grid */}
-            {[1, 2, 3].map((gridIdx) => {
-              const yOffset = gridIdx * 35;
+            {/* Vertical column divider grid lines */}
+            {[0.2, 0.4, 0.6, 0.8].map((p, idx) => {
+              const gx = 50 + p * (width - 100);
               return (
-                <path
-                  key={gridIdx}
-                  d={`M ${boxBottomLeft.x} ${boxBottomLeft.y - yOffset} L ${boxBottomBack.x} ${boxBottomBack.y - yOffset} L ${boxBottomRight.x} ${boxBottomRight.y - yOffset}`}
-                  fill="none"
-                  stroke="rgba(255,255,255,0.02)"
-                  strokeWidth="0.75"
-                  strokeDasharray="2 6"
-                />
-              );
-            })}
-
-            {/* Secondary Intersecting Wave (wavelength guide) */}
-            <path
-              d={secondaryCurve}
-              fill="none"
-              stroke="rgba(255,255,255,0.16)"
-              strokeWidth="1.2"
-              strokeDasharray="3 4"
-            />
-
-            {/* 3D Ribbon Paths (Overlapping to build density sheet) */}
-            {curvesPaths.map((c, idx) => {
-              const isFront = c.index === 0;
-              return (
-                <path
+                <line
                   key={idx}
-                  d={c.path}
-                  fill="none"
-                  stroke="url(#ribbonGradient)"
-                  strokeWidth={isFront ? 3 : 2.5}
-                  opacity={isFront ? 0.95 : 0.08 + (16 - c.index) * 0.01}
+                  x1={gx}
+                  y1="30"
+                  x2={gx}
+                  y2="230"
+                  stroke="rgba(255,255,255,0.025)"
+                  strokeWidth="1"
                 />
               );
             })}
 
-            {/* Front Crisp White Highlight Line representing light reflection edge */}
-            {curvesPaths[0] && (
+            {/* Horizontal dashed reference lines */}
+            {[70, 110, 150, 190].map((yVal, idx) => (
+              <line
+                key={idx}
+                x1="45"
+                y1={yVal}
+                x2={width - 45}
+                y2={yVal}
+                stroke="rgba(255,255,255,0.045)"
+                strokeDasharray="2 4"
+                strokeWidth="0.8"
+              />
+            ))}
+
+            {/* Flat Horizontal Baseline */}
+            <line x1="45" y1="230" x2={width - 45} y2="230" stroke="rgba(255,255,255,0.15)" strokeWidth="1.2" />
+
+            {/* BACKGROUND WAVE AREA FILL & OUTLINE */}
+            {waveData.bgAreaPath && (
               <path
-                d={curvesPaths[0].path}
+                d={waveData.bgAreaPath}
+                fill="url(#bgAreaGradient)"
+                opacity="0.45"
+              />
+            )}
+            {waveData.bgPath && (
+              <path
+                d={waveData.bgPath}
                 fill="none"
-                stroke="#ffffff"
-                strokeWidth="1"
-                opacity="0.88"
+                stroke="rgba(255,255,255,0.22)"
+                strokeWidth="1.2"
+                strokeDasharray="2 3"
               />
             )}
 
-            {/* 3D Glass Box - Front Solid Wireframe Frame */}
-            <g>
-              {/* Bottom floor edges */}
-              <path d={`M ${boxBottomLeft.x} ${boxBottomLeft.y} L ${boxBottomFront.x} ${boxBottomFront.y} L ${boxBottomRight.x} ${boxBottomRight.y}`} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
-              {/* Top ceiling edges */}
-              <path d={`M ${boxTopLeft.x} ${boxTopLeft.y} L ${boxTopFront.x} ${boxTopFront.y} L ${boxTopRight.x} ${boxTopRight.y}`} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
-              {/* Corner vertical posts */}
-              <line x1={boxBottomLeft.x} y1={boxBottomLeft.y} x2={boxTopLeft.x} y2={boxTopLeft.y} stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
-              <line x1={boxBottomRight.x} y1={boxBottomRight.y} x2={boxTopRight.x} y2={boxTopRight.y} stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
-              <line x1={boxBottomFront.x} y1={boxBottomFront.y} x2={boxTopFront.x} y2={boxTopFront.y} stroke="rgba(255,255,255,0.22)" strokeWidth="1.4" />
-            </g>
+            {/* INTENSE PEAK FLARE BEAM & AURA GLOW */}
+            {waveData.peakCoord && (
+              <>
+                {/* Radial Glow Flare */}
+                <circle
+                  cx={waveData.peakCoord.x}
+                  cy={waveData.peakCoord.y}
+                  r="26"
+                  fill="url(#peakFlareGradient)"
+                  style={{ mixBlendMode:'screen' }}
+                />
+                {/* Vertical glowing fading laser beam */}
+                <line
+                  x1={waveData.peakCoord.x}
+                  y1={waveData.peakCoord.y}
+                  x2={waveData.peakCoord.x}
+                  y2={waveData.peakCoord.y - 45}
+                  stroke="url(#verticalBeamGradient)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </>
+            )}
 
-            {/* Decal - Bounding Box Ticks & Labels */}
-            {/* Wavelength Ticks at Top Front ceiling edge */}
-            {[0, 0.25, 0.5, 0.75, 1].map((p, idx) => {
-              const tx = boxTopLeft.x + p * (boxTopRight.x - boxTopLeft.x);
-              const ty = boxTopLeft.y + p * (boxTopRight.y - boxTopLeft.y);
-              return (
-                <g key={idx}>
-                  <line x1={tx} y1={ty} x2={tx} y2={ty - 4} stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-                </g>
-              );
-            })}
-            <text
-              x={midX}
-              y={boxTopFront.y - 12}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.45)"
-              style={{ fontFamily:SF, fontSize:7.5, fontWeight:'600', letterSpacing:'1.5px' }}
-            >
-              WAVELENGTH
-            </text>
-
-            {/* Scientific Crosshair Target Marker in Center */}
-            <g transform={`translate(${midX - 35}, 160)`}>
-              <circle r="8" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
-              <line x1="-4" y1="0" x2="4" y2="0" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
-              <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
-            </g>
-            <text
-              x={midX - 35}
-              y={182}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.25)"
-              style={{ fontFamily:SF, fontSize:6.5, fontWeight:'600' }}
-            >
-              745 R  495 B
-            </text>
-
-            {/* Front vertical post measurement ticks */}
-            {[0.2, 0.4, 0.6, 0.8].map((p, idx) => {
-              const ty = boxTopFront.y + p * (boxBottomFront.y - boxTopFront.y);
-              return (
-                <g key={idx}>
-                  <line x1={boxTopFront.x - 3} y1={ty} x2={boxTopFront.x + 3} y2={ty} stroke="rgba(255,255,255,0.35)" strokeWidth="1" />
-                </g>
-              );
-            })}
+            {/* FOREGROUND GLOWING NEON WAVE */}
+            {waveData.mainPath && (
+              <>
+                {/* Volumetric Neon drop-glow path */}
+                <path
+                  d={waveData.mainPath}
+                  fill="none"
+                  stroke="url(#glowPathGradient)"
+                  strokeWidth="6"
+                  opacity="0.22"
+                />
+                {/* Sharp foreground glow line path */}
+                <path
+                  d={waveData.mainPath}
+                  fill="none"
+                  stroke="url(#glowPathGradient)"
+                  strokeWidth="2.5"
+                />
+              </>
+            )}
 
             {/* Dashed vertical coordinate lines & pins */}
             {pins.map((pin, idx) => {
@@ -450,20 +422,20 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                       score: pin.score,
                       x: pin.xTop,
                       y: pin.yTop - 12,
-                      color: '#fbbf24'
+                      color: '#ec4899'
                     });
                   }}
                   onMouseLeave={() => {
                     setHovered(null);
                   }}
                 >
-                  {/* Vertical dashed guide line */}
+                  {/* Vertical dashed coordinate guide line */}
                   <line
                     x1={pin.xBase}
                     y1={pin.yBase}
                     x2={pin.xTop}
                     y2={pin.yTop}
-                    stroke={isHovered ? '#fbbf24' : 'rgba(255,255,255,0.2)'}
+                    stroke={isHovered ? 'url(#glowPathGradient)' : 'rgba(255,255,255,0.18)'}
                     strokeDasharray="2 3"
                     strokeWidth={isHovered ? 1.5 : 0.75}
                     style={{ transition: 'stroke 0.25s' }}
@@ -474,13 +446,13 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                     cx={pin.xBase}
                     cy={pin.yBase}
                     r="2"
-                    fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
+                    fill={pin.index === 12 ? '#ffffff' : 'url(#glowPathGradient)'}
                   />
 
                   {/* Score label in yellow (Flat horizontal alignment) */}
                   <text
                     x={pin.xBase}
-                    y={300}
+                    y={255}
                     textAnchor="middle"
                     fill="#fbbf24"
                     style={{ fontFamily: SF, fontSize: 8.5, fontWeight: '700' }}
@@ -491,7 +463,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                   {/* Emotion short name below score (Flat horizontal alignment) */}
                   <text
                     x={pin.xBase}
-                    y={312}
+                    y={268}
                     textAnchor="middle"
                     fill="rgba(255,255,255,0.3)"
                     style={{ fontFamily: SF, fontSize: 7.2, fontWeight: '600', letterSpacing: '0.4px' }}
@@ -503,23 +475,23 @@ function PeakChart({ negScores = {}, posScores = {} }) {
                   <circle
                     cx={pin.xTop}
                     cy={pin.yTop}
-                    r={isHovered ? 6.5 : 5}
+                    r={isHovered ? 6.5 : 4.5}
                     fill="#000000"
-                    stroke={pin.index === 12 ? '#ffffff' : '#fbbf24'}
-                    strokeWidth="2"
+                    stroke={pin.index === 12 ? '#ffffff' : 'url(#glowPathGradient)'}
+                    strokeWidth="1.8"
                     style={{ transition: 'all 0.2s' }}
                   />
                   <circle
                     cx={pin.xTop}
                     cy={pin.yTop}
-                    r="2"
+                    r="2.2"
                     fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
                   />
 
                   {/* Label above the pin */}
                   <text
                     x={pin.xTop}
-                    y={pin.yTop - 11}
+                    y={pin.yTop - 10}
                     textAnchor="middle"
                     fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
                     style={{ fontFamily: SF, fontSize: 8.5, fontWeight: 'bold' }}
