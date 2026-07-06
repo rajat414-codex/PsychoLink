@@ -1313,12 +1313,51 @@ export default function Auth({ onComplete }) {
                 justifyContent:'center',
                 borderLeft:'1px solid rgba(255,255,255,0.08)'
               }}>
-                {/* Floating Animated Glowing Soul */}
+                {/* Floating Human-AI Creation Artwork */}
                 <motion.div
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{
+                    width: '320px',
+                    height: '240px',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.22)',
+                    borderRadius: '24px',
+                    boxShadow: '0 25px 50px rgba(0,0,0,0.6), 0 0 30px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
                 >
-                  <GlowingSoul />
+                  <img src="/human_ai_creation.png" alt="Human & AI Synthesis" style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '22px'
+                  }} />
+                  
+                  {/* Bottom glass overlay branding */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '12px',
+                    left: '12px',
+                    right: '12px',
+                    background: 'rgba(19, 17, 20, 0.72)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    padding: '8px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    zIndex: 3
+                  }}>
+                    <span style={{ fontFamily: J, fontSize: '0.75rem', fontWeight: '700', color: '#fff', letterSpacing: '0.5px' }}>Therapy Core</span>
+                    <span style={{ fontFamily: S, fontSize: '0.68rem', fontWeight: '600', color: '#e0524d' }}>EQ.fi</span>
+                  </div>
                 </motion.div>
               </div>
 
