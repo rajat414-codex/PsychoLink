@@ -110,6 +110,8 @@ function BarChart({ items = [], values = {} }) {
 // GAUSSIAN PEAK CHART (AI-Market style)
 // ────────────────────────────────────────────────────────
 function PeakChart({ negScores = {}, posScores = {} }) {
+  const [hovered, setHovered] = useState(null);
+
   const data = [
     ...NEG.map(em => ({ name: em.label, icon: em.icon, stress: negScores[em.id]||0, wellness: 0 })),
     ...POS.map(em => ({ name: em.label, icon: em.icon, stress: 0, wellness: posScores[em.id]||0 })),
@@ -123,35 +125,80 @@ function PeakChart({ negScores = {}, posScores = {} }) {
   const dominant   = peakStress >= peakWell ? { label:data[sIdx]?.name, v:peakStress, c:'#A855F7' }
                                             : { label:data[wIdx]?.name, v:peakWell,  c:'#D946EF' };
 
-  const Tip = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
-    const row = payload.filter(p => p.value > 0);
-    if (!row.length) return null;
-    return (
-      <div style={{ background:'rgba(13,15,35,0.97)', backdropFilter:'blur(12px)', border:'1px solid rgba(255,255,255,0.16)', borderRadius:14, padding:'11px 16px', boxShadow:'0 16px 40px rgba(0,0,0,0.65)' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:2 }}>
-          <span style={{ fontSize:'0.95rem' }}>{payload[0]?.payload?.icon}</span>
-          <p style={{ margin:0, fontSize:'1.15rem', fontWeight:800, color:'#fff', fontFamily:SF }}>{row[0].value}%</p>
-        </div>
-        <p style={{ margin:0, fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:SF }}>{label} · {row[0].name}</p>
-      </div>
-    );
-  };
+  const grid = React.useMemo(() => {
+    const size = 8;
+    const tempGrid = [];
 
-  // glowing pulse dot for the peak reference
-  const PulseDot = (color) => (props) => {
-    const { cx, cy } = props;
-    if (cx == null || cy == null) return null;
-    return (
-      <g>
-        <circle cx={cx} cy={cy} r="11" fill={color} opacity="0.18">
-          <animate attributeName="r" values="8;15;8" dur="2.2s" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values="0.3;0;0.3" dur="2.2s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx={cx} cy={cy} r="5" fill={color} stroke="#fff" strokeWidth="2" style={{ filter:`drop-shadow(0 0 8px ${color})` }}/>
-        <circle cx={cx} cy={cy} r="2" fill="#fff"/>
-      </g>
-    );
+    const emotionMap = {
+      '3,1': { id: 'anxiety',    name: 'Anxiety',    icon: '😰', isMain: true, score: negScores['anxiety'] || 72,    color: '#6F86FF' },
+      '3,2': { id: 'depression', name: 'Depression', icon: '🌧️', isMain: true, score: negScores['depression'] || 48, color: '#0033FF' },
+      '3,3': { id: 'stress',     name: 'Stress',     icon: '🔥', isMain: true, score: negScores['stress'] || 68,     color: '#977DFF' },
+      '3,4': { id: 'loneliness', name: 'Loneliness', icon: '🌑', isMain: true, score: negScores['loneliness'] || 40, color: '#4D4DBF' },
+      '3,5': { id: 'overwhelm',  name: 'Overwhelm',  icon: '🌊', isMain: true, score: negScores['overwhelm'] || 62,  color: '#8899FF' },
+      '3,6': { id: 'burnout',    name: 'Burnout',    icon: '🪫', isMain: true, score: negScores['burnout'] || 55,    color: '#2E46D8' },
+      '4,1': { id: 'calmness',   name: 'Calmness',   icon: '🍃', isMain: true, score: posScores['calmness'] || 78,   color: '#F2E6EE' },
+      '4,2': { id: 'happiness',  name: 'Happiness',  icon: '😊', isMain: true, score: posScores['happiness'] || 72,  color: '#FFCCF2' },
+      '4,3': { id: 'focus',      name: 'Focus',      icon: '🎯', isMain: true, score: posScores['focus'] || 70,      color: '#B8A6FF' },
+      '4,4': { id: 'energy',     name: 'Energy',     icon: '⚡', isMain: true, score: posScores['energy'] || 68,     color: '#977DFF' },
+      '4,5': { id: 'confidence', name: 'Confidence', icon: '💪', isMain: true, score: posScores['confidence'] || 66, color: '#FFAEE9' },
+      '4,6': { id: 'peace',      name: 'Inner Peace',icon: '🕊️', isMain: true, score: posScores['peace'] || 74,      color: '#CDB9FF' }
+    };
+
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        const key = `${r},${c}`;
+        if (emotionMap[key]) {
+          tempGrid.push({ r, c, ...emotionMap[key] });
+        } else {
+          let sumInfluence = 0;
+          Object.keys(emotionMap).forEach(emKey => {
+            const [emR, emC] = emKey.split(',').map(Number);
+            const score = emotionMap[emKey].score;
+            const distSq = Math.pow(r - emR, 2) + Math.pow(c - emC, 2);
+            sumInfluence += score / (distSq * 1.8 + 1);
+          });
+          
+          const noise = (Math.sin(r * 12.3 + c * 34.5) * 0.5 + 0.5) * 4;
+          const score = Math.max(3, Math.min(26, sumInfluence * 0.4 + noise));
+          const hue = r < 4 ? 240 + (c / 8) * 35 : 300 + (c / 8) * 40;
+          tempGrid.push({
+            r,
+            c,
+            isMain: false,
+            score,
+            color: `hsl(${hue}, 70%, 50%)`
+          });
+        }
+      }
+    }
+    return tempGrid;
+  }, [negScores, posScores]);
+
+  const getFaceColors = (score) => {
+    let hue, sat, lit;
+    if (score < 25) {
+      hue = 245 + (score / 25) * 20;
+      sat = 85;
+      lit = 30 + (score / 25) * 12;
+    } else if (score < 65) {
+      const t = (score - 25) / 40;
+      hue = 265 + t * 90;
+      if (hue > 360) hue -= 360;
+      sat = 90;
+      lit = 42 + t * 15;
+    } else {
+      const t = (score - 65) / 35;
+      hue = 15 + t * 45;
+      sat = 95;
+      lit = 57 + t * 25;
+    }
+
+    return {
+      top: `hsl(${hue}, ${sat}%, ${lit}%)`,
+      left: `hsl(${hue}, ${sat - 10}%, ${lit - 8}%)`,
+      right: `hsl(${hue}, ${sat - 20}%, ${lit - 14}%)`,
+      glow: `hsl(${hue}, ${sat}%, ${lit}%)`
+    };
   };
 
   return (
@@ -185,42 +232,147 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         </div>
       </div>
 
-      <div style={{ height:250, width:'100%', position:'relative', zIndex:1 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top:24, right:18, left:-8, bottom:0 }}>
-            <defs>
-              <linearGradient id="strokeStress" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#3B82F6"/><stop offset="55%" stopColor="#8B5CF6"/><stop offset="100%" stopColor="#A855F7"/>
-              </linearGradient>
-              <linearGradient id="strokeWell" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#8B5CF6"/><stop offset="55%" stopColor="#D946EF"/><stop offset="100%" stopColor="#EC4899"/>
-              </linearGradient>
-              <linearGradient id="fillStress" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#6366F1" stopOpacity={0.5}/><stop offset="60%" stopColor="#8B5CF6" stopOpacity={0.12}/><stop offset="100%" stopColor="#8B5CF6" stopOpacity={0}/>
-              </linearGradient>
-              <linearGradient id="fillWell" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#D946EF" stopOpacity={0.42}/><stop offset="60%" stopColor="#EC4899" stopOpacity={0.1}/><stop offset="100%" stopColor="#EC4899" stopOpacity={0}/>
-              </linearGradient>
-              <filter id="curveGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="4.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-            <CartesianGrid strokeDasharray="3 8" stroke="rgba(255,255,255,0.04)" vertical={false}/>
-            <XAxis dataKey="name" axisLine={false} tickLine={false}
-              tick={{ fill:'rgba(255,255,255,0.4)', fontSize:9, fontFamily:'Sora', fontWeight:600 }}
-              interval={0} angle={-30} textAnchor="end" height={52}/>
-            <YAxis axisLine={false} tickLine={false} width={32}
-              tick={{ fill:'rgba(255,255,255,0.26)', fontSize:10, fontFamily:'Sora' }} tickFormatter={(v)=>`${v}%`}/>
-            <Tooltip content={<Tip/>} cursor={{ stroke:'rgba(255,255,255,0.2)', strokeWidth:1, strokeDasharray:'4 4' }}/>
-            <Area type="monotone" dataKey="stress" name="Stress" stroke="url(#strokeStress)" strokeWidth={3.5}
-              fill="url(#fillStress)" filter="url(#curveGlow)" dot={false} activeDot={{ r:6, fill:'#8B5CF6', stroke:'#fff', strokeWidth:2.5 }} isAnimationActive animationDuration={1600}/>
-            <Area type="monotone" dataKey="wellness" name="Wellness" stroke="url(#strokeWell)" strokeWidth={3.5}
-              fill="url(#fillWell)" filter="url(#curveGlow)" dot={false} activeDot={{ r:6, fill:'#D946EF', stroke:'#fff', strokeWidth:2.5 }} isAnimationActive animationDuration={1800}/>
-            {/* pinned glowing peaks */}
-            {peakStress > 0 && <ReferenceDot x={data[sIdx].name} y={peakStress} shape={PulseDot('#A855F7')} isFront/>}
-            {peakWell   > 0 && <ReferenceDot x={data[wIdx].name} y={peakWell}   shape={PulseDot('#D946EF')} isFront/>}
-          </AreaChart>
-        </ResponsiveContainer>
+      <div style={{ height:260, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
+        <svg width="100%" height="100%" viewBox="0 0 500 320" style={{ overflow:'visible' }}>
+          {/* Floor grid bounding box */}
+          <polygon
+            points={`${250 - 8*22} ${200}, 250 ${200 - 8*11}, ${250 + 8*22} ${200}, 250 ${200 + 8*11}`}
+            fill="rgba(255,255,255,0.015)"
+            stroke="rgba(255,255,255,0.06)"
+            strokeWidth="1.5"
+          />
+
+          {/* Grid lines on floor */}
+          {[...Array(9)].map((_, i) => {
+            const x1 = 250 + (i - 4) * 22;
+            const y1 = 200 + (i - 4) * 11;
+            const x2 = x1 - 8 * 22;
+            const y2 = y1 + 8 * 11;
+            
+            const xa1 = 250 + (i - 4) * -22;
+            const ya1 = 200 + (i - 4) * 11;
+            const xa2 = xa1 + 8 * 22;
+            const ya2 = ya1 + 8 * 11;
+
+            return (
+              <g key={i}>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+                <line x1={xa1} y1={ya1} x2={xa2} y2={ya2} stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+              </g>
+            );
+          })}
+
+          {/* Left Height Axis */}
+          <line x1={250 - 4*22} y1={200} x2={250 - 4*22} y2={90} stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+          {[0, 25, 50, 75, 100].map((tick, idx) => {
+            const h = (tick / 100) * 105;
+            const yPos = 200 - h;
+            return (
+              <g key={idx}>
+                <line x1={250 - 4*22 - 4} y1={yPos} x2={250 - 4*22} y2={yPos} stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                <text
+                  x={250 - 4*22 - 8}
+                  y={yPos + 3}
+                  textAnchor="end"
+                  fill="rgba(255,255,255,0.35)"
+                  style={{ fontFamily:SF, fontSize:8, fontWeight:'bold' }}
+                >
+                  {tick}%
+                </text>
+              </g>
+            );
+          })}
+
+          {/* 3D Isometric columns */}
+          {grid.map((item, idx) => {
+            const dr = item.r - 3.5;
+            const dc = item.c - 3.5;
+            const x = 250 + (dc - dr) * 22;
+            const y = 200 + (dc + dr) * 11;
+            const h = (item.score / 100) * 105;
+
+            const colors = getFaceColors(item.score);
+
+            const isMain = item.isMain;
+            const sizeW = isMain ? 10 : 6;
+            const sizeH = isMain ? 5 : 3;
+
+            const topPoints = `${x} ${y - h - sizeH}, ${x + sizeW} ${y - h}, ${x} ${y - h + sizeH}, ${x - sizeW} ${y - h}`;
+            const leftPoints = `${x - sizeW} ${y - h}, ${x} ${y - h + sizeH}, ${x} ${y + sizeH}, ${x - sizeW} ${y}`;
+            const rightPoints = `${x} ${y - h + sizeH}, ${x + sizeW} ${y - h}, ${x + sizeW} ${y}, ${x} ${y + sizeH}`;
+
+            return (
+              <g
+                key={idx}
+                style={{ cursor: isMain ? 'pointer' : 'default' }}
+                onMouseEnter={() => {
+                  if (isMain) {
+                    setHovered({
+                      name: item.name,
+                      score: item.score,
+                      x: x,
+                      y: y - h - 10,
+                      color: colors.top
+                    });
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (isMain) setHovered(null);
+                }}
+              >
+                {isMain && item.score > 50 && (
+                  <ellipse
+                    cx={x}
+                    cy={y}
+                    rx={sizeW * 2.2}
+                    ry={sizeH * 2.2}
+                    fill={colors.glow}
+                    opacity="0.08"
+                    style={{ filter: 'blur(8px)' }}
+                  />
+                )}
+
+                <polygon points={leftPoints} fill={colors.left} />
+                <polygon points={rightPoints} fill={colors.right} />
+                <polygon points={topPoints} fill={colors.top} />
+                
+                {isMain && (
+                  <polygon
+                    points={topPoints}
+                    fill="none"
+                    stroke="#ffffff"
+                    strokeWidth="0.75"
+                    opacity="0.5"
+                  />
+                )}
+              </g>
+            );
+          })}
+        </svg>
+
+        {hovered && (
+          <div style={{
+            position: 'absolute',
+            left: `${hovered.x}px`,
+            top: `${hovered.y}px`,
+            transform: 'translate(-50%, -100%)',
+            background: 'rgba(10, 11, 28, 0.96)',
+            backdropFilter: 'blur(12px)',
+            border: `1.5px solid ${hovered.color}`,
+            borderRadius: '10px',
+            padding: '8px 12px',
+            zIndex: 100,
+            pointerEvents: 'none',
+            boxShadow: '0 12px 30px rgba(0,0,0,0.7)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '2px'
+          }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#fff', fontFamily: SF, letterSpacing: '0.2px' }}>{hovered.name}</span>
+            <span style={{ fontSize: '0.88rem', fontWeight: '800', color: hovered.color, fontFamily: SF }}>{hovered.score}%</span>
+          </div>
+        )}
       </div>
 
       {/* peak chips */}
