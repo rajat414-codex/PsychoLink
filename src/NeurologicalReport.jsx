@@ -111,6 +111,19 @@ function BarChart({ items = [], values = {} }) {
 // ────────────────────────────────────────────────────────
 function PeakChart({ negScores = {}, posScores = {} }) {
   const [hovered, setHovered] = useState(null);
+  const containerRef = React.useRef(null);
+  const [width, setWidth] = useState(500);
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setWidth(entry.contentRect.width || 500);
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const scores = React.useMemo(() => {
     return [
@@ -142,12 +155,12 @@ function PeakChart({ negScores = {}, posScores = {} }) {
   };
 
   // Shepard's smooth interpolation function
-  const getInterpolatedScore = (x, scoresList) => {
+  const getInterpolatedScore = (x, scoresList, currentWidth) => {
     let numerator = 0;
     let denominator = 0;
-    const epsilon = 180; // smooth peaks
+    const epsilon = Math.max(100, (currentWidth / 500) * 180); // scale smoothness with width
     for (let i = 0; i < 12; i++) {
-      const x_i = 50 + i * (380 / 11); // Center range 50 to 430
+      const x_i = 50 + i * ((currentWidth - 100) / 11); // Center range 50 to width - 50
       const val = scoresList[i] || 0;
       const distSq = Math.pow(x - x_i, 2);
       const weight = 1 / (distSq + epsilon);
@@ -166,16 +179,20 @@ function PeakChart({ negScores = {}, posScores = {} }) {
       const offY = j * 6;
       let pathStr = '';
       
-      for (let x = 50; x <= 430; x += 4) {
-        const baseH = getInterpolatedScore(x, scores);
+      const startX = 50;
+      const endX = width - 50;
+      const step = Math.max(4, Math.round((endX - startX) / 100)); // step size dynamically scaled
+      
+      for (let x = startX; x <= endX; x += step) {
+        const baseH = getInterpolatedScore(x, scores, width);
         // Add realistic 3D terrain wave deformation
-        const wave = 0.72 + 0.28 * Math.sin(j * 0.7 + x * 0.018);
+        const wave = 0.72 + 0.28 * Math.sin(j * 0.7 + x * (10 / width)); // scale frequency with width
         const h = baseH * 1.35 * wave;
         
         const px = x + offX;
         const py = 220 - offY - h; // Base curve center_y shifted to 220
         
-        if (x === 50) {
+        if (x === startX) {
           pathStr += `M ${px} ${py}`;
         } else {
           pathStr += ` L ${px} ${py}`;
@@ -184,7 +201,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
       pathsList.push({ path: pathStr, index: j });
     }
     return pathsList;
-  }, [scores]);
+  }, [scores, width]);
 
   // Guides and Pins metadata
   const pins = React.useMemo(() => {
@@ -194,12 +211,12 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     const names = ['Anxiety', 'Depression', 'Stress', 'Loneliness', 'Overwhelm', 'Burnout', 'Calmness', 'Happiness', 'Focus', 'Energy', 'Confidence', 'Inner Peace'];
     
     for (let i = 0; i < 12; i++) {
-      const x_i = 50 + i * (380 / 11);
+      const x_i = 50 + i * ((width - 100) / 11);
       const val = scores[i] || 0;
       
       // j = 0 has offX = 10
       const offX = 10; 
-      const h = val * 1.35 * (0.72 + 0.28 * Math.sin(0 * 0.7 + x_i * 0.018));
+      const h = val * 1.35 * (0.72 + 0.28 * Math.sin(0 * 0.7 + x_i * (10 / width)));
       
       list.push({
         index: i + 1,
@@ -214,7 +231,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
       });
     }
     return list;
-  }, [scores]);
+  }, [scores, width]);
 
   return (
     <div style={{ position:'relative', borderRadius:'18px', overflow:'hidden', padding:'16px 8px 4px',
@@ -247,13 +264,13 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         </div>
       </div>
 
-      <div style={{ height:310, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
+      <div ref={containerRef} style={{ height:310, width:'100%', position:'relative', zIndex:1, display:'flex', justifyContent:'center', alignItems:'center' }}>
         <motion.div
           animate={{ y: [0, -6, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
         >
-          <svg width="100%" height="100%" viewBox="0 0 500 300" style={{ overflow:'visible' }}>
+          <svg width={width} height={270} viewBox={`0 0 ${width} 270`} style={{ overflow:'visible' }}>
             <defs>
               <filter id="neon-glow-peaks" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur stdDeviation="5" result="blur" />
@@ -268,7 +285,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
             </defs>
 
             {/* Base Horizontal Axis line */}
-            <line x1="40" y1="240" x2="460" y2="240" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+            <line x1="40" y1="240" x2={width - 40} y2="240" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
 
             {/* Back Contour Lines (Dashed grey) */}
             {curvesPaths.map((c, idx) => {
