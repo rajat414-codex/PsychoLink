@@ -112,94 +112,109 @@ function BarChart({ items = [], values = {} }) {
 function PeakChart({ negScores = {}, posScores = {} }) {
   const [hovered, setHovered] = useState(null);
 
-  const data = [
-    ...NEG.map(em => ({ name: em.label, icon: em.icon, stress: negScores[em.id]||0, wellness: 0 })),
-    ...POS.map(em => ({ name: em.label, icon: em.icon, stress: 0, wellness: posScores[em.id]||0 })),
-  ];
-
-  // find peak points to pin callouts
-  const sIdx = data.reduce((bi,d,i,a)=> d.stress   > a[bi].stress   ? i : bi, 0);
-  const wIdx = data.reduce((bi,d,i,a)=> d.wellness > a[bi].wellness ? i : bi, 0);
-  const peakStress = data[sIdx]?.stress || 0;
-  const peakWell   = data[wIdx]?.wellness || 0;
-  const dominant   = peakStress >= peakWell ? { label:data[sIdx]?.name, v:peakStress, c:'#A855F7' }
-                                            : { label:data[wIdx]?.name, v:peakWell,  c:'#D946EF' };
-
-  const grid = React.useMemo(() => {
-    const size = 8;
-    const tempGrid = [];
-
-    const emotionMap = {
-      '3,1': { id: 'anxiety',    name: 'Anxiety',    icon: '😰', isMain: true, score: negScores['anxiety'] || 72,    color: '#6F86FF' },
-      '3,2': { id: 'depression', name: 'Depression', icon: '🌧️', isMain: true, score: negScores['depression'] || 48, color: '#0033FF' },
-      '3,3': { id: 'stress',     name: 'Stress',     icon: '🔥', isMain: true, score: negScores['stress'] || 68,     color: '#977DFF' },
-      '3,4': { id: 'loneliness', name: 'Loneliness', icon: '🌑', isMain: true, score: negScores['loneliness'] || 40, color: '#4D4DBF' },
-      '3,5': { id: 'overwhelm',  name: 'Overwhelm',  icon: '🌊', isMain: true, score: negScores['overwhelm'] || 62,  color: '#8899FF' },
-      '3,6': { id: 'burnout',    name: 'Burnout',    icon: '🪫', isMain: true, score: negScores['burnout'] || 55,    color: '#2E46D8' },
-      '4,1': { id: 'calmness',   name: 'Calmness',   icon: '🍃', isMain: true, score: posScores['calmness'] || 78,   color: '#F2E6EE' },
-      '4,2': { id: 'happiness',  name: 'Happiness',  icon: '😊', isMain: true, score: posScores['happiness'] || 72,  color: '#FFCCF2' },
-      '4,3': { id: 'focus',      name: 'Focus',      icon: '🎯', isMain: true, score: posScores['focus'] || 70,      color: '#B8A6FF' },
-      '4,4': { id: 'energy',     name: 'Energy',     icon: '⚡', isMain: true, score: posScores['energy'] || 68,     color: '#977DFF' },
-      '4,5': { id: 'confidence', name: 'Confidence', icon: '💪', isMain: true, score: posScores['confidence'] || 66, color: '#FFAEE9' },
-      '4,6': { id: 'peace',      name: 'Inner Peace',icon: '🕊️', isMain: true, score: posScores['peace'] || 74,      color: '#CDB9FF' }
-    };
-
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        const key = `${r},${c}`;
-        if (emotionMap[key]) {
-          tempGrid.push({ r, c, ...emotionMap[key] });
-        } else {
-          let sumInfluence = 0;
-          Object.keys(emotionMap).forEach(emKey => {
-            const [emR, emC] = emKey.split(',').map(Number);
-            const score = emotionMap[emKey].score;
-            const distSq = Math.pow(r - emR, 2) + Math.pow(c - emC, 2);
-            sumInfluence += score / (distSq * 1.8 + 1);
-          });
-          
-          const noise = (Math.sin(r * 12.3 + c * 34.5) * 0.5 + 0.5) * 4;
-          const score = Math.max(3, Math.min(26, sumInfluence * 0.4 + noise));
-          const hue = r < 4 ? 240 + (c / 8) * 35 : 300 + (c / 8) * 40;
-          tempGrid.push({
-            r,
-            c,
-            isMain: false,
-            score,
-            color: `hsl(${hue}, 70%, 50%)`
-          });
-        }
-      }
-    }
-    return tempGrid;
+  const scores = React.useMemo(() => {
+    return [
+      negScores['anxiety'] || 72,
+      negScores['depression'] || 48,
+      negScores['stress'] || 68,
+      negScores['loneliness'] || 40,
+      negScores['overwhelm'] || 62,
+      negScores['burnout'] || 55,
+      posScores['calmness'] || 78,
+      posScores['happiness'] || 72,
+      posScores['focus'] || 70,
+      posScores['energy'] || 68,
+      posScores['confidence'] || 66,
+      posScores['peace'] || 74
+    ];
   }, [negScores, posScores]);
 
-  const getFaceColors = (score) => {
-    let hue, sat, lit;
-    if (score < 25) {
-      hue = 245 + (score / 25) * 20;
-      sat = 85;
-      lit = 30 + (score / 25) * 12;
-    } else if (score < 65) {
-      const t = (score - 25) / 40;
-      hue = 265 + t * 90;
-      if (hue > 360) hue -= 360;
-      sat = 90;
-      lit = 42 + t * 15;
-    } else {
-      const t = (score - 65) / 35;
-      hue = 15 + t * 45;
-      sat = 95;
-      lit = 57 + t * 25;
-    }
-
-    return {
-      top: `hsl(${hue}, ${sat}%, ${lit}%)`,
-      left: `hsl(${hue}, ${sat - 10}%, ${lit - 8}%)`,
-      right: `hsl(${hue}, ${sat - 20}%, ${lit - 14}%)`,
-      glow: `hsl(${hue}, ${sat}%, ${lit}%)`
-    };
+  // find peak points to pin callouts
+  const peakStress = Math.max(...scores.slice(0, 6));
+  const peakWell   = Math.max(...scores.slice(6, 12));
+  const sIdx = scores.indexOf(peakStress);
+  const wIdx = scores.indexOf(peakWell);
+  const dominantIdx = peakStress >= peakWell ? sIdx : wIdx;
+  const dominant = {
+    label: [...NEG, ...POS][dominantIdx]?.label,
+    v: scores[dominantIdx],
+    c: dominantIdx < 6 ? '#A855F7' : '#D946EF'
   };
+
+  // Shepard's smooth interpolation function
+  const getInterpolatedScore = (x, scoresList) => {
+    let numerator = 0;
+    let denominator = 0;
+    const epsilon = 200; // smooth peaks
+    for (let i = 0; i < 12; i++) {
+      const x_i = 40 + i * (420 / 11); // range 40 to 460
+      const val = scoresList[i] || 0;
+      const distSq = Math.pow(x - x_i, 2);
+      const weight = 1 / (distSq + epsilon);
+      numerator += val * weight;
+      denominator += weight;
+    }
+    return numerator / denominator;
+  };
+
+  // Generate 8 parallel curve paths shifted in 3D perspective
+  const curvesPaths = React.useMemo(() => {
+    const pathsList = [];
+    const steps = 8;
+    for (let j = 0; j < steps; j++) {
+      const offX = (steps - 1 - j) * 3.5;
+      const offY = j * 6;
+      let pathStr = '';
+      
+      for (let x = 35; x <= 465; x += 4) {
+        const baseH = getInterpolatedScore(x, scores);
+        // Add realistic 3D terrain wave deformation
+        const wave = 0.72 + 0.28 * Math.sin(j * 0.7 + x * 0.018);
+        const h = baseH * 1.35 * wave;
+        
+        const px = x + offX;
+        const py = 230 - offY - h;
+        
+        if (x === 35) {
+          pathStr += `M ${px} ${py}`;
+        } else {
+          pathStr += ` L ${px} ${py}`;
+        }
+      }
+      pathsList.push({ path: pathStr, index: j });
+    }
+    return pathsList;
+  }, [scores]);
+
+  // Guides and Pins metadata
+  const pins = React.useMemo(() => {
+    const list = [];
+    const labels = ['ANX', 'DEP', 'STR', 'LON', 'OVE', 'BUR', 'CAL', 'HAP', 'FOC', 'ENE', 'CON', 'PEA'];
+    const icons = ['😰', '🌧️', '🔥', '🌑', '🌊', '🪫', '🍃', '😊', '🎯', '⚡', '💪', '🕊️'];
+    const names = ['Anxiety', 'Depression', 'Stress', 'Loneliness', 'Overwhelm', 'Burnout', 'Calmness', 'Happiness', 'Focus', 'Energy', 'Confidence', 'Inner Peace'];
+    
+    for (let i = 0; i < 12; i++) {
+      const x_i = 40 + i * (420 / 11);
+      const val = scores[i] || 0;
+      
+      // Calculate top point on front curve (j = 0 => offX = 24.5, offY = 0)
+      const offX = 24.5; 
+      const h = val * 1.35 * (0.72 + 0.28 * Math.sin(0 * 0.7 + x_i * 0.018));
+      
+      list.push({
+        index: i + 1,
+        name: names[i],
+        label: labels[i],
+        icon: icons[i],
+        score: val,
+        xBase: x_i + offX,
+        yBase: 250,
+        xTop: x_i + offX,
+        yTop: 230 - h
+      });
+    }
+    return list;
+  }, [scores]);
 
   return (
     <div style={{ position:'relative', borderRadius:'18px', overflow:'hidden', padding:'16px 8px 4px',
@@ -241,9 +256,9 @@ function PeakChart({ negScores = {}, posScores = {} }) {
           <svg width="100%" height="100%" viewBox="0 0 500 360" style={{ overflow:'visible' }}>
             <defs>
               <filter id="neon-glow-peaks" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
+                <feGaussianBlur stdDeviation="5" result="blur" />
                 <feComponentTransfer in="blur" result="glow">
-                  <feFuncA type="linear" slope="0.5"/>
+                  <feFuncA type="linear" slope="0.6"/>
                 </feComponentTransfer>
                 <feMerge>
                   <feMergeNode in="glow" />
@@ -252,119 +267,126 @@ function PeakChart({ negScores = {}, posScores = {} }) {
               </filter>
             </defs>
 
-            {/* Floor grid bounding box */}
-            <polygon
-              points={`${250 - 8*25} ${220}, 250 ${220 - 8*12.5}, ${250 + 8*25} ${220}, 250 ${220 + 8*12.5}`}
-              fill="rgba(255,255,255,0.015)"
-              stroke="rgba(255,255,255,0.08)"
-              strokeWidth="1.5"
-            />
+            {/* Base Horizontal Axis line */}
+            <line x1="30" y1="250" x2="480" y2="250" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
 
-            {/* Grid lines on floor */}
-            {[...Array(9)].map((_, i) => {
-              const x1 = 250 + (i - 4) * 25;
-              const y1 = 220 + (i - 4) * 12.5;
-              const x2 = x1 - 8 * 25;
-              const y2 = y1 + 8 * 12.5;
-              
-              const xa1 = 250 + (i - 4) * -25;
-              const ya1 = 220 + (i - 4) * 12.5;
-              const xa2 = xa1 + 8 * 25;
-              const ya2 = ya1 + 8 * 12.5;
-
+            {/* Back Contour Lines (Dashed grey) */}
+            {curvesPaths.map((c, idx) => {
+              if (c.index === 0) return null; // draw front solid curve last for overlap
               return (
-                <g key={i}>
-                  <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
-                  <line x1={xa1} y1={ya1} x2={xa2} y2={ya2} stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
-                </g>
+                <path
+                  key={idx}
+                  d={c.path}
+                  fill="none"
+                  stroke="rgba(255,255,255,0.18)"
+                  strokeWidth="1"
+                  strokeDasharray="2 3"
+                />
               );
             })}
 
-            {/* Left Height Axis */}
-            <line x1={250 - 4*25} y1={220} x2={250 - 4*25} y2={75} stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
-            {[0, 25, 50, 75, 100].map((tick, idx) => {
-              const h = (tick / 100) * 145;
-              const yPos = 220 - h;
-              return (
-                <g key={idx}>
-                  <line x1={250 - 4*25 - 4} y1={yPos} x2={250 - 4*25} y2={yPos} stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
-                  <text
-                    x={250 - 4*25 - 8}
-                    y={yPos + 3}
-                    textAnchor="end"
-                    fill="rgba(255,255,255,0.4)"
-                    style={{ fontFamily:SF, fontSize:8.5, fontWeight:'bold' }}
-                  >
-                    {tick}%
-                  </text>
-                </g>
-              );
-            })}
+            {/* Front Highlight Curve (Solid Yellow with Glow) */}
+            {curvesPaths[0] && (
+              <path
+                d={curvesPaths[0].path}
+                fill="none"
+                stroke="#fbbf24"
+                strokeWidth="2.5"
+                filter="url(#neon-glow-peaks)"
+              />
+            )}
 
-            {/* 3D Isometric columns */}
-            {grid.map((item, idx) => {
-              const dr = item.r - 3.5;
-              const dc = item.c - 3.5;
-              const x = 250 + (dc - dr) * 25;
-              const y = 220 + (dc + dr) * 12.5;
-              const h = (item.score / 100) * 145;
-
-              const colors = getFaceColors(item.score);
-
-              const isMain = item.isMain;
-              const rx = isMain ? 11 : 6.5;
-              const ry = rx * 0.48;
-
-              const leftPath = `M ${x - rx} ${y - h} A ${rx} ${ry} 0 0 0 ${x} ${y - h + ry} L ${x} ${y + ry} A ${rx} ${ry} 0 0 1 ${x - rx} ${y} Z`;
-              const rightPath = `M ${x} ${y - h + ry} A ${rx} ${ry} 0 0 0 ${x + rx} ${y - h} L ${x + rx} ${y} A ${rx} ${ry} 0 0 1 ${x} ${y + ry} Z`;
-
+            {/* Dashed vertical coordinate lines & pins */}
+            {pins.map((pin, idx) => {
+              const isHovered = hovered && hovered.name === pin.name;
               return (
                 <g
                   key={idx}
-                  style={{ cursor: isMain ? 'pointer' : 'default' }}
-                  filter={isMain ? 'url(#neon-glow-peaks)' : 'none'}
+                  style={{ cursor: 'pointer' }}
                   onMouseEnter={() => {
-                    if (isMain) {
-                      setHovered({
-                        name: item.name,
-                        score: item.score,
-                        x: x,
-                        y: y - h - 10,
-                        color: colors.top
-                      });
-                    }
+                    setHovered({
+                      name: pin.name,
+                      score: pin.score,
+                      x: pin.xTop,
+                      y: pin.yTop - 12,
+                      color: '#fbbf24'
+                    });
                   }}
                   onMouseLeave={() => {
-                    if (isMain) setHovered(null);
+                    setHovered(null);
                   }}
                 >
-                  {isMain && item.score > 50 && (
-                    <ellipse
-                      cx={x}
-                      cy={y}
-                      rx={rx * 2.2}
-                      ry={ry * 2.2}
-                      fill={colors.glow}
-                      opacity="0.08"
-                      style={{ filter: 'blur(8px)' }}
-                    />
-                  )}
+                  {/* Vertical dashed line */}
+                  <line
+                    x1={pin.xBase}
+                    y1={pin.yBase}
+                    x2={pin.xTop}
+                    y2={pin.yTop}
+                    stroke={isHovered ? '#fbbf24' : 'rgba(255,255,255,0.22)'}
+                    strokeDasharray="3 3"
+                    strokeWidth={isHovered ? 1.5 : 1}
+                    style={{ transition: 'stroke 0.25s' }}
+                  />
 
-                  <path d={leftPath} fill={colors.left} opacity={isMain ? 0.95 : 0.88} />
-                  <path d={rightPath} fill={colors.right} opacity={isMain ? 0.95 : 0.88} />
-                  <ellipse cx={x} cy={y - h} rx={rx} ry={ry} fill={colors.top} opacity={isMain ? 0.95 : 0.88} />
-                  
-                  {isMain && (
-                    <ellipse
-                      cx={x}
-                      cy={y - h}
-                      rx={rx}
-                      ry={ry}
-                      fill="none"
-                      stroke="rgba(255,255,255,0.4)"
-                      strokeWidth="0.75"
-                    />
-                  )}
+                  {/* Horizontal tick at axis */}
+                  <line
+                    x1={pin.xBase}
+                    y1={pin.yBase}
+                    x2={pin.xBase}
+                    y2={pin.yBase + 5}
+                    stroke="rgba(255,255,255,0.3)"
+                    strokeWidth="1"
+                  />
+
+                  {/* Score label in yellow */}
+                  <text
+                    x={pin.xBase}
+                    y={pin.yBase + 18}
+                    textAnchor="middle"
+                    fill="#fbbf24"
+                    style={{ fontFamily: SF, fontSize: 8.5, fontWeight: '700' }}
+                  >
+                    {pin.score}%
+                  </text>
+
+                  {/* Emotion short name below score */}
+                  <text
+                    x={pin.xBase}
+                    y={pin.yBase + 32}
+                    textAnchor="middle"
+                    fill="rgba(255,255,255,0.4)"
+                    style={{ fontFamily: SF, fontSize: 7.5, fontWeight: '600' }}
+                  >
+                    {pin.label}
+                  </text>
+
+                  {/* Circle Pin on the top curve */}
+                  <circle
+                    cx={pin.xTop}
+                    cy={pin.yTop}
+                    r={isHovered ? 6.5 : 5}
+                    fill="#000000"
+                    stroke="#fbbf24"
+                    strokeWidth="2"
+                    style={{ transition: 'all 0.2s' }}
+                  />
+                  <circle
+                    cx={pin.xTop}
+                    cy={pin.yTop}
+                    r="2"
+                    fill="#fbbf24"
+                  />
+
+                  {/* Label above the pin */}
+                  <text
+                    x={pin.xTop}
+                    y={pin.yTop - 11}
+                    textAnchor="middle"
+                    fill={isHovered ? '#fbbf24' : '#fff'}
+                    style={{ fontFamily: SF, fontSize: 8.5, fontWeight: 'bold' }}
+                  >
+                    {pin.index}
+                  </text>
                 </g>
               );
             })}
