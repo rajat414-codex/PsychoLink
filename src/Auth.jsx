@@ -1331,7 +1331,7 @@ export default function Auth({ onComplete }) {
                     justifyContent: 'center'
                   }}
                 >
-                  <img src="/human_ai_creation.png" alt="Human & AI Synthesis" style={{
+                  <img src="/human_ai_creation.png?v=2" alt="Human & AI Synthesis" style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',

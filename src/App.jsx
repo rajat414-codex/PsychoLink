@@ -156,7 +156,7 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
             zIndex: 2
           }}
         >
-          <img src="/human_ai_creation.png" alt="Human and AI reaching together" style={{
+          <img src="/human_ai_creation.png?v=2" alt="Human and AI reaching together" style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover'
