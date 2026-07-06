@@ -4,6 +4,8 @@ import SplashScreen from './SplashScreen'
 import { AnimatePresence, motion } from 'framer-motion'
 import Auth from './Auth'
 import Home from './Home'
+import humanAiCreation from './assets/human_ai_creation.png'
+
 
 // ── TRANSITION SCREEN ────────────────────────────────────
 // ── TRANSITION SCREEN ────────────────────────────────────
@@ -156,7 +158,7 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
             zIndex: 2
           }}
         >
-          <img src="/human_ai_creation.png?v=2" alt="Human and AI reaching together" style={{
+          <img src={humanAiCreation} alt="Human and AI reaching together" style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover'

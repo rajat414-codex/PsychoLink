@@ -4,6 +4,8 @@ import { API_BASE } from './config';
 // ── ORIGINAL GOOGLE ICON ──
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple, FaPhoneAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaEnvelope, FaChevronRight, FaPlus } from 'react-icons/fa';
+import humanAiCreation from './assets/human_ai_creation.png';
+
 
 const Spinner = ({ color='#8b87f5', size=22 }) => (
   <div style={{ display:'flex', justifyContent:'center', padding:'12px' }}>
@@ -1331,7 +1333,7 @@ export default function Auth({ onComplete }) {
                     justifyContent: 'center'
                   }}
                 >
-                  <img src="/human_ai_creation.png?v=2" alt="Human & AI Synthesis" style={{
+                  <img src={humanAiCreation} alt="Human & AI Synthesis" style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
