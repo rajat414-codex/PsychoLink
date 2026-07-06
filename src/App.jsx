@@ -53,42 +53,24 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
           equilibrium
         </div>
         
-        {/* Center capsule menu */}
+        {/* Center Branding */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '24px',
-          padding: '10px 28px',
-          background: 'rgba(255,255,255,0.03)',
-          backdropFilter: 'blur(15px)',
-          WebkitBackdropFilter: 'blur(15px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '30px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontFamily: J,
+          fontWeight: '600',
+          fontSize: '1.05rem',
+          letterSpacing: '5px',
+          color: '#fff',
+          textTransform: 'uppercase',
+          opacity: 0.95
         }}>
-          {['Services', 'How it works', 'AI Security', 'Integrations', 'Resources'].map((link, idx) => (
-            <span key={idx} style={{ fontFamily: J, fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', fontWeight: '500', transition: 'color 0.2s' }} onMouseOver={e=>e.currentTarget.style.color='#fff'} onMouseOut={e=>e.currentTarget.style.color='rgba(255,255,255,0.45)'}>{link}</span>
-          ))}
+          PsychoLink
         </div>
 
-        {/* Right Sign Up button */}
-        <button style={{
-          padding: '10px 22px',
-          background: '#ffffff',
-          border: 'none',
-          borderRadius: '30px',
-          color: '#000000',
-          fontFamily: J,
-          fontSize: '0.82rem',
-          fontWeight: '600',
-          cursor: 'pointer',
-          boxShadow: '0 4px 14px rgba(255,255,255,0.15)',
-          transition: 'transform 0.2s'
-        }}
-        onMouseOver={e=>e.currentTarget.style.transform='scale(1.03)'}
-        onMouseOut={e=>e.currentTarget.style.transform='scale(1.0)'}>
-          Get started
-        </button>
+        {/* Right spacing */}
+        <div style={{ width: '100px' }} />
       </div>
 
       {/* Hero Content Section */}
@@ -96,33 +78,9 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
         <h1 style={{ fontFamily: J, fontSize: '3.1rem', fontWeight: '400', color: '#fff', letterSpacing: '-1.5px', lineHeight: '1.15', margin: '0 0 16px' }}>
           Who looks outside, dreams;<br />who looks inside, awakes.
         </h1>
-        <p style={{ fontFamily: J, fontSize: '0.92rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.5px', fontWeight: '400', margin: '0 0 32px' }}>
+        <p style={{ fontFamily: J, fontSize: '0.92rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.5px', fontWeight: '400', margin: 0 }}>
           when human empathy and cognitive clarity move as one
         </p>
-
-        {/* Center Pill Button - Begin Your Journey */}
-        <motion.button
-          whileHover={{ scale: 1.03, boxShadow: '0 0 25px rgba(255,255,255,0.2)' }}
-          whileTap={{ scale: 0.97 }}
-          onClick={onDone}
-          style={{
-            padding: '12px 30px',
-            background: '#ffffff',
-            border: 'none',
-            borderRadius: '30px',
-            color: '#000000',
-            fontFamily: J,
-            fontSize: '0.88rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 10px 25px rgba(255,255,255,0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          Begin Your Journey →
-        </motion.button>
       </div>
 
       {/* Centered Graphic Container */}
@@ -165,19 +123,40 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
           }} />
         </motion.div>
 
-        {/* Micro Halftone Dotted Toolbar icons below the graphic */}
-        <div style={{ display: 'flex', gap: '20px', marginTop: '24px', opacity: 0.25, zIndex: 2 }}>
-          {/* SVG Halftone Toolbar Icon 1 (Download arrow) */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M19 12l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          {/* SVG Halftone Toolbar Icon 2 (Asterisk) */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          {/* SVG Halftone Toolbar Icon 3 (Grid) */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          {/* SVG Halftone Toolbar Icon 4 (Subtract Circle) */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          {/* SVG Halftone Toolbar Icon 5 (Checkmark) */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </div>
+        {/* Aesthetic Continue to App Action Panel */}
+        <motion.button
+          whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(255,255,255,0.18)' }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onDone}
+          style={{
+            marginTop: '36px',
+            padding: '14px 44px',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1.5px solid rgba(255, 255, 255, 0.22)',
+            borderRadius: '30px',
+            color: '#ffffff',
+            fontFamily: J,
+            fontSize: '0.9rem',
+            fontWeight: '700',
+            letterSpacing: '0.5px',
+            cursor: 'pointer',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            zIndex: 10,
+            transition: 'all 0.25s'
+          }}
+          onMouseOver={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.5)'}
+          onMouseOut={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.22)'}
+        >
+          Continue to App
+          <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+            <path d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </motion.button>
       </div>
     </motion.div>
   );
