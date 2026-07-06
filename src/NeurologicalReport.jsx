@@ -154,97 +154,82 @@ function PeakChart({ negScores = {}, posScores = {} }) {
     c: dominantIdx < 6 ? '#A855F7' : '#D946EF'
   };
 
-  // Shepard's smooth interpolation function
-  const getInterpolatedScore = (x, scoresList, currentWidth) => {
-    let numerator = 0;
-    let denominator = 0;
-    const epsilon = Math.max(100, (currentWidth / 500) * 180); // scale smoothness with width
-    for (let i = 0; i < 12; i++) {
-      const x_i = 65 + i * ((currentWidth - 130) / 11); // Center range 65 to width - 65
-      const val = scoresList[i] || 0;
-      const distSq = Math.pow(x - x_i, 2);
-      const weight = 1 / (distSq + epsilon);
-      numerator += val * weight;
-      denominator += weight;
-    }
-    return numerator / denominator;
-  };
-
-  // Generate foreground wave path, background wave path, and locate highest peak coordinates
-  const waveData = React.useMemo(() => {
-    const startX = 50;
-    const endX = width - 50;
-    const step = 2; // high resolution smoothness
+  // Generate dynamic scattered sub-nodes (left side) and routing paths to cognitive categories (right side)
+  const neuralData = React.useMemo(() => {
+    const points = [];
+    const pathways = [];
     
-    let mainPath = '';
-    let bgPath = '';
-    let bgAreaPath = '';
-    
-    let peakCoord = { x: width / 2, y: 120, val: 0 };
-
-    for (let x = startX; x <= endX; x += step) {
-      // Main foreground wave
-      const baseH = getInterpolatedScore(x, scores, width);
-      const h = baseH * 1.55;
-      const py = 230 - h;
-      
-      if (baseH > peakCoord.val) {
-        peakCoord = { x, y: py, val: baseH };
-      }
-      
-      if (x === startX) {
-        mainPath += `M ${x} ${py}`;
-      } else {
-        mainPath += ` L ${x} ${py}`;
-      }
-      
-      // Secondary background area wave (phase-shifted and lower)
-      const baseH_bg = getInterpolatedScore(x - 32, scores, width);
-      const bgWaveDisp = 6 * Math.sin(x * 0.02);
-      const h_bg = Math.max(10, baseH_bg * 0.76 + bgWaveDisp);
-      const py_bg = 230 - h_bg;
-      
-      if (x === startX) {
-        bgPath += `M ${x} ${py_bg}`;
-        bgAreaPath += `M ${x} 230 L ${x} ${py_bg}`;
-      } else {
-        bgPath += ` L ${x} ${py_bg}`;
-        bgAreaPath += ` L ${x} ${py_bg}`;
-      }
-    }
-    bgAreaPath += ` L ${endX} 230 Z`;
-    
-    return { mainPath, bgPath, bgAreaPath, peakCoord };
-  }, [scores, width]);
-
-  // Guides and Pins metadata
-  const pins = React.useMemo(() => {
-    const list = [];
     const labels = ['ANX', 'DEP', 'STR', 'LON', 'OVE', 'BUR', 'CAL', 'HAP', 'FOC', 'ENE', 'CON', 'PEA'];
-    const icons = ['😰', '🌧️', '🔥', '🌑', '🌊', '🪫', '🍃', '😊', '🎯', '⚡', '💪', '🕊️'];
     const names = ['Anxiety', 'Depression', 'Stress', 'Loneliness', 'Overwhelm', 'Burnout', 'Calmness', 'Happiness', 'Focus', 'Energy', 'Confidence', 'Inner Peace'];
     
+    const targetYs = [50, 105, 160, 215];
+    const targetColors = ['#a855f7', '#ec4899', '#3b82f6', '#14b8a6'];
+    const xDest = Math.max(250, width - 135);
+    
     for (let i = 0; i < 12; i++) {
-      const x_i = 65 + i * ((width - 130) / 11);
       const val = scores[i] || 0;
+      const xPos = 45 + i * ((xDest - 65) / 11);
       
-      const h = val * 1.55;
-      const yTop = 230 - h;
+      // Target category based on emotion type
+      const targetIdx = Math.floor(i / 3);
+      const yTarget = targetYs[targetIdx];
+      const destColor = targetColors[targetIdx];
       
+      // Generate 2 sub-nodes per emotion for scatter density
+      const count = 2;
+      for (let j = 0; j < count; j++) {
+        // Deterministic Y scatter offset using prime multipliers
+        const seedY = ((i * 37 + j * 79) % 130);
+        const yPos = 35 + seedY + (val * 0.15);
+        
+        // Sizing based on score value
+        const radius = Math.max(2.2, Math.min(8, (val / 100) * 6 + (j * 1.5)));
+        const ptId = `${i}-${j}`;
+        
+        points.push({
+          id: ptId,
+          x: xPos,
+          y: yPos,
+          r: radius,
+          color: destColor,
+          name: names[i],
+          score: val
+        });
+        
+        // Cubic Bezier curve routing to target category
+        const pathStr = `M ${xPos} ${yPos} C ${xPos + (xDest - xPos) * 0.45} ${yPos}, ${xPos + (xDest - xPos) * 0.55} ${yTarget}, ${xDest} ${yTarget}`;
+        
+        pathways.push({
+          id: `link-${ptId}`,
+          d: pathStr,
+          color: destColor
+        });
+      }
+    }
+    return { points, pathways, targetYs, targetColors, xDest };
+  }, [scores, width]);
+
+  // Static label pins for bottom alignment
+  const labelPins = React.useMemo(() => {
+    const list = [];
+    const labels = ['ANX', 'DEP', 'STR', 'LON', 'OVE', 'BUR', 'CAL', 'HAP', 'FOC', 'ENE', 'CON', 'PEA'];
+    const names = ['Anxiety', 'Depression', 'Stress', 'Loneliness', 'Overwhelm', 'Burnout', 'Calmness', 'Happiness', 'Focus', 'Energy', 'Confidence', 'Inner Peace'];
+    const xDest = Math.max(250, width - 135);
+
+    for (let i = 0; i < 12; i++) {
+      const xPos = 45 + i * ((xDest - 65) / 11);
       list.push({
         index: i + 1,
-        name: names[i],
         label: labels[i],
-        icon: icons[i],
-        score: val,
-        xBase: x_i,
-        yBase: 230,
-        xTop: x_i,
-        yTop: yTop
+        name: names[i],
+        score: scores[i] || 0,
+        x: xPos
       });
     }
     return list;
   }, [scores, width]);
+
+  const targetTitles = ['Stress Core', 'Mood Index', 'Focus & Flow', 'Recovery Flow'];
 
   return (
     <div style={{ position:'relative', borderRadius:'18px', overflow:'hidden', padding:'16px 8px 4px',
@@ -266,8 +251,8 @@ function PeakChart({ negScores = {}, posScores = {} }) {
       {/* header row: title + dominant stat */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'2px 10px 12px', position:'relative', zIndex:3 }}>
         <div>
-          <p style={{ margin:'0 0 2px', fontSize:'0.92rem', fontWeight:800, color:'#fff', fontFamily:SF }}>Intensity Curve</p>
-          <p style={{ margin:0, fontSize:'0.68rem', color:'rgba(255,255,255,0.4)', fontFamily:SF }}>Across all 12 emotions</p>
+          <p style={{ margin:'0 0 2px', fontSize:'0.92rem', fontWeight:800, color:'#fff', fontFamily:SF }}>Neural Pathway Mapping</p>
+          <p style={{ margin:0, fontSize:'0.68rem', color:'rgba(255,255,255,0.4)', fontFamily:SF }}>Across all 12 psychological domains</p>
         </div>
         <div style={{ textAlign:'right' }}>
           <div style={{ display:'flex', alignItems:'baseline', gap:6, justifyContent:'flex-end' }}>
@@ -285,222 +270,159 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         >
           <svg width={width} height={320} viewBox={`0 0 ${width} 320`} style={{ overflow:'visible' }}>
             <defs>
-              {/* Foreground Neon Color Gradient */}
-              <linearGradient id="glowPathGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#8b5cf6" />
-                <stop offset="35%" stopColor="#ec4899" />
-                <stop offset="65%" stopColor="#f97316" />
-                <stop offset="100%" stopColor="#fbbf24" />
-              </linearGradient>
-
-              {/* Background Wave Translucent Area Gradient */}
-              <linearGradient id="bgAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(139,92,246,0.18)" />
-                <stop offset="100%" stopColor="rgba(139,92,246,0.0)" />
-              </linearGradient>
-
-              {/* Vertical Glowing Peak Beam Gradient */}
-              <linearGradient id="verticalBeamGradient" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#ec4899" stopOpacity="0" />
-              </linearGradient>
-
-              {/* Radial Peak Flare Gradient */}
-              <radialGradient id="peakFlareGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.55" />
-                <stop offset="60%" stopColor="#ec4899" stopOpacity="0.1" />
-                <stop offset="100%" stopColor="transparent" stopOpacity="0" />
-              </radialGradient>
+              {/* Path gradients transition from dimmed scatter node colors to target category colors */}
+              {neuralData.targetColors.map((col, idx) => (
+                <linearGradient key={idx} id={`flowGrad-${idx}`} x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor={col} stopOpacity="0.12" />
+                  <stop offset="60%" stopColor={col} stopOpacity="0.45" />
+                  <stop offset="100%" stopColor={col} stopOpacity="0.88" />
+                </linearGradient>
+              ))}
             </defs>
 
-            {/* Vertical column divider grid lines */}
-            {[0.2, 0.4, 0.6, 0.8].map((p, idx) => {
-              const gx = 50 + p * (width - 100);
+            {/* Vertical column grid lines */}
+            {labelPins.map((pin, idx) => (
+              <line
+                key={idx}
+                x1={pin.x}
+                y1="30"
+                x2={pin.x}
+                y2="235"
+                stroke="rgba(255,255,255,0.025)"
+                strokeWidth="1"
+              />
+            ))}
+
+            {/* NEURAL PATHWAY BEZIER LINES */}
+            {neuralData.pathways.map((path) => {
+              const targetIdx = Math.floor(path.id.split('-')[1] / 3);
               return (
-                <line
-                  key={idx}
-                  x1={gx}
-                  y1="30"
-                  x2={gx}
-                  y2="230"
-                  stroke="rgba(255,255,255,0.025)"
+                <path
+                  key={path.id}
+                  d={path.d}
+                  fill="none"
+                  stroke={`url(#flowGrad-${targetIdx})`}
                   strokeWidth="1"
+                  opacity="0.55"
                 />
               );
             })}
 
-            {/* Horizontal dashed reference lines */}
-            {[70, 110, 150, 190].map((yVal, idx) => (
-              <line
-                key={idx}
-                x1="45"
-                y1={yVal}
-                x2={width - 45}
-                y2={yVal}
-                stroke="rgba(255,255,255,0.045)"
-                strokeDasharray="2 4"
-                strokeWidth="0.8"
-              />
-            ))}
-
-            {/* Flat Horizontal Baseline */}
-            <line x1="45" y1="230" x2={width - 45} y2="230" stroke="rgba(255,255,255,0.15)" strokeWidth="1.2" />
-
-            {/* BACKGROUND WAVE AREA FILL & OUTLINE */}
-            {waveData.bgAreaPath && (
-              <path
-                d={waveData.bgAreaPath}
-                fill="url(#bgAreaGradient)"
-                opacity="0.45"
-              />
-            )}
-            {waveData.bgPath && (
-              <path
-                d={waveData.bgPath}
-                fill="none"
-                stroke="rgba(255,255,255,0.22)"
-                strokeWidth="1.2"
-                strokeDasharray="2 3"
-              />
-            )}
-
-            {/* INTENSE PEAK FLARE BEAM & AURA GLOW */}
-            {waveData.peakCoord && (
-              <>
-                {/* Radial Glow Flare */}
-                <circle
-                  cx={waveData.peakCoord.x}
-                  cy={waveData.peakCoord.y}
-                  r="26"
-                  fill="url(#peakFlareGradient)"
-                  style={{ mixBlendMode:'screen' }}
-                />
-                {/* Vertical glowing fading laser beam */}
-                <line
-                  x1={waveData.peakCoord.x}
-                  y1={waveData.peakCoord.y}
-                  x2={waveData.peakCoord.x}
-                  y2={waveData.peakCoord.y - 45}
-                  stroke="url(#verticalBeamGradient)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-              </>
-            )}
-
-            {/* FOREGROUND GLOWING NEON WAVE */}
-            {waveData.mainPath && (
-              <>
-                {/* Volumetric Neon drop-glow path */}
-                <path
-                  d={waveData.mainPath}
-                  fill="none"
-                  stroke="url(#glowPathGradient)"
-                  strokeWidth="6"
-                  opacity="0.22"
-                />
-                {/* Sharp foreground glow line path */}
-                <path
-                  d={waveData.mainPath}
-                  fill="none"
-                  stroke="url(#glowPathGradient)"
-                  strokeWidth="2.5"
-                />
-              </>
-            )}
-
-            {/* Dashed vertical coordinate lines & pins */}
-            {pins.map((pin, idx) => {
-              const isHovered = hovered && hovered.name === pin.name;
+            {/* SCATTERED NODES (Left/Middle area) */}
+            {neuralData.points.map((pt) => {
+              const isHovered = hovered && hovered.id === pt.id;
               return (
                 <g
-                  key={idx}
+                  key={pt.id}
                   style={{ cursor: 'pointer' }}
                   onMouseEnter={() => {
                     setHovered({
-                      name: pin.name,
-                      score: pin.score,
-                      x: pin.xTop,
-                      y: pin.yTop - 12,
-                      color: '#ec4899'
+                      id: pt.id,
+                      name: pt.name,
+                      score: pt.score,
+                      x: pt.x,
+                      y: pt.y,
+                      color: pt.color
                     });
                   }}
                   onMouseLeave={() => {
                     setHovered(null);
                   }}
                 >
-                  {/* Vertical dashed coordinate guide line */}
-                  <line
-                    x1={pin.xBase}
-                    y1={pin.yBase}
-                    x2={pin.xTop}
-                    y2={pin.yTop}
-                    stroke={isHovered ? 'url(#glowPathGradient)' : 'rgba(255,255,255,0.18)'}
-                    strokeDasharray="2 3"
-                    strokeWidth={isHovered ? 1.5 : 0.75}
-                    style={{ transition: 'stroke 0.25s' }}
-                  />
-
-                  {/* Axis solid base dot */}
+                  {/* Glowing outer aura for hovered node */}
                   <circle
-                    cx={pin.xBase}
-                    cy={pin.yBase}
-                    r="2"
-                    fill={pin.index === 12 ? '#ffffff' : 'url(#glowPathGradient)'}
+                    cx={pt.x}
+                    cy={pt.y}
+                    r={isHovered ? pt.r + 5 : pt.r + 2}
+                    fill={pt.color}
+                    opacity={isHovered ? 0.35 : 0.08}
+                    style={{ transition: 'all 0.25s' }}
                   />
-
-                  {/* Score label in yellow (Flat horizontal alignment) */}
-                  <text
-                    x={pin.xBase}
-                    y={255}
-                    textAnchor="middle"
-                    fill="#fbbf24"
-                    style={{ fontFamily: SF, fontSize: 8.5, fontWeight: '700' }}
-                  >
-                    {pin.score}%
-                  </text>
-
-                  {/* Emotion short name below score (Flat horizontal alignment) */}
-                  <text
-                    x={pin.xBase}
-                    y={268}
-                    textAnchor="middle"
-                    fill="rgba(255,255,255,0.3)"
-                    style={{ fontFamily: SF, fontSize: 7.2, fontWeight: '600', letterSpacing: '0.4px' }}
-                  >
-                    {pin.label}
-                  </text>
-
-                  {/* Circle Pin on the top curve */}
+                  {/* Sharp core circle node */}
                   <circle
-                    cx={pin.xTop}
-                    cy={pin.yTop}
-                    r={isHovered ? 6.5 : 4.5}
-                    fill="#000000"
-                    stroke={pin.index === 12 ? '#ffffff' : 'url(#glowPathGradient)'}
-                    strokeWidth="1.8"
-                    style={{ transition: 'all 0.2s' }}
+                    cx={pt.x}
+                    cy={pt.y}
+                    r={isHovered ? pt.r + 1.5 : pt.r}
+                    fill={pt.color}
+                    opacity="0.85"
+                    style={{ transition: 'all 0.25s' }}
                   />
+                </g>
+              );
+            })}
+
+            {/* TARGET CATEGORY BINS (Right side) */}
+            {neuralData.targetYs.map((yVal, idx) => {
+              const col = neuralData.targetColors[idx];
+              return (
+                <g key={idx}>
+                  {/* Category Node Outer Glow */}
                   <circle
-                    cx={pin.xTop}
-                    cy={pin.yTop}
+                    cx={neuralData.xDest}
+                    cy={yVal}
+                    r="9.5"
+                    fill={col}
+                    opacity="0.25"
+                  />
+                  {/* Category Node Sharp Boundary */}
+                  <circle
+                    cx={neuralData.xDest}
+                    cy={yVal}
+                    r="5.5"
+                    fill={col}
+                  />
+                  {/* Category Node White Core Spot */}
+                  <circle
+                    cx={neuralData.xDest}
+                    cy={yVal}
                     r="2.2"
-                    fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
+                    fill="#ffffff"
                   />
-
-                  {/* Label above the pin */}
+                  {/* Category Title Label Text */}
                   <text
-                    x={pin.xTop}
-                    y={pin.yTop - 10}
-                    textAnchor="middle"
-                    fill={pin.index === 12 ? '#ffffff' : '#fbbf24'}
-                    style={{ fontFamily: SF, fontSize: 8.5, fontWeight: 'bold' }}
+                    x={neuralData.xDest + 16}
+                    y={yVal + 3.5}
+                    fill="rgba(255,255,255,0.72)"
+                    style={{ fontFamily: SF, fontSize: 8.5, fontWeight: '700', letterSpacing: '0.4px' }}
                   >
-                    {pin.index}
+                    {targetTitles[idx]}
                   </text>
                 </g>
               );
             })}
+
+            {/* Bottom horizontal axis baseline */}
+            <line x1="35" y1="235" x2={neuralData.xDest + 80} y2="235" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+
+            {/* Clean, flat bottom text alignment */}
+            {labelPins.map((pin) => (
+              <g key={pin.index}>
+                {/* Tick mark */}
+                <line x1={pin.x} y1="235" x2={pin.x} y2="239" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+
+                {/* Score */}
+                <text
+                  x={pin.x}
+                  y={255}
+                  textAnchor="middle"
+                  fill="#fbbf24"
+                  style={{ fontFamily: SF, fontSize: 8.5, fontWeight: '700' }}
+                >
+                  {pin.score}%
+                </text>
+
+                {/* Short emotion code */}
+                <text
+                  x={pin.x}
+                  y={268}
+                  textAnchor="middle"
+                  fill="rgba(255,255,255,0.3)"
+                  style={{ fontFamily: SF, fontSize: 7.2, fontWeight: '600', letterSpacing: '0.4px' }}
+                >
+                  {pin.label}
+                </text>
+              </g>
+            ))}
           </svg>
         </motion.div>
 
