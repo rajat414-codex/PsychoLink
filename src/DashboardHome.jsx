@@ -212,15 +212,15 @@ export default function DashboardHome({
             <div style={{ height:230, marginLeft:-18, position:'relative', zIndex:2 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={MOOD_TREND.map(item => {
-                  const mVal = item.mood - 50;
-                  const cVal = item.calm - 50;
-                  const isFine = Math.abs(mVal - cVal) <= 5;
-                  const finalCalm = isFine ? mVal : cVal;
+                  const diff = item.mood - item.calm;
+                  const isFine = Math.abs(diff) <= 3;
+                  const mVal = isFine ? 0 : diff * 3.2;
+                  const cVal = isFine ? 0 : -diff * 3.2;
                   return {
                     ...item,
                     moodVal: mVal,
-                    calmVal: finalCalm,
-                    range: [finalCalm, mVal],
+                    calmVal: cVal,
+                    range: [cVal, mVal],
                   };
                 })}>
                   <defs>
