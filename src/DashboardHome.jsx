@@ -57,14 +57,14 @@ function Card({ children, style, delay=0, glow, onClick, hover }) {
       onClick={onClick}
       style={{
         position:'relative',
-        background:'rgba(10, 10, 12, 0.85)',
+        background:'rgba(255, 255, 255, 0.03)',
         backdropFilter:'blur(20px)',
         WebkitBackdropFilter:'blur(20px)',
-        border:'1px solid rgba(255, 255, 255, 0.08)',
+        border:'1px solid rgba(255, 255, 255, 0.1)',
         borderRadius:24, padding:20,
         boxShadow: glow
-          ? `0 16px 48px rgba(0,0,0,0.7), 0 0 50px ${glow}12, inset 0 1px 0 rgba(255,255,255,0.08)`
-          : '0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+          ? `0 16px 48px rgba(0,0,0,0.5), 0 0 50px ${glow}10, inset 0 1px 0 rgba(255,255,255,0.08)`
+          : '0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         cursor: onClick ? 'pointer' : 'default',
         overflow:'hidden',
         ...style,
@@ -223,7 +223,7 @@ export default function DashboardHome({
     <motion.div ref={rootRef} key="home" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
       style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
 
-      <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, overflow:'hidden', background:'#000000' }}>
+      <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, overflow:'hidden', background:'#121214' }}>
         {/* Central Fluent spotlight glow */}
         <div style={{
           position:'absolute',
@@ -231,13 +231,13 @@ export default function DashboardHome({
           transform:'translate(-50%,-50%)',
           width:'700px', height:'700px',
           borderRadius:'50%',
-          background:'radial-gradient(circle, rgba(255,255,255,0.045) 0%, transparent 60%)',
+          background:'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 60%)',
           filter:'blur(80px)',
         }}/>
         <motion.div animate={{ x:[0,20,0], y:[0,-20,0] }} transition={{ duration:25, repeat:Infinity, ease:'easeInOut' }}
-          style={{ position:'absolute', top:'10%', left:'20%', width:350, height:350, borderRadius:'50%', background:`radial-gradient(circle, ${accent}0b, transparent 70%)`, filter:'blur(60px)' }}/>
+          style={{ position:'absolute', top:'10%', left:'20%', width:350, height:350, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,0.04), transparent 70%)', filter:'blur(60px)' }}/>
         <motion.div animate={{ x:[0,-20,0], y:[0,20,0] }} transition={{ duration:28, repeat:Infinity, ease:'easeInOut' }}
-          style={{ position:'absolute', bottom:'15%', right:'20%', width:350, height:350, borderRadius:'50%', background:'radial-gradient(circle, rgba(139,135,245,0.08), transparent 70%)', filter:'blur(60px)' }}/>
+          style={{ position:'absolute', bottom:'15%', right:'20%', width:350, height:350, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,0.03), transparent 70%)', filter:'blur(60px)' }}/>
       </div>
 
       <div style={{ position:'relative', zIndex:1 }}>

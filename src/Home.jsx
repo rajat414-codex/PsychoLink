@@ -430,14 +430,14 @@ export default function Home({ userProfile, onLogout }) {
   };
 
   return (
-    <div style={{ width:'100vw', height:'100vh', display:'flex', background:'#000000', fontFamily:J, overflow:'hidden', position:'relative' }}>
+    <div style={{ width:'100vw', height:'100vh', display:'flex', background:'#121214', fontFamily:J, overflow:'hidden', position:'relative' }}>
 
       {/* ── GLOBAL BG ──────────────────────────────────────────── */}
       <div style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none' }}>
         <motion.div animate={{ backgroundPosition:['0% 0%','100% 100%'] }} transition={{ duration:40, repeat:Infinity, ease:'linear', repeatType:'mirror' }}
           style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&q=80&w=2000')`, backgroundSize:'130% 130%', opacity:0.04 }}/>
-        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 20% 0%, rgba(139,92,246,0.12) 0%, transparent 55%)' }}/>
-        <motion.div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse at 80% 100%, ${activeAI==='AURA'?'rgba(236,72,153,0.09)':'rgba(45,212,191,0.09)'} 0%, transparent 55%)`, transition:'background 1.2s' }}/>
+        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.06) 0%, transparent 50%)' }}/>
+        <motion.div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse at 80% 100%, rgba(255,255,255,0.05) 0%, transparent 50%)`, transition:'background 1.2s' }}/>
         <motion.div animate={{ backgroundPosition:['0px 0px','80px 160px'] }} transition={{ duration:50, repeat:Infinity, ease:'linear' }}
           style={{ position:'absolute', inset:0, opacity:0.04, backgroundImage:`radial-gradient(circle,rgba(255,255,255,0.9) 1px,transparent 1px)`, backgroundSize:'60px 60px' }}/>
       </div>
