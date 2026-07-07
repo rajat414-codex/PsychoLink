@@ -253,13 +253,13 @@ export default function DashboardHome({
           {KPIS.map((k,i) => <KpiCard key={i} k={k} i={i} inView={inView}/>)}
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr', gap:12, marginBottom:14 }}>
+        <div style={{ marginBottom:14 }}>
           <Card delay={0.3} glow={accent}>
             <CardTitle title="Wellness Overview" sub="Mood & calm — last 7 days"
               right={<motion.div whileHover={{ scale:1.05 }} style={{ padding:'4px 10px', background:accentB, border:`1px solid ${accentBr}`, borderRadius:20, boxShadow:`0 0 14px ${accent}25` }}>
                 <span style={{ fontSize:'0.68rem', color:accent, fontWeight:700, fontFamily:S }}>↑ 12% this week</span>
               </motion.div>}/>
-            <div style={{ height:230, marginLeft:-18, position:'relative', zIndex:2 }}>
+            <div style={{ height:280, marginLeft:-18, position:'relative', zIndex:2 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={waveData}>
                   <defs>
@@ -337,36 +337,6 @@ export default function DashboardHome({
               </span>
             </div>
           </Card>
-
-          <Card delay={0.36} glow="#5eb8ad">
-            <CardTitle title="Emotion Mix" sub="This week's breakdown"/>
-            <div style={{ height:160, position:'relative', zIndex:2 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <defs>
-                    <filter id="pieGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                  </defs>
-                  <Pie data={EMOTION_SPLIT} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={52} outerRadius={74} paddingAngle={3} stroke="none" filter="url(#pieGlow)" isAnimationActive animationDuration={1400}>
-                    {EMOTION_SPLIT.map((e,i) => <Cell key={i} fill={e.color}/>)}
-                  </Pie>
-                  <Tooltip content={<Tip/>}/>
-                </PieChart>
-              </ResponsiveContainer>
-              <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
-                <span style={{ fontSize:'1.5rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:'0 0 20px rgba(94,184,173,0.6)' }}>44%</span>
-                <span style={{ fontSize:'0.66rem', color:'rgba(255,255,255,0.4)', fontFamily:J }}>Calm</span>
-              </div>
-            </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginTop:12, position:'relative', zIndex:2 }}>
-              {EMOTION_SPLIT.map((e,i) => (
-                <div key={i} style={{ display:'flex', alignItems:'center', gap:7 }}>
-                  <span style={{ width:8, height:8, borderRadius:2, background:e.color, flexShrink:0, boxShadow:`0 0 6px ${e.color}` }}/>
-                  <span style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.55)', fontFamily:J }}>{e.name}</span>
-                  <span style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.3)', fontFamily:S, marginLeft:'auto' }}>{e.value}%</span>
-                </div>
-              ))}
-            </div>
-          </Card>
         </div>
 
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:14 }}>
@@ -389,7 +359,7 @@ export default function DashboardHome({
           ))}
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1.3fr 1fr', gap:12, marginBottom:14 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1.2fr 1fr 1fr', gap:12, marginBottom:14 }}>
           <Card delay={0.54} glow={accent}>
             <CardTitle title="Weekly Activity" sub="Check-ins & sessions"
               right={<motion.span whileHover={{ scale:1.05 }} onClick={()=>setShowBreath(true)} style={{ fontSize:'0.7rem', color:accent, fontWeight:700, fontFamily:S, cursor:'pointer', display:'flex', alignItems:'center', gap:5 }}><FaWind size={11}/> Breathe</motion.span>}/>
@@ -410,6 +380,36 @@ export default function DashboardHome({
                   <Bar dataKey="v" fill="url(#barGrad)" radius={[6,6,0,0]} maxBarSize={26} filter="url(#barGlow)" isAnimationActive animationDuration={1400}/>
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          </Card>
+
+          <Card delay={0.36} glow="#5eb8ad">
+            <CardTitle title="Emotion Mix" sub="This week's breakdown"/>
+            <div style={{ height:150, position:'relative', zIndex:2 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <defs>
+                    <filter id="pieGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  <Pie data={EMOTION_SPLIT} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={48} outerRadius={66} paddingAngle={3} stroke="none" filter="url(#pieGlow)" isAnimationActive animationDuration={1400}>
+                    {EMOTION_SPLIT.map((e,i) => <Cell key={i} fill={e.color}/>)}
+                  </Pie>
+                  <Tooltip content={<Tip/>}/>
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
+                <span style={{ fontSize:'1.3rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:'0 0 20px rgba(94,184,173,0.6)' }}>44%</span>
+                <span style={{ fontSize:'0.64rem', color:'rgba(255,255,255,0.4)', fontFamily:J }}>Calm</span>
+              </div>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginTop:8, position:'relative', zIndex:2 }}>
+              {EMOTION_SPLIT.map((e,i) => (
+                <div key={i} style={{ display:'flex', alignItems:'center', gap:5 }}>
+                  <span style={{ width:7, height:7, borderRadius:2, background:e.color, flexShrink:0, boxShadow:`0 0 6px ${e.color}` }}/>
+                  <span style={{ fontSize:'0.66rem', color:'rgba(255,255,255,0.55)', fontFamily:J }}>{e.name}</span>
+                  <span style={{ fontSize:'0.66rem', color:'rgba(255,255,255,0.3)', fontFamily:S, marginLeft:'auto' }}>{e.value}%</span>
+                </div>
+              ))}
             </div>
           </Card>
 
