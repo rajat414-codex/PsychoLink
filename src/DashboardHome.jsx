@@ -95,10 +95,23 @@ function Tip({ active, payload, label }) {
       <p style={{ margin:'0 0 4px', fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:S }}>{label}</p>
       {payload.map((p,i) => {
         const isVal = p.name === 'moodVal' || p.name === 'calmVal';
-        const displayName = p.name === 'moodVal' ? 'Mood' : p.name === 'calmVal' ? 'Calm' : p.name;
-        const displayValue = isVal ? p.value + 50 : p.value;
+        let displayName = p.name === 'moodVal' ? 'Mood' : p.name === 'calmVal' ? 'Calm' : p.name;
+        let displayValue = isVal ? p.value + 50 : p.value;
+        let textColor = p.color || p.stroke || p.fill;
+
+        if (p.name === 'val') {
+          const isPos = p.value >= 0;
+          displayName = isPos ? 'Positive State' : 'Negative State';
+          displayValue = (isPos ? '+' : '') + p.value;
+          textColor = isPos ? '#8b87f5' : '#FF4A5A';
+        }
+
+        if (textColor && typeof textColor === 'string' && textColor.includes('url')) {
+          textColor = p.value >= 0 ? '#8b87f5' : '#FF4A5A';
+        }
+
         return (
-          <p key={i} style={{ margin:0, fontSize:'0.82rem', fontWeight:700, color:p.color||p.stroke||p.fill, fontFamily:S, textTransform:'capitalize' }}>
+          <p key={i} style={{ margin:0, fontSize:'0.82rem', fontWeight:700, color:textColor, fontFamily:S, textTransform:'capitalize' }}>
             {displayName}: {displayValue}%
           </p>
         );
