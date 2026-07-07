@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import {
-  ComposedChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  ComposedChart, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, CartesianGrid, ReferenceLine,
 } from 'recharts';
 import {
