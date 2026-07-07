@@ -261,7 +261,7 @@ export default function DashboardHome({
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false}/>
                   
                   <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.3)', fontSize:11, fontFamily:'Space Grotesk' }}/>
-                  <YAxis domain={[-50, 50]} tickFormatter={(v) => `${v + 50}%`} axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.25)', fontSize:10 }} width={28}/>
+                  <YAxis domain={[-50, 50]} tickFormatter={(v) => `${v + 50}%`} axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.25)', fontSize:10 }} width={42}/>
                   <Tooltip content={<Tip/>}/>
                   
                   {/* Central Cartesian axes crossing at center (Thursday acts as horizontal midpoint) */}
