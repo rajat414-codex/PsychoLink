@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, CartesianGrid,
+  PieChart, Pie, Cell, BarChart, Bar, CartesianGrid, ReferenceLine,
 } from 'recharts';
 import {
   FaArrowUp, FaArrowDown, FaBrain, FaArrowRight, FaWind, FaRobot,
