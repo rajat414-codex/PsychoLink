@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  ComposedChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, CartesianGrid, ReferenceLine,
 } from 'recharts';
 import {
@@ -149,6 +149,56 @@ export default function DashboardHome({
   const rootRef = useRef(null);
   const inView = useInView(rootRef, { once:true });
 
+  const generateWaveData = (moodIndex) => {
+    const points = [];
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const labelIndices = { 0: 'Mon', 3: 'Tue', 7: 'Wed', 10: 'Thu', 13: 'Fri', 17: 'Sat', 20: 'Sun' };
+    const isPositive = moodIndex === 0 || moodIndex === 3;
+    
+    for (let i = 0; i <= 20; i++) {
+      const dayIndex = Math.min(6, Math.floor(i / 3));
+      const dayName = days[dayIndex];
+      const label = labelIndices[i] || '';
+      
+      let val = 0;
+      if (isPositive) {
+        if (i <= 10) {
+          val = (i / 10) * 45;
+        } else {
+          val = ((20 - i) / 10) * 45;
+        }
+      } else {
+        if (i <= 10) {
+          if (i <= 5) {
+            val = (i / 5) * 40;
+          } else {
+            val = ((10 - i) / 5) * 40;
+          }
+        } else {
+          if (i <= 15) {
+            val = -((i - 10) / 5) * 40;
+          } else {
+            val = -((20 - i) / 5) * 40;
+          }
+        }
+      }
+      
+      const baselineMood = isPositive ? 70 : 48;
+      const baselineCalm = isPositive ? 65 : 44;
+      
+      points.push({
+        name: label,
+        d: dayName,
+        val: val,
+        mood: Math.min(100, Math.max(0, baselineMood + Math.round(val * 0.45))),
+        calm: Math.min(100, Math.max(0, baselineCalm + Math.round(val * 0.35))),
+      });
+    }
+    return points;
+  };
+
+  const waveData = generateWaveData(moodToday);
+
   const KPIS = [
     { label:'Mood Score', num:82, suffix:'%', delta:'+8%',  up:true, color:'#5eb8ad', spark:[58,62,60,66,71,74,82] },
     { label:'Day Streak', num:7,  suffix:'',  delta:'days', up:true, color:'#c79552', spark:[1,2,3,4,5,6,7] },
@@ -211,40 +261,21 @@ export default function DashboardHome({
               </motion.div>}/>
             <div style={{ height:230, marginLeft:-18, position:'relative', zIndex:2 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={MOOD_TREND.map(item => {
-                  const diff = item.mood - item.calm;
-                  const isFine = Math.abs(diff) <= 3;
-                  const mVal = isFine ? 0 : diff * 3.2;
-                  const cVal = isFine ? 0 : -diff * 3.2;
-                  return {
-                    ...item,
-                    moodVal: mVal,
-                    calmVal: cVal,
-                    range: [cVal, mVal],
-                  };
-                })}>
+                <ComposedChart data={waveData}>
                   <defs>
-                    <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b87f5" stopOpacity={0.35}/>
-                      <stop offset="100%" stopColor="#8b87f5" stopOpacity={0.01}/>
+                    <linearGradient id="posBarGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#8b87f5" stopOpacity={0.8}/>
+                      <stop offset="100%" stopColor="#5eb8ad" stopOpacity={0.15}/>
                     </linearGradient>
-                    <linearGradient id="calmGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#5eb8ad" stopOpacity={0.3}/>
-                      <stop offset="100%" stopColor="#5eb8ad" stopOpacity={0.01}/>
-                    </linearGradient>
-                    
-                    <linearGradient id="rangeGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b87f5" stopOpacity={0.16}/>
-                      <stop offset="100%" stopColor="#5eb8ad" stopOpacity={0.16}/>
+                    <linearGradient id="negBarGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#FF4A5A" stopOpacity={0.8}/>
+                      <stop offset="100%" stopColor="#F59E0B" stopOpacity={0.15}/>
                     </linearGradient>
                     
-                    <linearGradient id="moodStroke" x1="0" y1="0" x2="1" y2="0">
+                    <linearGradient id="boundaryStroke" x1="0" y1="0" x2="1" y2="0">
                       <stop offset="0%" stopColor="#8b87f5"/>
-                      <stop offset="100%" stopColor="#a855f7"/>
-                    </linearGradient>
-                    <linearGradient id="calmGradStroke" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#5eb8ad"/>
-                      <stop offset="100%" stopColor="#14b8a6"/>
+                      <stop offset="50%" stopColor="#5eb8ad"/>
+                      <stop offset="100%" stopColor="#FF4A5A"/>
                     </linearGradient>
                     
                     <filter id="lineGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -260,7 +291,7 @@ export default function DashboardHome({
                   
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false}/>
                   
-                  <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.3)', fontSize:11, fontFamily:'Space Grotesk' }}/>
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.3)', fontSize:11, fontFamily:'Space Grotesk' }}/>
                   <YAxis domain={[-50, 50]} tickFormatter={(v) => `${v + 50}%`} axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.25)', fontSize:10 }} width={42}/>
                   <Tooltip content={<Tip/>}/>
                   
@@ -268,24 +299,42 @@ export default function DashboardHome({
                   <ReferenceLine y={0} stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} markerEnd="url(#arrow-right)" />
                   <ReferenceLine x="Thu" stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} markerEnd="url(#arrow-up)" />
                   
-                  {/* Connective visual range bridge area */}
-                  <Area type="monotone" dataKey="range" stroke="none" fill="url(#rangeGrad)" isAnimationActive animationDuration={1500} activeDot={false} dot={false}/>
+                  {/* Thin vertical stems representing hand-drawn waveform lines */}
+                  <Bar dataKey="val" barSize={3.5} isAnimationActive animationDuration={1400}>
+                    {waveData.map((entry, index) => {
+                      const isPositiveVal = entry.val >= 0;
+                      return (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={isPositiveVal ? 'url(#posBarGrad)' : 'url(#negBarGrad)'} 
+                        />
+                      );
+                    })}
+                  </Bar>
                   
-                  <Area type="monotone" dataKey="moodVal" stroke="url(#moodStroke)" strokeWidth={2.5} fill="url(#moodGrad)" filter="url(#lineGlow)" isAnimationActive animationDuration={1600}
-                    dot={{ r: 3, stroke: '#8b87f5', strokeWidth: 1.2, fill: '#070709' }}
-                    activeDot={{ r: 5, stroke: '#fff', strokeWidth: 1.5, fill: '#8b87f5' }}/>
-                  <Area type="monotone" dataKey="calmVal" stroke="url(#calmGradStroke)" strokeWidth={2.5} fill="url(#calmGrad)" filter="url(#lineGlow)" isAnimationActive animationDuration={1800}
-                    dot={{ r: 3, stroke: '#5eb8ad', strokeWidth: 1.2, fill: '#070709' }}
-                    activeDot={{ r: 5, stroke: '#fff', strokeWidth: 1.5, fill: '#5eb8ad' }}/>
-                </AreaChart>
+                  {/* Sharp outer triangular boundary line */}
+                  <Area 
+                    type="linear" 
+                    dataKey="val" 
+                    stroke="url(#boundaryStroke)" 
+                    strokeWidth={2} 
+                    fill="none" 
+                    filter="url(#lineGlow)" 
+                    isAnimationActive 
+                    animationDuration={1600} 
+                    dot={false} 
+                    activeDot={false} 
+                  />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
             <div style={{ display:'flex', gap:18, marginTop:8, paddingLeft:18, position:'relative', zIndex:2 }}>
-              {[['Mood','#8b87f5'],['Calm','#5eb8ad']].map(([l,c],i)=>(
-                <span key={i} style={{ display:'flex', alignItems:'center', gap:6, fontSize:'0.74rem', color:'rgba(255,255,255,0.5)', fontFamily:J }}>
-                  <span style={{ width:9, height:9, borderRadius:'50%', background:c, boxShadow:`0 0 8px ${c}` }}/> {l}
-                </span>
-              ))}
+              <span style={{ display:'flex', alignItems:'center', gap:6, fontSize:'0.74rem', color:'rgba(255,255,255,0.5)', fontFamily:J }}>
+                <span style={{ width:9, height:9, borderRadius:'50%', background:'#8b87f5', boxShadow:'0 0 8px #8b87f5' }}/> Positive State
+              </span>
+              <span style={{ display:'flex', alignItems:'center', gap:6, fontSize:'0.74rem', color:'rgba(255,255,255,0.5)', fontFamily:J }}>
+                <span style={{ width:9, height:9, borderRadius:'50%', background:'#FF4A5A', boxShadow:'0 0 8px #FF4A5A' }}/> Negative State
+              </span>
             </div>
           </Card>
 
