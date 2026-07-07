@@ -30,14 +30,14 @@ function Card({ children, style, delay=0, glow }) {
     <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay, duration:0.55, ease:[0.22,1,0.36,1] }}
       style={{
         position:'relative', overflow:'hidden',
-        background:'rgba(255, 255, 255, 0.015)',
+        background:'rgba(10, 10, 12, 0.85)',
         backdropFilter:'blur(20px)',
         WebkitBackdropFilter:'blur(20px)',
-        border:'1px solid rgba(255, 255, 255, 0.06)',
+        border:'1px solid rgba(255, 255, 255, 0.08)',
         borderRadius:24, padding:20,
         boxShadow: glow
-          ? `0 12px 40px rgba(0,0,0,0.5), 0 0 50px ${glow}10, inset 0 1px 0 rgba(255,255,255,0.08)`
-          : '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+          ? `0 16px 48px rgba(0,0,0,0.7), 0 0 50px ${glow}12, inset 0 1px 0 rgba(255,255,255,0.08)`
+          : '0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
         ...style
       }}>
       <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)', pointerEvents:'none' }}/>

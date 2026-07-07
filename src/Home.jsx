@@ -430,7 +430,7 @@ export default function Home({ userProfile, onLogout }) {
   };
 
   return (
-    <div style={{ width:'100vw', height:'100vh', display:'flex', background:'#0a0a0c', fontFamily:J, overflow:'hidden', position:'relative' }}>
+    <div style={{ width:'100vw', height:'100vh', display:'flex', background:'#000000', fontFamily:J, overflow:'hidden', position:'relative' }}>
 
       {/* ── GLOBAL BG ──────────────────────────────────────────── */}
       <div style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none' }}>

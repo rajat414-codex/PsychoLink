@@ -57,14 +57,14 @@ function Card({ children, style, delay=0, glow, onClick, hover }) {
       onClick={onClick}
       style={{
         position:'relative',
-        background:'rgba(255, 255, 255, 0.015)',
+        background:'rgba(10, 10, 12, 0.85)',
         backdropFilter:'blur(20px)',
         WebkitBackdropFilter:'blur(20px)',
-        border:'1px solid rgba(255, 255, 255, 0.06)',
+        border:'1px solid rgba(255, 255, 255, 0.08)',
         borderRadius:24, padding:20,
         boxShadow: glow
-          ? `0 12px 40px rgba(0,0,0,0.5), 0 0 50px ${glow}10, inset 0 1px 0 rgba(255,255,255,0.08)`
-          : '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+          ? `0 16px 48px rgba(0,0,0,0.7), 0 0 50px ${glow}12, inset 0 1px 0 rgba(255,255,255,0.08)`
+          : '0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
         cursor: onClick ? 'pointer' : 'default',
         overflow:'hidden',
         ...style,
@@ -210,7 +210,7 @@ export default function DashboardHome({
     <motion.div ref={rootRef} key="home" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
       style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
 
-      <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, overflow:'hidden', background:'#070709' }}>
+      <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, overflow:'hidden', background:'#000000' }}>
         {/* Central Fluent spotlight glow */}
         <div style={{
           position:'absolute',
