@@ -57,17 +57,19 @@ function Card({ children, style, delay=0, glow, onClick, hover }) {
       onClick={onClick}
       style={{
         position:'relative',
-        background:'linear-gradient(165deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-        border:'1px solid rgba(255,255,255,0.09)',
-        borderRadius:20, padding:20,
+        background:'rgba(255, 255, 255, 0.015)',
+        backdropFilter:'blur(20px)',
+        WebkitBackdropFilter:'blur(20px)',
+        border:'1px solid rgba(255, 255, 255, 0.06)',
+        borderRadius:24, padding:20,
         boxShadow: glow
-          ? `0 1px 2px rgba(0,0,0,0.3), 0 0 40px ${glow}15, inset 0 1px 0 rgba(255,255,255,0.06)`
-          : '0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+          ? `0 12px 40px rgba(0,0,0,0.5), 0 0 50px ${glow}10, inset 0 1px 0 rgba(255,255,255,0.08)`
+          : '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         cursor: onClick ? 'pointer' : 'default',
         overflow:'hidden',
         ...style,
       }}>
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)', pointerEvents:'none' }}/>
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)', pointerEvents:'none' }}/>
       {children}
     </motion.div>
   );
@@ -91,11 +93,16 @@ function Tip({ active, payload, label }) {
     <motion.div initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }}
       style={{ background:'rgba(20,20,26,0.95)', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.14)', borderRadius:12, padding:'10px 14px', boxShadow:'0 12px 32px rgba(0,0,0,0.6)' }}>
       <p style={{ margin:'0 0 4px', fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:S }}>{label}</p>
-      {payload.map((p,i) => (
-        <p key={i} style={{ margin:0, fontSize:'0.82rem', fontWeight:700, color:p.color||p.stroke||p.fill, fontFamily:S, textTransform:'capitalize' }}>
-          {p.name}: {p.value}%
-        </p>
-      ))}
+      {payload.map((p,i) => {
+        const isVal = p.name === 'moodVal' || p.name === 'calmVal';
+        const displayName = p.name === 'moodVal' ? 'Mood' : p.name === 'calmVal' ? 'Calm' : p.name;
+        const displayValue = isVal ? p.value + 50 : p.value;
+        return (
+          <p key={i} style={{ margin:0, fontSize:'0.82rem', fontWeight:700, color:p.color||p.stroke||p.fill, fontFamily:S, textTransform:'capitalize' }}>
+            {displayName}: {displayValue}%
+          </p>
+        );
+      })}
     </motion.div>
   );
 }
@@ -153,11 +160,21 @@ export default function DashboardHome({
     <motion.div ref={rootRef} key="home" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
       style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
 
-      <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, overflow:'hidden' }}>
-        <motion.div animate={{ x:[0,40,0], y:[0,30,0] }} transition={{ duration:18, repeat:Infinity, ease:'easeInOut' }}
-          style={{ position:'absolute', top:'5%', left:'10%', width:320, height:320, borderRadius:'50%', background:`radial-gradient(circle,${accent}12,transparent 70%)`, filter:'blur(60px)' }}/>
-        <motion.div animate={{ x:[0,-30,0], y:[0,40,0] }} transition={{ duration:22, repeat:Infinity, ease:'easeInOut' }}
-          style={{ position:'absolute', bottom:'10%', right:'5%', width:280, height:280, borderRadius:'50%', background:'radial-gradient(circle,rgba(139,135,245,0.1),transparent 70%)', filter:'blur(60px)' }}/>
+      <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, overflow:'hidden', background:'#070709' }}>
+        {/* Central Fluent spotlight glow */}
+        <div style={{
+          position:'absolute',
+          top:'50%', left:'50%',
+          transform:'translate(-50%,-50%)',
+          width:'700px', height:'700px',
+          borderRadius:'50%',
+          background:'radial-gradient(circle, rgba(255,255,255,0.045) 0%, transparent 60%)',
+          filter:'blur(80px)',
+        }}/>
+        <motion.div animate={{ x:[0,20,0], y:[0,-20,0] }} transition={{ duration:25, repeat:Infinity, ease:'easeInOut' }}
+          style={{ position:'absolute', top:'10%', left:'20%', width:350, height:350, borderRadius:'50%', background:`radial-gradient(circle, ${accent}0b, transparent 70%)`, filter:'blur(60px)' }}/>
+        <motion.div animate={{ x:[0,-20,0], y:[0,20,0] }} transition={{ duration:28, repeat:Infinity, ease:'easeInOut' }}
+          style={{ position:'absolute', bottom:'15%', right:'20%', width:350, height:350, borderRadius:'50%', background:'radial-gradient(circle, rgba(139,135,245,0.08), transparent 70%)', filter:'blur(60px)' }}/>
       </div>
 
       <div style={{ position:'relative', zIndex:1 }}>
@@ -194,24 +211,53 @@ export default function DashboardHome({
               </motion.div>}/>
             <div style={{ height:230, marginLeft:-18, position:'relative', zIndex:2 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={MOOD_TREND}>
+                <AreaChart data={MOOD_TREND.map(item => ({ ...item, moodVal: item.mood - 50, calmVal: item.calm - 50 }))}>
                   <defs>
                     <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b87f5" stopOpacity={0.5}/>
-                      <stop offset="100%" stopColor="#8b87f5" stopOpacity={0}/>
+                      <stop offset="0%" stopColor="#8b87f5" stopOpacity={0.35}/>
+                      <stop offset="100%" stopColor="#8b87f5" stopOpacity={0.01}/>
                     </linearGradient>
                     <linearGradient id="calmGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#5eb8ad" stopOpacity={0.4}/>
-                      <stop offset="100%" stopColor="#5eb8ad" stopOpacity={0}/>
+                      <stop offset="0%" stopColor="#5eb8ad" stopOpacity={0.3}/>
+                      <stop offset="100%" stopColor="#5eb8ad" stopOpacity={0.01}/>
                     </linearGradient>
+                    
+                    <linearGradient id="moodStroke" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#8b87f5"/>
+                      <stop offset="100%" stopColor="#a855f7"/>
+                    </linearGradient>
+                    <linearGradient id="calmGradStroke" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#5eb8ad"/>
+                      <stop offset="100%" stopColor="#14b8a6"/>
+                    </linearGradient>
+                    
                     <filter id="lineGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    
+                    {/* Arrow markers for Cartesian axes */}
+                    <marker id="arrow-right" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="rgba(255,255,255,0.4)" />
+                    </marker>
+                    <marker id="arrow-up" viewBox="0 0 10 10" refX="5" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                      <path d="M 1.5 10 L 5 0 L 8.5 10 z" fill="rgba(255,255,255,0.4)" />
+                    </marker>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false}/>
+                  
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false}/>
+                  
                   <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.3)', fontSize:11, fontFamily:'Space Grotesk' }}/>
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.25)', fontSize:10 }} width={28}/>
+                  <YAxis domain={[-50, 50]} tickFormatter={(v) => `${v + 50}%`} axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.25)', fontSize:10 }} width={28}/>
                   <Tooltip content={<Tip/>}/>
-                  <Area type="monotone" dataKey="mood" stroke="#8b87f5" strokeWidth={2.5} fill="url(#moodGrad)" filter="url(#lineGlow)" isAnimationActive animationDuration={1600}/>
-                  <Area type="monotone" dataKey="calm" stroke="#5eb8ad" strokeWidth={2.5} fill="url(#calmGrad)" filter="url(#lineGlow)" isAnimationActive animationDuration={1800}/>
+                  
+                  {/* Central Cartesian axes crossing at center (Thursday acts as horizontal midpoint) */}
+                  <ReferenceLine y={0} stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} markerEnd="url(#arrow-right)" />
+                  <ReferenceLine x="Thu" stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} markerEnd="url(#arrow-up)" />
+                  
+                  <Area type="monotone" dataKey="moodVal" stroke="url(#moodStroke)" strokeWidth={2.5} fill="url(#moodGrad)" filter="url(#lineGlow)" isAnimationActive animationDuration={1600}
+                    dot={{ r: 3, stroke: '#8b87f5', strokeWidth: 1.2, fill: '#070709' }}
+                    activeDot={{ r: 5, stroke: '#fff', strokeWidth: 1.5, fill: '#8b87f5' }}/>
+                  <Area type="monotone" dataKey="calmVal" stroke="url(#calmGradStroke)" strokeWidth={2.5} fill="url(#calmGrad)" filter="url(#lineGlow)" isAnimationActive animationDuration={1800}
+                    dot={{ r: 3, stroke: '#5eb8ad', strokeWidth: 1.2, fill: '#070709' }}
+                    activeDot={{ r: 5, stroke: '#fff', strokeWidth: 1.5, fill: '#5eb8ad' }}/>
                 </AreaChart>
               </ResponsiveContainer>
             </div>

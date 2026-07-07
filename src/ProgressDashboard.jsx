@@ -20,17 +20,27 @@ const TREND = [
 ];
 
 const COMPARE = [
-  { name:'Anxiety', last:68, now:35, color:'#c79552' },
-  { name:'Stress',  last:72, now:42, color:'#e0524d' },
-  { name:'Mood',    last:52, now:78, color:'#56a06f' },
+  { name:'Anxiety', last:68, now:35, color:'#F59E0B' },
+  { name:'Stress',  last:72, now:42, color:'#FF4A5A' },
+  { name:'Mood',    last:52, now:78, color:'#10B981' },
 ];
 
 function Card({ children, style, delay=0, glow }) {
   return (
     <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay, duration:0.55, ease:[0.22,1,0.36,1] }}
-      style={{ position:'relative', overflow:'hidden', background:'linear-gradient(165deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))', border:'1px solid rgba(255,255,255,0.09)', borderRadius:20, padding:20,
-        boxShadow: glow ? `0 1px 2px rgba(0,0,0,0.3), 0 0 40px ${glow}15, inset 0 1px 0 rgba(255,255,255,0.06)` : '0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)', ...style }}>
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)', pointerEvents:'none' }}/>
+      style={{
+        position:'relative', overflow:'hidden',
+        background:'rgba(255, 255, 255, 0.015)',
+        backdropFilter:'blur(20px)',
+        WebkitBackdropFilter:'blur(20px)',
+        border:'1px solid rgba(255, 255, 255, 0.06)',
+        borderRadius:24, padding:20,
+        boxShadow: glow
+          ? `0 12px 40px rgba(0,0,0,0.5), 0 0 50px ${glow}10, inset 0 1px 0 rgba(255,255,255,0.08)`
+          : '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+        ...style
+      }}>
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)', pointerEvents:'none' }}/>
       {children}
     </motion.div>
   );
@@ -112,7 +122,7 @@ export default function ProgressDashboard({ accent, accentB, accentBr }) {
                 </div>
                 <div style={{ textAlign:'right' }}>
                   <span style={{ fontSize:'1.4rem', fontWeight:800, color:m.color, fontFamily:S, lineHeight:1 }}>{m.now}%</span>
-                  <p style={{ margin:'2px 0 0', fontSize:'0.68rem', fontWeight:700, color:'#56a06f', display:'flex', alignItems:'center', gap:3, justifyContent:'flex-end' }}>
+                  <p style={{ margin:'2px 0 0', fontSize:'0.68rem', fontWeight:700, color:'#10B981', display:'flex', alignItems:'center', gap:3, justifyContent:'flex-end' }}>
                     {improved ? <FaCheckCircle size={8}/> : null}{diff}% {m.name==='Mood'?'up':'down'}
                   </p>
                 </div>
@@ -126,9 +136,9 @@ export default function ProgressDashboard({ accent, accentB, accentBr }) {
       <Card delay={0.3} glow={accent} style={{ marginBottom:14 }}>
         <Title title="6-Week Trend" sub="Mood rising as stress & anxiety fall"
           right={<div style={{ display:'flex', gap:14 }}>
-            {[['Mood','#56a06f'],['Stress','#e0524d'],['Anxiety','#c79552']].map(([l,c],i)=>(
+            {[['Mood','#10B981'],['Stress','#FF4A5A'],['Anxiety','#F59E0B']].map(([l,c],i)=>(
               <span key={i} style={{ display:'flex', alignItems:'center', gap:5, fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:J }}>
-                <span style={{ width:8, height:8, borderRadius:'50%', background:c, boxShadow:`0 0 6px ${c}` }}/>{l}
+                <span style={{ width:8, height:8, borderRadius:'50%', background:c, boxShadow:`0 0 8px ${c}` }}/>{l}
               </span>
             ))}
           </div>}/>
@@ -137,26 +147,59 @@ export default function ProgressDashboard({ accent, accentB, accentBr }) {
             <AreaChart data={TREND}>
               <defs>
                 <linearGradient id="moodArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#56a06f" stopOpacity={0.55}/>
-                  <stop offset="100%" stopColor="#56a06f" stopOpacity={0.02}/>
+                  <stop offset="0%" stopColor="#10B981" stopOpacity={0.4}/>
+                  <stop offset="100%" stopColor="#10B981" stopOpacity={0.01}/>
                 </linearGradient>
                 <linearGradient id="stressArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#e0524d" stopOpacity={0.4}/>
-                  <stop offset="100%" stopColor="#e0524d" stopOpacity={0.02}/>
+                  <stop offset="0%" stopColor="#FF4A5A" stopOpacity={0.3}/>
+                  <stop offset="100%" stopColor="#FF4A5A" stopOpacity={0.01}/>
                 </linearGradient>
                 <linearGradient id="anxArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#c79552" stopOpacity={0.35}/>
-                  <stop offset="100%" stopColor="#c79552" stopOpacity={0.02}/>
+                  <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.25}/>
+                  <stop offset="100%" stopColor="#F59E0B" stopOpacity={0.01}/>
                 </linearGradient>
-                <filter id="areaGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                
+                <linearGradient id="moodStroke" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#10B981"/>
+                  <stop offset="100%" stopColor="#34D399"/>
+                </linearGradient>
+                <linearGradient id="stressStroke" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#FF4A5A"/>
+                  <stop offset="100%" stopColor="#FF9F1C"/>
+                </linearGradient>
+                <linearGradient id="anxStroke" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#F59E0B"/>
+                  <stop offset="100%" stopColor="#fbbf24"/>
+                </linearGradient>
+                
+                <filter id="areaGlow"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <filter id="lineGlowOnly"><feGaussianBlur stdDeviation="3" result="b"/></filter>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false}/>
               <XAxis dataKey="w" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.3)', fontSize:11, fontFamily:'Space Grotesk' }}/>
               <YAxis axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.25)', fontSize:10 }} width={28}/>
               <Tooltip content={<Tip/>}/>
-              <Area type="monotone" dataKey="anxiety" stroke="#c79552" strokeWidth={2} fill="url(#anxArea)" filter="url(#areaGlow)" isAnimationActive animationDuration={1500}/>
-              <Area type="monotone" dataKey="stress" stroke="#e0524d" strokeWidth={2} fill="url(#stressArea)" filter="url(#areaGlow)" isAnimationActive animationDuration={1700}/>
-              <Area type="monotone" dataKey="mood" stroke="#56a06f" strokeWidth={2.5} fill="url(#moodArea)" filter="url(#areaGlow)" isAnimationActive animationDuration={1900}/>
+              
+              {/* Glow area fills */}
+              <Area type="monotone" dataKey="anxiety" stroke="none" fill="url(#anxArea)" isAnimationActive animationDuration={1500}/>
+              <Area type="monotone" dataKey="stress" stroke="none" fill="url(#stressArea)" isAnimationActive animationDuration={1700}/>
+              <Area type="monotone" dataKey="mood" stroke="none" fill="url(#moodArea)" isAnimationActive animationDuration={1900}/>
+
+              {/* Glowing thick background line strokes */}
+              <Area type="monotone" dataKey="anxiety" stroke="url(#anxStroke)" strokeWidth={5.5} fill="none" filter="url(#lineGlowOnly)" opacity={0.35} isAnimationActive animationDuration={1500}/>
+              <Area type="monotone" dataKey="stress" stroke="url(#stressStroke)" strokeWidth={5.5} fill="none" filter="url(#lineGlowOnly)" opacity={0.35} isAnimationActive animationDuration={1700}/>
+              <Area type="monotone" dataKey="mood" stroke="url(#moodStroke)" strokeWidth={5.5} fill="none" filter="url(#lineGlowOnly)" opacity={0.35} isAnimationActive animationDuration={1900}/>
+
+              {/* Sharp foreground line strokes with points/dots */}
+              <Area type="monotone" dataKey="anxiety" stroke="url(#anxStroke)" strokeWidth={2.5} fill="none" isAnimationActive animationDuration={1500}
+                dot={{ r: 3.5, stroke: '#F59E0B', strokeWidth: 1.5, fill: '#0a0a0c' }}
+                activeDot={{ r: 6.5, stroke: '#fff', strokeWidth: 2, fill: '#F59E0B' }}/>
+              <Area type="monotone" dataKey="stress" stroke="url(#stressStroke)" strokeWidth={2.5} fill="none" isAnimationActive animationDuration={1700}
+                dot={{ r: 3.5, stroke: '#FF4A5A', strokeWidth: 1.5, fill: '#0a0a0c' }}
+                activeDot={{ r: 6.5, stroke: '#fff', strokeWidth: 2, fill: '#FF4A5A' }}/>
+              <Area type="monotone" dataKey="mood" stroke="url(#moodStroke)" strokeWidth={3} fill="none" isAnimationActive animationDuration={1900}
+                dot={{ r: 3.5, stroke: '#10B981', strokeWidth: 1.5, fill: '#0a0a0c' }}
+                activeDot={{ r: 6.5, stroke: '#fff', strokeWidth: 2, fill: '#10B981' }}/>
             </AreaChart>
           </ResponsiveContainer>
         </div>

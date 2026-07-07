@@ -293,24 +293,33 @@ function PeakChart({ negScores = {}, posScores = {} }) {
             ))}
 
             {/* NEURAL PATHWAY FLOW LINES (Direct Bezier Curves) */}
-            {neuralData.pathways.map((path) => (
+            {neuralData.pathways.map((path, idx) => (
               <g key={path.id}>
                 {/* Volumetric glow path envelope */}
                 <path
                   d={path.d}
                   fill="none"
                   stroke={`url(#flowGrad-${path.targetIdx})`}
-                  strokeWidth={path.isHighlight ? '3.5' : '2.5'}
-                  opacity={path.isHighlight ? 0.22 : 0.12}
+                  strokeWidth={path.isHighlight ? '4.5' : '2.5'}
+                  opacity={path.isHighlight ? 0.28 : 0.12}
                 />
                 {/* Sharp core flow path */}
                 <path
                   d={path.d}
                   fill="none"
                   stroke={`url(#flowGrad-${path.targetIdx})`}
-                  strokeWidth={path.isHighlight ? '1.5' : '0.85'}
-                  opacity={path.isHighlight ? 0.92 : 0.55}
+                  strokeWidth={path.isHighlight ? '1.8' : '0.85'}
+                  opacity={path.isHighlight ? 0.95 : 0.55}
                 />
+                {/* Animated light pulses flowing along the pathway */}
+                <circle r={path.isHighlight ? 2.2 : 1.4} fill={path.color}>
+                  <animateMotion
+                    dur={`${2.2 + (idx % 3) * 0.8}s`}
+                    repeatCount="indefinite"
+                    path={path.d}
+                    fill="freeze"
+                  />
+                </circle>
               </g>
             ))}
 
