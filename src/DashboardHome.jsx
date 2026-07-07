@@ -211,7 +211,18 @@ export default function DashboardHome({
               </motion.div>}/>
             <div style={{ height:230, marginLeft:-18, position:'relative', zIndex:2 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={MOOD_TREND.map(item => ({ ...item, moodVal: item.mood - 50, calmVal: item.calm - 50 }))}>
+                <AreaChart data={MOOD_TREND.map(item => {
+                  const mVal = item.mood - 50;
+                  const cVal = item.calm - 50;
+                  const isFine = Math.abs(mVal - cVal) <= 5;
+                  const finalCalm = isFine ? mVal : cVal;
+                  return {
+                    ...item,
+                    moodVal: mVal,
+                    calmVal: finalCalm,
+                    range: [finalCalm, mVal],
+                  };
+                })}>
                   <defs>
                     <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#8b87f5" stopOpacity={0.35}/>
@@ -220,6 +231,11 @@ export default function DashboardHome({
                     <linearGradient id="calmGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#5eb8ad" stopOpacity={0.3}/>
                       <stop offset="100%" stopColor="#5eb8ad" stopOpacity={0.01}/>
+                    </linearGradient>
+                    
+                    <linearGradient id="rangeGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#8b87f5" stopOpacity={0.16}/>
+                      <stop offset="100%" stopColor="#5eb8ad" stopOpacity={0.16}/>
                     </linearGradient>
                     
                     <linearGradient id="moodStroke" x1="0" y1="0" x2="1" y2="0">
@@ -251,6 +267,9 @@ export default function DashboardHome({
                   {/* Central Cartesian axes crossing at center (Thursday acts as horizontal midpoint) */}
                   <ReferenceLine y={0} stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} markerEnd="url(#arrow-right)" />
                   <ReferenceLine x="Thu" stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} markerEnd="url(#arrow-up)" />
+                  
+                  {/* Connective visual range bridge area */}
+                  <Area type="monotone" dataKey="range" stroke="none" fill="url(#rangeGrad)" isAnimationActive animationDuration={1500} activeDot={false} dot={false}/>
                   
                   <Area type="monotone" dataKey="moodVal" stroke="url(#moodStroke)" strokeWidth={2.5} fill="url(#moodGrad)" filter="url(#lineGlow)" isAnimationActive animationDuration={1600}
                     dot={{ r: 3, stroke: '#8b87f5', strokeWidth: 1.2, fill: '#070709' }}
