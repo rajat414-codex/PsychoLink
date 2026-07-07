@@ -282,22 +282,22 @@ export default function DashboardHome({
                     
                     {/* Arrow markers for Cartesian axes */}
                     <marker id="arrow-right" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="rgba(255,255,255,0.4)" />
+                      <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="rgba(255,255,255,0.6)" />
                     </marker>
                     <marker id="arrow-up" viewBox="0 0 10 10" refX="5" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                      <path d="M 1.5 10 L 5 0 L 8.5 10 z" fill="rgba(255,255,255,0.4)" />
+                      <path d="M 1.5 10 L 5 0 L 8.5 10 z" fill="rgba(255,255,255,0.6)" />
                     </marker>
                   </defs>
                   
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={true}/>
                   
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.3)', fontSize:11, fontFamily:'Space Grotesk' }}/>
-                  <YAxis domain={[-50, 50]} tickFormatter={(v) => `${v + 50}%`} axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.25)', fontSize:10 }} width={42}/>
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.4)', fontSize:11, fontFamily:'Space Grotesk' }}/>
+                  <YAxis domain={[-50, 50]} tickFormatter={(v) => `${v + 50}%`} axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.35)', fontSize:10 }} width={42}/>
                   <Tooltip content={<Tip/>}/>
                   
                   {/* Central Cartesian axes crossing at center (Thursday acts as horizontal midpoint) */}
-                  <ReferenceLine y={0} stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} markerEnd="url(#arrow-right)" />
-                  <ReferenceLine x="Thu" stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} markerEnd="url(#arrow-up)" />
+                  <ReferenceLine y={0} stroke="rgba(255,255,255,0.4)" strokeWidth={1.5} markerEnd="url(#arrow-right)" />
+                  <ReferenceLine x="Thu" stroke="rgba(255,255,255,0.4)" strokeWidth={1.5} markerEnd="url(#arrow-up)" />
                   
                   {/* Thin vertical stems representing hand-drawn waveform lines */}
                   <Bar dataKey="val" barSize={3.5} isAnimationActive animationDuration={1400}>
