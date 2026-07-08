@@ -16,12 +16,12 @@ function ModalShell({ onClose, accent = '#8b5cf6', maxWidth = '520px', children 
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={onClose}
-      style={{ position:'fixed', inset:0, background:'rgba(4,3,10,0.7)', backdropFilter:'blur(6px)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+      style={{ position:'fixed', inset:0, background:'rgba(9,10,15,0.8)', backdropFilter:'blur(6px)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
       <motion.div
         initial={{ opacity:0, y:20, scale:0.97 }} animate={{ opacity:1, y:0, scale:1 }} exit={{ opacity:0, y:20, scale:0.97 }}
         transition={{ type:'spring', stiffness:300, damping:28 }}
         onClick={e => e.stopPropagation()}
-        style={{ width:'100%', maxWidth, maxHeight:'88vh', overflowY:'auto', background:'rgba(10,8,20,0.97)', border:`1px solid ${accent}33`, borderRadius:'24px', padding:'28px', boxShadow:`0 30px 80px rgba(0,0,0,0.6), 0 0 40px ${accent}1a`, position:'relative' }}>
+        style={{ width:'100%', maxWidth, maxHeight:'88vh', overflowY:'auto', background:'var(--bg-card)', border:`1px solid var(--border-subtle)`, borderRadius:'24px', padding:'28px', boxShadow:`var(--shadow-card)`, position:'relative' }}>
         <button onClick={onClose}
           style={{ position:'absolute', top:'18px', right:'18px', width:'32px', height:'32px', borderRadius:'10px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.5)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
           <FaTimes size={13}/>
@@ -33,7 +33,7 @@ function ModalShell({ onClose, accent = '#8b5cf6', maxWidth = '520px', children 
 }
 
 const fieldStyle = {
-  width:'100%', padding:'11px 14px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.09)',
+  width:'100%', padding:'11px 14px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)',
   borderRadius:'12px', color:'#fff', fontSize:'0.86rem', fontFamily:J, outline:'none', marginTop:'6px', resize:'vertical',
 };
 const labelStyle = { fontSize:'0.78rem', color:'rgba(255,255,255,0.55)', fontFamily:J, fontWeight:'600' };
@@ -136,9 +136,9 @@ export function JoinConsultantModal({ onClose, accent = '#8b5cf6' }) {
 
         <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={submit} disabled={status==='sending'}
           style={{ width:'100%', padding:'13px', borderRadius:'14px', border:'none', cursor: status==='sending' ? 'not-allowed':'pointer',
-            background: status==='sending' ? 'rgba(255,255,255,0.06)' : `linear-gradient(135deg,${accent},#ec4899)`,
+            background: status==='sending' ? 'rgba(255,255,255,0.06)' : accent,
             color:'#fff', fontSize:'0.92rem', fontWeight:'700', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:'8px',
-            boxShadow: status==='sending' ? 'none' : `0 8px 24px ${accent}40` }}>
+            boxShadow: status==='sending' ? 'none' : `0 8px 20px ${accent}25` }}>
           {status==='sending' ? (<><FaSpinner className="spin" size={14}/> Submitting...</>) : 'Submit Application'}
         </motion.button>
       </div>
@@ -262,16 +262,16 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
             </div>
           </div>
 
-          <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'16px', padding:'18px', marginBottom:'18px' }}>
+          <div style={{ background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:'16px', padding:'18px', marginBottom:'18px' }}>
             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'10px' }}>
-              <span style={{ fontSize:'0.84rem', color:'rgba(255,255,255,0.5)' }}>Consultant</span>
+              <span style={{ fontSize:'0.84rem', color:'var(--text-secondary)' }}>Consultant</span>
               <span style={{ fontSize:'0.84rem', color:'#fff', fontWeight:'700' }}>{consultant?.name}</span>
             </div>
             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'10px' }}>
-              <span style={{ fontSize:'0.84rem', color:'rgba(255,255,255,0.5)' }}>Session</span>
+              <span style={{ fontSize:'0.84rem', color:'var(--text-secondary)' }}>Session</span>
               <span style={{ fontSize:'0.84rem', color:'#fff' }}>1 hour, 1:1 video/chat</span>
             </div>
-            <div style={{ height:'1px', background:'rgba(255,255,255,0.08)', margin:'10px 0' }}/>
+            <div style={{ height:'1px', background:'var(--border-subtle)', margin:'10px 0' }}/>
             <div style={{ display:'flex', justifyContent:'space-between' }}>
               <span style={{ fontSize:'0.92rem', color:'rgba(255,255,255,0.7)', fontWeight:'700' }}>Total</span>
               <span style={{ fontSize:'1.3rem', color:'#fff', fontWeight:'800', fontFamily:S }}>₹{price}</span>
@@ -280,8 +280,8 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
 
           <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={simulatePayment}
             style={{ width:'100%', padding:'14px', borderRadius:'14px', border:'none', cursor:'pointer',
-              background:`linear-gradient(135deg,${consultant?.color||'#8b5cf6'},#8b5cf6)`, color:'#fff', fontSize:'0.95rem', fontWeight:'800', fontFamily:J,
-              boxShadow:`0 10px 28px ${consultant?.color||'#8b5cf6'}45` }}>
+              background: consultant?.color || '#8b5cf6', color:'#fff', fontSize:'0.95rem', fontWeight:'800', fontFamily:J,
+              boxShadow:`0 8px 20px ${(consultant?.color||'#8b5cf6')}25` }}>
             Pay ₹{price}
           </motion.button>
           <p style={{ textAlign:'center', fontSize:'0.68rem', color:'rgba(255,255,255,0.25)', marginTop:'10px', fontFamily:J }}>

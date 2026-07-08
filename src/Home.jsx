@@ -121,9 +121,9 @@ export default function Home({ userProfile, onLogout }) {
   const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
-  const accent   = activeAI === 'AURA' ? '#e0524d' : '#5eb8ad';
-  const accentB  = activeAI === 'AURA' ? 'rgba(224,82,77,0.10)' : 'rgba(94,184,173,0.10)';
-  const accentBr = activeAI === 'AURA' ? 'rgba(224,82,77,0.22)'  : 'rgba(94,184,173,0.22)';
+  const accent   = activeAI === 'AURA' ? '#dd4e48' : '#51ab9f';
+  const accentB  = activeAI === 'AURA' ? 'rgba(221,78,72,0.05)' : 'rgba(81,171,159,0.05)';
+  const accentBr = activeAI === 'AURA' ? 'rgba(221,78,72,0.15)'  : 'rgba(81,171,159,0.15)';
 
   const activeSession = sessions[activeAI].find(s => s.active) || sessions[activeAI][0];
   const messages      = activeSession?.messages || [];
@@ -430,16 +430,16 @@ export default function Home({ userProfile, onLogout }) {
   };
 
   return (
-    <div style={{ width:'100vw', height:'100vh', display:'flex', background:'#121214', fontFamily:J, overflow:'hidden', position:'relative' }}>
+    <div style={{ width:'100vw', height:'100vh', display:'flex', background:'var(--bg-app)', fontFamily:J, overflow:'hidden', position:'relative' }}>
 
       {/* ── GLOBAL BG ──────────────────────────────────────────── */}
       <div style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none' }}>
         <motion.div animate={{ backgroundPosition:['0% 0%','100% 100%'] }} transition={{ duration:40, repeat:Infinity, ease:'linear', repeatType:'mirror' }}
-          style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&q=80&w=2000')`, backgroundSize:'130% 130%', opacity:0.04 }}/>
-        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.06) 0%, transparent 50%)' }}/>
-        <motion.div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse at 80% 100%, rgba(255,255,255,0.05) 0%, transparent 50%)`, transition:'background 1.2s' }}/>
+          style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&q=80&w=2000')`, backgroundSize:'130% 130%', opacity:0.02 }}/>
+        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 20% 0%, rgba(139,92,246,0.05) 0%, transparent 55%)' }}/>
+        <motion.div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse at 80% 100%, ${activeAI==='AURA'?'rgba(221,78,72,0.03)':'rgba(81,171,159,0.03)'} 0%, transparent 55%)`, transition:'background 1.2s' }}/>
         <motion.div animate={{ backgroundPosition:['0px 0px','80px 160px'] }} transition={{ duration:50, repeat:Infinity, ease:'linear' }}
-          style={{ position:'absolute', inset:0, opacity:0.04, backgroundImage:`radial-gradient(circle,rgba(255,255,255,0.9) 1px,transparent 1px)`, backgroundSize:'60px 60px' }}/>
+          style={{ position:'absolute', inset:0, opacity:0.02, backgroundImage:`radial-gradient(circle,rgba(255,255,255,0.4) 1px,transparent 1px)`, backgroundSize:'60px 60px' }}/>
       </div>
 
       {/* ══ SIDEBAR ════════════════════════════════════════════════ */}
@@ -447,20 +447,20 @@ export default function Home({ userProfile, onLogout }) {
         {sidebar && (
           <motion.aside initial={{ x:-270, opacity:0 }} animate={{ x:0, opacity:1 }} exit={{ x:-270, opacity:0 }}
             transition={{ type:'spring', stiffness:300, damping:30 }}
-            style={{ width:'255px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'rgba(6,4,14,0.98)', backdropFilter:'blur(40px)', borderRight:'1px solid rgba(255,255,255,0.06)', position:'relative', zIndex:20 }}>
+            style={{ width:'255px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'var(--bg-sidebar)', backdropFilter:'blur(40px)', borderRight:'1px solid var(--border-subtle)', position:'relative', zIndex:20 }}>
 
             {/* Brand */}
             <div style={{ padding:'22px 16px 16px', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'9px', marginBottom:'20px', userSelect:'none' }}>
                 <motion.div animate={{ scale:[1,1.4,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
-                  style={{ width:'9px', height:'9px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},#8b5cf6)`, boxShadow:'0 2px 8px rgba(0,0,0,0.3)', transition:'background 0.5s' }}/>
+                  style={{ width:'9px', height:'9px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},var(--accent-purple))`, boxShadow:'0 2px 8px rgba(0,0,0,0.3)', transition:'background 0.5s' }}/>
                 <span style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'1rem', color:'rgba(255,255,255,0.75)' }}>Cognitive Social</span>
               </div>
               {/* AI Toggle */}
-              <div style={{ display:'flex', background:'rgba(255,255,255,0.04)', borderRadius:'14px', padding:'4px', gap:'3px', border:'1px solid rgba(255,255,255,0.07)' }}>
-                {[{ k:'AURA', g:'#e0524d' }, { k:'MAX', g:'#5eb8ad' }].map(ai => (
+              <div style={{ display:'flex', background:'var(--bg-input)', borderRadius:'14px', padding:'4px', gap:'3px', border:'1px solid var(--border-subtle)' }}>
+                {[{ k:'AURA', g:'#dd4e48' }, { k:'MAX', g:'#51ab9f' }].map(ai => (
                   <button key={ai.k} onClick={() => setActiveAI(ai.k)}
-                    style={{ flex:1, padding:'9px 0', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'0.76rem', fontWeight:'700', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s', background:activeAI===ai.k?ai.g:'transparent', color:activeAI===ai.k?'#fff':'rgba(255,255,255,0.28)', boxShadow:activeAI===ai.k?`0 4px 14px ${accent}45`:'none', userSelect:'none' }}>
+                    style={{ flex:1, padding:'9px 0', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'0.76rem', fontWeight:'700', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s', background:activeAI===ai.k?ai.g:'transparent', color:activeAI===ai.k?'#fff':'rgba(255,255,255,0.28)', boxShadow:activeAI===ai.k?`0 4px 12px ${accent}25`:'none', userSelect:'none' }}>
                     {ai.k}
                   </button>
                 ))}
@@ -505,8 +505,8 @@ export default function Home({ userProfile, onLogout }) {
 
             {/* User + Logout */}
             <div style={{ padding:'10px 12px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'9px', padding:'10px 12px', borderRadius:'14px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ width:'34px', height:'34px', borderRadius:'50%', background: userProfile?.picture ? 'transparent' : `linear-gradient(135deg,${accent},#8b5cf6)`, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'0.85rem', flexShrink:0, color:'#fff', transition:'background 0.5s', boxShadow:'0 4px 12px rgba(0,0,0,0.4)', overflow:'hidden' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'9px', padding:'10px 12px', borderRadius:'14px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)' }}>
+                <div style={{ width:'34px', height:'34px', borderRadius:'50%', background: userProfile?.picture ? 'transparent' : `linear-gradient(135deg,${accent},var(--accent-purple))`, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'0.85rem', flexShrink:0, color:'#fff', transition:'background 0.5s', boxShadow:'0 4px 12px rgba(0,0,0,0.4)', overflow:'hidden' }}>
                   {userProfile?.picture
                     ? <img src={userProfile.picture} alt="" referrerPolicy="no-referrer" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                     : (userProfile?.name || 'U')[0].toUpperCase()}
@@ -529,9 +529,9 @@ export default function Home({ userProfile, onLogout }) {
       <div style={{ flex:1, display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden', position:'relative', zIndex:5 }}>
 
         {/* Top bar */}
-        <div style={{ height:'54px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 18px', borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(6,4,14,0.85)', backdropFilter:'blur(24px)' }}>
+        <div style={{ height:'54px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 18px', borderBottom:'1px solid var(--border-subtle)', background:'rgba(13,15,19,0.85)', backdropFilter:'blur(24px)' }}>
           <motion.button whileHover={{ background:'rgba(255,255,255,0.07)' }} whileTap={{ scale:0.95 }} onClick={() => setSidebar(s => !s)}
-            style={{ width:'34px', height:'34px', borderRadius:'9px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'4px', flexShrink:0 }}>
+            style={{ width:'34px', height:'34px', borderRadius:'9px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'4px', flexShrink:0 }}>
             {[0,1,2].map(i => <div key={i} style={{ width:'14px', height:'1.5px', background:'rgba(255,255,255,0.5)', borderRadius:'1px' }}/>)}
           </motion.button>
 
@@ -658,7 +658,7 @@ export default function Home({ userProfile, onLogout }) {
                         </div>
                       </div>
                       {msg.role === 'user' && (
-                        <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},#8b5cf6)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginBottom:'18px', fontWeight:'800', fontSize:'0.72rem', color:'#fff' }}>
+                        <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},var(--accent-purple))`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginBottom:'18px', fontWeight:'800', fontSize:'0.72rem', color:'#fff' }}>
                           {(userProfile?.name || 'U')[0].toUpperCase()}
                         </div>
                       )}
@@ -675,11 +675,11 @@ export default function Home({ userProfile, onLogout }) {
                 </div>
 
                 {/* Input */}
-                <div style={{ padding:'10px 16px 14px', background:'rgba(6,4,14,0.95)', backdropFilter:'blur(24px)', borderTop:'1px solid rgba(255,255,255,0.05)', flexShrink:0 }}>
-                  <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'rgba(255,255,255,0.05)', border:`1px solid ${listening?accentBr:'rgba(255,255,255,0.08)'}`, borderRadius:'20px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?'0 0 0 3px rgba(139,135,245,0.15)':'' }}>
+                <div style={{ padding:'10px 16px 14px', background:'rgba(13,15,19,0.95)', backdropFilter:'blur(24px)', borderTop:'1px solid var(--border-subtle)', flexShrink:0 }}>
+                  <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'var(--bg-input)', border:`1px solid ${listening?accentBr:'var(--border-subtle)'}`, borderRadius:'20px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?`0 0 0 3px ${accent}15`:'' }}>
                     <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={handleMicClick}
                       animate={isRecording ? { scale:[1,1.1,1] } : {}} transition={isRecording ? { duration:0.8, repeat:Infinity } : {}}
-                      style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'rgba(255,255,255,0.06)', border:`1px solid ${isRecording?'#ef4444':'rgba(255,255,255,0.09)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 1px 3px rgba(204,102,102,0.4)':'' }}>
+                      style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'var(--bg-input)', border:`1px solid ${isRecording?'#ef4444':'var(--border-subtle)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 1px 3px rgba(204,102,102,0.4)':'' }}>
                       {isRecording ? <FaStop size={11} color="#fff"/> : <FaMicrophone size={12} color="rgba(255,255,255,0.4)"/>}
                     </motion.button>
                     <textarea ref={textareaRef} value={input}
@@ -689,7 +689,7 @@ export default function Home({ userProfile, onLogout }) {
                       rows={1}
                       style={{ flex:1, background:'none', border:'none', color:'rgba(255,255,255,0.88)', fontSize:'0.9rem', fontFamily:J, resize:'none', lineHeight:'1.5', maxHeight:'110px', minHeight:'22px', padding:'7px 0', overflowY:'auto' }}/>
                     <motion.button whileHover={input.trim()?{scale:1.06}:{}} whileTap={input.trim()?{scale:0.94}:{}} onClick={() => sendMsg()}
-                      style={{ width:'36px', height:'36px', borderRadius:'50%', background:input.trim()?`linear-gradient(135deg,${accent},#8b5cf6)`:'rgba(255,255,255,0.05)', border:`1px solid ${input.trim()?accent:'rgba(255,255,255,0.07)'}`, cursor:input.trim()?'pointer':'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:input.trim()?`0 4px 14px ${accent}45`:'' }}>
+                      style={{ width:'36px', height:'36px', borderRadius:'50%', background:input.trim()?accent:'rgba(255,255,255,0.03)', border:`1px solid ${input.trim()?accent:'var(--border-subtle)'}`, cursor:input.trim()?'pointer':'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:input.trim()?`0 4px 12px ${accent}25`:'' }}>
                       <FaPaperPlane size={13} color={input.trim()?'#fff':'rgba(255,255,255,0.22)'} style={{ marginLeft:'1px' }}/>
                     </motion.button>
                   </div>
@@ -911,10 +911,10 @@ export default function Home({ userProfile, onLogout }) {
       <AnimatePresence>
         {showApps && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} onClick={() => setShowApps(false)}
-            style={{ position:'fixed', inset:0, background:'rgba(4,3,14,0.88)', backdropFilter:'blur(10px)', zIndex:150, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'20px', overflowY:'auto' }}>
+            style={{ position:'fixed', inset:0, background:'rgba(9,10,15,0.82)', backdropFilter:'blur(10px)', zIndex:150, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'20px', overflowY:'auto' }}>
             <motion.div initial={{ scale:0.94, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:0.94, y:20 }}
               onClick={e => e.stopPropagation()}
-              style={{ width:'100%', maxWidth:560, background:'rgba(10,8,20,0.98)', border:'1px solid rgba(139,92,246,0.2)', borderRadius:28, padding:28, marginTop:20 }}>
+              style={{ width:'100%', maxWidth:560, background:'var(--bg-card)', border:'1px solid var(--border-subtle)', borderRadius:28, padding:28, marginTop:20, boxShadow:'var(--shadow-card)' }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
                 <div>
                   <h3 style={{ fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.4rem', color:'#fff', margin:'0 0 3px' }}>Pending Applications</h3>
@@ -1044,11 +1044,11 @@ export default function Home({ userProfile, onLogout }) {
       <AnimatePresence>
         {summaryOpen && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} onClick={() => setSummaryOpen(false)}
-            style={{ position:'fixed', inset:0, background:'rgba(4,3,14,0.88)', backdropFilter:'blur(10px)', zIndex:150, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+            style={{ position:'fixed', inset:0, background:'rgba(9,10,15,0.82)', backdropFilter:'blur(10px)', zIndex:150, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
             <motion.div initial={{ scale:0.92, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:0.92, y:20 }} onClick={e => e.stopPropagation()}
-              style={{ width:'100%', maxWidth:460, background:'rgba(10,8,20,0.98)', border:`1px solid ${accentBr}`, borderRadius:28, padding:28, maxHeight:'80vh', overflowY:'auto' }}>
+              style={{ width:'100%', maxWidth:460, background:'var(--bg-card)', border:'1px solid var(--border-subtle)', borderRadius:28, padding:28, maxHeight:'80vh', overflowY:'auto', boxShadow:'var(--shadow-card)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
-                <div style={{ width:36, height:36, borderRadius:12, background:accentB, border:`1px solid ${accentBr}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem' }}>📋</div>
+                <div style={{ width:36, height:36, borderRadius:12, background:'var(--bg-input)', border:'1px solid var(--border-subtle)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem' }}>📋</div>
                 <h3 style={{ fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.3rem', color:'#fff', margin:0 }}>Session Summary</h3>
               </div>
               {summaryLoading ? (
@@ -1057,10 +1057,10 @@ export default function Home({ userProfile, onLogout }) {
                   <span style={{ color:'rgba(255,255,255,0.5)', fontSize:'0.85rem', fontFamily:J }}>Generating summary...</span>
                 </div>
               ) : (
-                <p style={{ color:'rgba(255,255,255,0.78)', fontSize:'0.86rem', lineHeight:1.8, fontFamily:J, whiteSpace:'pre-wrap', margin:0 }}>{sessionSummary}</p>
+                <p style={{ color:'var(--text-secondary)', fontSize:'0.86rem', lineHeight:1.8, fontFamily:J, whiteSpace:'pre-wrap', margin:0 }}>{sessionSummary}</p>
               )}
               <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} onClick={() => setSummaryOpen(false)}
-                style={{ marginTop:20, width:'100%', padding:'11px', borderRadius:14, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', color:'rgba(255,255,255,0.6)', fontSize:'0.86rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
+                style={{ marginTop:20, width:'100%', padding:'11px', borderRadius:14, border:'1px solid var(--border-subtle)', background:'var(--bg-input)', color:'rgba(255,255,255,0.6)', fontSize:'0.86rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
                 Close
               </motion.button>
             </motion.div>

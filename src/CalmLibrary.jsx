@@ -128,7 +128,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
       </div>
 
       {/* Main Panel */}
-      <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:24, padding:22 }}>
+      <div style={{ background:'var(--bg-card)', border:'1px solid var(--border-subtle)', borderRadius:24, padding:22, boxShadow:'var(--shadow-card)' }}>
         
         {/* ACTIVITY 1: MICRO-STRETCHING */}
         {activeActivity === 'neuro-stretch' && (
@@ -139,7 +139,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
             {stretchStep < 3 ? (
               <div>
                 {/* ── HIGH-END INTERACTIVE INSTRUCTION CARD ── */}
-                <div style={{ background:'rgba(0,0,0,0.2)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:16, padding:20, marginBottom:20 }}>
+                <div style={{ background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:16, padding:20, marginBottom:20 }}>
                   <h4 style={{ fontFamily:J, color:accent, fontSize:'1.1rem', margin:'0 0 12px', fontWeight:700 }}>
                     Current Setup: {stretches[stretchStep].title}
                   </h4>
@@ -173,7 +173,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
                 </div>
 
                 <button onClick={() => setIsTimerRunning(!isTimerRunning)}
-                  style={{ width:'100%', padding:'14px', borderRadius:12, border:'none', background: isTimerRunning ? '#e0524d' : '#fff', color: isTimerRunning ? '#fff' : '#000', fontWeight:700, fontFamily:J, cursor:'pointer', transition:'all 0.2s', boxShadow:'0 4px 12px rgba(0,0,0,0.2)' }}>
+                  style={{ width:'100%', padding:'14px', borderRadius:12, border:'none', background: isTimerRunning ? '#dd4e48' : '#fff', color: isTimerRunning ? '#fff' : '#000', fontWeight:700, fontFamily:J, cursor:'pointer', transition:'all 0.2s', boxShadow:'0 4px 12px rgba(0,0,0,0.2)' }}>
                   {isTimerRunning ? 'Pause Movement Hold' : 'Start Physical Hold'}
                 </button>
               </div>
@@ -201,7 +201,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
             
             {!shakeDone ? (
               <div>
-                <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:16, padding:16, marginBottom:20 }}>
+                <div style={{ background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:16, padding:16, marginBottom:20 }}>
                   <span style={{ fontSize:'0.7rem', color:'#8b87f5', fontFamily:S, fontWeight:700, display:'block', marginBottom:6, letterSpacing:'0.5px' }}>EXERCISE STEPS FOR YOU:</span>
                   <ol style={{ margin:0, paddingLeft:16, fontSize:'0.8rem', color:'rgba(255,255,255,0.45)', fontFamily:J, display:'flex', flexDirection:'column', gap:5, lineHeight:1.4 }}>
                     <li>Stand up or sit down completely straight on your chair.</li>
@@ -252,7 +252,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
             <span style={{ fontSize:'0.65rem', color:'#c79552', fontWeight:800, fontFamily:S, letterSpacing:'1px' }}>ACTIVITY 03 // ACUPRESSURE REWIRING</span>
             <h3 style={{ fontFamily:J, color:'#fff', fontSize:'1.25rem', margin:'4px 0 16px' }}>Emotional Freedom Tapping Loop</h3>
 
-            <div style={{ background:'rgba(0,0,0,0.2)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:16, padding:18, marginBottom:20 }}>
+            <div style={{ background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:16, padding:18, marginBottom:20 }}>
               <span style={{ fontSize:'0.7rem', fontFamily:S, color:'#c79552', fontWeight:700, textTransform:'uppercase' }}>TARGET BODY LOCATION</span>
               <h4 style={{ fontFamily:J, color:'#fff', fontSize:'1.15rem', margin:'4px 0 14px' }}>{tappingPoints[tapStep].point}</h4>
               
@@ -273,7 +273,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
                     setTapStep(prev => prev + 1);
                   });
                 }}
-                  style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', background:accent, color:'#0a0a0c', fontWeight:800, fontFamily:J, cursor:'pointer', display:'flex', alignItems:'center', justify:'center', gap:6, justifyContent:'center' }}>
+                  style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', background:accent, color:'#fff', fontWeight:800, fontFamily:J, cursor:'pointer', display:'flex', alignItems:'center', justify:'center', gap:6, justifyContent:'center', boxShadow:`0 4px 12px ${accent}25` }}>
                   I Feel Ready, Next Tapping Point ➔ {!isPremium && <FaLock size={10}/>}
                 </button>
               ) : (

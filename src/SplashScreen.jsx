@@ -39,7 +39,7 @@ export default function SplashScreen({ onComplete }) {
           transition={{ duration: 0.85, ease: [0.4, 0, 0.2, 1] }}
           style={{
             position: 'fixed', inset: 0, zIndex: 1000, overflow: 'hidden',
-            background: '#0a0a0c',
+            background: 'var(--bg-app)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           }}
         >
@@ -52,7 +52,7 @@ export default function SplashScreen({ onComplete }) {
                 position: 'absolute', borderRadius: '50%', pointerEvents: 'none',
                 left: o.x, top: o.y, transform: 'translate(-50%,-50%)',
                 width: o.size, height: o.size,
-                background: `radial-gradient(circle, ${o.color}55 0%, ${o.color}22 45%, transparent 70%)`,
+                background: `radial-gradient(circle, ${o.color}1c 0%, ${o.color}08 45%, transparent 70%)`,
                 filter: 'blur(60px)',
               }}
             />
@@ -64,7 +64,7 @@ export default function SplashScreen({ onComplete }) {
             transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
             style={{
               position: 'absolute', inset: 0, pointerEvents: 'none',
-              opacity: 0.06, backgroundSize: '55px 55px',
+              opacity: 0.03, backgroundSize: '55px 55px',
               backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
             }}
           />
@@ -75,7 +75,7 @@ export default function SplashScreen({ onComplete }) {
             transition={{ duration: 2.5, delay: 0.8, ease: 'easeInOut' }}
             style={{
               position: 'absolute', inset: '0 0 auto 0', height: '2px', pointerEvents: 'none',
-              background: 'linear-gradient(90deg, transparent, rgba(139,135,245,0.5), rgba(139,135,245,0.4), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(139,135,245,0.18), rgba(139,135,245,0.08), transparent)',
               filter: 'blur(1px)',
             }}
           />

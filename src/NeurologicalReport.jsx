@@ -11,14 +11,14 @@ const G  = "'Fraunces','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');`;
 
 // ── ATTITUDE Palette ─────────────────────────────────────
-const BLUSH   = '#F2E6EE';
-const PINK    = '#FFCCF2';
-const PERI    = '#977DFF';
-const ORCHID  = '#0033FF';
-const PLUM    = '#0600AB';
-const NIGHT   = '#00033D';
-const CARD    = 'rgba(2,6,48,0.75)';
-const BORDER  = '1px solid rgba(151,125,255,0.14)';
+const BLUSH   = '#e4e4e7';
+const PINK    = '#d4d4d8';
+const PERI    = '#8b5cf6';
+const ORCHID  = '#6366f1';
+const PLUM    = '#1e1b4b';
+const NIGHT   = '#090a0f';
+const CARD    = 'var(--bg-card)';
+const BORDER  = '1px solid var(--border-subtle)';
 
 // ── Emotion configs ──────────────────────────────────────
 const NEG = [
@@ -221,9 +221,9 @@ function PeakChart({ negScores = {}, posScores = {} }) {
 
   return (
     <div style={{ position:'relative', borderRadius:'18px', overflow:'hidden', padding:'16px 8px 4px',
-      background:'linear-gradient(165deg,rgba(99,102,241,0.07),rgba(168,85,247,0.04))',
-      border:'1px solid rgba(255,255,255,0.08)',
-      boxShadow:'inset 0 1px 0 rgba(255,255,255,0.06)' }}>
+      background:'var(--bg-card)',
+      border:'1px solid var(--border-subtle)',
+      boxShadow:'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
 
       {/* animated shimmer sweep */}
       <style>{`@keyframes nrSweep{0%{transform:translateX(-120%)}100%{transform:translateX(420%)}}`}</style>
@@ -457,9 +457,9 @@ function PeakChart({ negScores = {}, posScores = {} }) {
             left: `${hovered.x}px`,
             top: `${hovered.y - 12}px`,
             transform: 'translate(-50%, -100%)',
-            background: 'rgba(10, 11, 28, 0.96)',
+            background: 'var(--bg-card)',
             backdropFilter: 'blur(12px)',
-            border: `1.5px solid ${hovered.color}`,
+            border: `1px solid ${hovered.color}88`,
             borderRadius: '10px',
             padding: '8px 12px',
             zIndex: 100,
@@ -597,7 +597,7 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
   const urgC = urgentColor(analysis?.urgency);
 
   return (
-    <div style={{ height:'100vh', overflowY:'auto', background:`linear-gradient(160deg,${NIGHT} 0%,#020B40 50%,#0A0E5E 100%)`, fontFamily:J, position:'relative' }}>
+    <div style={{ height:'100vh', overflowY:'auto', background:'var(--bg-app)', fontFamily:J, position:'relative' }}>
       <style>{FONTS}</style>
 
       {/* ambient glow */}
@@ -606,9 +606,9 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
           radial-gradient(ellipse 60% 40% at 95% 20%,rgba(151,125,255,0.13),transparent)` }}/>
 
       {/* HEADER */}
-      <div style={{ padding:'13px 18px 11px', borderBottom:'1px solid rgba(151,125,255,0.12)',
+      <div style={{ padding:'13px 18px 11px', borderBottom:'1px solid var(--border-subtle)',
         display:'flex', alignItems:'center', justifyContent:'space-between',
-        background:'rgba(2,6,48,0.90)', backdropFilter:'blur(20px)',
+        background:'rgba(13,15,19,0.90)', backdropFilter:'blur(20px)',
         position:'sticky', top:0, zIndex:20 }}>
         <div>
           <h2 style={{ margin:'0 0 2px', fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800,
@@ -650,11 +650,11 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
           )}
           <motion.button whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
             onClick={analyze} disabled={loading}
-            style={{ padding:'7px 14px', background:`linear-gradient(135deg,${ORCHID},${PLUM})`,
-              border:'1px solid rgba(242,230,238,0.16)', borderRadius:'10px', color:'#fff',
+            style={{ padding:'7px 14px', background:'var(--accent-purple)',
+              border:'1px solid rgba(255,255,255,0.08)', borderRadius:'10px', color:'#fff',
               fontSize:'0.72rem', fontWeight:700, cursor:'pointer', fontFamily:SF,
               display:'flex', alignItems:'center', gap:'6px',
-              boxShadow:'0 4px 18px rgba(0,51,255,0.45)', opacity: loading?0.7:1 }}>
+              boxShadow:'0 4px 12px rgba(139,92,246,0.25)', opacity: loading?0.7:1 }}>
             {loading
               ? <motion.div animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }}
                   style={{ width:'11px', height:'11px', borderRadius:'50%',
@@ -672,9 +672,9 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'13px', marginBottom:'13px' }}>
 
           <motion.div initial={{ opacity:0, x:-14 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.45 }}
-            style={{ background:`radial-gradient(ellipse at 50% 0%,rgba(0,51,255,0.22) 0%,rgba(2,6,48,0.97) 100%)`,
-              border:`1px solid rgba(0,51,255,0.35)`, borderRadius:'18px', padding:'16px',
-              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+            style={{ background:'var(--bg-card)',
+              border:'1px solid var(--border-subtle)', borderRadius:'18px', padding:'16px',
+              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'3px' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
                 <motion.div animate={{ scale:[1,1.3,1], opacity:[0.7,1,0.7] }} transition={{ duration:1.2, repeat:Infinity }}
@@ -696,9 +696,9 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
           </motion.div>
 
           <motion.div initial={{ opacity:0, x:14 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.45, delay:0.1 }}
-            style={{ background:`radial-gradient(ellipse at 50% 0%,rgba(151,125,255,0.22) 0%,rgba(3,4,42,0.97) 100%)`,
-              border:`1px solid rgba(151,125,255,0.35)`, borderRadius:'18px', padding:'16px',
-              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+            style={{ background:'var(--bg-card)',
+              border:'1px solid var(--border-subtle)', borderRadius:'18px', padding:'16px',
+              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'3px' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
                 <motion.div animate={{ scale:[1,1.2,1] }} transition={{ duration:2, repeat:Infinity }}
@@ -937,11 +937,11 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
                 return (
                   <div style={{ display:'flex', alignItems:'center', gap:'7px', marginTop:'7px',
                     padding:'7px 11px', borderRadius:'9px',
-                    background: better?'rgba(0,51,255,0.10)':'rgba(255,204,242,0.10)',
-                    border:`1px solid ${better?'rgba(0,51,255,0.22)':'rgba(255,204,242,0.22)'}` }}>
+                    background: better?'rgba(81,171,159,0.08)':'rgba(221,78,72,0.08)',
+                    border:`1px solid ${better?'var(--accent-max-border)':'var(--accent-aura-border)'}` }}>
                     <span style={{ fontSize:'0.9rem' }}>{better?'✨':'⚠️'}</span>
                     <p style={{ margin:0, fontFamily:SF, fontSize:'0.68rem', fontWeight:700,
-                      color: better?'#6F86FF':'#FFCCF2' }}>
+                      color: better?'var(--accent-max)':'var(--accent-aura)' }}>
                       {better
                         ? `Stress down ${Math.abs(diff)}% vs last session — you're improving!`
                         : `Stress up ${diff}% vs last — time to practice today`}

@@ -25,8 +25,8 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
       style={{
         position: 'absolute',
         inset: 0,
-        background: '#000000',
-        color: '#ffffff',
+        background: 'var(--bg-app)',
+        color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -107,10 +107,10 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
           style={{
             width: '560px',
             height: '360px',
-            background: 'rgba(255, 255, 255, 0.02)',
-            border: '1.5px solid rgba(255, 255, 255, 0.1)',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '20px',
-            boxShadow: '0 35px 80px rgba(0,0,0,0.8), 0 0 40px rgba(139,92,246,0.15)',
+            boxShadow: 'var(--shadow-card)',
             overflow: 'hidden',
             position: 'relative',
             zIndex: 2
@@ -131,16 +131,16 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
           style={{
             marginTop: '36px',
             padding: '14px 44px',
-            background: 'rgba(255, 255, 255, 0.04)',
-            border: '1.5px solid rgba(255, 255, 255, 0.22)',
+            background: 'var(--bg-input)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '30px',
-            color: '#ffffff',
+            color: 'var(--text-primary)',
             fontFamily: J,
             fontSize: '0.9rem',
             fontWeight: '700',
             letterSpacing: '0.5px',
             cursor: 'pointer',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
+            boxShadow: '0 16px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             display: 'flex',
@@ -183,7 +183,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'fixed', top: 0, left: 0, background: '#121214', backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 70%)' }}>
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'fixed', top: 0, left: 0, background: 'var(--bg-app)', backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(139,135,245,0.02) 0%, rgba(94,184,173,0.01) 50%, transparent 80%)' }}>
       <AppleEmoji/>
       <AnimatePresence mode="wait">
 

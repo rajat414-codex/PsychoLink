@@ -50,7 +50,7 @@ export default function CrisisButton({ onBreathing, onChatAura }) {
             onClick={() => setOpen(false)}
             style={{
               position: 'fixed', inset: 0, zIndex: 200,
-              background: 'rgba(4,3,14,0.88)', backdropFilter: 'blur(10px)',
+              background: 'rgba(9,10,15,0.82)', backdropFilter: 'blur(10px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
             }}
           >
@@ -61,25 +61,25 @@ export default function CrisisButton({ onBreathing, onChatAura }) {
               onClick={e => e.stopPropagation()}
               style={{
                 width: '100%', maxWidth: 480,
-                background: 'rgba(10,8,20,0.98)',
-                border: '1px solid rgba(204,102,102,0.2)',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '28px', padding: '28px',
-                boxShadow: '0 30px 80px rgba(0,0,0,0.7), 0 0 40px rgba(204,102,102,0.1)',
+                boxShadow: 'var(--shadow-card)',
               }}
             >
               {/* Close */}
               <button onClick={() => setOpen(false)}
-                style={{ position: 'absolute', top: '18px', right: '18px', width: 32, height: 32, borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                style={{ position: 'absolute', top: '18px', right: '18px', width: 32, height: 32, borderRadius: 10, background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <FaTimes size={13}/>
               </button>
 
               {/* Header */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(204,102,102,0.12)', border: '1px solid rgba(204,102,102,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>🆘</div>
+                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(204,102,102,0.06)', border: '1px solid rgba(204,102,102,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>🆘</div>
                   <h3 style={{ fontFamily: G, fontStyle: 'italic', fontWeight: 600, fontSize: '1.4rem', color: '#fff', margin: 0 }}>You're Not Alone</h3>
                 </div>
-                <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.84rem', fontFamily: J, margin: 0, lineHeight: 1.6 }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', fontFamily: J, margin: 0, lineHeight: 1.6 }}>
                   Whatever you're going through right now — it matters. Please reach out to a crisis counselor.
                 </p>
               </div>
@@ -92,12 +92,12 @@ export default function CrisisButton({ onBreathing, onChatAura }) {
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '14px 16px', borderRadius: '16px',
-                      background: `${l.color}0d`, border: `1px solid ${l.color}30`,
+                      background: 'var(--bg-input)', border: '1px solid var(--border-subtle)',
                       textDecoration: 'none', gap: 12,
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: '50%', background: `${l.color}20`, border: `1px solid ${l.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: l.color, flexShrink: 0 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: '50%', background: `${l.color}15`, border: `1px solid ${l.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: l.color, flexShrink: 0 }}>
                         <FaPhone size={12}/>
                       </div>
                       <div>

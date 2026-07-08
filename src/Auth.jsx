@@ -27,9 +27,9 @@ function SpaceBg({ activeAI }) {
   ];
   return (
     <div style={{ position:'absolute', inset:0, overflow:'hidden', zIndex:0, pointerEvents:'none' }}>
-      <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 50% 50%, #0c0c1a 0%, #050508 60%, #020203 100%)' }}/>
+      <div style={{ position:'absolute', inset:0, background:'var(--bg-app)' }}/>
       <motion.div animate={{ backgroundPosition:['0% 0%','100% 100%'] }} transition={{ duration:40, repeat:Infinity, ease:'linear', repeatType:'mirror' }}
-        style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&q=80&w=2000')`, backgroundSize:'130% 130%', opacity:0.1 }}/>
+        style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&q=80&w=2000')`, backgroundSize:'130% 130%', opacity:0.02 }}/>
       {[{sz:'75px',op:0.5,dur:55,dir:'180px 360px'},{sz:'145px',op:0.25,dur:85,dir:'-270px 550px'},{sz:'230px',op:0.1,dur:115,dir:'140px -275px'}].map((s,i)=>(
         <motion.div key={i} animate={{ backgroundPosition:['0px 0px',s.dir] }} transition={{ duration:s.dur, repeat:Infinity, ease:'linear' }}
           style={{ position:'absolute', inset:0, opacity:s.op, backgroundImage:`radial-gradient(circle, rgba(255,255,255,0.85) 1.5px, transparent 1.5px)`, backgroundSize:`${s.sz} ${s.sz}` }}/>
@@ -354,18 +354,18 @@ export default function Auth({ onComplete }) {
   const L = "'Lexend', sans-serif";
 
   const card = {
-    background:'linear-gradient(160deg,rgba(16,12,32,0.95) 0%,rgba(10,8,24,0.98) 100%)',
+    background:'var(--bg-card)',
     backdropFilter:'blur(60px)', WebkitBackdropFilter:'blur(60px)',
-    borderRadius:'28px', border:'1px solid rgba(255,255,255,0.11)',
-    boxShadow:'0 50px 100px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.14)',
+    borderRadius:'28px', border:'1px solid var(--border-subtle)',
+    boxShadow:'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
     position:'relative', zIndex:2, overflow:'hidden'
   };
 
   const glassCard = {
-    background:'linear-gradient(160deg,rgba(255,255,255,0.10) 0%,rgba(255,255,255,0.04) 100%)',
+    background:'rgba(255,255,255,0.015)',
     backdropFilter:'blur(40px)', WebkitBackdropFilter:'blur(40px)',
-    borderRadius:'30px', border:'1px solid rgba(255,255,255,0.18)',
-    boxShadow:'0 40px 90px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.25)',
+    borderRadius:'30px', border:'1px solid var(--border-subtle)',
+    boxShadow:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)',
     position:'relative', zIndex:2, overflow:'hidden'
   };
 

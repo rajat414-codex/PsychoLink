@@ -67,22 +67,22 @@ export default function BreathingModal({ onClose }) {
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 200,
-        background: 'radial-gradient(ellipse at 30% 30%, rgba(139,135,245,0.2) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(94,184,173,0.15) 0%, transparent 60%), rgba(4,3,14,0.92)',
+        background: 'rgba(9,10,15,0.82)',
         backdropFilter: 'blur(12px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '32px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
       }}
     >
       <motion.div
         initial={{ scale: 0.92, opacity: 0, y: 24 }} animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
         onClick={e => e.stopPropagation()}
-        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '28px', padding: '20px' }}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', padding: '32px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '28px', boxShadow: 'var(--shadow-card)', maxWidth: '440px', width: '100%' }}
       >
         {/* Header */}
         <div style={{ textAlign: 'center' }}>
-          <p style={{ fontFamily: S, fontSize: '0.68rem', letterSpacing: '2.5px', color: 'rgba(255,255,255,0.3)', fontWeight: 700, margin: '0 0 6px' }}>BREATHING EXERCISE</p>
+          <p style={{ fontFamily: S, fontSize: '0.68rem', letterSpacing: '2.5px', color: 'var(--text-muted)', fontWeight: 700, margin: '0 0 6px' }}>BREATHING EXERCISE</p>
           <h2 style={{ fontFamily: G, fontStyle: 'italic', fontWeight: 600, fontSize: '1.8rem', color: '#fff', margin: '0 0 4px' }}>4 · 7 · 8 Technique</h2>
-          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', fontFamily: J, margin: 0 }}>Reduces anxiety · Helps sleep · Calms the mind</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontFamily: J, margin: 0 }}>Reduces anxiety · Helps sleep · Calms the mind</p>
         </div>
 
         {/* Breathing circle */}
@@ -98,33 +98,31 @@ export default function BreathingModal({ onClose }) {
                 borderRadius: '50%',
                 border: `1px solid ${phase.color}50`,
                 pointerEvents: 'none',
+                scale: scale
               }}
             />
           ))}
 
-          {/* Main circle */}
+          {/* Inner circle */}
           <motion.div
-            animate={{ scale: running ? scale : 1 }}
-            transition={{ duration: running ? (phaseIdx === 0 ? 4 : phaseIdx === 1 ? 0.2 : 8) : 0.5, ease: phaseIdx === 1 ? 'linear' : 'easeInOut' }}
+            animate={running && phaseIdx === 0 ? { scale: [1, 1.05, 1] } : {}}
+            transition={{ duration: 4, repeat: Infinity }}
             style={{
-              width: 160, height: 160, borderRadius: '50%',
-              background: `radial-gradient(ellipse 50% 40% at 35% 30%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.2) 30%, transparent 60%), radial-gradient(circle at 44% 44%, rgba(255,255,255,0.1) 0%, ${phase.color} 40%, ${phase.color}99 70%, ${phase.color}33 100%)`,
-              boxShadow: `0 0 40px ${phase.color}88, 0 0 80px ${phase.color}44`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '4px',
-              transition: 'box-shadow 0.5s',
+              width: 170, height: 170, borderRadius: '50%',
+              background: `radial-gradient(circle at 30% 30%, #fff, ${phase.color} 40%, #000 95%)`,
+              boxShadow: running ? `0 10px 40px ${phase.color}35` : 'none',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              zIndex: 5, cursor: 'pointer', transition: 'all 0.5s ease',
+              scale: scale
             }}
           >
-            <span style={{ fontFamily: S, fontSize: '2.2rem', fontWeight: 700, color: '#fff', lineHeight: 1 }}>
-              {running ? countdown : '·'}
-            </span>
-            <span style={{ fontFamily: J, fontSize: '0.72rem', fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: '1px' }}>
-              {running ? phase.label.toUpperCase() : 'READY'}
-            </span>
+            <span style={{ fontSize: '2.5rem', fontWeight: 800, color: '#fff', fontFamily: S, textShadow: '0 2px 10px rgba(0,0,0,0.4)', userSelect: 'none' }}>{countdown}</span>
+            <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.75)', fontFamily: J, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', marginTop: '4px', userSelect: 'none' }}>{phase.label}</span>
           </motion.div>
         </div>
 
-        {/* Phase indicator */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        {/* Phase timeline */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '20px', padding: '10px 20px' }}>
           {PHASES.map((p, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <motion.div
@@ -142,7 +140,7 @@ export default function BreathingModal({ onClose }) {
         <AnimatePresence mode="wait">
           <motion.p key={phaseIdx}
             initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-            style={{ fontFamily: J, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', margin: 0, textAlign: 'center', maxWidth: '280px', minHeight: '24px' }}
+            style={{ fontFamily: J, fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, textAlign: 'center', maxWidth: '280px', minHeight: '24px' }}
           >
             {running ? phase.instruction : 'Press Start when you\'re ready'}
           </motion.p>
@@ -150,7 +148,7 @@ export default function BreathingModal({ onClose }) {
 
         {/* Cycle count */}
         {cycles > 0 && (
-          <div style={{ padding: '4px 14px', borderRadius: '20px', background: 'rgba(139,135,245,0.1)', border: '1px solid rgba(139,135,245,0.25)' }}>
+          <div style={{ padding: '4px 14px', borderRadius: '20px', background: 'rgba(139,135,245,0.06)', border: '1px solid rgba(139,135,245,0.15)' }}>
             <span style={{ fontFamily: S, fontSize: '0.72rem', color: '#a5a1f0', fontWeight: 700 }}>✓ {cycles} cycle{cycles > 1 ? 's' : ''} completed</span>
           </div>
         )}
@@ -161,9 +159,9 @@ export default function BreathingModal({ onClose }) {
             onClick={() => setRunning(r => !r)}
             style={{
               padding: '13px 32px', borderRadius: '14px', border: 'none', cursor: 'pointer',
-              background: running ? 'rgba(255,255,255,0.08)' : `linear-gradient(135deg, ${phase.color}, #8b87f5)`,
+              background: running ? 'var(--bg-input)' : phase.color,
               color: '#fff', fontSize: '0.92rem', fontWeight: 700, fontFamily: J,
-              boxShadow: running ? 'none' : `0 8px 24px ${phase.color}44`,
+              boxShadow: running ? 'none' : `0 8px 20px ${phase.color}25`,
             }}
           >
             {running ? '⏸ Pause' : cycles > 0 ? '▶ Resume' : '▶ Start'}
@@ -171,14 +169,14 @@ export default function BreathingModal({ onClose }) {
 
           {(running || cycles > 0) && (
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={reset}
-              style={{ padding: '13px 20px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontSize: '0.92rem', fontWeight: 700, fontFamily: J }}
+              style={{ padding: '13px 20px', borderRadius: '14px', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'var(--bg-input)', color: 'rgba(255,255,255,0.5)', fontSize: '0.92rem', fontWeight: 700, fontFamily: J }}
             >
               ↺ Reset
             </motion.button>
           )}
 
           <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={onClose}
-            style={{ padding: '13px 20px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', fontSize: '0.92rem', fontWeight: 700, fontFamily: J }}
+            style={{ padding: '13px 20px', borderRadius: '14px', border: '1px solid var(--border-subtle)', cursor: 'pointer', background: 'var(--bg-input)', color: 'rgba(255,255,255,0.5)', fontSize: '0.92rem', fontWeight: 700, fontFamily: J }}
           >
             ✕ Close
           </motion.button>

@@ -57,19 +57,17 @@ function Card({ children, style, delay=0, glow, onClick, hover }) {
       onClick={onClick}
       style={{
         position:'relative',
-        background:'rgba(255, 255, 255, 0.03)',
-        backdropFilter:'blur(20px)',
-        WebkitBackdropFilter:'blur(20px)',
-        border:'1px solid rgba(255, 255, 255, 0.1)',
+        background:'var(--bg-card)',
+        border:'1px solid var(--border-subtle)',
         borderRadius:24, padding:20,
         boxShadow: glow
-          ? `0 16px 48px rgba(0,0,0,0.5), 0 0 50px ${glow}10, inset 0 1px 0 rgba(255,255,255,0.08)`
-          : '0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+          ? `0 16px 48px rgba(0,0,0,0.5), 0 0 40px ${glow}0d, inset 0 1px 0 rgba(255,255,255,0.03)`
+          : 'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
         cursor: onClick ? 'pointer' : 'default',
         overflow:'hidden',
         ...style,
       }}>
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)', pointerEvents:'none' }}/>
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent)', pointerEvents:'none' }}/>
       {children}
     </motion.div>
   );
@@ -126,10 +124,10 @@ function KpiCard({ k, i, inView }) {
   return (
     <Card delay={0.05+i*0.08} glow={k.color} hover style={{ padding:16 }}>
       <motion.div animate={{ opacity:[0.4,0.7,0.4] }} transition={{ duration:3, repeat:Infinity, delay:i*0.3 }}
-        style={{ position:'absolute', top:-30, right:-30, width:80, height:80, borderRadius:'50%', background:`radial-gradient(circle,${k.color}33,transparent 70%)`, pointerEvents:'none' }}/>
+        style={{ position:'absolute', top:-30, right:-30, width:80, height:80, borderRadius:'50%', background:`radial-gradient(circle,${k.color}18,transparent 70%)`, pointerEvents:'none' }}/>
       <p style={{ margin:'0 0 8px', fontSize:'0.64rem', color:'rgba(255,255,255,0.4)', fontFamily:S, letterSpacing:'1px', fontWeight:700, textTransform:'uppercase', position:'relative', zIndex:2 }}>{k.label}</p>
       <div style={{ display:'flex', alignItems:'baseline', gap:7, position:'relative', zIndex:2 }}>
-        <span style={{ fontSize:'1.75rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:`0 0 20px ${k.color}55` }}>{display}</span>
+        <span style={{ fontSize:'1.75rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:`0 0 16px ${k.color}25` }}>{display}</span>
         <span style={{ fontSize:'0.7rem', fontWeight:700, color:k.color, display:'flex', alignItems:'center', gap:3 }}>
           {k.up ? <FaArrowUp size={8}/> : <FaArrowDown size={8}/>}{k.delta}
         </span>
@@ -223,7 +221,7 @@ export default function DashboardHome({
     <motion.div ref={rootRef} key="home" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
       style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
 
-      <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, overflow:'hidden', background:'#121214' }}>
+      <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:0, overflow:'hidden', background:'var(--bg-app)' }}>
         {/* Central Fluent spotlight glow */}
         <div style={{
           position:'absolute',
@@ -231,13 +229,13 @@ export default function DashboardHome({
           transform:'translate(-50%,-50%)',
           width:'700px', height:'700px',
           borderRadius:'50%',
-          background:'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 60%)',
+          background:'radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 60%)',
           filter:'blur(80px)',
         }}/>
         <motion.div animate={{ x:[0,20,0], y:[0,-20,0] }} transition={{ duration:25, repeat:Infinity, ease:'easeInOut' }}
-          style={{ position:'absolute', top:'10%', left:'20%', width:350, height:350, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,0.04), transparent 70%)', filter:'blur(60px)' }}/>
+          style={{ position:'absolute', top:'10%', left:'20%', width:350, height:350, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,0.015), transparent 70%)', filter:'blur(60px)' }}/>
         <motion.div animate={{ x:[0,-20,0], y:[0,20,0] }} transition={{ duration:28, repeat:Infinity, ease:'easeInOut' }}
-          style={{ position:'absolute', bottom:'15%', right:'20%', width:350, height:350, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,0.03), transparent 70%)', filter:'blur(60px)' }}/>
+          style={{ position:'absolute', bottom:'15%', right:'20%', width:350, height:350, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,0.01), transparent 70%)', filter:'blur(60px)' }}/>
       </div>
 
       <div style={{ position:'relative', zIndex:1 }}>
@@ -302,10 +300,10 @@ export default function DashboardHome({
                     </marker>
                   </defs>
                   
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.25)" vertical={true}/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={true}/>
                   
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.8)', fontSize:11, fontFamily:'Space Grotesk' }}/>
-                  <YAxis domain={[-50, 50]} tickFormatter={(v) => `${v + 50}%`} axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.7)', fontSize:10 }} width={42}/>
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.5)', fontSize:11, fontFamily:'Space Grotesk' }}/>
+                  <YAxis domain={[-50, 50]} tickFormatter={(v) => `${v + 50}%`} axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.4)', fontSize:10 }} width={42}/>
                   <Tooltip content={<Tip/>}/>
                   
                   {/* Central Cartesian axes crossing at center (Thursday acts as horizontal midpoint) */}
@@ -358,16 +356,16 @@ export default function DashboardHome({
             { ai:'MAX',  name:'Max',  sub:'COGNITIVE ANALYSIS', desc:'Break patterns, build clear solutions.',  color:'#5eb8ad', icon:<FaRobot size={20}/> },
           ].map((ai,i) => (
             <Card key={i} delay={0.42+i*0.06} glow={ai.color} hover onClick={() => { setActiveAI(ai.ai); setTab('chat'); }}
-              style={{ borderColor:`${ai.color}22` }}>
+              style={{ borderColor:'var(--border-subtle)' }}>
               <motion.div animate={{ scale:[1,1.15,1], opacity:[0.3,0.6,0.3] }} transition={{ duration:4, repeat:Infinity, delay:i*0.5 }}
-                style={{ position:'absolute', top:-30, right:-30, width:120, height:120, borderRadius:'50%', background:`radial-gradient(circle,${ai.color}33,transparent 70%)`, pointerEvents:'none' }}/>
+                style={{ position:'absolute', top:-30, right:-30, width:120, height:120, borderRadius:'50%', background:`radial-gradient(circle,${ai.color}15,transparent 70%)`, pointerEvents:'none' }}/>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14, position:'relative', zIndex:2 }}>
-                <div style={{ width:42, height:42, borderRadius:13, background:`${ai.color}1a`, border:`1px solid ${ai.color}40`, display:'flex', alignItems:'center', justifyContent:'center', color:ai.color, boxShadow:`0 0 20px ${ai.color}30` }}>{ai.icon}</div>
+                <div style={{ width:42, height:42, borderRadius:13, background:`${ai.color}1a`, border:`1px solid ${ai.color}25`, display:'flex', alignItems:'center', justifyContent:'center', color:ai.color, boxShadow:`0 0 14px ${ai.color}18` }}>{ai.icon}</div>
                 <motion.div whileHover={{ x:3 }} style={{ width:26, height:26, borderRadius:'50%', background:`${ai.color}1a`, display:'flex', alignItems:'center', justifyContent:'center', color:ai.color }}><FaArrowRight size={10}/></motion.div>
               </div>
               <p style={{ margin:'0 0 3px', fontFamily:J, fontWeight:800, fontSize:'1.15rem', color:'#fff', position:'relative', zIndex:2 }}>{ai.name}</p>
               <p style={{ margin:'0 0 8px', fontSize:'0.64rem', color:ai.color, fontFamily:S, letterSpacing:'1.5px', fontWeight:700, position:'relative', zIndex:2 }}>{ai.sub}</p>
-              <p style={{ margin:0, fontSize:'0.8rem', color:'rgba(255,255,255,0.45)', fontFamily:J, lineHeight:1.5, position:'relative', zIndex:2 }}>{ai.desc}</p>
+              <p style={{ margin:0, fontSize:'0.8rem', color:'var(--text-secondary)', fontFamily:J, lineHeight:1.5, position:'relative', zIndex:2 }}>{ai.desc}</p>
             </Card>
           ))}
         </div>
@@ -411,8 +409,8 @@ export default function DashboardHome({
                 </PieChart>
               </ResponsiveContainer>
               <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
-                <span style={{ fontSize:'1.3rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:'0 0 20px rgba(94,184,173,0.6)' }}>44%</span>
-                <span style={{ fontSize:'0.64rem', color:'rgba(255,255,255,0.4)', fontFamily:J }}>Calm</span>
+                <span style={{ fontSize:'1.3rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:'0 0 16px rgba(94,184,173,0.25)' }}>44%</span>
+                <span style={{ fontSize:'0.64rem', color:'var(--text-secondary)', fontFamily:J }}>Calm</span>
               </div>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginTop:8, position:'relative', zIndex:2 }}>
