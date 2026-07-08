@@ -172,10 +172,10 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
                   <span style={{ fontFamily:S, fontSize:'1.9rem', fontWeight:700, color:'#fff' }}>{timer}s</span>
                 </div>
 
-                <button onClick={() => setIsTimerRunning(!isTimerRunning)}
-                  style={{ width:'100%', padding:'14px', borderRadius:12, border:'none', background: isTimerRunning ? '#dd4e48' : '#fff', color: isTimerRunning ? '#fff' : '#000', fontWeight:700, fontFamily:J, cursor:'pointer', transition:'all 0.2s', boxShadow:'0 4px 12px rgba(0,0,0,0.2)' }}>
+                <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={() => setIsTimerRunning(!isTimerRunning)}
+                  style={{ width:'100%', padding:'14px', borderRadius:12, border:'none', background: isTimerRunning ? '#ef4444' : `linear-gradient(135deg, ${accent}, #8b5cf6)`, color: '#fff', fontWeight:700, fontFamily:J, cursor:'pointer', transition:'all 0.2s', boxShadow:`0 4px 18px ${accent}25` }}>
                   {isTimerRunning ? 'Pause Movement Hold' : 'Start Physical Hold'}
-                </button>
+                </motion.button>
               </div>
             ) : (
               <motion.div initial={{ opacity:0, scale:0.96 }} animate={{ opacity:1, scale:1 }} style={{ textAlign:'center', padding:'20px 0' }}>
@@ -268,19 +268,20 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
 
             <div style={{ display:'flex', gap:10 }}>
               {tapStep < tappingPoints.length - 1 ? (
-                <button onClick={() => {
-                  handlePremiumCheck(() => {
-                    setTapStep(prev => prev + 1);
-                  });
-                }}
-                  style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', background:accent, color:'#fff', fontWeight:800, fontFamily:J, cursor:'pointer', display:'flex', alignItems:'center', justify:'center', gap:6, justifyContent:'center', boxShadow:`0 4px 12px ${accent}25` }}>
+                <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}
+                  onClick={() => {
+                    handlePremiumCheck(() => {
+                      setTapStep(prev => prev + 1);
+                    });
+                  }}
+                  style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', background:`linear-gradient(135deg, ${accent}, #8b5cf6)`, color:'#fff', fontWeight:800, fontFamily:J, cursor:'pointer', display:'flex', alignItems:'center', gap:6, justifyContent:'center', boxShadow:`0 4px 18px ${accent}25` }}>
                   I Feel Ready, Next Tapping Point ➔ {!isPremium && <FaLock size={10}/>}
-                </button>
+                </motion.button>
               ) : (
-                <button onClick={() => setTapStep(0)}
-                  style={{ width:'100%', padding:'13px', borderRadius:12, border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'#fff', fontWeight:700, fontFamily:J, cursor:'pointer' }}>
+                <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={() => setTapStep(0)}
+                  style={{ width:'100%', padding:'13px', borderRadius:12, border:'1px solid rgba(255,255,255,0.12)', background:'rgba(255,255,255,0.03)', color:'#fff', fontWeight:700, fontFamily:J, cursor:'pointer' }}>
                   Reset Acupressure Loop
-                </button>
+                </motion.button>
               )}
             </div>
           </motion.div>

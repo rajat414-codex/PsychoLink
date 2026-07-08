@@ -105,27 +105,27 @@ export function JoinConsultantModal({ onClose, accent = '#8b5cf6' }) {
 
       <div style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
         <label style={labelStyle}>Full Name *
-          <input style={fieldStyle} value={form.fullName} onChange={set('fullName')} placeholder="Dr. Jane Doe"/>
+          <input className="premium-input" value={form.fullName} onChange={set('fullName')} placeholder="Dr. Jane Doe"/>
         </label>
 
         <label style={labelStyle}>Email *
-          <input type="email" style={fieldStyle} value={form.email} onChange={set('email')} placeholder="jane@example.com"/>
+          <input type="email" className="premium-input" value={form.email} onChange={set('email')} placeholder="jane@example.com"/>
         </label>
 
         <label style={labelStyle}>Skills / Specialization
-          <input style={fieldStyle} value={form.skills} onChange={set('skills')} placeholder="e.g. Anxiety, CBT, Trauma"/>
+          <input className="premium-input" value={form.skills} onChange={set('skills')} placeholder="e.g. Anxiety, CBT, Trauma"/>
         </label>
 
         <label style={labelStyle}>Therapy approach(es) you use with clients
-          <textarea rows={2} style={fieldStyle} value={form.therapyApproach} onChange={set('therapyApproach')} placeholder="e.g. CBT, person-centered, mindfulness-based..."/>
+          <textarea rows={2} className="premium-input" value={form.therapyApproach} onChange={set('therapyApproach')} placeholder="e.g. CBT, person-centered, mindfulness-based..."/>
         </label>
 
         <label style={labelStyle}>Qualifications
-          <textarea rows={2} style={fieldStyle} value={form.qualifications} onChange={set('qualifications')} placeholder="Degrees, licenses, certifications, years of experience..."/>
+          <textarea rows={2} className="premium-input" value={form.qualifications} onChange={set('qualifications')} placeholder="Degrees, licenses, certifications, years of experience..."/>
         </label>
 
         <label style={labelStyle}>How do you handle multilingual or aggressive clients?
-          <textarea rows={3} style={fieldStyle} value={form.multilingualAggressive} onChange={set('multilingualAggressive')} placeholder="e.g. I switch languages as needed, use de-escalation techniques..."/>
+          <textarea rows={3} className="premium-input" value={form.multilingualAggressive} onChange={set('multilingualAggressive')} placeholder="e.g. I switch languages as needed, use de-escalation techniques..."/>
         </label>
 
         {status === 'error' && (

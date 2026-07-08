@@ -639,7 +639,7 @@ export default function Home({ userProfile, onLogout }) {
                       style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start', alignItems:'flex-end', gap:'8px' }}>
 
                       <div style={{ maxWidth:'72%' }}>
-                        <div style={{ padding:'12px 16px', background:msg.role==='user'?`linear-gradient(135deg,${accent}28,${accent}14)`:'rgba(255,255,255,0.055)', border:`1px solid ${msg.role==='user'?accent+'38':'rgba(255,255,255,0.08)'}`, borderRadius:msg.role==='user'?'18px 18px 4px 18px':'18px 18px 18px 4px', color:'rgba(255,255,255,0.9)', fontSize:'0.88rem', lineHeight:'1.65', fontFamily:J, whiteSpace:'pre-wrap' }}>
+                        <div style={{ padding:'12px 16px', background:msg.role==='user'?`linear-gradient(135deg, ${accent}20, ${accent}0b)`:'var(--bg-card)', border:`1px solid ${msg.role==='user'?accent+'44':'var(--border-subtle)'}`, borderRadius:msg.role==='user'?'18px 18px 4px 18px':'18px 18px 18px 4px', color:'rgba(255,255,255,0.9)', fontSize:'0.88rem', lineHeight:'1.65', fontFamily:J, whiteSpace:'pre-wrap', boxShadow:msg.role==='user'?`0 8px 32px ${accent}0b, inset 0 1px 0 rgba(255,255,255,0.03)`:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
                           {msg.audioUrl ? (
                             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                               <audio src={msg.audioUrl} controls style={{ height:32, maxWidth:200, filter:'invert(1) hue-rotate(180deg)', opacity:0.85 }}/>
@@ -675,8 +675,8 @@ export default function Home({ userProfile, onLogout }) {
                 </div>
 
                 {/* Input */}
-                <div style={{ padding:'10px 16px 14px', background:'rgba(13,15,19,0.95)', backdropFilter:'blur(24px)', borderTop:'1px solid var(--border-subtle)', flexShrink:0 }}>
-                  <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'var(--bg-input)', border:`1px solid ${listening?accentBr:'var(--border-subtle)'}`, borderRadius:'20px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?`0 0 0 3px ${accent}15`:'' }}>
+                <div style={{ padding:'12px 16px 16px', background:'rgba(13,15,19,0.95)', backdropFilter:'blur(24px)', borderTop:'1px solid var(--border-subtle)', flexShrink:0 }}>
+                  <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'var(--bg-input)', border:`1px solid ${listening?accent:'var(--border-subtle)'}`, borderRadius:'24px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?`0 0 0 3px ${accent}15`:'' }}>
                     <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={handleMicClick}
                       animate={isRecording ? { scale:[1,1.1,1] } : {}} transition={isRecording ? { duration:0.8, repeat:Infinity } : {}}
                       style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'var(--bg-input)', border:`1px solid ${isRecording?'#ef4444':'var(--border-subtle)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 1px 3px rgba(204,102,102,0.4)':'' }}>
@@ -850,7 +850,7 @@ export default function Home({ userProfile, onLogout }) {
                   <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.7rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>My Journal</h2>
                   <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', margin:0, fontFamily:J }}>Write your thoughts freely — AI gives you weekly insights</p>
                 </div>
-                <div style={{ background:'linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))', border:'1px solid rgba(255,255,255,0.08)', borderRadius:20, padding:20, marginBottom:14, boxShadow:'0 1px 2px rgba(0,0,0,0.3)' }}>
+                <div style={{ background:'var(--bg-card)', border:'1px solid var(--border-subtle)', borderRadius:20, padding:20, marginBottom:14, boxShadow:'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
                   <textarea value={journalInput} onChange={e => setJournalInput(e.target.value)}
                     placeholder="What's on your mind today? How are you feeling? Write freely..."
                     style={{ width:'100%', minHeight:120, background:'none', border:'none', outline:'none', color:'rgba(255,255,255,0.85)', fontSize:'0.9rem', fontFamily:J, lineHeight:1.7, resize:'vertical' }}/>
@@ -884,7 +884,8 @@ export default function Home({ userProfile, onLogout }) {
                     <p style={{ margin:'0 0 8px', fontSize:'0.68rem', color:'rgba(255,255,255,0.25)', fontFamily:S, letterSpacing:'1.5px', fontWeight:600 }}>PAST ENTRIES ({journalEntries.length})</p>
                     {journalEntries.map((entry, i) => (
                       <motion.div key={entry.id} initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} transition={{ delay:i*0.04 }}
-                        style={{ background:'linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'14px 16px', boxShadow:'0 1px 2px rgba(0,0,0,0.3)' }}>
+                        whileHover={{ y:-2, transition:{ duration:0.2 } }}
+                        style={{ background:'var(--bg-card)', border:'1px solid var(--border-subtle)', borderRadius:16, padding:'14px 16px', boxShadow:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
                         <p style={{ margin:'0 0 6px', fontSize:'0.68rem', color:'rgba(255,255,255,0.28)', fontFamily:S }}>
                           {new Date(entry.date).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})} · {new Date(entry.date).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}
                         </p>

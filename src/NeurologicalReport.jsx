@@ -648,13 +648,13 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
               </span>
             </div>
           )}
-          <motion.button whileHover={{ scale:1.05 }} whileTap={{ scale:0.95 }}
+          <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
             onClick={analyze} disabled={loading}
-            style={{ padding:'7px 14px', background:'var(--accent-purple)',
-              border:'1px solid rgba(255,255,255,0.08)', borderRadius:'10px', color:'#fff',
-              fontSize:'0.72rem', fontWeight:700, cursor:'pointer', fontFamily:SF,
+            style={{ padding:'8px 16px', background:'linear-gradient(135deg, var(--accent-purple), #6366f1)',
+              border:'none', borderRadius:'10px', color:'#fff',
+              fontSize:'0.76rem', fontWeight:700, cursor:'pointer', fontFamily:SF,
               display:'flex', alignItems:'center', gap:'6px',
-              boxShadow:'0 4px 12px rgba(139,92,246,0.25)', opacity: loading?0.7:1 }}>
+              boxShadow:'0 4px 14px rgba(139,92,246,0.35)', opacity: loading?0.7:1 }}>
             {loading
               ? <motion.div animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }}
                   style={{ width:'11px', height:'11px', borderRadius:'50%',
@@ -672,9 +672,10 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'13px', marginBottom:'13px' }}>
 
           <motion.div initial={{ opacity:0, x:-14 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.45 }}
+            whileHover={{ y:-3, borderColor:'rgba(255,255,255,0.11)', boxShadow:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.04)' }}
             style={{ background:'var(--bg-card)',
               border:'1px solid var(--border-subtle)', borderRadius:'18px', padding:'16px',
-              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
+              boxShadow:'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)', transition:'all 0.25s ease' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'3px' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
                 <motion.div animate={{ scale:[1,1.3,1], opacity:[0.7,1,0.7] }} transition={{ duration:1.2, repeat:Infinity }}
@@ -696,9 +697,10 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
           </motion.div>
 
           <motion.div initial={{ opacity:0, x:14 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.45, delay:0.1 }}
+            whileHover={{ y:-3, borderColor:'rgba(255,255,255,0.11)', boxShadow:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.04)' }}
             style={{ background:'var(--bg-card)',
               border:'1px solid var(--border-subtle)', borderRadius:'18px', padding:'16px',
-              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.03)' }}>
+              boxShadow:'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)', transition:'all 0.25s ease' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'3px' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
                 <motion.div animate={{ scale:[1,1.2,1] }} transition={{ duration:2, repeat:Infinity }}
@@ -761,10 +763,11 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
               const isA = activeEm === em.id;
               return (
                 <motion.div key={em.id} layout onClick={() => setActiveEm(isA?null:em.id)}
+                  whileHover={{ y:-2, borderColor: isA?c+'88':'rgba(255,255,255,0.11)' }}
                   style={{ cursor:'pointer', padding:'11px 13px', borderRadius:'13px',
-                    background: isA?`${c}10`:'rgba(228,228,255,0.03)',
-                    border:`1px solid ${isA?c+'48':'rgba(151,125,255,0.08)'}`,
-                    transition:'border 0.2s, background 0.2s' }}>
+                    background: isA?`${c}14`:'var(--bg-input)',
+                    border:`1px solid ${isA?c+'66':'var(--border-subtle)'}`,
+                    transition:'all 0.25s ease' }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'5px' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
                       <span style={{ fontSize:'0.95rem' }}>{em.icon}</span>
@@ -816,8 +819,9 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
               {CURES.map((c,i) => (
                 <motion.div key={i} initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }}
                   transition={{ delay:0.50+i*0.06 }}
+                  whileHover={{ x:4 }}
                   style={{ display:'flex', gap:'10px', alignItems:'flex-start', padding:'8px 11px',
-                    borderRadius:'11px', background:'rgba(228,228,255,0.03)', border:'1px solid rgba(151,125,255,0.07)' }}>
+                    borderRadius:'11px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)', transition:'all 0.2s' }}>
                   <span style={{ fontSize:'1.05rem', flexShrink:0, marginTop:'1px' }}>{c.icon}</span>
                   <div>
                     <p style={{ margin:'0 0 2px', fontFamily:SF, fontSize:'0.70rem', fontWeight:700, color:c.color }}>{c.title}</p>
@@ -839,7 +843,7 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
                   const c = scoreColor(score);
                   return (
                     <div key={id} style={{ padding:'9px 11px', borderRadius:'11px',
-                      background:'rgba(228,228,255,0.03)', border:`1px solid ${c}22` }}>
+                      background:'var(--bg-input)', border:'1px solid var(--border-subtle)' }}>
                       <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'3px' }}>
                         <span style={{ fontSize:'0.82rem' }}>{rec.icon}</span>
                         <span style={{ fontFamily:SF, fontSize:'0.70rem', fontWeight:700, color:c, flex:1 }}>

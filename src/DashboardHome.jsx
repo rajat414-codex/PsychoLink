@@ -53,7 +53,7 @@ function Card({ children, style, delay=0, glow, onClick, hover }) {
     <motion.div
       initial={{ opacity:0, y:18 }} animate={{ opacity:1, y:0 }}
       transition={{ delay, duration:0.55, ease:[0.22,1,0.36,1] }}
-      whileHover={hover ? { y:-4, transition:{ duration:0.25 } } : undefined}
+      whileHover={hover ? { y:-4, borderColor:'rgba(255,255,255,0.11)', boxShadow: glow ? `0 20px 48px rgba(0,0,0,0.65), 0 0 40px ${glow}14, inset 0 1px 0 rgba(255,255,255,0.04)` : '0 20px 48px rgba(0,0,0,0.55)', transition:{ duration:0.25, ease:'easeOut' } } : undefined}
       onClick={onClick}
       style={{
         position:'relative',
@@ -65,6 +65,7 @@ function Card({ children, style, delay=0, glow, onClick, hover }) {
           : 'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
         cursor: onClick ? 'pointer' : 'default',
         overflow:'hidden',
+        transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
         ...style,
       }}>
       <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent)', pointerEvents:'none' }}/>
