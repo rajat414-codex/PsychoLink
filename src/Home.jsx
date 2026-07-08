@@ -602,100 +602,106 @@ export default function Home({ userProfile, onLogout }) {
                   )}
                 </div>
                 {messages.length > 1 && (
-                  <div style={{ flexShrink:0, display:'flex', justifyContent:'flex-end', padding:'8px 20px 0', position:'relative', zIndex:2 }}>
-                    <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={getSessionSummary}
-                      style={{ padding:'7px 14px', borderRadius:20, border:`1px solid ${accentBr}`, background:accentB, color:accent, fontSize:'0.75rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:6 }}>
-                      📋 Session Summary
-                    </motion.button>
+                  <div style={{ flexShrink:0, display:'flex', justifyContent:'flex-end', padding:'12px 24px 0', position:'relative', zIndex:2 }}>
+                    <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto', display:'flex', justifyContent:'flex-end' }}>
+                      <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={getSessionSummary}
+                        style={{ padding:'7px 14px', borderRadius:20, border:`1px solid ${accentBr}`, background:accentB, color:accent, fontSize:'0.75rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:6 }}>
+                        📋 Session Summary
+                      </motion.button>
+                    </div>
                   </div>
                 )}
-                <div style={{ flex:1, overflowY:'auto', padding:'8px 20px 10px', display:'flex', flexDirection:'column', gap:'14px', position:'relative', zIndex:1 }}>
-                  {messages.length === 0 && (
-                    <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}
-                      style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'30px 20px', minHeight:'50vh' }}>
+                <div style={{ flex:1, overflowY:'auto', padding:'8px 20px 10px', display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
+                  <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto', display:'flex', flexDirection:'column', gap:'14px', flex:1, justifyContent:messages.length===0?'center':'flex-start' }}>
+                    {messages.length === 0 && (
+                      <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}
+                        style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'30px 20px' }}>
 
-                      <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'1.8rem', color:'#fff', marginBottom:'8px' }}>
-                        {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : "Hello, I'm Max"}
-                      </h2>
-                      <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.86rem', lineHeight:'1.75', maxWidth:'340px', marginBottom:'24px', fontFamily:J }}>
-                        {activeAI === 'AURA'
-                          ? "I'm your emotional anchor. Here to listen and support you through anything."
-                          : "I'm your cognitive analyst. Ready to break down patterns and build solutions."}
-                      </p>
-                      <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', justifyContent:'center', maxWidth:'460px' }}>
-                        {SUGGESTIONS[activeAI].map((s,i) => (
-                          <motion.button key={i} whileHover={{ background:accentB, borderColor:accentBr, scale:1.02 }} whileTap={{ scale:0.97 }}
-                            onClick={() => sendMsg(s)}
-                            style={{ padding:'9px 14px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.09)', borderRadius:'20px', color:'rgba(255,255,255,0.55)', fontSize:'0.81rem', cursor:'pointer', fontFamily:J, transition:'all 0.2s', fontWeight:'500' }}>
-                            {s}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {messages.map((msg,i) => (
-                    <motion.div key={i} initial={{ opacity:0, y:8, scale:0.98 }} animate={{ opacity:1, y:0, scale:1 }} transition={{ duration:0.25 }}
-                      style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start', alignItems:'flex-end', gap:'8px' }}>
-
-                      <div style={{ maxWidth:'72%' }}>
-                        <div style={{ padding:'12px 16px', background:msg.role==='user'?`linear-gradient(135deg, ${accent}20, ${accent}0b)`:'var(--bg-card)', border:`1px solid ${msg.role==='user'?accent+'44':'var(--border-subtle)'}`, borderRadius:msg.role==='user'?'18px 18px 4px 18px':'18px 18px 18px 4px', color:'rgba(255,255,255,0.9)', fontSize:'0.88rem', lineHeight:'1.65', fontFamily:J, whiteSpace:'pre-wrap', boxShadow:msg.role==='user'?`0 8px 32px ${accent}0b, inset 0 1px 0 rgba(255,255,255,0.03)`:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
-                          {msg.audioUrl ? (
-                            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                              <audio src={msg.audioUrl} controls style={{ height:32, maxWidth:200, filter:'invert(1) hue-rotate(180deg)', opacity:0.85 }}/>
-                              <span style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:S }}>{msg.audioDuration}s</span>
-                            </div>
-                          ) : msg.content}
-                        </div>
-                        <div style={{ display:'flex', alignItems:'center', gap:'7px', marginTop:'3px', justifyContent:msg.role==='user'?'flex-end':'flex-start' }}>
-                          <span style={{ fontSize:'0.61rem', color:'rgba(255,255,255,0.16)', fontFamily:S }}>{fmt(msg.ts)}</span>
-                          {msg.role === 'assistant' && (
-                            <motion.button whileHover={{ color:accent }} whileTap={{ scale:0.9 }} onClick={() => speakText(msg.content)}
-                              style={{ background:'none', border:'none', color:'rgba(255,255,255,0.16)', cursor:'pointer', padding:0, transition:'color 0.2s' }}>
-                              <FaVolumeUp size={9}/>
+                        <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'2.2rem', color:'#fff', marginBottom:'8px' }}>
+                          {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : "Hello, I'm Max"}
+                        </h2>
+                        <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.88rem', lineHeight:'1.75', maxWidth:'420px', marginBottom:'32px', fontFamily:J }}>
+                          {activeAI === 'AURA'
+                            ? "I'm your emotional anchor. Here to listen and support you through anything."
+                            : "I'm your cognitive analyst. Ready to break down patterns and build solutions."}
+                        </p>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', width:'100%', maxWidth:'600px', margin:'0 auto' }}>
+                          {SUGGESTIONS[activeAI].map((s,i) => (
+                            <motion.button key={i} whileHover={{ background:'var(--bg-card)', borderColor:'rgba(255,255,255,0.12)', y:-2 }} whileTap={{ scale:0.98 }}
+                              onClick={() => sendMsg(s)}
+                              style={{ padding:'16px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:'16px', color:'rgba(255,255,255,0.7)', fontSize:'0.84rem', cursor:'pointer', fontFamily:J, textAlign:'left', lineHeight:1.4, transition:'all 0.2s', display:'flex', flexDirection:'column', justifyContent:'space-between', gap:8 }}>
+                              <span style={{ fontWeight:'600' }}>{s}</span>
+                              <span style={{ fontSize:'0.72rem', color:accent, fontWeight:'700', letterSpacing:'0.5px' }}>ASK ASSISTANT ➔</span>
                             </motion.button>
-                          )}
+                          ))}
                         </div>
-                      </div>
-                      {msg.role === 'user' && (
-                        <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},var(--accent-purple))`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginBottom:'18px', fontWeight:'800', fontSize:'0.72rem', color:'#fff' }}>
-                          {(userProfile?.name || 'U')[0].toUpperCase()}
+                      </motion.div>
+                    )}
+
+                    {messages.map((msg,i) => (
+                      <motion.div key={i} initial={{ opacity:0, y:8, scale:0.98 }} animate={{ opacity:1, y:0, scale:1 }} transition={{ duration:0.25 }}
+                        style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start', alignItems:'flex-end', gap:'8px' }}>
+
+                        <div style={{ maxWidth:'72%' }}>
+                          <div style={{ padding:'12px 16px', background:msg.role==='user'?`linear-gradient(135deg, ${accent}20, ${accent}0b)`:'var(--bg-card)', border:`1px solid ${msg.role==='user'?accent+'44':'var(--border-subtle)'}`, borderRadius:msg.role==='user'?'18px 18px 4px 18px':'18px 18px 18px 4px', color:'rgba(255,255,255,0.9)', fontSize:'0.88rem', lineHeight:'1.65', fontFamily:J, whiteSpace:'pre-wrap', boxShadow:msg.role==='user'?`0 8px 32px ${accent}0b, inset 0 1px 0 rgba(255,255,255,0.03)`:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
+                            {msg.audioUrl ? (
+                              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                                <audio src={msg.audioUrl} controls style={{ height:32, maxWidth:200, filter:'invert(1) hue-rotate(180deg)', opacity:0.85 }}/>
+                                <span style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:S }}>{msg.audioDuration}s</span>
+                              </div>
+                            ) : msg.content}
+                          </div>
+                          <div style={{ display:'flex', alignItems:'center', gap:'7px', marginTop:'3px', justifyContent:msg.role==='user'?'flex-end':'flex-start' }}>
+                            <span style={{ fontSize:'0.61rem', color:'rgba(255,255,255,0.16)', fontFamily:S }}>{fmt(msg.ts)}</span>
+                            {msg.role === 'assistant' && (
+                              <motion.button whileHover={{ color:accent }} whileTap={{ scale:0.9 }} onClick={() => speakText(msg.content)}
+                                style={{ background:'none', border:'none', color:'rgba(255,255,255,0.16)', cursor:'pointer', padding:0, transition:'color 0.2s' }}>
+                                <FaVolumeUp size={9}/>
+                              </motion.button>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </motion.div>
-                  ))}
+                        {msg.role === 'user' && (
+                          <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},var(--accent-purple))`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginBottom:'18px', fontWeight:'800', fontSize:'0.72rem', color:'#fff' }}>
+                            {(userProfile?.name || 'U')[0].toUpperCase()}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
 
-                  {loading && (
-                    <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} style={{ display:'flex', alignItems:'flex-end', gap:'8px' }}>
-
-                      <TypingDots color={accent}/>
-                    </motion.div>
-                  )}
-                  <div ref={bottomRef}/>
+                    {loading && (
+                      <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} style={{ display:'flex', alignItems:'flex-end', gap:'8px' }}>
+                        <TypingDots color={accent}/>
+                      </motion.div>
+                    )}
+                    <div ref={bottomRef}/>
+                  </div>
                 </div>
 
                 {/* Input */}
-                <div style={{ padding:'12px 16px 16px', background:'rgba(13,15,19,0.95)', backdropFilter:'blur(24px)', borderTop:'1px solid var(--border-subtle)', flexShrink:0 }}>
-                  <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'var(--bg-input)', border:`1px solid ${listening?accent:'var(--border-subtle)'}`, borderRadius:'24px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?`0 0 0 3px ${accent}15`:'' }}>
-                    <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={handleMicClick}
-                      animate={isRecording ? { scale:[1,1.1,1] } : {}} transition={isRecording ? { duration:0.8, repeat:Infinity } : {}}
-                      style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'var(--bg-input)', border:`1px solid ${isRecording?'#ef4444':'var(--border-subtle)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 1px 3px rgba(204,102,102,0.4)':'' }}>
-                      {isRecording ? <FaStop size={11} color="#fff"/> : <FaMicrophone size={12} color="rgba(255,255,255,0.4)"/>}
-                    </motion.button>
-                    <textarea ref={textareaRef} value={input}
-                      onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight,110) + 'px'; }}
-                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
-                      placeholder={isRecording ? `🔴 Recording... ${recordDuration}s (click mic to send)` : `Message ${activeAI==='AURA'?'Aura':'Max'}...`}
-                      rows={1}
-                      style={{ flex:1, background:'none', border:'none', color:'rgba(255,255,255,0.88)', fontSize:'0.9rem', fontFamily:J, resize:'none', lineHeight:'1.5', maxHeight:'110px', minHeight:'22px', padding:'7px 0', overflowY:'auto' }}/>
-                    <motion.button whileHover={input.trim()?{scale:1.06}:{}} whileTap={input.trim()?{scale:0.94}:{}} onClick={() => sendMsg()}
-                      style={{ width:'36px', height:'36px', borderRadius:'50%', background:input.trim()?accent:'rgba(255,255,255,0.03)', border:`1px solid ${input.trim()?accent:'var(--border-subtle)'}`, cursor:input.trim()?'pointer':'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:input.trim()?`0 4px 12px ${accent}25`:'' }}>
-                      <FaPaperPlane size={13} color={input.trim()?'#fff':'rgba(255,255,255,0.22)'} style={{ marginLeft:'1px' }}/>
-                    </motion.button>
+                <div style={{ padding:'16px 20px 24px', background:'transparent', flexShrink:0, position:'relative', zIndex:5 }}>
+                  <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto' }}>
+                    <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'var(--bg-card)', border:`1px solid ${listening?accent:'var(--border-subtle)'}`, borderRadius:'24px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?`0 0 16px ${accent}10, 0 0 0 3px ${accent}10`:'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
+                      <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={handleMicClick}
+                        animate={isRecording ? { scale:[1,1.1,1] } : {}} transition={isRecording ? { duration:0.8, repeat:Infinity } : {}}
+                        style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'var(--bg-input)', border:`1px solid ${isRecording?'#ef4444':'var(--border-subtle)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 1px 3px rgba(204,102,102,0.4)':'' }}>
+                        {isRecording ? <FaStop size={11} color="#fff"/> : <FaMicrophone size={12} color="rgba(255,255,255,0.4)"/>}
+                      </motion.button>
+                      <textarea ref={textareaRef} value={input}
+                        onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight,110) + 'px'; }}
+                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
+                        placeholder={isRecording ? `🔴 Recording... ${recordDuration}s (click mic to send)` : `Message ${activeAI==='AURA'?'Aura':'Max'}...`}
+                        rows={1}
+                        style={{ flex:1, background:'none', border:'none', color:'rgba(255,255,255,0.88)', fontSize:'0.9rem', fontFamily:J, resize:'none', lineHeight:'1.5', maxHeight:'110px', minHeight:'22px', padding:'7px 0', overflowY:'auto' }}/>
+                      <motion.button whileHover={input.trim()?{scale:1.06}:{}} whileTap={input.trim()?{scale:0.94}:{}} onClick={() => sendMsg()}
+                        style={{ width:'36px', height:'36px', borderRadius:'50%', background:input.trim()?accent:'rgba(255,255,255,0.03)', border:`1px solid ${input.trim()?accent:'var(--border-subtle)'}`, cursor:input.trim()?'pointer':'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:input.trim()?`0 4px 12px ${accent}25`:'' }}>
+                        <FaPaperPlane size={13} color={input.trim()?'#fff':'rgba(255,255,255,0.22)'} style={{ marginLeft:'1px' }}/>
+                      </motion.button>
+                    </div>
+                    <p style={{ textAlign:'center', fontSize:'0.61rem', color:'rgba(255,255,255,0.14)', fontFamily:S, letterSpacing:'0.5px', margin:'7px 0 0' }}>
+                      {activeAI==='AURA'?'Aura · Emotional Support AI':'Max · Cognitive Analysis AI'} — Not a substitute for professional therapy
+                    </p>
                   </div>
-                  <p style={{ textAlign:'center', fontSize:'0.61rem', color:'rgba(255,255,255,0.14)', fontFamily:S, letterSpacing:'0.5px', margin:'7px 0 0' }}>
-                    {activeAI==='AURA'?'Aura · Emotional Support AI':'Max · Cognitive Analysis AI'} — Not a substitute for professional therapy
-                  </p>
                 </div>
               </motion.div>
             )}
