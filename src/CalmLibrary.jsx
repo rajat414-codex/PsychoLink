@@ -133,7 +133,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
         {/* ACTIVITY 1: MICRO-STRETCHING */}
         {activeActivity === 'neuro-stretch' && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}>
-            <span style={{ fontSize:'0.65rem', color:'#5eb8ad', fontWeight:800, fontFamily:S, letterSpacing:'1px' }}>ACTIVITY 01 // NEURO-SOMATIC WORKOUT</span>
+            <span style={{ fontSize:'0.65rem', color:'#10b981', fontWeight:800, fontFamily:S, letterSpacing:'1px' }}>ACTIVITY 01 // NEURO-SOMATIC WORKOUT</span>
             <h3 style={{ fontFamily:J, color:'#fff', fontSize:'1.25rem', margin:'4px 0 16px' }}>Vagus Nerve Micro-Stretching</h3>
 
             {stretchStep < 3 ? (
@@ -179,8 +179,8 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
               </div>
             ) : (
               <motion.div initial={{ opacity:0, scale:0.96 }} animate={{ opacity:1, scale:1 }} style={{ textAlign:'center', padding:'20px 0' }}>
-                <div style={{ width:48, height:48, borderRadius:'50%', background:'rgba(94,184,173,0.1)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 12px' }}>
-                  <FaCheckCircle size={22} color="#5eb8ad"/>
+                <div style={{ width:48, height:48, borderRadius:'50%', background:'rgba(16,185,129,0.08)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 12px' }}>
+                  <FaCheckCircle size={22} color="#10b981"/>
                 </div>
                 <h4 style={{ fontFamily:J, color:'#fff', margin:'0 0 6px', fontSize:'1.1rem' }}>Physical Decompression Complete</h4>
                 <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.84rem', fontFamily:J, maxWidth:360, margin:'0 auto 20px', lineHeight:1.4 }}>Your upper body skeletal muscles have released pent-up adrenaline loops. Awesome job.</p>
@@ -196,13 +196,13 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
         {/* ACTIVITY 2: SOMATIC SHAKE-OFF */}
         {activeActivity === 'somatic-shake' && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}>
-            <span style={{ fontSize:'0.65rem', color:'#8b87f5', fontWeight:800, fontFamily:S, letterSpacing:'1px' }}>ACTIVITY 02 // NERVOUS DISCHARGE</span>
+            <span style={{ fontSize:'0.65rem', color:'#8b5cf6', fontWeight:800, fontFamily:S, letterSpacing:'1px' }}>ACTIVITY 02 // NERVOUS DISCHARGE</span>
             <h3 style={{ fontFamily:J, color:'#fff', fontSize:'1.25rem', margin:'4px 0 12px' }}>Adrenaline Shake-Off Cycle</h3>
             
             {!shakeDone ? (
               <div>
                 <div style={{ background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:16, padding:16, marginBottom:20 }}>
-                  <span style={{ fontSize:'0.7rem', color:'#8b87f5', fontFamily:S, fontWeight:700, display:'block', marginBottom:6, letterSpacing:'0.5px' }}>EXERCISE STEPS FOR YOU:</span>
+                  <span style={{ fontSize:'0.7rem', color:'#8b5cf6', fontFamily:S, fontWeight:700, display:'block', marginBottom:6, letterSpacing:'0.5px' }}>EXERCISE STEPS FOR YOU:</span>
                   <ol style={{ margin:0, paddingLeft:16, fontSize:'0.8rem', color:'rgba(255,255,255,0.45)', fontFamily:J, display:'flex', flexDirection:'column', gap:5, lineHeight:1.4 }}>
                     <li>Stand up or sit down completely straight on your chair.</li>
                     <li>Physically shake both your hands and arms rapidly in the air (like shaking off water droplets).</li>
@@ -211,7 +211,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
                 </div>
 
                 <div style={{ height:8, background:'rgba(255,255,255,0.06)', borderRadius:4, marginBottom:22, overflow:'hidden' }}>
-                  <div style={{ width: `${(shakeCount / 20) * 100}%`, height:'100%', background:'#8b87f5', transition:'width 0.1s ease-out' }}/>
+                  <div style={{ width: `${(shakeCount / 20) * 100}%`, height:'100%', background:'#8b5cf6', transition:'width 0.1s ease-out' }}/>
                 </div>
 
                 <motion.button whileTap={{ scale: 0.95 }}
@@ -224,16 +224,16 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
                       }
                     });
                   }}
-                  style={{ width:120, height:120, borderRadius:'50%', border:'4px solid rgba(139,135,245,0.2)', background:'radial-gradient(circle, rgba(139,135,245,0.15), transparent)', color:'#fff', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:4, margin:'0 auto', outline:'none' }}>
-                  <FaHandPaper size={24} color="#8b87f5"/>
+                  style={{ width:120, height:120, borderRadius:'50%', border:'4px solid rgba(139,92,246,0.15)', background:'radial-gradient(circle, rgba(139,92,246,0.12), transparent)', color:'#fff', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:4, margin:'0 auto', outline:'none' }}>
+                  <FaHandPaper size={24} color="#8b5cf6"/>
                   <span style={{ fontFamily:S, fontSize:'0.75rem', fontWeight:700 }}>SHAKE & TAP</span>
                   <span style={{ fontSize:'0.64rem', color:'rgba(255,255,255,0.4)' }}>{shakeCount}/20</span>
                 </motion.button>
               </div>
             ) : (
               <div style={{ textAlign:'center', padding:'20px 0' }}>
-                <div style={{ width:48, height:48, borderRadius:'50%', background:'rgba(139,135,245,0.1)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 12px' }}>
-                  <FaCheckCircle size={22} color="#8b87f5"/>
+                <div style={{ width:48, height:48, borderRadius:'50%', background:'rgba(139,92,246,0.08)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 12px' }}>
+                  <FaCheckCircle size={22} color="#8b5cf6"/>
                 </div>
                 <h4 style={{ fontFamily:J, color:'#fff', margin:'0 0 4px', fontSize:'1.1rem' }}>Kinetic Discharge Successful</h4>
                 <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.82rem', fontFamily:J, marginBottom:16 }}>The physical restlessness index of your central nervous system has stabilized.</p>
@@ -249,15 +249,15 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
         {/* ACTIVITY 3: EFT SENSORY TAPPING */}
         {activeActivity === 'eft-tapping' && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}>
-            <span style={{ fontSize:'0.65rem', color:'#c79552', fontWeight:800, fontFamily:S, letterSpacing:'1px' }}>ACTIVITY 03 // ACUPRESSURE REWIRING</span>
+            <span style={{ fontSize:'0.65rem', color:'#f59e0b', fontWeight:800, fontFamily:S, letterSpacing:'1px' }}>ACTIVITY 03 // ACUPRESSURE REWIRING</span>
             <h3 style={{ fontFamily:J, color:'#fff', fontSize:'1.25rem', margin:'4px 0 16px' }}>Emotional Freedom Tapping Loop</h3>
 
             <div style={{ background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:16, padding:18, marginBottom:20 }}>
-              <span style={{ fontSize:'0.7rem', fontFamily:S, color:'#c79552', fontWeight:700, textTransform:'uppercase' }}>TARGET BODY LOCATION</span>
+              <span style={{ fontSize:'0.7rem', fontFamily:S, color:'#f59e0b', fontWeight:700, textTransform:'uppercase' }}>TARGET BODY LOCATION</span>
               <h4 style={{ fontFamily:J, color:'#fff', fontSize:'1.15rem', margin:'4px 0 14px' }}>{tappingPoints[tapStep].point}</h4>
               
               <div style={{ borderTop:'1px solid rgba(255,255,255,0.06)', paddingTop:12 }}>
-                <span style={{ fontSize:'0.7rem', color:'#c79552', fontFamily:S, fontWeight:700, display:'block', marginBottom:6, letterSpacing:'0.5px' }}>WHAT YOU MUST DO NOW:</span>
+                <span style={{ fontSize:'0.7rem', color:'#f59e0b', fontFamily:S, fontWeight:700, display:'block', marginBottom:6, letterSpacing:'0.5px' }}>WHAT YOU MUST DO NOW:</span>
                 <ul style={{ margin:0, paddingLeft:16, fontSize:'0.8rem', color:'rgba(255,255,255,0.45)', fontFamily:J, display:'flex', flexDirection:'column', gap:5, lineHeight:1.4 }}>
                   <li><strong>{tappingPoints[tapStep].instruction}</strong></li>
                   <li>Perform the tapping physically on your skin while taking 3 slow, deep belly breaths.</li>

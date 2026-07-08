@@ -353,8 +353,8 @@ export default function DashboardHome({
 
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:14 }}>
           {[
-            { ai:'AURA', name:'Aura', sub:'EMOTIONAL SUPPORT', desc:"Feeling overwhelmed? Let's talk it through.", color:'#e0524d', icon:<FaBrain size={20}/> },
-            { ai:'MAX',  name:'Max',  sub:'COGNITIVE ANALYSIS', desc:'Break patterns, build clear solutions.',  color:'#5eb8ad', icon:<FaRobot size={20}/> },
+            { ai:'AURA', name:'Aura', sub:'EMOTIONAL SUPPORT', desc:"Feeling overwhelmed? Let's talk it through.", color:'#f43f5e', icon:<FaBrain size={20}/> },
+            { ai:'MAX',  name:'Max',  sub:'COGNITIVE ANALYSIS', desc:'Break patterns, build clear solutions.',  color:'#0ea5e9', icon:<FaRobot size={20}/> },
           ].map((ai,i) => (
             <Card key={i} delay={0.42+i*0.06} glow={ai.color} hover onClick={() => { setActiveAI(ai.ai); setTab('chat'); }}
               style={{ borderColor:'var(--border-subtle)' }}>
@@ -410,7 +410,7 @@ export default function DashboardHome({
                 </PieChart>
               </ResponsiveContainer>
               <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
-                <span style={{ fontSize:'1.3rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:'0 0 16px rgba(94,184,173,0.25)' }}>44%</span>
+                <span style={{ fontSize:'1.3rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:'0 0 16px rgba(16,185,129,0.15)' }}>44%</span>
                 <span style={{ fontSize:'0.64rem', color:'var(--text-secondary)', fontFamily:J }}>Calm</span>
               </div>
             </div>
@@ -440,8 +440,8 @@ export default function DashboardHome({
                     <p style={{ margin:0, fontSize:'0.68rem', color:'rgba(255,255,255,0.3)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.spec}</p>
                   </div>
                   <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
-                    <span style={{ fontSize:'0.74rem', fontWeight:700, color:'#c79552' }}>★{c.rating}</span>
-                    <span style={{ width:7, height:7, borderRadius:'50%', background:c.avail?'#56a06f':'rgba(255,255,255,0.15)', boxShadow:c.avail?'0 0 8px #56a06f':'none' }}/>
+                    <span style={{ fontSize:'0.74rem', fontWeight:700, color:'#f59e0b' }}>★{c.rating}</span>
+                    <span style={{ width:7, height:7, borderRadius:'50%', background:c.avail?'#10b981':'rgba(255,255,255,0.15)' }}/>
                   </div>
                 </motion.div>
               ))}
@@ -456,10 +456,10 @@ export default function DashboardHome({
           <CardTitle title="Recent Activity" sub="Your latest interactions"/>
           <div style={{ display:'flex', flexDirection:'column', gap:4, position:'relative', zIndex:2 }}>
             {[
-              { icon:'💬', label:'Chat with Aura', meta:'Emotional check-in', time:'2h ago', tag:'Completed', tagColor:'#56a06f' },
-              { icon:'🧘', label:'Calm Morning meditation', meta:'5 min session', time:'5h ago', tag:'Completed', tagColor:'#56a06f' },
-              { icon:'📓', label:'Journal entry', meta:'Evening reflection', time:'1d ago', tag:'Saved', tagColor:'#8b87f5' },
-              { icon:'🧠', label:'Brain Report generated', meta:'Stress down 12%', time:'2d ago', tag:'Insight', tagColor:'#5eb8ad' },
+              { icon:'💬', label:'Chat with Aura', meta:'Emotional check-in', time:'2h ago', tag:'Completed', tagColor:'#10b981' },
+              { icon:'🧘', label:'Calm Morning meditation', meta:'5 min session', time:'5h ago', tag:'Completed', tagColor:'#10b981' },
+              { icon:'📓', label:'Journal entry', meta:'Evening reflection', time:'1d ago', tag:'Saved', tagColor:'#6366f1' },
+              { icon:'🧠', label:'Brain Report generated', meta:'Stress down 12%', time:'2d ago', tag:'Insight', tagColor:'#0ea5e9' },
             ].map((a,i) => (
               <motion.div key={i} initial={{ opacity:0, x:10 }} animate={{ opacity:1, x:0 }} transition={{ delay:0.75+i*0.07 }}
                 whileHover={{ x:4, background:'rgba(255,255,255,0.03)' }}
