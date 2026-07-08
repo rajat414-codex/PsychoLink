@@ -38,10 +38,10 @@ const MOOD_TREND = [
   { d:'Sun', mood:82, calm:79 },
 ];
 const EMOTION_SPLIT = [
-  { name:'Calm', value:44, color:'#5eb8ad' },
-  { name:'Anxious', value:23, color:'#e0524d' },
-  { name:'Focused', value:21, color:'#8b87f5' },
-  { name:'Low', value:12, color:'#c79552' },
+  { name:'Calm', value:44, color:'#10b981' },
+  { name:'Anxious', value:23, color:'#f43f5e' },
+  { name:'Focused', value:21, color:'#6366f1' },
+  { name:'Low', value:12, color:'#f59e0b' },
 ];
 const ACTIVITY = [
   { d:'M', v:3 }, { d:'T', v:5 }, { d:'W', v:2 }, { d:'T', v:6 },
@@ -212,10 +212,10 @@ export default function DashboardHome({
   const waveData = generateWaveData(moodToday);
 
   const KPIS = [
-    { label:'Mood Score', num:82, suffix:'%', delta:'+8%',  up:true, color:'#5eb8ad', spark:[58,62,60,66,71,74,82] },
-    { label:'Day Streak', num:7,  suffix:'',  delta:'days', up:true, color:'#c79552', spark:[1,2,3,4,5,6,7] },
-    { label:'Sessions',   num:sessionCount, suffix:'', delta:'+3', up:true, color:'#8b87f5', spark:[2,4,3,6,5,7,8] },
-    { label:'Journal',    num:journalCount, suffix:'', delta:'logs', up:true, color:'#e0524d', spark:[0,1,1,2,3,3,4] },
+    { label:'Mood Score', num:82, suffix:'%', delta:'+8%',  up:true, color:'#10b981', spark:[58,62,60,66,71,74,82] },
+    { label:'Day Streak', num:7,  suffix:'',  delta:'days', up:true, color:'#f59e0b', spark:[1,2,3,4,5,6,7] },
+    { label:'Sessions',   num:sessionCount, suffix:'', delta:'+3', up:true, color:'#6366f1', spark:[2,4,3,6,5,7,8] },
+    { label:'Journal',    num:journalCount, suffix:'', delta:'logs', up:true, color:'#f43f5e', spark:[0,1,1,2,3,3,4] },
   ];
 
   return (
@@ -276,18 +276,18 @@ export default function DashboardHome({
                 <ComposedChart data={waveData}>
                   <defs>
                     <linearGradient id="posBarGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b87f5" stopOpacity={0.8}/>
-                      <stop offset="100%" stopColor="#5eb8ad" stopOpacity={0.15}/>
+                      <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8}/>
+                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.15}/>
                     </linearGradient>
                     <linearGradient id="negBarGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FF4A5A" stopOpacity={0.8}/>
-                      <stop offset="100%" stopColor="#F59E0B" stopOpacity={0.15}/>
+                      <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.8}/>
+                      <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.15}/>
                     </linearGradient>
                     
                     <linearGradient id="boundaryStroke" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#8b87f5"/>
-                      <stop offset="50%" stopColor="#5eb8ad"/>
-                      <stop offset="100%" stopColor="#FF4A5A"/>
+                      <stop offset="0%" stopColor="#6366f1"/>
+                      <stop offset="50%" stopColor="#10b981"/>
+                      <stop offset="100%" stopColor="#f43f5e"/>
                     </linearGradient>
                     
                     <filter id="lineGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -308,8 +308,8 @@ export default function DashboardHome({
                   <Tooltip content={<Tip/>}/>
                   
                   {/* Central Cartesian axes crossing at center (Thursday acts as horizontal midpoint) */}
-                  <ReferenceLine y={0} stroke={accent} strokeWidth={2.2} markerEnd="url(#arrow-right)" />
-                  <ReferenceLine x="Thu" stroke={accent} strokeWidth={2.2} markerEnd="url(#arrow-up)" />
+                  <ReferenceLine y={0} stroke="rgba(255,255,255,0.06)" strokeWidth={1} strokeDasharray="3 3" />
+                  <ReferenceLine x="Thu" stroke="rgba(255,255,255,0.06)" strokeWidth={1} strokeDasharray="3 3" />
                   
                   {/* Thin vertical stems representing hand-drawn waveform lines */}
                   <Bar dataKey="val" barSize={3.5} isAnimationActive animationDuration={1400}>
@@ -342,10 +342,10 @@ export default function DashboardHome({
             </div>
             <div style={{ display:'flex', gap:18, marginTop:8, paddingLeft:18, position:'relative', zIndex:2 }}>
               <span style={{ display:'flex', alignItems:'center', gap:6, fontSize:'0.74rem', color:'rgba(255,255,255,0.5)', fontFamily:J }}>
-                <span style={{ width:9, height:9, borderRadius:'50%', background:'#8b87f5', boxShadow:'0 0 8px #8b87f5' }}/> Positive State
+                <span style={{ width:9, height:9, borderRadius:'50%', background:'#6366f1' }}/> Positive State
               </span>
               <span style={{ display:'flex', alignItems:'center', gap:6, fontSize:'0.74rem', color:'rgba(255,255,255,0.5)', fontFamily:J }}>
-                <span style={{ width:9, height:9, borderRadius:'50%', background:'#FF4A5A', boxShadow:'0 0 8px #FF4A5A' }}/> Negative State
+                <span style={{ width:9, height:9, borderRadius:'50%', background:'#f43f5e' }}/> Negative State
               </span>
             </div>
           </Card>

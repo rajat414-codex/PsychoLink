@@ -22,20 +22,20 @@ const BORDER  = '1px solid var(--border-subtle)';
 
 // ── Emotion configs ──────────────────────────────────────
 const NEG = [
-  { id:'anxiety',    label:'Anxiety',    icon:'😰', color:'#6F86FF' },
-  { id:'depression', label:'Depression', icon:'🌧️', color:'#0033FF' },
-  { id:'stress',     label:'Stress',     icon:'🔥', color:'#977DFF' },
-  { id:'loneliness', label:'Loneliness', icon:'🌑', color:'#4D4DBF' },
-  { id:'overwhelm',  label:'Overwhelm',  icon:'🌊', color:'#8899FF' },
-  { id:'burnout',    label:'Burnout',    icon:'🪫', color:'#2E46D8' },
+  { id:'anxiety',    label:'Anxiety',    icon:'😰', color:'#818cf8' },
+  { id:'depression', label:'Depression', icon:'🌧️', color:'#4f46e5' },
+  { id:'stress',     label:'Stress',     icon:'🔥', color:'#ec4899' },
+  { id:'loneliness', label:'Loneliness', icon:'🌑', color:'#6366f1' },
+  { id:'overwhelm',  label:'Overwhelm',  icon:'🌊', color:'#a78bfa' },
+  { id:'burnout',    label:'Burnout',    icon:'🪫', color:'#3b82f6' },
 ];
 const POS = [
-  { id:'calmness',   label:'Calmness',   icon:'🍃', color:'#F2E6EE' },
-  { id:'happiness',  label:'Happiness',  icon:'😊', color:'#FFCCF2' },
-  { id:'focus',      label:'Focus',      icon:'🎯', color:'#B8A6FF' },
-  { id:'energy',     label:'Energy',     icon:'⚡', color:'#977DFF' },
-  { id:'confidence', label:'Confidence', icon:'💪', color:'#FFAEE9' },
-  { id:'peace',      label:'Inner Peace',icon:'🕊️', color:'#CDB9FF' },
+  { id:'calmness',   label:'Calmness',   icon:'🍃', color:'#10b981' },
+  { id:'happiness',  label:'Happiness',  icon:'😊', color:'#f59e0b' },
+  { id:'focus',      label:'Focus',      icon:'🎯', color:'#14b8a6' },
+  { id:'energy',     label:'Energy',     icon:'⚡', color:'#f43f5e' },
+  { id:'confidence', label:'Confidence', icon:'💪', color:'#8b5cf6' },
+  { id:'peace',      label:'Inner Peace',icon:'🕊️', color:'#06b6d4' },
 ];
 const RECS = {
   anxiety:    { icon:'🫁', title:'Anxiety Regulation',   desc:'4-7-8 breathing. Cold water on face. 5-4-3-2-1 grounding technique.', tag:'Breathwork & Grounding' },
@@ -46,12 +46,12 @@ const RECS = {
   burnout:    { icon:'🔋', title:'Energy Recovery',      desc:'Strict work boundaries. 2 full rest days. Hobby time non-negotiable.', tag:'Rest & Boundaries' },
 };
 const CURES = [
-  { icon:'🌬️', title:'Breathwork',  desc:'Box breathing 4-4-4-4 for 5 mins when anxious',      color:'#8899FF' },
-  { icon:'🚶', title:'Movement',    desc:'30 min brisk walk — lowers cortisol by 26%',           color:'#FFCCF2' },
-  { icon:'💤', title:'Sleep Reset', desc:'Sleep by 10:30 PM — brain detoxes during deep sleep',  color:'#B8A6FF' },
-  { icon:'📓', title:'Journaling',  desc:'Write 3 gratitude points every morning',               color:'#F2E6EE' },
-  { icon:'🧘', title:'Meditation',  desc:'10 min daily — clinically shrinks the amygdala',       color:'#FFAEE9' },
-  { icon:'🥗', title:'Nutrition',   desc:'Omega-3, walnuts, dark greens — direct brain fuel',   color:'#977DFF' },
+  { icon:'🌬️', title:'Breathwork',  desc:'Box breathing 4-4-4-4 for 5 mins when anxious',      color:'#10b981' },
+  { icon:'🚶', title:'Movement',    desc:'30 min brisk walk — lowers cortisol by 26%',           color:'#f43f5e' },
+  { icon:'💤', title:'Sleep Reset', desc:'Sleep by 10:30 PM — brain detoxes during deep sleep',  color:'#8b5cf6' },
+  { icon:'📓', title:'Journaling',  desc:'Write 3 gratitude points every morning',               color:'#f59e0b' },
+  { icon:'🧘', title:'Meditation',  desc:'10 min daily — clinically shrinks the amygdala',       color:'#0ea5e9' },
+  { icon:'🥗', title:'Nutrition',   desc:'Omega-3, walnuts, dark greens — direct brain fuel',   color:'#14b8a6' },
 ];
 
 const DEMO_NEG = { anxiety:72, depression:48, stress:68, loneliness:40, overwhelm:62, burnout:55 };

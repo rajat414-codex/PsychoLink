@@ -121,9 +121,9 @@ export default function Home({ userProfile, onLogout }) {
   const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
-  const accent   = activeAI === 'AURA' ? '#dd4e48' : '#51ab9f';
-  const accentB  = activeAI === 'AURA' ? 'rgba(221,78,72,0.05)' : 'rgba(81,171,159,0.05)';
-  const accentBr = activeAI === 'AURA' ? 'rgba(221,78,72,0.15)'  : 'rgba(81,171,159,0.15)';
+  const accent   = activeAI === 'AURA' ? '#f43f5e' : '#0ea5e9';
+  const accentB  = activeAI === 'AURA' ? 'rgba(244,63,94,0.04)' : 'rgba(14,165,233,0.04)';
+  const accentBr = activeAI === 'AURA' ? 'rgba(244,63,94,0.12)' : 'rgba(14,165,233,0.12)';
 
   const activeSession = sessions[activeAI].find(s => s.active) || sessions[activeAI][0];
   const messages      = activeSession?.messages || [];
@@ -458,7 +458,7 @@ export default function Home({ userProfile, onLogout }) {
               </div>
               {/* AI Toggle */}
               <div style={{ display:'flex', background:'var(--bg-input)', borderRadius:'14px', padding:'4px', gap:'3px', border:'1px solid var(--border-subtle)' }}>
-                {[{ k:'AURA', g:'#dd4e48' }, { k:'MAX', g:'#51ab9f' }].map(ai => (
+                {[{ k:'AURA', g:'#f43f5e' }, { k:'MAX', g:'#0ea5e9' }].map(ai => (
                   <button key={ai.k} onClick={() => setActiveAI(ai.k)}
                     style={{ flex:1, padding:'9px 0', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'0.76rem', fontWeight:'700', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s', background:activeAI===ai.k?ai.g:'transparent', color:activeAI===ai.k?'#fff':'rgba(255,255,255,0.28)', boxShadow:activeAI===ai.k?`0 4px 12px ${accent}25`:'none', userSelect:'none' }}>
                     {ai.k}

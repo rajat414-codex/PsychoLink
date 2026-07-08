@@ -20,9 +20,9 @@ const TREND = [
 ];
 
 const COMPARE = [
-  { name:'Anxiety', last:68, now:35, color:'#F59E0B' },
-  { name:'Stress',  last:72, now:42, color:'#FF4A5A' },
-  { name:'Mood',    last:52, now:78, color:'#10B981' },
+  { name:'Anxiety', last:68, now:35, color:'#f59e0b' },
+  { name:'Stress',  last:72, now:42, color:'#f43f5e' },
+  { name:'Mood',    last:52, now:78, color:'#10b981' },
 ];
 
 function Card({ children, style, delay=0, glow }) {
