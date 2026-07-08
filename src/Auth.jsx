@@ -722,95 +722,150 @@ export default function Auth({ onComplete }) {
         ═══════════════════════════════════════════ */}
         {screen==='landing' && (
           <motion.div key="landing" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, scale:0.98 }} transition={{ duration:0.9 }}
-            style={{ position:'absolute', inset:0, display:'flex', width: '100vw' }}>
+            style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:10 }}>
 
-            {/* Left Background Area */}
-            <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
-              <OceanBg opacity={0}/>
-              <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right,rgba(4,3,14,0.05) 40%,rgba(4,3,14,0.75) 100%)', zIndex:1 }}/>
-              <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(4,3,14,0.3) 0%,transparent 40%,rgba(4,3,14,0.55) 100%)', zIndex:1 }}/>
-              <motion.div initial={{ opacity:0,y:-12 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.4 }}
-                style={{ position:'absolute', top:'36px', left:'36px', zIndex:10, userSelect:'none' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
-                  <motion.div animate={{ scale:[1,1.5,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
-                    style={{ width:'10px', height:'10px', borderRadius:'50%', background:'linear-gradient(135deg,#8b87f5,#8b87f5)', boxShadow:'none' }}/>
-                  <span style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'1.45rem', color:'#fff', letterSpacing:'1px' }}>Cognitive Social</span>
-                </div>
-                <div style={{ paddingLeft:'20px' }}>
-                  <motion.span animate={{ boxShadow:['0 0 0px rgba(139,135,245,0)','0 0 20px rgba(139,135,245,0.4)','0 0 0px rgba(139,135,245,0)'] }} transition={{ duration:3, repeat:Infinity }}
-                    style={{ fontFamily:S, fontWeight:'700', fontSize:'0.68rem', letterSpacing:'5px', color:'rgba(255,255,255,0.9)', background:'linear-gradient(135deg,rgba(139,135,245,0.2),rgba(139,135,245,0.2))', backdropFilter:'blur(10px)', border:'1px solid rgba(139,135,245,0.4)', borderRadius:'5px', padding:'3px 12px', display:'inline-block' }}>
-                    CONSULTATION
-                  </motion.span>
-                </div>
-              </motion.div>
-              <motion.div initial={{ opacity:0,y:10 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.7 }}
-                style={{ position:'absolute', bottom:'44px', left:'36px', maxWidth:'360px', zIndex:10 }}>
-                <p style={{ fontFamily:P, fontStyle:'italic', fontSize:'1.05rem', color:'rgba(255,255,255,0.58)', lineHeight:'1.8', margin:'0 0 12px' }}>
-                  "The ocean calms the mind the way therapy calms the soul."
-                </p>
-                <div style={{ width:'44px', height:'2px', background:'linear-gradient(90deg,#8b87f5,transparent)', borderRadius:'2px' }}/>
-              </motion.div>
-            </div>
+            {/* Custom high-fidelity background */}
+            <div style={{ position:'absolute', inset:0, background:'var(--bg-app)', zIndex:0 }}/>
+            {/* Stars grid overlay */}
+            <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize:'40px 40px', zIndex:1, pointerEvents:'none' }}/>
+            {/* Glowing background circles */}
+            {[{c:'rgba(139,135,245,0.06)',x:'15%',y:'10%',d:12},{c:'rgba(94,184,173,0.06)',x:'65%',y:'60%',d:15}].map((g,i)=>(
+              <motion.div key={i} animate={{ scale:[1,1.2,1], opacity:[0.5,1,0.5] }} transition={{ duration:g.d, repeat:Infinity, ease:'easeInOut', delay:i*2 }}
+                style={{ position:'absolute', left:g.x, top:g.y, width:'500px', height:'500px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(80px)', zIndex:1, pointerEvents:'none' }}/>
+            ))}
 
-            {/* Right — Glass Login Form */}
-            <div style={{ width:'440px', flexShrink:0, position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'60px 40px' }}>
-              <div style={{ position:'absolute', inset:0 }}>
-                <motion.div animate={{ scale:[1,1.06,1] }} transition={{ duration:20, repeat:Infinity, ease:'easeInOut' }}
-                  style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80&w=1600')`, backgroundSize:'cover', backgroundPosition:'right center' }}/>
-                <div style={{ position:'absolute', inset:0, background:'rgba(4,3,14,0.88)' }}/>
-                <div style={{ position:'absolute', inset:0, background:'linear-gradient(to left,rgba(4,3,14,0.96),rgba(4,3,14,0.75))' }}/>
-              </div>
-              <div style={{ position:'absolute', top:'-20%', right:'-20%', width:'280px', height:'280px', borderRadius:'50%', background:'radial-gradient(circle,rgba(139,135,245,0.1),transparent 70%)', filter:'blur(40px)', pointerEvents:'none' }}/>
-
-              <motion.div initial={{ opacity:0,y:22 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.35,duration:0.8 }}
-                style={{ ...card, width:'100%', padding:'44px 38px' }}>
+            {/* The main container box split 50-50 */}
+            <motion.div initial={{ y:25, opacity:0 }} animate={{ y:0, opacity:1 }} transition={{ delay:0.1 }}
+              style={{
+                width:'920px',
+                height:'580px',
+                display:'flex',
+                borderRadius:'28px',
+                border:'1px solid var(--border-subtle)',
+                boxShadow:'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
+                overflow:'hidden',
+                zIndex:2,
+                position:'relative'
+              }}
+            >
+              {/* Left Side: Solid Dark Charcoal Info Branding */}
+              <div style={{
+                width:'460px',
+                background:'var(--bg-card)',
+                padding:'44px 40px',
+                display:'flex',
+                flexDirection:'column',
+                justifyContent:'space-between',
+                position:'relative',
+                borderRight:'1px solid var(--border-subtle)'
+              }}>
                 {shine}
-                <h1 style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'2.6rem', color:'#fff', marginBottom:'8px', textShadow:'none' }}>Welcome back</h1>
-                <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', marginBottom:'28px' }}>Sign in to your account</p>
+
+                {/* Logo Top Left */}
+                <div style={{ userSelect:'none' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'4px' }}>
+                    <motion.div animate={{ scale:[1,1.4,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
+                      style={{ width:'8px', height:'8px', borderRadius:'50%', background:'var(--accent-purple)', boxShadow:'none' }}/>
+                    <span style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'1.45rem', color:'#fff', letterSpacing:'0.5px' }}>Cognitive Social</span>
+                  </div>
+                  <div style={{ paddingLeft:'18px' }}>
+                    <span style={{ fontFamily:S, fontWeight:'700', fontSize:'0.65rem', letterSpacing:'5px', color:'var(--accent-purple)', textTransform:'uppercase' }}>
+                      CONSULTATION
+                    </span>
+                  </div>
+                </div>
+
+                {/* Center visual: Floating Human-AI Creation Artwork inside a beautiful slot */}
+                <div style={{ display:'flex', justifyContent:'center', alignItems:'center', flex:1 }}>
+                  <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{
+                      width: '280px',
+                      height: '210px',
+                      background: 'var(--bg-input)',
+                      border: '1.5px solid var(--border-subtle)',
+                      borderRadius: '24px',
+                      boxShadow: 'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}
+                  >
+                    <img src={humanAiCreation} alt="Human & AI Synthesis" style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }} />
+                  </motion.div>
+                </div>
+
+                {/* Bottom Quote */}
+                <div style={{ paddingLeft:'4px' }}>
+                  <p style={{ fontFamily:P, fontStyle:'italic', fontSize:'1.02rem', color:'var(--text-secondary)', lineHeight:'1.7', margin:'0 0 12px' }}>
+                    "The ocean calms the mind the way therapy calms the soul."
+                  </p>
+                  <div style={{ width:'36px', height:'2px', background:'linear-gradient(90deg,var(--accent-purple),transparent)', borderRadius:'2px' }}/>
+                </div>
+              </div>
+
+              {/* Right Side: The login form card */}
+              <div style={{
+                width:'460px',
+                background:'#090a0f',
+                padding:'44px 40px',
+                display:'flex',
+                flexDirection:'column',
+                justifyContent:'center',
+                position:'relative'
+              }}>
+                {shine}
+                <h1 style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'2.2rem', color:'#fff', margin:'0 0 4px', textShadow:'none' }}>Welcome back</h1>
+                <p style={{ color:'var(--text-secondary)', fontSize:'0.82rem', margin:'0 0 24px', fontFamily:J }}>Sign in to your account</p>
 
                 {/* Email row FIXED TO RUN EMAIL SUBMIT GRID */}
-                <div style={{ marginBottom:'18px' }}>
-                  <p style={{ fontSize:'0.63rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>EMAIL</p>
+                <div style={{ marginBottom:'16px' }}>
+                  <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.35)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>EMAIL</p>
                   <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                     <input type="email" placeholder="you@example.com" value={emailInput} onChange={e=>setEmailInput(e.target.value)}
                       onKeyDown={e=>e.key==='Enter'&&openEmailCode()}
-                      style={{ flex:1, height:'50px', padding:'0 16px', background:'rgba(255,255,255,0.055)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', color:'#fff', fontSize:'0.95rem', fontFamily:J, transition:'all 0.25s' }}
-                      onFocus={e=>{ e.target.style.borderColor='rgba(139,135,245,0.6)'; e.target.style.boxShadow='0 0 0 3px rgba(139,135,245,0.12)'; }}
-                      onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
-                    <motion.button whileHover={{ scale:1.08 }} whileTap={{ scale:0.92 }} onClick={openEmailCode}
-                      style={{ width:'50px', height:'50px', flexShrink:0, borderRadius:'14px', background:'linear-gradient(135deg,#8b87f5,#8b87f5)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 20px rgba(139,135,245,0.55)' }}>
+                      style={{ flex:1, height:'48px', padding:'0 16px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:'12px', color:'#fff', fontSize:'0.9rem', fontFamily:J, transition:'all 0.25s' }}
+                      onFocus={e=>{ e.target.style.borderColor='var(--accent-purple)'; e.target.style.background='rgba(255,255,255,0.06)'; }}
+                      onBlur={e=>{ e.target.style.borderColor='var(--border-subtle)'; e.target.style.background='var(--bg-input)'; }}/>
+                    <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={openEmailCode}
+                      style={{ width:'48px', height:'48px', flexShrink:0, borderRadius:'12px', background:'var(--accent-purple)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 16px rgba(139,92,246,0.3)' }}>
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9h10M10 5l4 4-4 4" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </motion.button>
                   </div>
                 </div>
 
                 {/* OR */}
-                <div style={{ display:'flex', alignItems:'center', gap:'14px', marginBottom:'16px' }}>
-                  <div style={{ flex:1, height:'1px', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.1)' }}/>
-                  <span style={{ color:'rgba(255,255,255,0.22)', fontSize:'0.7rem', fontFamily:S, letterSpacing:'2px' }}>OR</span>
-                  <div style={{ flex:1, height:'1px', background:'linear-gradient(270deg,transparent,rgba(255,255,255,0.1)' }}/>
+                <div style={{ display:'flex', alignItems:'center', gap:'14px', marginBottom:'14px' }}>
+                  <div style={{ flex:1, height:'1px', background:'var(--border-subtle)' }}/>
+                  <span style={{ color:'rgba(255,255,255,0.22)', fontSize:'0.65rem', fontFamily:S, letterSpacing:'2px' }}>OR</span>
+                  <div style={{ flex:1, height:'1px', background:'var(--border-subtle)' }}/>
                 </div>
 
                 {/* ── SOCIAL BUTTONS ── */}
-                <div style={{ display:'flex', flexDirection:'column', gap:'10px', marginBottom:'26px' }}>
+                <div style={{ display:'flex', flexDirection:'column', gap:'10px', marginBottom:'22px' }}>
                   {[
-                    { icon: <FcGoogle size={20}/>, label:'Continue with Google', action:()=>triggerGoogleLoginPopup(), hb:'rgba(66,133,244,0.08)', hbr:'rgba(66,133,244,0.3)' },
-                    { icon:<FaApple size={20} color="#fff"/>, label:'Sign in with Apple', action:()=>{ setAppleStep('email'); setAppleEmail(''); setApplePass(''); setScreen('apple'); }, hb:'rgba(255,255,255,0.08)', hbr:'rgba(255,255,255,0.2)' },
-                    { icon:<FaPhoneAlt size={14} color="rgba(168,85,247,0.9)"/>, label:'Continue with Phone', action:()=>{ setOtpSent(false); setPhone(''); setOtp(['','','','','','']); setScreen('phone'); }, hb:'rgba(168,85,247,0.08)', hbr:'rgba(168,85,247,0.3)' },
+                    { icon: <FcGoogle size={18}/>, label:'Continue with Google', action:()=>triggerGoogleLoginPopup(), hb:'rgba(255,255,255,0.02)', hbr:'var(--border-subtle)' },
+                    { icon:<FaApple size={18} color="#fff"/>, label:'Sign in with Apple', action:()=>{ setAppleStep('email'); setAppleEmail(''); setApplePass(''); setScreen('apple'); }, hb:'rgba(255,255,255,0.02)', hbr:'var(--border-subtle)' },
+                    { icon:<FaPhoneAlt size={13} color="var(--accent-purple)"/>, label:'Continue with Phone', action:()=>{ setOtpSent(false); setPhone(''); setOtp(['','','','','','']); setScreen('phone'); }, hb:'rgba(255,255,255,0.02)', hbr:'var(--border-subtle)' },
                   ].map((btn,i)=>(
                     <motion.button key={i} whileHover={{ backgroundColor:btn.hb, borderColor:btn.hbr, x:2 }} whileTap={{ scale:0.98 }} onClick={btn.action}
-                      style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'12px', padding:'13px 16px', background:'rgba(255,255,255,0.045)', border:'1px solid rgba(255,255,255,0.09)', borderRadius:'14px', color:'rgba(255,255,255,0.82)', fontSize:'0.9rem', fontWeight:'700', cursor:'pointer', fontFamily:L, transition:'all 0.2s' }}>
+                      style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'12px', padding:'12px 16px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:'12px', color:'rgba(255,255,255,0.85)', fontSize:'0.86rem', fontWeight:'600', cursor:'pointer', fontFamily:J, transition:'all 0.2s' }}>
                       {btn.icon} {btn.label}
                     </motion.button>
                   ))}
                 </div>
 
-                <p style={{ textAlign:'center', color:'rgba(255,255,255,0.22)', fontSize:'0.82rem', margin:0 }}>
+                <p style={{ textAlign:'center', color:'rgba(255,255,255,0.3)', fontSize:'0.8rem', margin:0, fontFamily:J }}>
                   Don't have an account?{' '}
-                  <span onClick={()=>setScreen('signup')} style={{ color:'#8b87f5', cursor:'pointer', fontWeight:'700' }}>Sign up</span>
+                  <span onClick={()=>setScreen('signup')} style={{ color:'var(--accent-purple)', cursor:'pointer', fontWeight:'700' }}>Sign up</span>
                 </p>
-              </motion.div>
-            </div>
+              </div>
+
+            </motion.div>
           </motion.div>
         )}
 
@@ -904,17 +959,103 @@ export default function Auth({ onComplete }) {
         ═══════════════════════════════════════════ */}
         {screen==='signup' && (
           <motion.div key="signup" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} transition={{ duration:0.6 }}
-            style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', overflowY:'auto', padding:'30px 0' }}>
-            <OceanBg opacity={0.88}/>
-            {[{c:'rgba(139,135,245,0.1)',x:'70%',y:'5%',d:10},{c:'rgba(139,135,245,0.1)',x:'5%',y:'60%',d:13}].map((g,i)=>(
-              <motion.div key={i} animate={{ scale:[1,1.2,1], opacity:[0.4,0.8,0.4] }} transition={{ duration:g.d, repeat:Infinity, delay:i*2 }}
-                style={{ position:'absolute', left:g.x, top:g.y, width:'350px', height:'350px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(55px)', zIndex:1, pointerEvents:'none' }}/>
+            style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:10 }}>
+            {/* Custom background */}
+            <div style={{ position:'absolute', inset:0, background:'var(--bg-app)', zIndex:0 }}/>
+            <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize:'40px 40px', zIndex:1, pointerEvents:'none' }}/>
+            {[{c:'rgba(139,135,245,0.06)',x:'15%',y:'10%',d:12},{c:'rgba(94,184,173,0.06)',x:'65%',y:'60%',d:15}].map((g,i)=>(
+              <motion.div key={i} animate={{ scale:[1,1.2,1], opacity:[0.5,1,0.5] }} transition={{ duration:g.d, repeat:Infinity, ease:'easeInOut', delay:i*2 }}
+                style={{ position:'absolute', left:g.x, top:g.y, width:'500px', height:'500px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(80px)', zIndex:1, pointerEvents:'none' }}/>
             ))}
 
-            <div style={{ ...card, width:'520px', padding:'48px 44px', zIndex:2, margin:'auto' }}>
-              {shine}
-              <h2 style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'2.4rem', color:'#fff', marginBottom:'6px', textShadow:'none' }}>Create Account</h2>
-              <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', margin:'0 0 30px' }}>Join Cognitive Social Consultation</p>
+            {/* The main container box split 50-50 */}
+            <motion.div initial={{ y:25, opacity:0 }} animate={{ y:0, opacity:1 }} transition={{ delay:0.1 }}
+              style={{
+                width:'920px',
+                height:'620px',
+                display:'flex',
+                borderRadius:'28px',
+                border:'1px solid var(--border-subtle)',
+                boxShadow:'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
+                overflow:'hidden',
+                zIndex:2,
+                position:'relative'
+              }}
+            >
+              {/* Left Side: Solid Dark Charcoal Info Branding */}
+              <div style={{
+                width:'460px',
+                background:'var(--bg-card)',
+                padding:'44px 40px',
+                display:'flex',
+                flexDirection:'column',
+                justifyContent:'space-between',
+                position:'relative',
+                borderRight:'1px solid var(--border-subtle)'
+              }}>
+                {shine}
+
+                {/* Logo Top Left */}
+                <div style={{ userSelect:'none' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'4px' }}>
+                    <motion.div animate={{ scale:[1,1.4,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
+                      style={{ width:'8px', height:'8px', borderRadius:'50%', background:'var(--accent-purple)', boxShadow:'none' }}/>
+                    <span style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'1.45rem', color:'#fff', letterSpacing:'0.5px' }}>Cognitive Social</span>
+                  </div>
+                  <div style={{ paddingLeft:'18px' }}>
+                    <span style={{ fontFamily:S, fontWeight:'700', fontSize:'0.65rem', letterSpacing:'5px', color:'var(--accent-purple)', textTransform:'uppercase' }}>
+                      CONSULTATION
+                    </span>
+                  </div>
+                </div>
+
+                {/* Center visual: Floating Human-AI Creation Artwork inside a beautiful slot */}
+                <div style={{ display:'flex', justifyContent:'center', alignItems:'center', flex:1 }}>
+                  <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{
+                      width: '280px',
+                      height: '210px',
+                      background: 'var(--bg-input)',
+                      border: '1.5px solid var(--border-subtle)',
+                      borderRadius: '24px',
+                      boxShadow: 'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}
+                  >
+                    <img src={humanAiCreation} alt="Human & AI Synthesis" style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }} />
+                  </motion.div>
+                </div>
+
+                {/* Bottom Quote */}
+                <div style={{ paddingLeft:'4px' }}>
+                  <p style={{ fontFamily:P, fontStyle:'italic', fontSize:'1.02rem', color:'var(--text-secondary)', lineHeight:'1.7', margin:'0 0 12px' }}>
+                    "The ocean calms the mind the way therapy calms the soul."
+                  </p>
+                  <div style={{ width:'36px', height:'2px', background:'linear-gradient(90deg,var(--accent-purple),transparent)', borderRadius:'2px' }}/>
+                </div>
+              </div>
+
+              {/* Right Side: The signup form */}
+              <div style={{
+                width:'460px',
+                background:'#090a0f',
+                padding:'40px',
+                display:'flex',
+                flexDirection:'column',
+                justifyContent:'flex-start',
+                overflowY:'auto',
+                position:'relative'
+              }}>
+                {shine}
+                <h2 style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'2.0rem', color:'#fff', margin:'0 0 4px', textShadow:'none' }}>Create Account</h2>
+                <p style={{ color:'var(--text-secondary)', fontSize:'0.82rem', margin:'0 0 20px', fontFamily:J }}>Join Cognitive Social Consultation</p>
 
               <div style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
 
@@ -1036,18 +1177,19 @@ export default function Auth({ onComplete }) {
                   whileHover={suDone ? { scale: 1.02 } : {}}
                   whileTap={suDone ? { scale: 0.98 } : {}}
                   onClick={suCreate}
-                  style={{ width:'100%', padding:'16px', background:suDone?'linear-gradient(135deg,#8b87f5,#8b87f5)':'rgba(255,255,255,0.05)', border:'none', borderRadius:'16px', color:suDone?'#fff':'rgba(255,255,255,0.25)', fontSize:'1rem', fontWeight:'700', cursor:suDone?'pointer':'not-allowed', fontFamily:J, transition:'all 0.4s', boxShadow:suDone?'0 10px 30px rgba(139,135,245,0.4)':'none', letterSpacing:'0.3px' }}
+                  style={{ width:'100%', padding:'16px', background:suDone?'var(--accent-purple)':'rgba(255,255,255,0.05)', border:'none', borderRadius:'16px', color:suDone?'#fff':'rgba(255,255,255,0.25)', fontSize:'1rem', fontWeight:'700', cursor:suDone?'pointer':'not-allowed', fontFamily:J, transition:'all 0.4s', boxShadow:suDone?`0 10px 30px rgba(139,135,245,0.2)`:'none', letterSpacing:'0.3px' }}
                 >
                   {suDone ? '✦ Create Account' : 'Complete all fields to continue'}
                 </motion.button>
 
-                <button onClick={()=>setScreen('landing')} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.22)', fontSize:'0.8rem', cursor:'pointer', fontFamily:J, display:'block', margin:'0 auto' }}>
+                <button onClick={()=>setScreen('landing')} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.22)', fontSize:'0.8rem', cursor:'pointer', fontFamily:J, display:'block', margin:'12px auto 0' }}>
                   ← Back to Sign in
                 </button>
               </div>
             </div>
           </motion.div>
-        )}
+        </motion.div>
+      )}
 
         {/* ═══════════════════════════════════════════
             APPLE ID LOGIN SCREEN
