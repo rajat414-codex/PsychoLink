@@ -126,7 +126,7 @@ function KpiCard({ k, i, inView }) {
         style={{ position:'absolute', top:-30, right:-30, width:80, height:80, borderRadius:'50%', background:`radial-gradient(circle,${k.color}18,transparent 70%)`, pointerEvents:'none' }}/>
       <p style={{ margin:'0 0 8px', fontSize:'0.64rem', color:'rgba(255,255,255,0.4)', fontFamily:S, letterSpacing:'1px', fontWeight:700, textTransform:'uppercase', position:'relative', zIndex:2 }}>{k.label}</p>
       <div style={{ display:'flex', alignItems:'baseline', gap:7, position:'relative', zIndex:2 }}>
-        <span style={{ fontSize:'1.75rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:`0 0 16px ${k.color}25` }}>{display}</span>
+        <span style={{ fontSize:'1.75rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:'none' }}>{display}</span>
         <span style={{ fontSize:'0.7rem', fontWeight:700, color:k.color, display:'flex', alignItems:'center', gap:3 }}>
           {k.up ? <FaArrowUp size={8}/> : <FaArrowDown size={8}/>}{k.delta}
         </span>
@@ -228,7 +228,7 @@ export default function DashboardHome({
           transform:'translate(-50%,-50%)',
           width:'700px', height:'700px',
           borderRadius:'50%',
-          background:'radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 60%)',
+          background:'radial-gradient(circle, rgba(99,102,241,0.015) 0%, transparent 70%)',
           filter:'blur(80px)',
         }}/>
         <motion.div animate={{ x:[0,20,0], y:[0,-20,0] }} transition={{ duration:25, repeat:Infinity, ease:'easeInOut' }}
@@ -251,7 +251,7 @@ export default function DashboardHome({
               <motion.button key={i} whileHover={{ scale:1.08, y:-2 }} whileTap={{ scale:0.94 }} onClick={() => setMoodToday(i)}
                 style={{ padding:'7px 12px', borderRadius:30, border:`1px solid ${moodToday===i?accent:'rgba(255,255,255,0.1)'}`,
                   background: moodToday===i?accentB:'rgba(255,255,255,0.03)', cursor:'pointer', display:'flex', alignItems:'center', gap:5,
-                  boxShadow: moodToday===i?`0 0 18px ${accent}40`:'none', transition:'box-shadow 0.3s' }}>
+                  boxShadow:'none', transition:'box-shadow 0.3s' }}>
                 <span style={{ fontSize:'0.95rem' }}>{m.e}</span>
                 <span style={{ fontSize:'0.74rem', fontWeight:600, color:moodToday===i?accent:'rgba(255,255,255,0.4)', fontFamily:J }}>{m.l}</span>
               </motion.button>
@@ -266,7 +266,7 @@ export default function DashboardHome({
         <div style={{ marginBottom:14 }}>
           <Card delay={0.3} glow={accent}>
             <CardTitle title="Wellness Overview" sub="Mood & calm — last 7 days"
-              right={<motion.div whileHover={{ scale:1.05 }} style={{ padding:'4px 10px', background:accentB, border:`1px solid ${accentBr}`, borderRadius:20, boxShadow:`0 0 14px ${accent}25` }}>
+              right={<motion.div whileHover={{ scale:1.05 }} style={{ padding:'4px 10px', background:accentB, border:`1px solid ${accentBr}`, borderRadius:20, boxShadow:'var(--shadow-premium)' }}>
                 <span style={{ fontSize:'0.68rem', color:accent, fontWeight:700, fontFamily:S }}>↑ 12% this week</span>
               </motion.div>}/>
             <div style={{ height:280, marginLeft:-18, position:'relative', zIndex:2 }}>
@@ -352,14 +352,14 @@ export default function DashboardHome({
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:14 }}>
           {[
             { ai:'AURA', name:'Aura', sub:'EMOTIONAL SUPPORT', desc:"Feeling overwhelmed? Let's talk it through.", color:'#f43f5e', icon:<FaBrain size={20}/> },
-            { ai:'MAX',  name:'Max',  sub:'COGNITIVE ANALYSIS', desc:'Break patterns, build clear solutions.',  color:'#0ea5e9', icon:<FaRobot size={20}/> },
+            { ai:'MAX',  name:'Max',  sub:'COGNITIVE ANALYSIS', desc:'Break patterns, build clear solutions.',  color:'#14b8a6', icon:<FaRobot size={20}/> },
           ].map((ai,i) => (
             <Card key={i} delay={0.42+i*0.06} glow={ai.color} hover onClick={() => { setActiveAI(ai.ai); setTab('chat'); }}
               style={{ borderColor:'var(--border-subtle)' }}>
               <motion.div animate={{ scale:[1,1.15,1], opacity:[0.3,0.6,0.3] }} transition={{ duration:4, repeat:Infinity, delay:i*0.5 }}
                 style={{ position:'absolute', top:-30, right:-30, width:120, height:120, borderRadius:'50%', background:`radial-gradient(circle,${ai.color}15,transparent 70%)`, pointerEvents:'none' }}/>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14, position:'relative', zIndex:2 }}>
-                <div style={{ width:42, height:42, borderRadius:13, background:`${ai.color}1a`, border:`1px solid ${ai.color}25`, display:'flex', alignItems:'center', justifyContent:'center', color:ai.color, boxShadow:`0 0 14px ${ai.color}18` }}>{ai.icon}</div>
+                <div style={{ width:42, height:42, borderRadius:13, background:`${ai.color}1a`, border:`1px solid ${ai.color}25`, display:'flex', alignItems:'center', justifyContent:'center', color:ai.color, boxShadow:'none' }}>{ai.icon}</div>
                 <motion.div whileHover={{ x:3 }} style={{ width:26, height:26, borderRadius:'50%', background:`${ai.color}1a`, display:'flex', alignItems:'center', justifyContent:'center', color:ai.color }}><FaArrowRight size={10}/></motion.div>
               </div>
               <p style={{ margin:'0 0 3px', fontFamily:J, fontWeight:800, fontSize:'1.15rem', color:'#fff', position:'relative', zIndex:2 }}>{ai.name}</p>
