@@ -121,9 +121,9 @@ export default function Home({ userProfile, onLogout }) {
   const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
-  const accent   = activeAI === 'AURA' ? '#f43f5e' : '#0ea5e9';
-  const accentB  = activeAI === 'AURA' ? 'rgba(244,63,94,0.04)' : 'rgba(14,165,233,0.04)';
-  const accentBr = activeAI === 'AURA' ? 'rgba(244,63,94,0.12)' : 'rgba(14,165,233,0.12)';
+  const accent   = activeAI === 'AURA' ? '#f43f5e' : '#14b8a6';
+  const accentB  = activeAI === 'AURA' ? 'rgba(244,63,94,0.03)' : 'rgba(20,184,166,0.03)';
+  const accentBr = activeAI === 'AURA' ? 'rgba(244,63,94,0.12)' : 'rgba(20,184,166,0.12)';
 
   const activeSession = sessions[activeAI].find(s => s.active) || sessions[activeAI][0];
   const messages      = activeSession?.messages || [];
@@ -433,13 +433,21 @@ export default function Home({ userProfile, onLogout }) {
     <div style={{ width:'100vw', height:'100vh', display:'flex', background:'var(--bg-app)', fontFamily:J, overflow:'hidden', position:'relative' }}>
 
       {/* ── GLOBAL BG ──────────────────────────────────────────── */}
-      <div style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none' }}>
-        <motion.div animate={{ backgroundPosition:['0% 0%','100% 100%'] }} transition={{ duration:40, repeat:Infinity, ease:'linear', repeatType:'mirror' }}
-          style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&q=80&w=2000')`, backgroundSize:'130% 130%', opacity:0.02 }}/>
-        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 20% 0%, rgba(139,92,246,0.05) 0%, transparent 55%)' }}/>
-        <motion.div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse at 80% 100%, ${activeAI==='AURA'?'rgba(221,78,72,0.03)':'rgba(81,171,159,0.03)'} 0%, transparent 55%)`, transition:'background 1.2s' }}/>
-        <motion.div animate={{ backgroundPosition:['0px 0px','80px 160px'] }} transition={{ duration:50, repeat:Infinity, ease:'linear' }}
-          style={{ position:'absolute', inset:0, opacity:0.02, backgroundImage:`radial-gradient(circle,rgba(255,255,255,0.4) 1px,transparent 1px)`, backgroundSize:'60px 60px' }}/>
+      <div style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none', overflow:'hidden' }}>
+        {/* Subtle grid pattern */}
+        <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px)', backgroundSize:'60px 60px', opacity:0.65 }}/>
+        
+        {/* Ambient floating blobs */}
+        <motion.div 
+          animate={{ x: [-20, 20, -20], y: [-20, 20, -20] }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position:'absolute', top:'-10%', left:'15%', width:'400px', height:'400px', borderRadius:'50%', background: activeAI === 'AURA' ? 'radial-gradient(circle, rgba(244,63,94,0.035) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(20,184,166,0.035) 0%, transparent 70%)', filter:'blur(60px)', transition:'all 1s' }}
+        />
+        <motion.div 
+          animate={{ x: [20, -20, 20], y: [20, -20, 20] }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position:'absolute', bottom:'-10%', right:'10%', width:'450px', height:'450px', borderRadius:'50%', background: activeAI === 'AURA' ? 'radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(148,163,184,0.02) 0%, transparent 70%)', filter:'blur(70px)', transition:'all 1s' }}
+        />
       </div>
 
       {/* ══ SIDEBAR ════════════════════════════════════════════════ */}
@@ -452,48 +460,62 @@ export default function Home({ userProfile, onLogout }) {
             {/* Brand */}
             <div style={{ padding:'22px 16px 16px', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'9px', marginBottom:'20px', userSelect:'none' }}>
-                <motion.div animate={{ scale:[1,1.4,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
-                  style={{ width:'9px', height:'9px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},var(--accent-purple))`, boxShadow:'0 2px 8px rgba(0,0,0,0.3)', transition:'background 0.5s' }}/>
-                <span style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'1rem', color:'rgba(255,255,255,0.75)' }}>Cognitive Social</span>
+                <motion.div animate={{ scale:[1,1.3,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
+                  style={{ width:'8px', height:'8px', borderRadius:'50%', background:accent, transition:'background 0.5s' }}/>
+                <span style={{ fontFamily: G, fontStyle: 'italic', fontWeight: '800', fontSize: '1.2rem', color: '#fff', letterSpacing: '-0.5px' }}>equilibrium</span>
+                <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.3)', fontFamily: S, letterSpacing: '1px', marginLeft: '2px', fontWeight:'700' }}>CORE</span>
               </div>
               {/* AI Toggle */}
-              <div style={{ display:'flex', background:'var(--bg-input)', borderRadius:'14px', padding:'4px', gap:'3px', border:'1px solid var(--border-subtle)' }}>
-                {[{ k:'AURA', g:'#f43f5e' }, { k:'MAX', g:'#0ea5e9' }].map(ai => (
-                  <button key={ai.k} onClick={() => setActiveAI(ai.k)}
-                    style={{ flex:1, padding:'9px 0', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'0.76rem', fontWeight:'700', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s', background:activeAI===ai.k?ai.g:'transparent', color:activeAI===ai.k?'#fff':'rgba(255,255,255,0.28)', boxShadow:activeAI===ai.k?'var(--shadow-premium)':'none', userSelect:'none' }}>
-                    {ai.k}
-                  </button>
-                ))}
+              <div style={{ display:'flex', background:'rgba(255,255,255,0.02)', borderRadius:'14px', padding:'4px', gap:'4px', border:'1px solid var(--border-subtle)' }}>
+                {[{ k:'AURA', g:'#f43f5e' }, { k:'MAX', g:'#14b8a6' }].map(ai => {
+                  const isActive = activeAI === ai.k;
+                  return (
+                    <button key={ai.k} onClick={() => setActiveAI(ai.k)}
+                      style={{ flex:1, padding:'10px 0', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'0.75rem', fontWeight:'700', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s', background: isActive ? ai.g : 'transparent', color: isActive ? '#fff' : 'rgba(255,255,255,0.3)', boxShadow: isActive ? 'var(--shadow-premium)' : 'none', userSelect:'none' }}>
+                      {ai.k} Core
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Nav */}
             <div style={{ padding:'12px 10px 6px' }}>
-              {navItems.map(item => (
-                <motion.button key={item.id} whileHover={{ background:'rgba(255,255,255,0.055)' }} whileTap={{ scale:0.97 }}
-                  onClick={() => setTab(item.id)}
-                  style={{ width:'100%', padding:'11px 14px', background:tab===item.id?accentB:'transparent', border:`1px solid ${tab===item.id?accentBr:'transparent'}`, borderRadius:'12px', color:tab===item.id?accent:'rgba(255,255,255,0.4)', fontSize:'0.86rem', fontWeight:'600', cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'12px', transition:'all 0.2s', marginBottom:'3px' }}>
-                  <span style={{ color:tab===item.id?accent:'rgba(255,255,255,0.25)', transition:'color 0.2s' }}>{item.icon}</span>
-                  {item.label}
-                  {tab === item.id && (
-                    <motion.div layoutId="nav-dot" style={{ width:'5px', height:'5px', borderRadius:'50%', background:accent, marginLeft:'auto', boxShadow:'0 2px 8px rgba(0,0,0,0.3)' }}/>
-                  )}
-                </motion.button>
-              ))}
+              {navItems.map(item => {
+                const isActive = tab === item.id;
+                return (
+                  <motion.button key={item.id} whileHover={{ background:'rgba(255,255,255,0.04)' }} whileTap={{ scale:0.98 }}
+                    onClick={() => setTab(item.id)}
+                    style={{ 
+                      width:'100%', padding:'11px 14px', 
+                      background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent', 
+                      border: '1px solid transparent',
+                      borderLeft: isActive ? `3px solid ${accent}` : '3px solid transparent',
+                      borderRadius: isActive ? '0 12px 12px 0' : '12px', 
+                      color: isActive ? '#fff' : 'rgba(255,255,255,0.45)', 
+                      fontSize:'0.85rem', fontWeight: isActive ? '700' : '500', 
+                      cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'12px', 
+                      transition:'all 0.2s', marginBottom:'4px' 
+                    }}>
+                    <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.25)', transition:'color 0.2s', display:'flex', alignItems:'center' }}>{item.icon}</span>
+                    {item.label}
+                  </motion.button>
+                );
+              })}
             </div>
 
             {/* Chat history */}
             {tab === 'chat' && (
               <div style={{ flex:1, overflow:'hidden', display:'flex', flexDirection:'column', padding:'6px 10px 0' }}>
-                <motion.button whileHover={{ background:accentB }} whileTap={{ scale:0.97 }} onClick={newChat}
-                  style={{ width:'100%', padding:'9px 13px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'11px', color:'rgba(255,255,255,0.6)', fontSize:'0.82rem', fontWeight:'600', cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'9px', transition:'all 0.2s', marginBottom:'8px' }}>
+                <motion.button whileHover={{ background: 'rgba(255,255,255,0.04)' }} whileTap={{ scale:0.97 }} onClick={newChat}
+                  style={{ width:'100%', padding:'9px 13px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'11px', color:'rgba(255,255,255,0.6)', fontSize:'0.82rem', fontWeight:'600', cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'9px', transition:'all 0.2s', marginBottom:'8px' }}>
                   <FaPlus size={10} color={accent}/> New conversation
                 </motion.button>
                 <p style={{ fontSize:'0.6rem', color:'rgba(255,255,255,0.2)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', padding:'2px 4px 6px', margin:0 }}>HISTORY</p>
                 <div style={{ overflowY:'auto', flex:1 }}>
                   {[...sessions[activeAI]].reverse().map(s => (
-                    <motion.div key={s.id} whileHover={{ background:'rgba(255,255,255,0.05)' }} onClick={() => switchSession(s.id)}
-                      style={{ padding:'8px 11px', borderRadius:'10px', cursor:'pointer', marginBottom:'2px', background:s.active?accentB:'transparent', border:`1px solid ${s.active?accentBr:'transparent'}`, transition:'all 0.2s', display:'flex', alignItems:'center', gap:'8px' }}>
+                    <motion.div key={s.id} whileHover={{ background:'rgba(255,255,255,0.04)' }} onClick={() => switchSession(s.id)}
+                      style={{ padding:'8px 11px', borderRadius:'10px', cursor:'pointer', marginBottom:'2px', background:s.active? 'rgba(255,255,255,0.03)' :'transparent', border: s.active ? '1px solid rgba(255,255,255,0.05)' : '1px solid transparent', borderLeft: s.active ? `3px solid ${accent}` : '3px solid transparent', transition:'all 0.2s', display:'flex', alignItems:'center', gap:'8px' }}>
                       <FaHistory size={9} color={s.active?accent:'rgba(255,255,255,0.2)'}/>
                       <span style={{ fontSize:'0.79rem', color:s.active?'rgba(255,255,255,0.85)':'rgba(255,255,255,0.35)', fontWeight:s.active?'600':'400', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{s.title}</span>
                     </motion.div>
@@ -504,20 +526,20 @@ export default function Home({ userProfile, onLogout }) {
             {tab !== 'chat' && <div style={{ flex:1 }}/>}
 
             {/* User + Logout */}
-            <div style={{ padding:'10px 12px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'9px', padding:'10px 12px', borderRadius:'14px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)' }}>
-                <div style={{ width:'34px', height:'34px', borderRadius:'50%', background: userProfile?.picture ? 'transparent' : `linear-gradient(135deg,${accent},var(--accent-purple))`, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'0.85rem', flexShrink:0, color:'#fff', transition:'background 0.5s', boxShadow:'0 4px 12px rgba(0,0,0,0.4)', overflow:'hidden' }}>
+            <div style={{ padding:'12px 14px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 12px', borderRadius:'14px', background:'rgba(255,255,255,0.01)', border:'1px solid var(--border-subtle)' }}>
+                <div style={{ width:'32px', height:'32px', borderRadius:'50%', background: userProfile?.picture ? 'transparent' : 'linear-gradient(135deg, #374151, #111827)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'0.8rem', flexShrink:0, color:'rgba(255,255,255,0.85)', overflow:'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
                   {userProfile?.picture
                     ? <img src={userProfile.picture} alt="" referrerPolicy="no-referrer" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                     : (userProfile?.name || 'U')[0].toUpperCase()}
                 </div>
                 <div style={{ flex:1, overflow:'hidden', minWidth:0 }}>
-                  <p style={{ margin:0, fontSize:'0.8rem', fontWeight:'700', color:'rgba(255,255,255,0.75)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{userProfile?.name || 'User'}</p>
-                  <p style={{ margin:0, fontSize:'0.66rem', color:'rgba(255,255,255,0.25)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{userProfile?.email || ''}</p>
+                  <p style={{ margin:0, fontSize:'0.8rem', fontWeight:'600', color:'rgba(255,255,255,0.85)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{userProfile?.name || 'User'}</p>
+                  <p style={{ margin:0, fontSize:'0.64rem', color:'rgba(255,255,255,0.3)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{userProfile?.email || ''}</p>
                 </div>
-                <motion.button whileHover={{ color:'#ef4444' }} whileTap={{ scale:0.9 }} onClick={onLogout}
-                  style={{ background:'none', border:'none', color:'rgba(255,255,255,0.2)', cursor:'pointer', padding:'4px', transition:'color 0.2s', flexShrink:0 }}>
-                  <FaSignOutAlt size={13}/>
+                <motion.button whileHover={{ color:'#f43f5e', background: 'rgba(244,63,94,0.05)' }} whileTap={{ scale:0.9 }} onClick={onLogout}
+                  style={{ background:'none', border:'none', color:'rgba(255,255,255,0.25)', cursor:'pointer', padding:'6px', borderRadius:'8px', transition:'all 0.2s', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <FaSignOutAlt size={12}/>
                 </motion.button>
               </div>
             </div>
@@ -529,16 +551,16 @@ export default function Home({ userProfile, onLogout }) {
       <div style={{ flex:1, display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden', position:'relative', zIndex:5 }}>
 
         {/* Top bar */}
-        <div style={{ height:'54px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 18px', borderBottom:'1px solid var(--border-subtle)', background:'rgba(13,15,19,0.85)', backdropFilter:'blur(24px)' }}>
-          <motion.button whileHover={{ background:'rgba(255,255,255,0.07)' }} whileTap={{ scale:0.95 }} onClick={() => setSidebar(s => !s)}
-            style={{ width:'34px', height:'34px', borderRadius:'9px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'4px', flexShrink:0 }}>
-            {[0,1,2].map(i => <div key={i} style={{ width:'14px', height:'1.5px', background:'rgba(255,255,255,0.5)', borderRadius:'1px' }}/>)}
+        <div style={{ height:'56px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 20px', borderBottom:'1px solid var(--border-subtle)', background:'rgba(8,10,16,0.55)', backdropFilter:'blur(30px)' }}>
+          <motion.button whileHover={{ background:'rgba(255,255,255,0.05)' }} whileTap={{ scale:0.96 }} onClick={() => setSidebar(s => !s)}
+            style={{ width:'32px', height:'32px', borderRadius:'8px', background:'rgba(255,255,255,0.01)', border:'1px solid var(--border-subtle)', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'3.5px', flexShrink:0 }}>
+            {[0,1,2].map(i => <div key={i} style={{ width:'12px', height:'1.5px', background:'rgba(255,255,255,0.6)', borderRadius:'1px' }}/>)}
           </motion.button>
-
+ 
           <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-            <motion.div animate={{ scale:[1,1.25,1], opacity:[0.6,1,0.6] }} transition={{ duration:2, repeat:Infinity }}
-              style={{ width:'7px', height:'7px', borderRadius:'50%', background:accent, boxShadow:'0 2px 8px rgba(0,0,0,0.3)', transition:'background 0.5s' }}/>
-            <span style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'1rem', color:'rgba(255,255,255,0.82)' }}>
+            <motion.div animate={{ scale:[1,1.25,1], opacity:[0.7,1,0.7] }} transition={{ duration:2, repeat:Infinity }}
+              style={{ width:'6px', height:'6px', borderRadius:'50%', background:accent, transition:'background 0.5s' }}/>
+            <span style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'0.96rem', color:'#fff' }}>
               {tab==='home'    ? 'Dashboard'
               :tab==='chat'    ? (activeAI==='AURA' ? 'Aura · Emotional AI' : 'Max · Cognitive AI')
               :tab==='report'  ? 'Neural Brain Report'
@@ -546,12 +568,11 @@ export default function Home({ userProfile, onLogout }) {
               :                  'My Progress'}
             </span>
           </div>
-
-          <motion.button whileHover={{ background:'rgba(255,255,255,0.07)' }} whileTap={{ scale:0.95 }}
-            style={{ width:'34px', height:'34px', borderRadius:'9px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
-            <FaBell size={13} color="rgba(255,255,255,0.5)"/>
-            <div style={{ position:'absolute', top:'7px', right:'7px', width:'6px', height:'6px', borderRadius:'50%', background:'#e0524d', boxShadow:'none' }}/>
-          </motion.button>
+ 
+          <motion.button whileHover={{ background:'rgba(255,255,255,0.05)' }} whileTap={{ scale:0.96 }}
+            style={{ width:'32px', height:'32px', borderRadius:'8px', background:'rgba(255,255,255,0.01)', border:'1px solid var(--border-subtle)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
+            <FaBell size={12} color="rgba(255,255,255,0.5)"/>
+            <div style={{ position:'absolute', top:'6px', right:'6px', width:'5px', height:'5px', borderRadius:'50%', background:'#f43f5e' }}/></motion.button>
         </div>
 
         {/* ════ TABS ═══════════════════════════════════════════════ */}
