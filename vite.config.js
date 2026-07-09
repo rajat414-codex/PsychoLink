@@ -1,4 +1,4 @@
-﻿import { defineConfig } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
@@ -7,5 +7,8 @@ export default defineConfig({
     host: true,
     allowedHosts: true,
     port: 5173,
+  },
+  build: {
+    chunkSizeWarningLimit: 1600,
   },
 })
