@@ -467,6 +467,8 @@ export default function DashboardHome({
           </Card>
 
         </div>
+
       </div>
+    </motion.div>
   );
 }
