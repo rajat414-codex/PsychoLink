@@ -373,7 +373,8 @@ export default function Auth({ onComplete }) {
 
     googleScript.onload = () => {
       if (window.google) {
-        const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "996022316929-8g0ov183hp224kg68cps575s9o507jac.apps.googleusercontent.com";
+        let googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "1015385845980-734dv4alnt7khbsfd6jvt6c0ejjlj0bd.apps.googleusercontent.com";
+        googleClientId = googleClientId.trim().replace(/^["']|["']$/g, '');
         tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
           client_id: googleClientId,
           scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
