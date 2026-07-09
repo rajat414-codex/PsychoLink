@@ -123,7 +123,7 @@ export default function HypnoticJoyfulAIVision() {
               <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3, duration: 1 }}>
                 <h1 style={{ fontSize: '6.5rem', fontWeight: '800', lineHeight: '0.92', letterSpacing: '-4px', marginBottom: '35px' }}>
                   A happier state <br /> of mind, <br />
-                  <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontWeight: '400', background: 'linear-gradient(to right, #fbcfe8, #c7d2fe, #8b87f5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontWeight: '400', background: 'linear-gradient(to right, #fbcfe8, #c7d2fe, var(--accent-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     crafted just for you.
                   </span>
                 </h1>
@@ -131,12 +131,12 @@ export default function HypnoticJoyfulAIVision() {
               
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '50px' }}>
                 <motion.button 
-                  whileHover={{ scale: 1.05, boxShadow: '0 25px 50px rgba(139,135,245,0.25)', border: '1px solid rgba(255,255,255,0.4)' }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02, boxShadow: 'var(--shadow-premium)', border: '1px solid rgba(255,255,255,0.3)' }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setCurrentScreen('auth')} 
-                  style={{ padding: '24px 60px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.18)', background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 100%)', backdropFilter: 'blur(30px)', color: '#fff', fontSize: '1rem', fontWeight: '800', letterSpacing: '3px', cursor: 'pointer', transition: 'border-color 0.3s' }}
+                  style={{ padding: '20px 48px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.12)', background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%)', backdropFilter: 'blur(30px)', color: '#fff', fontSize: '0.9rem', fontWeight: '700', letterSpacing: '2px', cursor: 'pointer', transition: 'all 0.3s' }}
                 >
-                  ENTER THE HAPPY MATRIX
+                  BEGIN YOUR JOURNEY
                 </motion.button>
                 <p style={{ maxWidth: '440px', fontSize: '1rem', lineHeight: '1.7', color: 'rgba(255,255,255,0.4)', fontWeight: '300', margin: 0 }}>
                   Why look anywhere else? Step into an immersive space designed exclusively to boost your mood, trigger genuine smiles, and align your cosmic peace.
@@ -231,9 +231,9 @@ export default function HypnoticJoyfulAIVision() {
 
             {/* EXECUTIVE SYSTEM CONTROLLER TABS */}
             <div style={{ position: 'absolute', top: '40px', zIndex: 10 }}>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '6px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '8px', backdropFilter: 'blur(30px)', boxShadow: '0 30px 60px rgba(0,0,0,0.5)' }}>
-                <button onClick={() => toggleAISystem('AURA')} style={{ padding: '14px 34px', border: 'none', borderRadius: '30px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2.5px', fontFamily: "'Space Grotesk', sans-serif", transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)', background: activeAI === 'AURA' ? 'linear-gradient(135deg, #8b87f5, #8b87f5)' : 'transparent', color: activeAI === 'AURA' ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: activeAI === 'AURA' ? '0 12px 30px rgba(139,135,245,0.4)' : 'none' }}>ANGELIC AURA</button>
-                <button onClick={() => toggleAISystem('MAX')} style={{ padding: '14px 34px', border: 'none', borderRadius: '30px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2.5px', fontFamily: "'Space Grotesk', sans-serif", transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)', background: activeAI === 'MAX' ? 'linear-gradient(135deg, #5eb8ad, #4a9488)' : 'transparent', color: activeAI === 'MAX' ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: activeAI === 'MAX' ? '0 12px 30px rgba(13,148,136,0.4)' : 'none' }}>MAX COGNITION</button>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '6px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '8px', backdropFilter: 'blur(30px)', boxShadow: 'var(--shadow-premium)' }}>
+                <button onClick={() => toggleAISystem('AURA')} style={{ padding: '14px 34px', border: 'none', borderRadius: '30px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2.5px', fontFamily: "'Space Grotesk', sans-serif", transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)', background: activeAI === 'AURA' ? 'var(--accent-aura)' : 'transparent', color: activeAI === 'AURA' ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: activeAI === 'AURA' ? 'var(--shadow-premium)' : 'none' }}>ANGELIC AURA</button>
+                <button onClick={() => toggleAISystem('MAX')} style={{ padding: '14px 34px', border: 'none', borderRadius: '30px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2.5px', fontFamily: "'Space Grotesk', sans-serif", transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)', background: activeAI === 'MAX' ? 'var(--accent-max)' : 'transparent', color: activeAI === 'MAX' ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: activeAI === 'MAX' ? 'var(--shadow-premium)' : 'none' }}>MAX COGNITION</button>
               </div>
             </div>
 
@@ -250,21 +250,19 @@ export default function HypnoticJoyfulAIVision() {
               <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '-12px', zIndex: 6 }}>
                 <motion.div 
                   animate={{ 
-                    scale: [1, 1.18, 1],
-                    filter: activeAI === 'AURA' 
-                      ? ['drop-shadow(0 0 15px rgba(139,135,245,0.7))', 'drop-shadow(0 0 30px rgba(139,135,245,1))', 'drop-shadow(0 0 15px rgba(139,135,245,0.7))']
-                      : ['drop-shadow(0 0 15px rgba(94,184,173,0.7))', 'drop-shadow(0 0 30px rgba(94,184,173,1))', 'drop-shadow(0 0 15px rgba(94,184,173,0.7))']
+                    scale: [1, 1.18, 1]
                   }}
                   transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                   style={{
                     width: '38px', height: '38px', borderRadius: '50%',
                     background: 'radial-gradient(circle at 35% 35%, #ffffff 0%, #f8fafc 45%, #cbd5e1 100%)',
-                    boxShadow: 'inset -2px -2px 10px rgba(0,0,0,0.2)'
+                    boxShadow: 'inset -2px -2px 10px rgba(0,0,0,0.2)',
+                    filter: activeAI === 'AURA' ? 'drop-shadow(0 4px 10px rgba(244,63,94,0.3))' : 'drop-shadow(0 4px 10px rgba(20,184,166,0.3))'
                   }}
                 />
                 <div style={{
                   width: '14px', height: '24px', marginTop: '-6px',
-                  background: activeAI === 'AURA' ? 'linear-gradient(to bottom, #ffffff, rgba(139,135,245,0.5))' : 'linear-gradient(to bottom, #ffffff, rgba(94,184,173,0.5))',
+                  background: activeAI === 'AURA' ? 'linear-gradient(to bottom, #ffffff, var(--accent-aura-border))' : 'linear-gradient(to bottom, #ffffff, var(--accent-max-border))',
                   borderRadius: '4px 4px 0 0', opacity: 0.95, transition: 'all 0.5s'
                 }} />
               </div>
@@ -278,16 +276,16 @@ export default function HypnoticJoyfulAIVision() {
                 zIndex: 4
               }}>
                 
-                {/* GLOWING AMBIENT SIDE CAPSULES (Ear Translucency) */}
+                {/* AMBIENT SIDE CAPSULES (Ear Translucency) */}
                 <div style={{
                   position: 'absolute', left: '-18px', width: '42px', height: '72px', borderRadius: '50% 30% 30% 50% / 50% 40% 40% 50%',
-                  background: activeAI === 'AURA' ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, #8b87f5 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, #5eb8ad 100%)',
-                  boxShadow: '-8px 10px 20px rgba(0,0,0,0.25), inset 3px 5px 10px rgba(255,255,255,0.7)', transition: 'all 0.5s'
+                  background: activeAI === 'AURA' ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-aura) 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-max) 100%)',
+                  boxShadow: '-4px 4px 10px rgba(0,0,0,0.15)', transition: 'all 0.5s'
                 }} />
                 <div style={{
                   position: 'absolute', right: '-18px', width: '42px', height: '72px', borderRadius: '30% 50% 50% 30% / 40% 50% 50% 40%',
-                  background: activeAI === 'AURA' ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, #8b87f5 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, #5eb8ad 100%)',
-                  boxShadow: '4px 10px 20px rgba(0,0,0,0.25), inset -3px 5px 10px rgba(255,255,255,0.7)', transition: 'all 0.5s'
+                  background: activeAI === 'AURA' ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-aura) 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-max) 100%)',
+                  boxShadow: '4px 4px 10px rgba(0,0,0,0.15)', transition: 'all 0.5s'
                 }} />
 
                 {/* THE CRYSTAL SEAMLESS VISOR ZONE WITH INTENSE BLUSH OVERLAY */}
@@ -373,7 +371,7 @@ export default function HypnoticJoyfulAIVision() {
                 }}>
                   {/* Blinking Positivity Core Diode */}
                   <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ffffff', border: '1px solid #cbd5e1', boxShadow: '0 4px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: activeAI === 'AURA' ? '#8b87f5' : '#5eb8ad', transition: 'all 0.5s', boxShadow: '0 0 8px currentColor' }} />
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: activeAI === 'AURA' ? 'var(--accent-aura)' : 'var(--accent-max)', transition: 'all 0.5s' }} />
                   </div>
 
                   {/* Calibration Grid Nodes */}

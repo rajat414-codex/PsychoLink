@@ -6,8 +6,8 @@ function AIChatEngine({ user, setUser }) {
   // Check identity to deploy specific core
   const isFemale = user.gender === 'female';
   const ai = isFemale
-    ? { name: 'AURA', color: '#ff007f', glow: 'rgba(255, 0, 127, 0.2)', welcome: `AURA core online. Welcome back, ${user.name}. Ready to analyze your psychological waves.` }
-    : { name: 'MAX', color: '#00f2fe', glow: 'rgba(0, 242, 254, 0.2)', welcome: `MAX nexus initiated. System active for user ${user.name}. Let's process the feed.` };
+    ? { name: 'AURA', color: '#ff007f', glow:'rgba(255, 63, 94, 0.05)', welcome: `AURA core online. Welcome back, ${user.name}. Ready to analyze your psychological waves.` }
+    : { name: 'MAX', color: '#00f2fe', glow:'rgba(20, 184, 166, 0.05)', welcome: `MAX nexus initiated. System active for user ${user.name}. Let's process the feed.` };
 
   const [messages, setMessages] = useState([{ role: 'ai', text: ai.welcome }]);
   const [input, setInput] = useState('');
@@ -91,7 +91,7 @@ function AIChatEngine({ user, setUser }) {
               transition={{ duration: 1.5, repeat: Infinity }}
               style={{ width: '6px', height: '6px', borderRadius: '50%',
                 background: error ? '#ff5050' : '#50ff96',
-                boxShadow: `0 0 6px ${error ? '#ff5050' : '#50ff96'}` }}/>
+                boxShadow:'none' }}/>
             <span style={{ fontSize: '0.65rem', fontWeight: '700', color: error ? '#ff8080' : '#80ffaa', letterSpacing: '1px' }}>
               {error ? 'OFFLINE' : 'LIVE'}
             </span>
@@ -125,12 +125,12 @@ function AIChatEngine({ user, setUser }) {
             {/* Visual AI Eye Pulse Node */}
             <div style={{ background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(30px)', border: `1px solid ${ai.color}30`, padding: '30px 20px', borderRadius: '28px', textAlign: 'center' }}>
               <motion.div
-                animate={{ scale: [1, 1.05, 1], boxShadow: `0 0 35px ${ai.glow}` }}
+                animate={{ scale: [1, 1.05, 1], boxShadow:'var(--shadow-premium)' }}
                 transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
                 style={{ width: '70px', height: '70px', borderRadius: '50%', background: '#000', border: `2px solid ${ai.color}`, margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
               >
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fff', boxShadow: '0 0 8px #fff' }} />
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fff', boxShadow: '0 0 8px #fff' }} />
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fff', boxShadow:'none' }} />
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fff', boxShadow:'none' }} />
               </motion.div>
               <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', letterSpacing: '1px' }}>{ai.name} AVATAR LIVE</h4>
               <p style={{ margin: 0, color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', fontWeight: '600' }}>SECURE COGNITIVE FEED</p>

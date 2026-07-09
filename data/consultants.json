@@ -44,68 +44,14 @@
     "price": 199
   },
   {
-    "id": 1781714187732,
-    "name": "Rajat",
-    "spec": "therapeutic, Traumatic , CBT , Relationship Consultant",
+    "id": 5,
+    "name": "Rajat Kamal",
+    "spec": "Founder · Peer Support",
     "rating": 5,
-    "sessions": 0,
-    "color": "#3b82f6",
+    "sessions": 60,
+    "color": "#5eb8ad",
     "avail": true,
-    "exp": "New",
-    "price": 199,
-    "qualifications": "B.Tech Student (2025–Present), Mental Health & Psychology Enthusiast, Certified in Basic Psychological First Aid and Active Listening (if applicable), Experience in peer support, student mentoring, and wellness awareness.",
-    "therapyApproach": "Active Listening, Person-Centered Support, CBT-informed techniques, Solution-Focused Guidance, Psychoeducation, Stress Management, Empathetic Communication and Practical solutions to handle Traumatic feelings."
-  },
-  {
-    "id": 1781803960732,
-    "name": "Aniket",
-    "spec": "bacha hu bhai",
-    "rating": 5,
-    "sessions": 0,
-    "color": "#10b981",
-    "avail": true,
-    "exp": "New",
-    "price": 199,
-    "qualifications": "10th  mein 91%  hai pls select krlo",
-    "therapyApproach": "sdhiashdi"
-  },
-  {
-    "id": 1781805487787,
-    "name": "Seema kumri",
-    "spec": "CBT",
-    "rating": 5,
-    "sessions": 0,
-    "color": "#f43f5e",
-    "avail": true,
-    "exp": "New",
-    "price": 199,
-    "qualifications": "CBT",
-    "therapyApproach": "CBT"
-  },
-  {
-    "id": 1781805488888,
-    "name": "Jana DOe",
-    "spec": "CBT",
-    "rating": 5,
-    "sessions": 0,
-    "color": "#a78bfa",
-    "avail": true,
-    "exp": "New",
-    "price": 199,
-    "qualifications": "ufhhfkhfhuj",
-    "therapyApproach": "kdhcdshc"
-  },
-  {
-    "id": 1781805490315,
-    "name": "Dr  Jane DOe",
-    "spec": "CBT",
-    "rating": 5,
-    "sessions": 0,
-    "color": "#ec4899",
-    "avail": true,
-    "exp": "New",
-    "price": 199,
-    "qualifications": "CBt",
-    "therapyApproach": "CBT "
+    "exp": "2 yrs",
+    "price": 199
   }
 ]

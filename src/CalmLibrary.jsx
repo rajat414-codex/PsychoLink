@@ -173,7 +173,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
                 </div>
 
                 <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={() => setIsTimerRunning(!isTimerRunning)}
-                  style={{ width:'100%', padding:'14px', borderRadius:12, border:'none', background: isTimerRunning ? '#ef4444' : `linear-gradient(135deg, ${accent}, #8b5cf6)`, color: '#fff', fontWeight:700, fontFamily:J, cursor:'pointer', transition:'all 0.2s', boxShadow:`0 4px 18px ${accent}25` }}>
+                  style={{ width:'100%', padding:'14px', borderRadius:12, border:'none', background: isTimerRunning ? '#ef4444' : `linear-gradient(135deg, ${accent}, var(--accent-purple))`, color: '#fff', fontWeight:700, fontFamily:J, cursor:'pointer', transition:'all 0.2s', boxShadow:'var(--shadow-premium)' }}>
                   {isTimerRunning ? 'Pause Movement Hold' : 'Start Physical Hold'}
                 </motion.button>
               </div>
@@ -196,13 +196,13 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
         {/* ACTIVITY 2: SOMATIC SHAKE-OFF */}
         {activeActivity === 'somatic-shake' && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}>
-            <span style={{ fontSize:'0.65rem', color:'#8b5cf6', fontWeight:800, fontFamily:S, letterSpacing:'1px' }}>ACTIVITY 02 // NERVOUS DISCHARGE</span>
+            <span style={{ fontSize:'0.65rem', color:'var(--accent-purple)', fontWeight:800, fontFamily:S, letterSpacing:'1px' }}>ACTIVITY 02 // NERVOUS DISCHARGE</span>
             <h3 style={{ fontFamily:J, color:'#fff', fontSize:'1.25rem', margin:'4px 0 12px' }}>Adrenaline Shake-Off Cycle</h3>
             
             {!shakeDone ? (
               <div>
                 <div style={{ background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:16, padding:16, marginBottom:20 }}>
-                  <span style={{ fontSize:'0.7rem', color:'#8b5cf6', fontFamily:S, fontWeight:700, display:'block', marginBottom:6, letterSpacing:'0.5px' }}>EXERCISE STEPS FOR YOU:</span>
+                  <span style={{ fontSize:'0.7rem', color:'var(--accent-purple)', fontFamily:S, fontWeight:700, display:'block', marginBottom:6, letterSpacing:'0.5px' }}>EXERCISE STEPS FOR YOU:</span>
                   <ol style={{ margin:0, paddingLeft:16, fontSize:'0.8rem', color:'rgba(255,255,255,0.45)', fontFamily:J, display:'flex', flexDirection:'column', gap:5, lineHeight:1.4 }}>
                     <li>Stand up or sit down completely straight on your chair.</li>
                     <li>Physically shake both your hands and arms rapidly in the air (like shaking off water droplets).</li>
@@ -211,7 +211,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
                 </div>
 
                 <div style={{ height:8, background:'rgba(255,255,255,0.06)', borderRadius:4, marginBottom:22, overflow:'hidden' }}>
-                  <div style={{ width: `${(shakeCount / 20) * 100}%`, height:'100%', background:'#8b5cf6', transition:'width 0.1s ease-out' }}/>
+                  <div style={{ width: `${(shakeCount / 20) * 100}%`, height:'100%', background:'var(--accent-purple)', transition:'width 0.1s ease-out' }}/>
                 </div>
 
                 <motion.button whileTap={{ scale: 0.95 }}
@@ -224,16 +224,16 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
                       }
                     });
                   }}
-                  style={{ width:120, height:120, borderRadius:'50%', border:'4px solid rgba(139,92,246,0.15)', background:'radial-gradient(circle, rgba(139,92,246,0.12), transparent)', color:'#fff', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:4, margin:'0 auto', outline:'none' }}>
-                  <FaHandPaper size={24} color="#8b5cf6"/>
+                  style={{ width:120, height:120, borderRadius:'50%', border:'4px solid var(--accent-purple-border)', background:'radial-gradient(circle, var(--accent-purple-dim), transparent)', color:'#fff', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:4, margin:'0 auto', outline:'none' }}>
+                  <FaHandPaper size={24} color="var(--accent-purple)"/>
                   <span style={{ fontFamily:S, fontSize:'0.75rem', fontWeight:700 }}>SHAKE & TAP</span>
                   <span style={{ fontSize:'0.64rem', color:'rgba(255,255,255,0.4)' }}>{shakeCount}/20</span>
                 </motion.button>
               </div>
             ) : (
               <div style={{ textAlign:'center', padding:'20px 0' }}>
-                <div style={{ width:48, height:48, borderRadius:'50%', background:'rgba(139,92,246,0.08)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 12px' }}>
-                  <FaCheckCircle size={22} color="#8b5cf6"/>
+                <div style={{ width:48, height:48, borderRadius:'50%', background:'var(--accent-purple-dim)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 12px' }}>
+                  <FaCheckCircle size={22} color="var(--accent-purple)"/>
                 </div>
                 <h4 style={{ fontFamily:J, color:'#fff', margin:'0 0 4px', fontSize:'1.1rem' }}>Kinetic Discharge Successful</h4>
                 <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.82rem', fontFamily:J, marginBottom:16 }}>The physical restlessness index of your central nervous system has stabilized.</p>
@@ -274,7 +274,7 @@ export default function CalmLibrary({ accent, accentB, accentBr, isPremium, onUp
                       setTapStep(prev => prev + 1);
                     });
                   }}
-                  style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', background:`linear-gradient(135deg, ${accent}, #8b5cf6)`, color:'#fff', fontWeight:800, fontFamily:J, cursor:'pointer', display:'flex', alignItems:'center', gap:6, justifyContent:'center', boxShadow:`0 4px 18px ${accent}25` }}>
+                  style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', background:`linear-gradient(135deg, ${accent}, var(--accent-purple))`, color:'#fff', fontWeight:800, fontFamily:J, cursor:'pointer', display:'flex', alignItems:'center', gap:6, justifyContent:'center', boxShadow:'var(--shadow-premium)' }}>
                   I Feel Ready, Next Tapping Point ➔ {!isPremium && <FaLock size={10}/>}
                 </motion.button>
               ) : (

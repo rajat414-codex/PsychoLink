@@ -10,48 +10,48 @@
 }
 
 :root {
-  /* Color Palette - Sleek SaaS Dark */
-  --bg-app: #090a0f;
-  --bg-sidebar: #0d0f13;
-  --bg-card: #121316;
-  --bg-card-hover: #16181c;
-  --bg-input: rgba(255, 255, 255, 0.03);
+  /* Color Palette - Premium SaaS Dark Slate */
+  --bg-app: #080a10;
+  --bg-sidebar: #0c0e14;
+  --bg-card: rgba(255, 255, 255, 0.025);
+  --bg-card-hover: rgba(255, 255, 255, 0.05);
+  --bg-input: rgba(255, 255, 255, 0.02);
   
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-hover: rgba(255, 255, 255, 0.09);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.12);
   
-  --text-primary: #ededef;
-  --text-secondary: rgba(255, 255, 255, 0.48);
-  --text-muted: rgba(255, 255, 255, 0.28);
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
   
-  /* Accent Colors (Toned down from neon) */
-  --accent-aura: #dd4e48;
-  --accent-aura-dim: rgba(221, 78, 72, 0.06);
-  --accent-aura-border: rgba(221, 78, 72, 0.16);
+  /* Accent Colors (Refined and modern, not neon) */
+  --accent-aura: #f43f5e;
+  --accent-aura-dim: rgba(244, 63, 94, 0.05);
+  --accent-aura-border: rgba(244, 63, 94, 0.12);
   
-  --accent-max: #51ab9f;
-  --accent-max-dim: rgba(81, 171, 159, 0.06);
-  --accent-max-border: rgba(81, 171, 159, 0.16);
+  --accent-max: #14b8a6;
+  --accent-max-dim: rgba(20, 184, 166, 0.05);
+  --accent-max-border: rgba(20, 184, 166, 0.12);
   
-  --accent-purple: #8b5cf6;
-  --accent-purple-dim: rgba(139, 92, 246, 0.06);
-  --accent-purple-border: rgba(139, 92, 246, 0.16);
+  --accent-purple: #6366f1;
+  --accent-purple-dim: rgba(99, 102, 241, 0.05);
+  --accent-purple-border: rgba(99, 102, 241, 0.12);
 
-  --accent-yellow: #c79552;
-  --accent-yellow-dim: rgba(199, 149, 82, 0.06);
+  --accent-yellow: #d97706;
+  --accent-yellow-dim: rgba(217, 119, 6, 0.05);
   
-  --accent-green: #56a06f;
-  --accent-green-dim: rgba(86, 160, 111, 0.06);
+  --accent-green: #10b981;
+  --accent-green-dim: rgba(16, 185, 129, 0.05);
 
   /* Fonts */
   --font-body: 'Plus Jakarta Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', 'NotoEmojiFallback', sans-serif;
   --font-display: 'Space Grotesk', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', 'NotoEmojiFallback', sans-serif;
   --font-serif: 'Cormorant Garamond', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', 'NotoEmojiFallback', serif;
 
-  /* Shadows - Ambient & Sleek */
-  --shadow-premium: 0 12px 40px -12px rgba(0,0,0,0.6);
-  --shadow-card: 0 16px 48px rgba(0,0,0,0.5);
-  --shadow-ambient: 0 0 40px rgba(0, 0, 0, 0.4);
+  /* Shadows - Minimal & Premium (No neon/harsh glows) */
+  --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+  --shadow-ambient: none;
 }
 
 body {
@@ -92,7 +92,7 @@ body {
 
 /* Premium Text Selection highlight colors */
 ::selection {
-  background: rgba(139, 92, 246, 0.22);
+  background: rgba(99, 102, 241, 0.2);
   color: #ededef;
 }
 
@@ -113,7 +113,7 @@ body {
 .premium-input:focus {
   border-color: var(--accent-purple);
   background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
 .premium-input::placeholder {
   color: rgba(255, 255, 255, 0.25);

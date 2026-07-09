@@ -28,15 +28,13 @@ const COMPARE = [
 function Card({ children, style, delay=0, glow }) {
   return (
     <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay, duration:0.55, ease:[0.22,1,0.36,1] }}
-      whileHover={{ y:-4, borderColor:'rgba(255,255,255,0.11)', boxShadow: glow ? `0 20px 48px rgba(0,0,0,0.65), 0 0 40px ${glow}14, inset 0 1px 0 rgba(255,255,255,0.04)` : '0 20px 48px rgba(0,0,0,0.55)', transition:{ duration:0.25, ease:'easeOut' } }}
+      whileHover={{ y:-4, borderColor: glow ? `${glow}55` : 'var(--border-hover)', boxShadow: 'var(--shadow-premium)', transition:{ duration:0.25, ease:'easeOut' } }}
       style={{
         position:'relative', overflow:'hidden',
         background:'var(--bg-card)',
-        border:'1px solid var(--border-subtle)',
+        border: glow ? `1px solid ${glow}22` : '1px solid var(--border-subtle)',
         borderRadius:24, padding:20,
-        boxShadow: glow
-          ? `0 16px 48px rgba(0,0,0,0.5), 0 0 40px ${glow}0d, inset 0 1px 0 rgba(255,255,255,0.03)`
-          : 'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
+        boxShadow: 'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
         transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
         ...style
       }}>
@@ -186,9 +184,9 @@ export default function ProgressDashboard({ accent, accentB, accentBr }) {
               <Area type="monotone" dataKey="mood" stroke="none" fill="url(#moodArea)" isAnimationActive animationDuration={1900}/>
 
               {/* Glowing thick background line strokes */}
-              <Area type="monotone" dataKey="anxiety" stroke="url(#anxStroke)" strokeWidth={5.5} fill="none" filter="url(#lineGlowOnly)" opacity={0.35} isAnimationActive animationDuration={1500}/>
-              <Area type="monotone" dataKey="stress" stroke="url(#stressStroke)" strokeWidth={5.5} fill="none" filter="url(#lineGlowOnly)" opacity={0.35} isAnimationActive animationDuration={1700}/>
-              <Area type="monotone" dataKey="mood" stroke="url(#moodStroke)" strokeWidth={5.5} fill="none" filter="url(#lineGlowOnly)" opacity={0.35} isAnimationActive animationDuration={1900}/>
+              <Area type="monotone" dataKey="anxiety" stroke="url(#anxStroke)" strokeWidth={5.5} fill="none"  opacity={0.35} isAnimationActive animationDuration={1500}/>
+              <Area type="monotone" dataKey="stress" stroke="url(#stressStroke)" strokeWidth={5.5} fill="none"  opacity={0.35} isAnimationActive animationDuration={1700}/>
+              <Area type="monotone" dataKey="mood" stroke="url(#moodStroke)" strokeWidth={5.5} fill="none"  opacity={0.35} isAnimationActive animationDuration={1900}/>
 
               {/* Sharp foreground line strokes with points/dots */}
               <Area type="monotone" dataKey="anxiety" stroke="url(#anxStroke)" strokeWidth={2.5} fill="none" isAnimationActive animationDuration={1500}

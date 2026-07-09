@@ -53,16 +53,14 @@ function Card({ children, style, delay=0, glow, onClick, hover }) {
     <motion.div
       initial={{ opacity:0, y:18 }} animate={{ opacity:1, y:0 }}
       transition={{ delay, duration:0.55, ease:[0.22,1,0.36,1] }}
-      whileHover={hover ? { y:-4, borderColor:'rgba(255,255,255,0.11)', boxShadow: glow ? `0 20px 48px rgba(0,0,0,0.65), 0 0 40px ${glow}14, inset 0 1px 0 rgba(255,255,255,0.04)` : '0 20px 48px rgba(0,0,0,0.55)', transition:{ duration:0.25, ease:'easeOut' } } : undefined}
+      whileHover={hover ? { y:-4, borderColor: glow ? `${glow}55` : 'var(--border-hover)', boxShadow: 'var(--shadow-premium)', transition:{ duration:0.25, ease:'easeOut' } } : undefined}
       onClick={onClick}
       style={{
         position:'relative',
         background:'var(--bg-card)',
-        border:'1px solid var(--border-subtle)',
+        border: glow ? `1px solid ${glow}22` : '1px solid var(--border-subtle)',
         borderRadius:24, padding:20,
-        boxShadow: glow
-          ? `0 16px 48px rgba(0,0,0,0.5), 0 0 40px ${glow}0d, inset 0 1px 0 rgba(255,255,255,0.03)`
-          : 'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
+        boxShadow: 'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
         cursor: onClick ? 'pointer' : 'default',
         overflow:'hidden',
         transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
@@ -144,7 +142,7 @@ function KpiCard({ k, i, inView }) {
               <filter id={`sparkGlow${i}`}><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             </defs>
             <Area type="monotone" dataKey="v" stroke={k.color} strokeWidth={2} fill={`url(#spark${i})`} dot={false}
-              filter={`url(#sparkGlow${i})`} isAnimationActive animationDuration={1400}/>
+               isAnimationActive animationDuration={1400}/>
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -331,7 +329,7 @@ export default function DashboardHome({
                     stroke="url(#boundaryStroke)" 
                     strokeWidth={2} 
                     fill="none" 
-                    filter="url(#lineGlow)" 
+                     
                     isAnimationActive 
                     animationDuration={1600} 
                     dot={false} 
@@ -389,7 +387,7 @@ export default function DashboardHome({
                   <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.3)', fontSize:11, fontFamily:'Space Grotesk' }}/>
                   <YAxis axisLine={false} tickLine={false} tick={{ fill:'rgba(255,255,255,0.22)', fontSize:10 }} width={20}/>
                   <Tooltip content={<Tip/>} cursor={{ fill:'rgba(255,255,255,0.03)' }}/>
-                  <Bar dataKey="v" fill="url(#barGrad)" radius={[6,6,0,0]} maxBarSize={26} filter="url(#barGlow)" isAnimationActive animationDuration={1400}/>
+                  <Bar dataKey="v" fill="url(#barGrad)" radius={[6,6,0,0]} maxBarSize={26}  isAnimationActive animationDuration={1400}/>
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -403,7 +401,7 @@ export default function DashboardHome({
                   <defs>
                     <filter id="pieGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                   </defs>
-                  <Pie data={EMOTION_SPLIT} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={48} outerRadius={66} paddingAngle={3} stroke="none" filter="url(#pieGlow)" isAnimationActive animationDuration={1400}>
+                  <Pie data={EMOTION_SPLIT} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={48} outerRadius={66} paddingAngle={3} stroke="none"  isAnimationActive animationDuration={1400}>
                     {EMOTION_SPLIT.map((e,i) => <Cell key={i} fill={e.color}/>)}
                   </Pie>
                   <Tooltip content={<Tip/>}/>

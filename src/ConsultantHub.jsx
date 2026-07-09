@@ -11,7 +11,7 @@ import { API_BASE } from './config';
 // ─────────────────────────────────────────────────────────────────
 // Shared modal shell
 // ─────────────────────────────────────────────────────────────────
-function ModalShell({ onClose, accent = '#8b5cf6', maxWidth = '520px', children }) {
+function ModalShell({ onClose, accent = 'var(--accent-purple)', maxWidth = '520px', children }) {
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -41,7 +41,7 @@ const labelStyle = { fontSize:'0.78rem', color:'rgba(255,255,255,0.55)', fontFam
 // ─────────────────────────────────────────────────────────────────
 // JoinConsultantModal — "Join as a Consultant" application form
 // ─────────────────────────────────────────────────────────────────
-export function JoinConsultantModal({ onClose, accent = '#8b5cf6' }) {
+export function JoinConsultantModal({ onClose, accent = 'var(--accent-purple)' }) {
   const [form, setForm] = useState({
     fullName: '', email: '', skills: '', therapyApproach: '', qualifications: '', multilingualAggressive: '',
   });
@@ -138,7 +138,7 @@ export function JoinConsultantModal({ onClose, accent = '#8b5cf6' }) {
           style={{ width:'100%', padding:'13px', borderRadius:'14px', border:'none', cursor: status==='sending' ? 'not-allowed':'pointer',
             background: status==='sending' ? 'rgba(255,255,255,0.06)' : accent,
             color:'#fff', fontSize:'0.92rem', fontWeight:'700', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:'8px',
-            boxShadow: status==='sending' ? 'none' : `0 8px 20px ${accent}25` }}>
+            boxShadow:'var(--shadow-premium)' }}>
           {status==='sending' ? (<><FaSpinner className="spin" size={14}/> Submitting...</>) : 'Submit Application'}
         </motion.button>
       </div>
@@ -149,7 +149,7 @@ export function JoinConsultantModal({ onClose, accent = '#8b5cf6' }) {
 // ─────────────────────────────────────────────────────────────────
 // ApplicationsPanel — Admin view: approve / reject pending applications
 // ─────────────────────────────────────────────────────────────────
-export function ApplicationsPanel({ applications, onRefresh, accent = '#8b5cf6' }) {
+export function ApplicationsPanel({ applications, onRefresh, accent = 'var(--accent-purple)' }) {
   const [busyId, setBusyId] = useState(null);
 
   const act = async (id, action) => {
@@ -167,7 +167,7 @@ export function ApplicationsPanel({ applications, onRefresh, accent = '#8b5cf6' 
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', minHeight:'50vh', padding:'30px' }}>
         <div style={{ width:'64px', height:'64px', borderRadius:'50%', background:'rgba(139,92,246,0.1)', border:'1px solid rgba(139,92,246,0.25)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'16px' }}>
-          <FaClock size={24} color="#8b5cf6"/>
+          <FaClock size={24} color="var(--accent-purple)"/>
         </div>
         <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'1.5rem', color:'#fff', margin:'0 0 6px' }}>All caught up!</h2>
         <p style={{ color:'rgba(255,255,255,0.35)', fontSize:'0.85rem', maxWidth:'320px', fontFamily:J }}>
@@ -249,7 +249,7 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
   };
 
   return (
-    <ModalShell onClose={onClose} accent={consultant?.color || '#8b5cf6'} maxWidth="420px">
+    <ModalShell onClose={onClose} accent={consultant?.color || 'var(--accent-purple)'} maxWidth="420px">
       {stage === 'review' && (
         <div>
           <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'18px' }}>
@@ -280,8 +280,8 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
 
           <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={simulatePayment}
             style={{ width:'100%', padding:'14px', borderRadius:'14px', border:'none', cursor:'pointer',
-              background: consultant?.color || '#8b5cf6', color:'#fff', fontSize:'0.95rem', fontWeight:'800', fontFamily:J,
-              boxShadow:`0 8px 20px ${(consultant?.color||'#8b5cf6')}25` }}>
+              background: consultant?.color || 'var(--accent-purple)', color:'#fff', fontSize:'0.95rem', fontWeight:'800', fontFamily:J,
+              boxShadow:`0 8px 20px ${(consultant?.color||'var(--accent-purple)')}25` }}>
             Pay ₹{price}
           </motion.button>
           <p style={{ textAlign:'center', fontSize:'0.68rem', color:'rgba(255,255,255,0.25)', marginTop:'10px', fontFamily:J }}>

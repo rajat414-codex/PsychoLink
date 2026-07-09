@@ -16,37 +16,13 @@ const Spinner = ({ color='#8b87f5', size=22 }) => (
 
 // ── SPACE BACKGROUND (AI Hub) ────────────────────────────
 function SpaceBg({ activeAI }) {
-  const accent = activeAI==='AURA' ? '#e0524d' : '#5eb8ad';
-  const planets = [
-    {size:14,orbit:260,speed:20,color:'#e0524d'},
-    {size:9, orbit:190,speed:14,color:'#a855f7'},
-    {size:6, orbit:150,speed:10,color:'#3b82f6'},
-    {size:18,orbit:360,speed:28,color:'#c79552'},
-    {size:5, orbit:120,speed:8, color:'#56a06f'},
-    {size:12,orbit:310,speed:23,color:'#e0524d'},
-  ];
+  const accent = activeAI==='AURA' ? 'var(--accent-aura)' : 'var(--accent-max)';
   return (
     <div style={{ position:'absolute', inset:0, overflow:'hidden', zIndex:0, pointerEvents:'none' }}>
       <div style={{ position:'absolute', inset:0, background:'var(--bg-app)' }}/>
-      <motion.div animate={{ backgroundPosition:['0% 0%','100% 100%'] }} transition={{ duration:40, repeat:Infinity, ease:'linear', repeatType:'mirror' }}
-        style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&q=80&w=2000')`, backgroundSize:'130% 130%', opacity:0.02 }}/>
-      {[{sz:'75px',op:0.5,dur:55,dir:'180px 360px'},{sz:'145px',op:0.25,dur:85,dir:'-270px 550px'},{sz:'230px',op:0.1,dur:115,dir:'140px -275px'}].map((s,i)=>(
-        <motion.div key={i} animate={{ backgroundPosition:['0px 0px',s.dir] }} transition={{ duration:s.dur, repeat:Infinity, ease:'linear' }}
-          style={{ position:'absolute', inset:0, opacity:s.op, backgroundImage:`radial-gradient(circle, rgba(255,255,255,0.85) 1.5px, transparent 1.5px)`, backgroundSize:`${s.sz} ${s.sz}` }}/>
-      ))}
-      <motion.div animate={{ rotate:360 }} transition={{ duration:110, repeat:Infinity, ease:'linear' }}
-        style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:'860px', height:'860px', background:`conic-gradient(from 0deg,transparent 0deg,${accent}07 60deg,transparent 120deg,rgba(139,135,245,0.04) 180deg,transparent 240deg,rgba(59,130,246,0.035) 300deg,transparent 360deg)`, borderRadius:'50%', filter:'blur(40px)', transition:'background 1.5s' }}/>
-      {planets.map((p,i)=>(
-        <motion.div key={i} animate={{ rotate:360 }} transition={{ duration:p.speed, repeat:Infinity, ease:'linear', delay:i*0.8 }}
-          style={{ position:'absolute', top:'50%', left:'50%', width:`${p.orbit*2}px`, height:`${p.orbit*2}px`, marginTop:`-${p.orbit}px`, marginLeft:`-${p.orbit}px`, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.025)' }}>
-          <div style={{ position:'absolute', top:'-1px', left:'50%', marginLeft:`-${p.size/2}px`, width:`${p.size}px`, height:`${p.size}px`, borderRadius:'50%', background:`radial-gradient(circle at 35% 30%, rgba(255,255,255,0.75), ${p.color})`, boxShadow:`0 0 ${p.size*2}px ${p.color}80` }}>
-            {p.size>12 && <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%) rotateX(68deg)', width:`${p.size*2.3}px`, height:`${p.size*2.3}px`, borderRadius:'50%', border:`1.5px solid ${p.color}45` }}/>}
-          </div>
-        </motion.div>
-      ))}
-      {[0,1,2].map(i=>(
-        <motion.div key={i} animate={{ x:['-5vw','112vw'], opacity:[0,1,0] }} transition={{ duration:1.7, repeat:Infinity, delay:i*4.5+1.5, repeatDelay:8 }}
-          style={{ position:'absolute', top:`${16+i*23}%`, left:0, width:'85px', height:'1px', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.8),transparent)' }}/>
+      {[{c:`${accent}0f`,x:'20%',y:'20%',d:15},{c:'rgba(99,102,241,0.06)',x:'70%',y:'60%',d:18}].map((g,i)=>(
+        <motion.div key={i} animate={{ scale:[1,1.15,1], x:[0,30,-20,0], y:[0,-20,30,0] }} transition={{ duration:g.d, repeat:Infinity, ease:'easeInOut', delay:i*2 }}
+          style={{ position:'absolute', left:g.x, top:g.y, width:'600px', height:'600px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(80px)' }}/>
       ))}
     </div>
   );
@@ -56,18 +32,10 @@ function SpaceBg({ activeAI }) {
 function OceanBg({ opacity=0.88 }) {
   return (
     <div style={{ position:'absolute', inset:0, overflow:'hidden', zIndex:0 }}>
-      <motion.div animate={{ scale:[1,1.06,1] }} transition={{ duration:20, repeat:Infinity, ease:'easeInOut' }}
-        style={{ position:'absolute', inset:0, backgroundImage:`url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80&w=1600')`, backgroundSize:'cover', backgroundPosition:'center' }}/>
-      <div style={{ position:'absolute', inset:0, background:`rgba(4,3,14,${opacity})` }}/>
-      {[{c:'rgba(99,102,241,0.15)',x:'10%',y:'10%',d:14},{c:'rgba(139,135,245,0.1)',x:'65%',y:'55%',d:18},{c:'rgba(139,135,245,0.12)',x:'40%',y:'25%',d:16}].map((g,i)=>(
-        <motion.div key={i} animate={{ scale:[1,1.2,1], opacity:[0.5,1,0.5], x:[0,25,-15,0], y:[0,-30,15,0] }} transition={{ duration:g.d, repeat:Infinity, ease:'easeInOut', delay:i*2 }}
-          style={{ position:'absolute', left:g.x, top:g.y, width:'400px', height:'400px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(60px)', pointerEvents:'none' }}/>
-      ))}
-      <motion.div animate={{ backgroundPosition:['0px 0px','100px 200px'] }} transition={{ duration:45, repeat:Infinity, ease:'linear' }}
-        style={{ position:'absolute', inset:0, opacity:0.2, backgroundImage:`radial-gradient(circle,rgba(255,255,255,0.8) 1.5px,transparent 1.5px)`, backgroundSize:'80px 80px' }}/>
-      {[...Array(10)].map((_,i)=>(
-        <motion.div key={i} animate={{ y:[0,-70-i*8,0], x:[0,(i%2===0?1:-1)*25,0], opacity:[0,0.6,0] }} transition={{ duration:4+i*0.4, repeat:Infinity, delay:i*0.65 }}
-          style={{ position:'absolute', left:`${6+i*9}%`, bottom:'12%', width:i%3===0?'5px':'3px', height:i%3===0?'5px':'3px', borderRadius:'50%', background:'rgba(255,255,255,0.5)' }}/>
+      <div style={{ position:'absolute', inset:0, background:'var(--bg-app)' }}/>
+      {[{c:'rgba(99,102,241,0.06)',x:'10%',y:'10%',d:14},{c:'rgba(20,184,166,0.04)',x:'65%',y:'55%',d:18}].map((g,i)=>(
+        <motion.div key={i} animate={{ scale:[1,1.15,1], x:[0,20,-10,0], y:[0,-20,10,0] }} transition={{ duration:g.d, repeat:Infinity, ease:'easeInOut', delay:i*2 }}
+          style={{ position:'absolute', left:g.x, top:g.y, width:'500px', height:'500px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(85px)', pointerEvents:'none' }}/>
       ))}
     </div>
   );
@@ -405,8 +373,9 @@ export default function Auth({ onComplete }) {
 
     googleScript.onload = () => {
       if (window.google) {
+        const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "996022316929-8g0ov183hp224kg68cps575s9o507jac.apps.googleusercontent.com";
         tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
-          client_id: "996022316929-8g0ov183hp224kg68cps575s9o507jac.apps.googleusercontent.com",
+          client_id: googleClientId,
           scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
           callback: async (tokenResponse) => {
             if (tokenResponse.access_token) {
@@ -697,16 +666,15 @@ export default function Auth({ onComplete }) {
               display:'flex', alignItems:'center', gap:'12px',
               padding:'14px 22px', borderRadius:'18px',
               background:'linear-gradient(135deg, rgba(16,12,32,0.92) 0%, rgba(10,8,24,0.95) 100%)',
-              border: notification.type === 'error' ? '1px solid rgba(224,82,77,0.45)' : notification.type === 'info' ? '1px solid rgba(139,135,245,0.45)' : '1px solid rgba(94,184,173,0.45)',
-              boxShadow: notification.type === 'error' ? '0 12px 35px rgba(224,82,77,0.22)' : '0 12px 35px rgba(139,135,245,0.22)',
+              border: notification.type === 'error' ? '1px solid rgba(244,63,94,0.3)' : notification.type === 'info' ? '1px solid rgba(99,102,241,0.3)' : '1px solid rgba(20,184,166,0.3)',
+              boxShadow: 'var(--shadow-premium)',
               backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
               pointerEvents:'auto', userSelect:'none'
             }}
           >
             <div style={{
               width:'8px', height:'8px', borderRadius:'50%',
-              background: notification.type === 'error' ? '#e0524d' : notification.type === 'info' ? '#8b87f5' : '#5eb8ad',
-              boxShadow: `0 0 10px ${notification.type === 'error' ? '#e0524d' : notification.type === 'info' ? '#8b87f5' : '#5eb8ad'}`
+              background: notification.type === 'error' ? 'var(--accent-aura)' : notification.type === 'info' ? 'var(--accent-purple)' : 'var(--accent-max)'
             }}/>
             <span style={{ fontSize:'0.9rem', fontWeight:'600', color:'rgba(255,255,255,0.92)', letterSpacing:'0.2px', fontFamily:J }}>
               {notification.message}
@@ -832,7 +800,7 @@ export default function Auth({ onComplete }) {
                       onFocus={e=>{ e.target.style.borderColor='var(--accent-purple)'; e.target.style.background='rgba(255,255,255,0.06)'; }}
                       onBlur={e=>{ e.target.style.borderColor='var(--border-subtle)'; e.target.style.background='var(--bg-input)'; }}/>
                     <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={openEmailCode}
-                      style={{ width:'48px', height:'48px', flexShrink:0, borderRadius:'12px', background:'var(--accent-purple)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 16px rgba(139,92,246,0.3)' }}>
+                      style={{ width:'48px', height:'48px', flexShrink:0, borderRadius:'12px', background:'var(--accent-purple)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'var(--shadow-premium)' }}>
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9h10M10 5l4 4-4 4" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </motion.button>
                   </div>
@@ -876,7 +844,7 @@ export default function Auth({ onComplete }) {
           <motion.div key="emailCode" initial={{ opacity:0, scale:0.96 }} animate={{ opacity:1, scale:1 }} exit={{ opacity:0 }} transition={{ duration:0.5 }}
             style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
             <OceanBg opacity={0.9}/>
-            {[{c:'rgba(99,102,241,0.16)',x:'8%',y:'10%',d:12},{c:'rgba(139,135,245,0.14)',x:'66%',y:'58%',d:15},{c:'rgba(168,85,247,0.12)',x:'42%',y:'18%',d:14}].map((g,i)=>(
+            {[{c:'rgba(99,102,241,0.16)',x:'8%',y:'10%',d:12},{c:'rgba(139,135,245,0.14)',x:'66%',y:'58%',d:15},{c:'rgba(99,102,241,0.15)',x:'42%',y:'18%',d:14}].map((g,i)=>(
               <motion.div key={i} animate={{ scale:[1,1.25,1], opacity:[0.5,1,0.5] }} transition={{ duration:g.d, repeat:Infinity, delay:i*1.4 }}
                 style={{ position:'absolute', left:g.x, top:g.y, width:'380px', height:'380px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(60px)', zIndex:1, pointerEvents:'none' }}/>
             ))}
@@ -886,7 +854,7 @@ export default function Auth({ onComplete }) {
               {shine}
 
               {/* Icon */}
-              <div style={{ width:'64px', height:'64px', borderRadius:'20px', background:'linear-gradient(135deg,rgba(139,135,245,0.9),rgba(99,102,241,0.85))', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', boxShadow:'0 12px 30px rgba(139,135,245,0.4)' }}>
+              <div style={{ width:'64px', height:'64px', borderRadius:'20px', background:'var(--accent-purple)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', boxShadow:'var(--shadow-premium)' }}>
                 <FaEnvelope size={26} color="#fff"/>
               </div>
 
@@ -903,7 +871,7 @@ export default function Auth({ onComplete }) {
                 </div>
                 {!ecSent && (
                   <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={sendEmailCode} disabled={ecSending}
-                    style={{ height:'52px', padding:'0 20px', flexShrink:0, borderRadius:'14px', border:'none', cursor:ecSending?'wait':'pointer', background:'linear-gradient(135deg,#8b87f5,#7975d4)', color:'#fff', fontSize:'0.84rem', fontWeight:'800', fontFamily:L, boxShadow:'0 6px 20px rgba(139,135,245,0.45)', display:'flex', alignItems:'center', justifyContent:'center', minWidth:'108px' }}>
+                    style={{ height:'52px', padding:'0 20px', flexShrink:0, borderRadius:'14px', border:'none', cursor:ecSending?'wait':'pointer', background:'var(--accent-purple)', color:'#fff', fontSize:'0.84rem', fontWeight:'800', fontFamily:L, boxShadow:'var(--shadow-premium)', display:'flex', alignItems:'center', justifyContent:'center', minWidth:'108px' }}>
                     {ecSending
                       ? <motion.div animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }} style={{ width:'16px', height:'16px', borderRadius:'50%', border:'2px solid rgba(255,255,255,0.25)', borderTopColor:'#fff' }}/>
                       : 'Send Code'}
@@ -937,9 +905,9 @@ export default function Auth({ onComplete }) {
                     {ecVerifying ? <Spinner color="#8b87f5"/> : (
                       <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} onClick={verifyEmailCode}
                         style={{ width:'100%', padding:'15px', borderRadius:'14px', border:'none', cursor:ecCode.join('').length===6?'pointer':'not-allowed',
-                          background:ecCode.join('').length===6?'linear-gradient(135deg,#8b87f5,#7975d4)':'rgba(255,255,255,0.06)',
+                          background:ecCode.join('').length===6?'var(--accent-purple)':'rgba(255,255,255,0.06)',
                           color:ecCode.join('').length===6?'#fff':'rgba(255,255,255,0.25)', fontSize:'0.95rem', fontWeight:'800', fontFamily:L, transition:'all 0.3s',
-                          boxShadow:ecCode.join('').length===6?'0 8px 24px rgba(139,135,245,0.4)':'none' }}>
+                          boxShadow:ecCode.join('').length===6?'var(--shadow-premium)':'none' }}>
                         Verify & Continue ✓
                       </motion.button>
                     )}
@@ -1064,7 +1032,7 @@ export default function Auth({ onComplete }) {
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>FULL NAME</p>
                   <input type="text" placeholder="Enter your full name" value={su.fullName} onChange={e=>setSu(p=>({...p,fullName:e.target.value}))}
                     style={{ width:'100%', height:'50px', padding:'0 16px', background:'rgba(255,255,255,0.055)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', color:'#fff', fontSize:'0.93rem', fontFamily:J, transition:'all 0.25s' }}
-                    onFocus={e=>{ e.target.style.borderColor='rgba(139,135,245,0.6)'; e.target.style.boxShadow='0 0 0 3px rgba(139,135,245,0.1)'; }}
+                    onFocus={e=>{ e.target.style.borderColor='var(--accent-purple)'; e.target.style.boxShadow='0 0 0 2px rgba(99,102,241,0.15)'; }}
                     onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
                 </div>
 
@@ -1073,7 +1041,7 @@ export default function Auth({ onComplete }) {
                   <p style={{ fontSize:'0.62rem', color:'rgba(255,255,255,0.32)', fontFamily:S, letterSpacing:'1.5px', fontWeight:'600', margin:'0 0 6px 4px' }}>NICKNAME</p>
                   <input type="text" placeholder="What should we call you?" value={su.nickname} onChange={e=>setSu(p=>({...p,nickname:e.target.value}))}
                     style={{ width:'100%', height:'50px', padding:'0 16px', background:'rgba(255,255,255,0.055)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', color:'#fff', fontSize:'0.93rem', fontFamily:J, transition:'all 0.25s' }}
-                    onFocus={e=>{ e.target.style.borderColor='rgba(139,135,245,0.6)'; e.target.style.boxShadow='0 0 0 3px rgba(139,135,245,0.1)'; }}
+                    onFocus={e=>{ e.target.style.borderColor='var(--accent-purple)'; e.target.style.boxShadow='0 0 0 2px rgba(99,102,241,0.15)'; }}
                     onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
                 </div>
 
@@ -1088,11 +1056,11 @@ export default function Auth({ onComplete }) {
                     <input type="tel" placeholder="10-digit number" value={su.mobile} disabled={suMobOk}
                       onChange={e=>setSu(p=>({...p,mobile:e.target.value.replace(/\D/g,'').slice(0,10)}))}
                       style={{ flex:1, height:'50px', padding:'0 16px', background:suMobOk?'rgba(86,160,111,0.08)':'rgba(255,255,255,0.055)', border:suMobOk?'1px solid rgba(86,160,111,0.4)':'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', color:'#fff', fontSize:'0.93rem', fontFamily:J, transition:'all 0.25s', letterSpacing:'1px' }}
-                      onFocus={e=>{ if(!suMobOk){ e.target.style.borderColor='rgba(139,135,245,0.6)'; e.target.style.boxShadow='0 0 0 3px rgba(139,135,245,0.1)'; }}}
+                      onFocus={e=>{ if(!suMobOk){ e.target.style.borderColor='var(--accent-purple)'; e.target.style.boxShadow='0 0 0 2px rgba(99,102,241,0.15)'; }}}
                       onBlur={e=>{ e.target.style.boxShadow='none'; if(!suMobOk) e.target.style.borderColor='rgba(255,255,255,0.1)'; }}/>
                     {!suMobOk && su.mobile.length===10 && !suMobSent && (
                       <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }} onClick={suSendMob} disabled={suMobSend}
-                        style={{ height:'50px', padding:'0 18px', background:'linear-gradient(135deg,#7975d4,#a855f7)', border:'none', borderRadius:'14px', color:'#fff', fontSize:'0.82rem', fontWeight:'700', cursor:'pointer', fontFamily:S, flexShrink:0, boxShadow:'0 4px 16px rgba(168,85,247,0.4)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        style={{ height:'50px', padding:'0 18px', background:'var(--accent-purple)', border:'none', borderRadius:'14px', color:'#fff', fontSize:'0.82rem', fontWeight:'700', cursor:'pointer', fontFamily:S, flexShrink:0, boxShadow:'var(--shadow-premium)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                         {suMobSend ? <motion.div animate={{ rotate:360 }} transition={{ duration:0.8,repeat:Infinity,ease:'linear' }} style={{ width:'15px',height:'15px',borderRadius:'50%',border:'2px solid rgba(255,255,255,0.2)',borderTopColor:'#fff' }}/> : 'Send OTP'}
                       </motion.button>
                     )}
@@ -1112,7 +1080,7 @@ export default function Auth({ onComplete }) {
                         <div style={{ marginTop:'12px', display:'flex', justifyContent:'center' }}>
                           {suMobVfy ? <Spinner color="#a855f7" size={20}/> : (
                             <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }} onClick={suVfyMob}
-                              style={{ padding:'10px 28px', background:suMobOtp.join('').length===6?'linear-gradient(135deg,#7975d4,#a855f7)':'rgba(255,255,255,0.06)', border:'none', borderRadius:'12px', color:suMobOtp.join('').length===6?'#fff':'rgba(255,255,255,0.3)', fontSize:'0.85rem', fontWeight:'700', cursor:suMobOtp.join('').length===6?'pointer':'not-allowed', fontFamily:J, transition:'all 0.3s', boxShadow:suMobOtp.join('').length===6?'0 6px 18px rgba(168,85,247,0.35)':'none' }}>
+                              style={{ padding:'10px 28px', background:suMobOtp.join('').length===6?'var(--accent-purple)':'rgba(255,255,255,0.06)', border:'none', borderRadius:'12px', color:suMobOtp.join('').length===6?'#fff':'rgba(255,255,255,0.3)', fontSize:'0.85rem', fontWeight:'700', cursor:suMobOtp.join('').length===6?'pointer':'not-allowed', fontFamily:J, transition:'all 0.3s', boxShadow:suMobOtp.join('').length===6?'var(--shadow-premium)':'none' }}>
                               Verify Mobile ✓
                             </motion.button>
                           )}
@@ -1129,11 +1097,11 @@ export default function Auth({ onComplete }) {
                     <input type="email" placeholder="your@email.com" value={su.email} disabled={suEmOk}
                       onChange={e=>setSu(p=>({...p,email:e.target.value}))}
                       style={{ flex:1, height:'50px', padding:'0 16px', background:suEmOk?'rgba(86,160,111,0.08)':'rgba(255,255,255,0.055)', border:suEmOk?'1px solid rgba(86,160,111,0.4)':'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', color:'#fff', fontSize:'0.93rem', fontFamily:J, transition:'all 0.25s' }}
-                      onFocus={e=>{ if(!suEmOk){ e.target.style.borderColor='rgba(139,135,245,0.6)'; e.target.style.boxShadow='0 0 0 3px rgba(139,135,245,0.1)'; }}}
+                      onFocus={e=>{ if(!suEmOk){ e.target.style.borderColor='var(--accent-purple)'; e.target.style.boxShadow='0 0 0 2px rgba(99,102,241,0.15)'; }}}
                       onBlur={e=>{ e.target.style.boxShadow='none'; if(!suEmOk) e.target.style.borderColor='rgba(255,255,255,0.1)'; }}/>
                     {!suEmOk && su.email.includes('@') && !suEmSent && (
                       <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }} onClick={suSendEm} disabled={suEmSend}
-                        style={{ height:'50px', padding:'0 18px', background:'linear-gradient(135deg,#8b87f5,#8b87f5)', border:'none', borderRadius:'14px', color:'#fff', fontSize:'0.82rem', fontWeight:'700', cursor:'pointer', fontFamily:S, flexShrink:0, boxShadow:'0 4px 16px rgba(139,135,245,0.4)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        style={{ height:'50px', padding:'0 18px', background:'var(--accent-purple)', border:'none', borderRadius:'14px', color:'#fff', fontSize:'0.82rem', fontWeight:'700', cursor:'pointer', fontFamily:S, flexShrink:0, boxShadow:'var(--shadow-premium)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                         {suEmSend ? <motion.div animate={{ rotate:360 }} transition={{ duration:0.8,repeat:Infinity,ease:'linear' }} style={{ width:'15px',height:'15px',borderRadius:'50%',border:'2px solid rgba(255,255,255,0.2)',borderTopColor:'#fff' }}/> : 'Send Code'}
                       </motion.button>
                     )}
@@ -1153,7 +1121,7 @@ export default function Auth({ onComplete }) {
                         <div style={{ marginTop:'12px', display:'flex', justifyContent:'center' }}>
                           {suEmVfy ? <Spinner color="#8b87f5" size={20}/> : (
                             <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }} onClick={suVfyEm}
-                              style={{ padding:'10px 28px', background:suEmCode.join('').length===6?'linear-gradient(135deg,#8b87f5,#8b87f5)':'rgba(255,255,255,0.06)', border:'none', borderRadius:'12px', color:suEmCode.join('').length===6?'#fff':'rgba(255,255,255,0.3)', fontSize:'0.85rem', fontWeight:'700', cursor:suEmCode.join('').length===6?'pointer':'not-allowed', fontFamily:J, transition:'all 0.3s', boxShadow:suEmCode.join('').length===6?'0 6px 18px rgba(139,135,245,0.35)':'none' }}>
+                              style={{ padding:'10px 28px', background:suEmCode.join('').length===6?'var(--accent-purple)':'rgba(255,255,255,0.06)', border:'none', borderRadius:'12px', color:suEmCode.join('').length===6?'#fff':'rgba(255,255,255,0.3)', fontSize:'0.85rem', fontWeight:'700', cursor:suEmCode.join('').length===6?'pointer':'not-allowed', fontFamily:J, transition:'all 0.3s', boxShadow:suEmCode.join('').length===6?'var(--shadow-premium)':'none' }}>
                               Verify Email ✓
                             </motion.button>
                           )}
@@ -1177,7 +1145,7 @@ export default function Auth({ onComplete }) {
                   whileHover={suDone ? { scale: 1.02 } : {}}
                   whileTap={suDone ? { scale: 0.98 } : {}}
                   onClick={suCreate}
-                  style={{ width:'100%', padding:'16px', background:suDone?'var(--accent-purple)':'rgba(255,255,255,0.05)', border:'none', borderRadius:'16px', color:suDone?'#fff':'rgba(255,255,255,0.25)', fontSize:'1rem', fontWeight:'700', cursor:suDone?'pointer':'not-allowed', fontFamily:J, transition:'all 0.4s', boxShadow:suDone?`0 10px 30px rgba(139,135,245,0.2)`:'none', letterSpacing:'0.3px' }}
+                  style={{ width:'100%', padding:'16px', background:suDone?'var(--accent-purple)':'rgba(255,255,255,0.05)', border:'none', borderRadius:'16px', color:suDone?'#fff':'rgba(255,255,255,0.25)', fontSize:'1rem', fontWeight:'700', cursor:suDone?'pointer':'not-allowed', fontFamily:J, transition:'all 0.4s', boxShadow:suDone?'var(--shadow-premium)':'none', letterSpacing:'0.3px' }}
                 >
                   {suDone ? '✦ Create Account' : 'Complete all fields to continue'}
                 </motion.button>
@@ -1209,7 +1177,7 @@ export default function Auth({ onComplete }) {
                     <input type="email" placeholder="Apple ID (Email)" value={appleEmail} onChange={e=>setAppleEmail(e.target.value)}
                       onKeyDown={e=>e.key==='Enter'&&appleEmail.includes('@')&&setAppleStep('password')}
                       style={{ width:'100%', padding:'13px 16px', background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'13px', color:'#fff', fontSize:'0.92rem', fontFamily:J, marginBottom:'12px', transition:'all 0.2s' }}
-                      onFocus={e=>{ e.target.style.borderColor='rgba(10,132,255,0.7)'; e.target.style.boxShadow='0 0 0 3px rgba(10,132,255,0.12)'; }}
+                      onFocus={e=>{ e.target.style.borderColor='rgba(10,132,255,0.7)'; e.target.style.boxShadow='0 0 0 2px rgba(10,132,255,0.12)'; }}
                       onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
                     <motion.button whileHover={{ opacity:0.88 }} whileTap={{ scale:0.97 }} onClick={()=>appleEmail.includes('@')&&setAppleStep('password')}
                       style={{ width:'100%', padding:'13px', background:'#0a84ff', border:'none', borderRadius:'13px', color:'#fff', fontSize:'0.92rem', fontWeight:'600', cursor:'pointer', fontFamily:J, boxShadow:'0 4px 16px rgba(10,132,255,0.4)' }}>
@@ -1227,7 +1195,7 @@ export default function Auth({ onComplete }) {
                       <input type={showPass?'text':'password'} placeholder="Password" value={applePass} onChange={e=>setApplePass(e.target.value)}
                         onKeyDown={e=>e.key==='Enter'&&applePass&&handleAppleLogin()}
                         style={{ width:'100%', padding:'13px 48px 13px 16px', background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'13px', color:'#fff', fontSize:'0.92rem', fontFamily:J, transition:'all 0.25s' }}
-                        onFocus={e=>{ e.target.style.borderColor='rgba(10,132,255,0.7)'; e.target.style.boxShadow='0 0 0 3px rgba(10,132,255,0.12)'; }}
+                        onFocus={e=>{ e.target.style.borderColor='rgba(10,132,255,0.7)'; e.target.style.boxShadow='0 0 0 2px rgba(10,132,255,0.12)'; }}
                         onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
                       <button onClick={()=>setShowPass(s=>!s)} style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:'rgba(255,255,255,0.35)', cursor:'pointer', padding:0 }}>
                         {showPass?<FaEyeSlash size={15}/>:<FaEye size={15}/>}
@@ -1259,10 +1227,10 @@ export default function Auth({ onComplete }) {
             style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
             <OceanBg opacity={0.92}/>
             <motion.div animate={{ scale:[1,1.18,1], opacity:[0.4,0.8,0.4] }} transition={{ duration:7, repeat:Infinity }}
-              style={{ position:'absolute', top:'20%', right:'20%', width:'350px', height:'350px', borderRadius:'50%', background:'radial-gradient(circle,rgba(168,85,247,0.12),transparent 70%)', filter:'blur(50px)', zIndex:1, pointerEvents:'none' }}/>
+              style={{ position:'absolute', top:'20%', right:'20%', width:'350px', height:'350px', borderRadius:'50%', background:'radial-gradient(circle,rgba(99,102,241,0.15),transparent 70%)', filter:'blur(50px)', zIndex:1, pointerEvents:'none' }}/>
             <div style={{ ...card, padding:'52px 44px', width:'400px', textAlign:'center', zIndex:2 }}>
               {shine}
-              <div style={{ width:'62px', height:'62px', borderRadius:'50%', background:'linear-gradient(135deg,#7975d4,#a855f7)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 22px', boxShadow:'0 8px 28px rgba(168,85,247,0.45)' }}>
+              <div style={{ width:'62px', height:'62px', borderRadius:'50%', background:'var(--accent-purple)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 22px', boxShadow:'var(--shadow-premium)' }}>
                 <FaPhoneAlt size={24} color="#fff"/>
               </div>
               <h2 style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'2rem', color:'#fff', marginBottom:'6px' }}>Enter Your Number</h2>
@@ -1275,12 +1243,12 @@ export default function Auth({ onComplete }) {
                 <input type="tel" placeholder="10-digit number" value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,'').slice(0,10))}
                   onKeyDown={e=>e.key==='Enter'&&sendOtp()}
                   style={{ flex:1, height:'52px', padding:'0 16px', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'14px', color:'#fff', fontSize:'1rem', fontFamily:J, letterSpacing:'2px', transition:'all 0.2s' }}
-                  onFocus={e=>{ e.target.style.borderColor='rgba(168,85,247,0.6)'; e.target.style.boxShadow='0 0 0 3px rgba(168,85,247,0.12)'; }}
+                  onFocus={e=>{ e.target.style.borderColor='var(--accent-purple)'; e.target.style.boxShadow='0 0 0 2px rgba(99,102,241,0.15)'; }}
                   onBlur={e=>{ e.target.style.borderColor='rgba(255,255,255,0.1)'; e.target.style.boxShadow='none'; }}/>
               </div>
               {phoneLoad ? <Spinner color="#a855f7"/> : (
                 <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} onClick={sendOtp}
-                  style={{ width:'100%', padding:'15px', background:phone.length===10?'linear-gradient(135deg,#7975d4,#a855f7)':'rgba(255,255,255,0.05)', border:'none', borderRadius:'14px', color:phone.length===10?'#fff':'rgba(255,255,255,0.25)', fontSize:'0.95rem', fontWeight:'700', cursor:phone.length===10?'pointer':'not-allowed', fontFamily:J, transition:'all 0.3s', boxShadow:phone.length===10?'0 8px 24px rgba(168,85,247,0.4)':'none' }}>
+                  style={{ width:'100%', padding:'15px', background:phone.length===10?'var(--accent-purple)':'rgba(255,255,255,0.05)', border:'none', borderRadius:'14px', color:phone.length===10?'#fff':'rgba(255,255,255,0.25)', fontSize:'0.95rem', fontWeight:'700', cursor:phone.length===10?'pointer':'not-allowed', fontFamily:J, transition:'all 0.3s', boxShadow:phone.length===10?'var(--shadow-premium)':'none' }}>
                   Send OTP →
                 </motion.button>
               )}
@@ -1299,7 +1267,7 @@ export default function Auth({ onComplete }) {
             <div style={{ ...card, padding:'52px 44px', width:'400px', textAlign:'center', zIndex:2 }}>
               {shine}
               <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ type:'spring', stiffness:200, damping:14 }}
-                style={{ width:'62px', height:'62px', borderRadius:'50%', background:'linear-gradient(135deg,#56a06f,#4a8a5f)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 22px', boxShadow:'0 8px 28px rgba(86,160,111,0.45)' }}>
+                style={{ width:'62px', height:'62px', borderRadius:'50%', background:'var(--accent-green)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 22px', boxShadow:'var(--shadow-premium)' }}>
                 <FaLock size={24} color="#fff"/>
               </motion.div>
               <h2 style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'2rem', color:'#fff', marginBottom:'6px' }}>Verify OTP</h2>
@@ -1314,7 +1282,7 @@ export default function Auth({ onComplete }) {
               </div>
               {otpLoad ? <Spinner color="#56a06f"/> : (
                 <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }} onClick={verifyOtp}
-                  style={{ width:'100%', padding:'15px', background:otp.join('').length===6?'linear-gradient(135deg,#56a06f,#4a8a5f)':'rgba(255,255,255,0.05)', border:'none', borderRadius:'14px', color:otp.join('').length===6?'#fff':'rgba(255,255,255,0.25)', fontSize:'0.95rem', fontWeight:'700', cursor:otp.join('').length===6?'pointer':'not-allowed', fontFamily:J, transition:'all 0.3s', boxShadow:otp.join('').length===6?'0 8px 24px rgba(86,160,111,0.4)':'none' }}>
+                  style={{ width:'100%', padding:'15px', background:otp.join('').length===6?'var(--accent-green)':'rgba(255,255,255,0.05)', border:'none', borderRadius:'14px', color:otp.join('').length===6?'#fff':'rgba(255,255,255,0.25)', fontSize:'0.95rem', fontWeight:'700', cursor:otp.join('').length===6?'pointer':'not-allowed', fontFamily:J, transition:'all 0.3s', boxShadow:otp.join('').length===6?'var(--shadow-premium)':'none' }}>
                   Verify & Continue ✓
                 </motion.button>
               )}

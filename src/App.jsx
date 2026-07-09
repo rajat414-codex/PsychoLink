@@ -94,7 +94,7 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
           width: '320px',
           height: '240px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--accent-purple-dim) 0%, transparent 70%)',
           filter: 'blur(35px)',
           zIndex: 1,
           pointerEvents: 'none'
@@ -125,7 +125,7 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
 
         {/* Aesthetic Continue to App Action Panel */}
         <motion.button
-          whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(255,255,255,0.18)' }}
+          whileHover={{ scale: 1.02, boxShadow: 'var(--shadow-premium)' }}
           whileTap={{ scale: 0.98 }}
           onClick={onDone}
           style={{
@@ -140,7 +140,7 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
             fontWeight: '700',
             letterSpacing: '0.5px',
             cursor: 'pointer',
-            boxShadow: '0 16px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+            boxShadow: 'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.05)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             display: 'flex',
@@ -183,7 +183,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'fixed', top: 0, left: 0, background: 'var(--bg-app)', backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(139,135,245,0.02) 0%, rgba(94,184,173,0.01) 50%, transparent 80%)' }}>
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'fixed', top: 0, left: 0, background: 'var(--bg-app)', backgroundImage: 'radial-gradient(circle at 50% 50%, var(--accent-purple-dim) 0%, var(--accent-max-dim) 50%, transparent 80%)' }}>
       <AppleEmoji/>
       <AnimatePresence mode="wait">
 

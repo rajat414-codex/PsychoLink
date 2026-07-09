@@ -460,7 +460,7 @@ export default function Home({ userProfile, onLogout }) {
               <div style={{ display:'flex', background:'var(--bg-input)', borderRadius:'14px', padding:'4px', gap:'3px', border:'1px solid var(--border-subtle)' }}>
                 {[{ k:'AURA', g:'#f43f5e' }, { k:'MAX', g:'#0ea5e9' }].map(ai => (
                   <button key={ai.k} onClick={() => setActiveAI(ai.k)}
-                    style={{ flex:1, padding:'9px 0', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'0.76rem', fontWeight:'700', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s', background:activeAI===ai.k?ai.g:'transparent', color:activeAI===ai.k?'#fff':'rgba(255,255,255,0.28)', boxShadow:activeAI===ai.k?`0 4px 12px ${accent}25`:'none', userSelect:'none' }}>
+                    style={{ flex:1, padding:'9px 0', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'0.76rem', fontWeight:'700', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s', background:activeAI===ai.k?ai.g:'transparent', color:activeAI===ai.k?'#fff':'rgba(255,255,255,0.28)', boxShadow:activeAI===ai.k?'var(--shadow-premium)':'none', userSelect:'none' }}>
                     {ai.k}
                   </button>
                 ))}
@@ -681,7 +681,7 @@ export default function Home({ userProfile, onLogout }) {
                 {/* Input */}
                 <div style={{ padding:'16px 20px 24px', background:'transparent', flexShrink:0, position:'relative', zIndex:5 }}>
                   <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto' }}>
-                    <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'var(--bg-card)', border:`1px solid ${listening?accent:'var(--border-subtle)'}`, borderRadius:'24px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?`0 0 16px ${accent}10, 0 0 0 3px ${accent}10`:'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
+                    <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'var(--bg-card)', border:`1px solid ${listening?accent:'var(--border-subtle)'}`, borderRadius:'24px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?'0 0 0 2px rgba(99,102,241,0.2)':'var(--shadow-card)' }}>
                       <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={handleMicClick}
                         animate={isRecording ? { scale:[1,1.1,1] } : {}} transition={isRecording ? { duration:0.8, repeat:Infinity } : {}}
                         style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'var(--bg-input)', border:`1px solid ${isRecording?'#ef4444':'var(--border-subtle)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 1px 3px rgba(204,102,102,0.4)':'' }}>
@@ -694,7 +694,7 @@ export default function Home({ userProfile, onLogout }) {
                         rows={1}
                         style={{ flex:1, background:'none', border:'none', color:'rgba(255,255,255,0.88)', fontSize:'0.9rem', fontFamily:J, resize:'none', lineHeight:'1.5', maxHeight:'110px', minHeight:'22px', padding:'7px 0', overflowY:'auto' }}/>
                       <motion.button whileHover={input.trim()?{scale:1.06}:{}} whileTap={input.trim()?{scale:0.94}:{}} onClick={() => sendMsg()}
-                        style={{ width:'36px', height:'36px', borderRadius:'50%', background:input.trim()?accent:'rgba(255,255,255,0.03)', border:`1px solid ${input.trim()?accent:'var(--border-subtle)'}`, cursor:input.trim()?'pointer':'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:input.trim()?`0 4px 12px ${accent}25`:'' }}>
+                        style={{ width:'36px', height:'36px', borderRadius:'50%', background:input.trim()?accent:'rgba(255,255,255,0.03)', border:`1px solid ${input.trim()?accent:'var(--border-subtle)'}`, cursor:input.trim()?'pointer':'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:input.trim()?'var(--shadow-premium)':'' }}>
                         <FaPaperPlane size={13} color={input.trim()?'#fff':'rgba(255,255,255,0.22)'} style={{ marginLeft:'1px' }}/>
                       </motion.button>
                     </div>
@@ -796,7 +796,7 @@ export default function Home({ userProfile, onLogout }) {
                         </div>
                       )}
                       <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }} onClick={() => c.avail && handleBookConsultant(c)}
-                        style={{ width:'100%', padding:'11px', background:c.avail?`linear-gradient(135deg,${c.color},${c.color}cc)`:'rgba(255,255,255,0.03)', border:`1px solid ${c.avail?c.color:'rgba(255,255,255,0.06)'}`, borderRadius:12, color:c.avail?'#fff':'rgba(255,255,255,0.22)', fontSize:'0.84rem', fontWeight:700, cursor:c.avail?'pointer':'not-allowed', fontFamily:J, transition:'all 0.2s', boxShadow:c.avail?`0 6px 18px ${c.color}25`:'' }}>
+                        style={{ width:'100%', padding:'11px', background:c.avail?`linear-gradient(135deg,${c.color},${c.color}cc)`:'rgba(255,255,255,0.03)', border:`1px solid ${c.avail?c.color:'rgba(255,255,255,0.06)'}`, borderRadius:12, color:c.avail?'#fff':'rgba(255,255,255,0.22)', fontSize:'0.84rem', fontWeight:700, cursor:c.avail?'pointer':'not-allowed', fontFamily:J, transition:'all 0.2s', boxShadow:c.avail?'var(--shadow-premium)':'' }}>
                         {!c.avail ? 'Unavailable' : usedFree[c.id] ? `Pay ₹${c.price||199} & Book →` : 'Book Free Session →'}
                       </motion.button>
                       {/* In-app call buttons */}
@@ -826,7 +826,7 @@ export default function Home({ userProfile, onLogout }) {
                     <p style={{ margin:0, fontSize:'0.82rem', color:'rgba(255,255,255,0.4)', fontFamily:J }}>Join our platform — reach thousands of people who need your help.</p>
                   </div>
                   <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={() => setShowJoin(true)}
-                    style={{ padding:'13px 22px', background:'#8b87f5', border:'none', borderRadius:14, color:'#0a0a0c', fontSize:'0.88rem', fontWeight:700, cursor:'pointer', fontFamily:J, flexShrink:0, boxShadow:'0 4px 12px rgba(0,0,0,0.35)', whiteSpace:'nowrap' }}>
+                    style={{ padding:'13px 22px', background:'var(--accent-purple)', border:'none', borderRadius:14, color:'#0a0a0c', fontSize:'0.88rem', fontWeight:700, cursor:'pointer', fontFamily:J, flexShrink:0, boxShadow:'0 4px 12px rgba(0,0,0,0.35)', whiteSpace:'nowrap' }}>
                     Apply Now →
                   </motion.button>
                 </motion.div>
@@ -1028,7 +1028,7 @@ export default function Home({ userProfile, onLogout }) {
       <AnimatePresence>
         {showSOS && (
           <motion.div initial={{ y:-80, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:-80, opacity:0 }}
-            style={{ position:'fixed', top:16, left:'50%', transform:'translateX(-50%)', zIndex:200, display:'flex', alignItems:'center', gap:12, padding:'12px 20px', borderRadius:30, background:'linear-gradient(135deg,rgba(239,68,68,0.95),rgba(185,28,28,0.95))', boxShadow:'0 8px 32px rgba(239,68,68,0.5)', backdropFilter:'blur(10px)', border:'1px solid rgba(239,68,68,0.3)' }}>
+            style={{ position:'fixed', top:16, left:'50%', transform:'translateX(-50%)', zIndex:200, display:'flex', alignItems:'center', gap:12, padding:'12px 20px', borderRadius:30, background:'linear-gradient(135deg,rgba(239,68,68,0.95),rgba(185,28,28,0.95))', boxShadow:'0 8px 24px rgba(239,68,68,0.25)', backdropFilter:'blur(10px)', border:'1px solid rgba(239,68,68,0.3)' }}>
             <motion.span animate={{ opacity:[1,0.5,1] }} transition={{ duration:1.2, repeat:Infinity }} style={{ fontSize:'1.1rem' }}>🆘</motion.span>
             <span style={{ color:'#fff', fontSize:'0.85rem', fontWeight:700, fontFamily:J }}>High stress detected — You're not alone</span>
             <motion.button whileHover={{ scale:1.05 }} onClick={() => { setShowSOS(false); setShowBreath(true); }}

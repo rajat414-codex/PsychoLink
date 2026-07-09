@@ -90,7 +90,7 @@ function BarChart({ items = [], values = {} }) {
                 background:`linear-gradient(180deg,${pc}55 0%,${pc}2e 50%,${pc}12 100%)`,
                 border:`1px solid ${pc}77`,
                 borderBottom:'none',
-                boxShadow:`inset 0 1px 0 ${pc}55, 0 0 16px ${pc}1a` }}>
+                boxShadow:'inset 0 1px 0 rgba(255,255,255,0.06)' }}>
               {/* soft top frosted highlight */}
               <div style={{ position:'absolute', top:0, left:0, right:0, height:'45%',
                 background:`linear-gradient(180deg,${pc}33,transparent)`, pointerEvents:'none' }}/>
@@ -244,7 +244,7 @@ function PeakChart({ negScores = {}, posScores = {} }) {
         </div>
         <div style={{ textAlign:'right' }}>
           <div style={{ display:'flex', alignItems:'baseline', gap:6, justifyContent:'flex-end' }}>
-            <span style={{ fontSize:'1.4rem', fontWeight:800, color:'#fff', fontFamily:SF, lineHeight:1, textShadow:`0 0 18px ${dominant.c}77` }}>{dominant.v}%</span>
+            <span style={{ fontSize:'1.4rem', fontWeight:800, color:'#fff', fontFamily:SF, lineHeight:1, textShadow:'none' }}>{dominant.v}%</span>
           </div>
           <p style={{ margin:'2px 0 0', fontSize:'0.66rem', color:dominant.c, fontFamily:SF, fontWeight:700 }}>Peak · {dominant.label}</p>
         </div>
@@ -479,14 +479,14 @@ function PeakChart({ negScores = {}, posScores = {} }) {
       {/* peak chips */}
       <div style={{ display:'flex', justifyContent:'center', gap:24, padding:'4px 12px 12px', position:'relative', zIndex:1 }}>
         <div style={{ display:'flex', alignItems:'center', gap:7 }}>
-          <span style={{ width:9, height:9, borderRadius:'50%', background:'#8B5CF6', boxShadow:'0 0 10px #8B5CF6' }}/>
+          <span style={{ width:9, height:9, borderRadius:'50%', background:'#8B5CF6', boxShadow:'none' }}/>
           <span style={{ fontSize:'0.74rem', color:'rgba(255,255,255,0.55)', fontFamily:SF }}>Peak stress</span>
-          <span style={{ fontSize:'0.88rem', fontWeight:800, color:'#A855F7', fontFamily:SF, textShadow:'0 0 12px rgba(168,85,247,0.6)' }}>{peakStress}%</span>
+          <span style={{ fontSize:'0.88rem', fontWeight:800, color:'#A855F7', fontFamily:SF, textShadow:'none' }}>{peakStress}%</span>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:7 }}>
-          <span style={{ width:9, height:9, borderRadius:'50%', background:'#D946EF', boxShadow:'0 0 10px #D946EF' }}/>
+          <span style={{ width:9, height:9, borderRadius:'50%', background:'#D946EF', boxShadow:'none' }}/>
           <span style={{ fontSize:'0.74rem', color:'rgba(255,255,255,0.55)', fontFamily:SF }}>Peak wellness</span>
-          <span style={{ fontSize:'0.88rem', fontWeight:800, color:'#EC4899', fontFamily:SF, textShadow:'0 0 12px rgba(236,72,153,0.6)' }}>{peakWell}%</span>
+          <span style={{ fontSize:'0.88rem', fontWeight:800, color:'#EC4899', fontFamily:SF, textShadow:'none' }}>{peakWell}%</span>
         </div>
       </div>
     </div>
@@ -654,7 +654,7 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
               border:'none', borderRadius:'10px', color:'#fff',
               fontSize:'0.76rem', fontWeight:700, cursor:'pointer', fontFamily:SF,
               display:'flex', alignItems:'center', gap:'6px',
-              boxShadow:'0 4px 14px rgba(139,92,246,0.35)', opacity: loading?0.7:1 }}>
+              boxShadow:'var(--shadow-premium)', opacity: loading?0.7:1 }}>
             {loading
               ? <motion.div animate={{ rotate:360 }} transition={{ duration:0.8, repeat:Infinity, ease:'linear' }}
                   style={{ width:'11px', height:'11px', borderRadius:'50%',
@@ -739,7 +739,7 @@ export default function NeurologicalReport({ messages = [], userProfile, activeA
             <div style={{ display:'flex', gap:'12px' }}>
               {[['#8B5CF6','Stress emotions'],['#D946EF','Wellness emotions']].map(([c,l])=>(
                 <div key={l} style={{ display:'flex', alignItems:'center', gap:'5px' }}>
-                  <div style={{ width:'9px', height:'9px', borderRadius:'50%', background:c, boxShadow:`0 0 5px ${c}` }}/>
+                  <div style={{ width:'9px', height:'9px', borderRadius:'50%', background:c, boxShadow:'none' }}/>
                   <span style={{ fontSize:'0.62rem', color:'rgba(228,228,255,0.42)', fontFamily:SF }}>{l}</span>
                 </div>
               ))}
