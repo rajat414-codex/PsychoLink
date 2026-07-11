@@ -7,6 +7,7 @@ import {
 import {
   FaArrowUp, FaArrowDown, FaBrain, FaArrowRight, FaWind, FaRobot,
 } from 'react-icons/fa';
+import RobotAvatar from './RobotAvatar';
 
 const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
 const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
@@ -359,7 +360,7 @@ export default function DashboardHome({
             {/* Aura Core selector */}
             <Card delay={0.42} glow="#f43f5e" hover onClick={() => { setActiveAI('AURA'); setTab('chat'); }} style={{ padding:18 }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8, position:'relative', zIndex:2 }}>
-                <div style={{ width:36, height:36, borderRadius:10, background:'rgba(244,63,94,0.08)', border:'1px solid rgba(244,63,94,0.15)', display:'flex', alignItems:'center', justifyContent:'center', color:'#f43f5e' }}><FaBrain size={18}/></div>
+                <div style={{ width:36, height:36, borderRadius:10, background:'rgba(244,63,94,0.08)', border:'1px solid rgba(244,63,94,0.15)', display:'flex', alignItems:'center', justifyContent:'center' }}><RobotAvatar expression="smile" size="xs" glowColor="#f43f5e" /></div>
                 <div style={{ width:24, height:24, borderRadius:'50%', background:'rgba(244,63,94,0.08)', display:'flex', alignItems:'center', justifyContent:'center', color:'#f43f5e' }}><FaArrowRight size={8}/></div>
               </div>
               <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:800, fontSize:'1.1rem', color:'#fff' }}>Aura Core</p>
@@ -370,7 +371,7 @@ export default function DashboardHome({
             {/* Max Core selector */}
             <Card delay={0.48} glow="#14b8a6" hover onClick={() => { setActiveAI('MAX'); setTab('chat'); }} style={{ padding:18 }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8, position:'relative', zIndex:2 }}>
-                <div style={{ width:36, height:36, borderRadius:10, background:'rgba(20,184,166,0.08)', border:'1px solid rgba(20,184,166,0.15)', display:'flex', alignItems:'center', justifyContent:'center', color:'#14b8a6' }}><FaRobot size={18}/></div>
+                <div style={{ width:36, height:36, borderRadius:10, background:'rgba(20,184,166,0.08)', border:'1px solid rgba(20,184,166,0.15)', display:'flex', alignItems:'center', justifyContent:'center' }}><RobotAvatar expression="neutral" size="xs" glowColor="#14b8a6" /></div>
                 <div style={{ width:24, height:24, borderRadius:'50%', background:'rgba(20,184,166,0.08)', display:'flex', alignItems:'center', justifyContent:'center', color:'#14b8a6' }}><FaArrowRight size={8}/></div>
               </div>
               <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:800, fontSize:'1.1rem', color:'#fff' }}>Max Core</p>

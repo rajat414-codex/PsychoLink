@@ -18,6 +18,7 @@ import { FaVideo, FaPhone } from 'react-icons/fa';
 import ProgressDashboard from './ProgressDashboard';
 import { FaSpa, FaCrown } from 'react-icons/fa';
 import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast } from './ConsultantHub';
+import RobotAvatar from './RobotAvatar';
 
 
 const AURA_PROMPT = `You are AURA (Affective Understanding and Reflective AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Use gentle supportive language. Ask reflective questions. Detect emotional states: anxiety, depression, stress, loneliness. Suggest coping strategies. Never diagnose. Keep responses concise (2-4 sentences). Use occasional emojis 🌸 Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. Always respond with empathy first, then guidance.`;
@@ -558,8 +559,12 @@ export default function Home({ userProfile, onLogout }) {
           </motion.button>
  
           <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-            <motion.div animate={{ scale:[1,1.25,1], opacity:[0.7,1,0.7] }} transition={{ duration:2, repeat:Infinity }}
-              style={{ width:'6px', height:'6px', borderRadius:'50%', background:accent, transition:'background 0.5s' }}/>
+            {tab === 'chat' ? (
+              <RobotAvatar expression="smile" size="xs" glowColor={accent} style={{ marginRight: '4px' }} />
+            ) : (
+              <motion.div animate={{ scale:[1,1.25,1], opacity:[0.7,1,0.7] }} transition={{ duration:2, repeat:Infinity }}
+                style={{ width:'6px', height:'6px', borderRadius:'50%', background:accent, transition:'background 0.5s' }}/>
+            )}
             <span style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'0.96rem', color:'#fff' }}>
               {tab==='home'    ? 'Dashboard'
               :tab==='chat'    ? (activeAI==='AURA' ? 'Aura · Emotional AI' : 'Max · Cognitive AI')
@@ -638,6 +643,7 @@ export default function Home({ userProfile, onLogout }) {
                       <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}
                         style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'30px 20px' }}>
 
+                        <RobotAvatar expression="wink-smile" size="lg" glowColor={accent} style={{ marginBottom: '24px' }} />
                         <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'2.2rem', color:'#fff', marginBottom:'8px' }}>
                           {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : "Hello, I'm Max"}
                         </h2>
@@ -661,8 +667,11 @@ export default function Home({ userProfile, onLogout }) {
 
                     {messages.map((msg,i) => (
                       <motion.div key={i} initial={{ opacity:0, y:8, scale:0.98 }} animate={{ opacity:1, y:0, scale:1 }} transition={{ duration:0.25 }}
-                        style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start', alignItems:'flex-end', gap:'8px' }}>
+                        style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start', alignItems:'flex-end', gap:'12px' }}>
 
+                        {msg.role !== 'user' && (
+                          <RobotAvatar expression="smile" size="sm" glowColor={accent} style={{ marginBottom: '18px', flexShrink: 0 }} />
+                        )}
                         <div style={{ maxWidth:'72%' }}>
                           <div style={{ padding:'12px 16px', background:msg.role==='user'?`linear-gradient(135deg, ${accent}20, ${accent}0b)`:'var(--bg-card)', border:`1px solid ${msg.role==='user'?accent+'44':'var(--border-subtle)'}`, borderRadius:msg.role==='user'?'18px 18px 4px 18px':'18px 18px 18px 4px', color:'rgba(255,255,255,0.9)', fontSize:'0.88rem', lineHeight:'1.65', fontFamily:J, whiteSpace:'pre-wrap', boxShadow:msg.role==='user'?`0 8px 32px ${accent}0b, inset 0 1px 0 rgba(255,255,255,0.03)`:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
                             {msg.audioUrl ? (
@@ -691,7 +700,8 @@ export default function Home({ userProfile, onLogout }) {
                     ))}
 
                     {loading && (
-                      <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} style={{ display:'flex', alignItems:'flex-end', gap:'8px' }}>
+                      <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} style={{ display:'flex', alignItems:'flex-end', gap:'12px' }}>
+                        <RobotAvatar expression="wink" size="sm" glowColor={accent} isTyping={true} />
                         <TypingDots color={accent}/>
                       </motion.div>
                     )}

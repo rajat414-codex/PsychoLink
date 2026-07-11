@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useRef, useEffect } from 'react'
 import { API_BASE } from './config'
+import RobotAvatar from './RobotAvatar'
 
 function AIChatEngine({ user, setUser }) {
   // Check identity to deploy specific core
@@ -124,14 +125,14 @@ function AIChatEngine({ user, setUser }) {
 
             {/* Visual AI Eye Pulse Node */}
             <div style={{ background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(30px)', border: `1px solid ${ai.color}30`, padding: '30px 20px', borderRadius: '28px', textAlign: 'center' }}>
-              <motion.div
-                animate={{ scale: [1, 1.05, 1], boxShadow:'var(--shadow-premium)' }}
-                transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
-                style={{ width: '70px', height: '70px', borderRadius: '50%', background: '#000', border: `2px solid ${ai.color}`, margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-              >
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fff', boxShadow:'none' }} />
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fff', boxShadow:'none' }} />
-              </motion.div>
+              <div style={{ marginBottom: '16px' }}>
+                <RobotAvatar
+                  expression={error ? 'dizzy' : isTyping ? 'wink' : 'smile'}
+                  size="md"
+                  glowColor={ai.color}
+                  isTyping={isTyping}
+                />
+              </div>
               <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', letterSpacing: '1px' }}>{ai.name} AVATAR LIVE</h4>
               <p style={{ margin: 0, color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', fontWeight: '600' }}>SECURE COGNITIVE FEED</p>
             </div>
