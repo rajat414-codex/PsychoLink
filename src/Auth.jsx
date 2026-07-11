@@ -5,6 +5,7 @@ import { API_BASE } from './config';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple, FaPhoneAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaEnvelope, FaChevronRight, FaPlus } from 'react-icons/fa';
 import humanAiCreation from './assets/human_ai_creation.png';
+import RobotAvatar from './RobotAvatar';
 
 
 const Spinner = ({ color='#8b87f5', size=22 }) => (
@@ -1486,53 +1487,18 @@ export default function Auth({ onComplete }) {
 
             {/* Character */}
             <motion.div animate={{ y:[0,-8,0] }} transition={{ duration:5, repeat:Infinity, ease:'easeInOut' }}
-              style={{ position:'relative', zIndex:5, display:'flex', flexDirection:'column', alignItems:'center' }}>
-              {/* Antenna */}
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:'-10px', position:'relative', zIndex:6 }}>
-                <motion.div animate={{ scale:eyes==='laughing'?[1,1.15,1]:[1,1.04,1], filter:activeAI==='AURA'?'drop-shadow(0 4px 10px rgba(224,82,77,0.5))':'drop-shadow(0 4px 10px rgba(94,184,173,0.5))' }} transition={{ duration:2, repeat:Infinity }}
-                  style={{ width:'30px', height:'30px', borderRadius:'50%', background:'radial-gradient(circle at 35% 35%,#ffffff,#f1f5f9 50%,#cbd5e1)', boxShadow:'inset -2px -2px 8px rgba(0,0,0,0.15)' }}/>
-                <div style={{ width:'12px', height:'18px', marginTop:'-4px', background:activeAI==='AURA'?'linear-gradient(to bottom,#ffffff,rgba(224,82,77,0.4))':'linear-gradient(to bottom,#ffffff,rgba(94,184,173,0.4))', borderRadius:'3px 3px 0 0', opacity:0.9, transition:'all 0.5s' }}/>
-              </div>
-              {/* Head */}
-              <div style={{ width:'240px', height:'204px', borderRadius:'50% 50% 46% 46%/56% 56% 44% 44%', background:'linear-gradient(135deg,#f8fafc,#edf2f7 35%,#cbd5e1 75%,#94a3b8)', position:'relative', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 35px 64px rgba(0,0,0,0.5),inset 0 13px 20px #ffffff,inset 0 -11px 24px rgba(148,163,184,0.35)', zIndex:4 }}>
-                <div style={{ position:'absolute', left:'-13px', width:'32px', height:'54px', borderRadius:'50% 30% 30% 50%/50% 40% 40% 50%', background:activeAI==='AURA'?'linear-gradient(135deg,rgba(255,255,255,0.9),#e0524d)':'linear-gradient(135deg,rgba(255,255,255,0.9),#5eb8ad)', boxShadow:'-5px 7px 13px rgba(0,0,0,0.2)' }}/>
-                <div style={{ position:'absolute', right:'-13px', width:'32px', height:'54px', borderRadius:'30% 50% 50% 30%/40% 50% 50% 40%', background:activeAI==='AURA'?'linear-gradient(135deg,rgba(255,255,255,0.9),#e0524d)':'linear-gradient(135deg,rgba(255,255,255,0.9),#5eb8ad)', boxShadow:'5px 7px 13px rgba(0,0,0,0.2)' }}/>
-                <div style={{ width:'184px', height:'124px', borderRadius:'50% 50% 45% 45%/58% 58% 42% 42%', background:'radial-gradient(circle at 50% 30%,#ffffff,#f8fafc 65%,#f1f5f9)', display:'flex', alignItems:'center', justifyContent:'center', gap:'34px', position:'relative', boxShadow:'inset 0 10px 18px rgba(148,163,184,0.4)' }}>
-                  <div style={{ position:'absolute', top:'4px', left:'16px', width:'152px', height:'34px', background:'linear-gradient(to bottom,rgba(255,255,255,0.9),transparent)', borderRadius:'50% 50% 20% 20%/80% 80% 20% 20%', opacity:0.7 }}/>
-                  <div style={{ position:'absolute', left:'19px', bottom:'30px', width:'24px', height:'11px', background:activeAI==='AURA'?'radial-gradient(circle,rgba(224,82,77,0.55),transparent 70%)':'radial-gradient(circle,rgba(94,184,173,0.4),transparent 70%)', filter:'blur(1px)' }}/>
-                  <div style={{ position:'absolute', right:'19px', bottom:'30px', width:'24px', height:'11px', background:activeAI==='AURA'?'radial-gradient(circle,rgba(224,82,77,0.55),transparent 70%)':'radial-gradient(circle,rgba(94,184,173,0.4),transparent 70%)', filter:'blur(1px)' }}/>
-                  <AnimatePresence mode="wait">
-                    {eyes==='normal' ? (
-                      [0,1].map(i=>(
-                        <motion.div key={`en${i}`} animate={{ scaleY:[1,1.05,1] }} transition={{ duration:4, repeat:Infinity, delay:i*0.16 }}
-                          style={{ width:'20px', height:'30px', borderRadius:'50%', backgroundColor:'#0f172a', position:'relative', boxShadow:'inset -2px -2px 5px rgba(0,0,0,0.6)' }}>
-                          <div style={{ position:'absolute', top:'5px', left:'5px', width:'6px', height:'6px', borderRadius:'50%', backgroundColor:'#fff', opacity:0.95 }}/>
-                        </motion.div>
-                      ))
-                    ) : (
-                      [0,1].map(i=>(
-                        <motion.div key={`el${i}`} initial={{ opacity:0,scaleY:0.1 }} animate={{ opacity:1,scaleY:1 }} style={{ width:'32px', height:'22px' }}>
-                          <svg width="32" height="22" viewBox="0 0 40 28" fill="none"><path d="M5 24C12 8 28 8 35 24" stroke="#0f172a" strokeWidth="7" strokeLinecap="round"/></svg>
-                        </motion.div>
-                      ))
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-              {/* Body */}
-              <div style={{ width:'136px', height:'116px', marginTop:'-18px', position:'relative', zIndex:2, display:'flex', flexDirection:'column', alignItems:'center' }}>
-                <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,#edf2f7,#cbd5e1 70%,#94a3b8)', borderRadius:'45% 45% 35% 35%/30% 30% 70% 70%', boxShadow:'0 20px 36px rgba(0,0,0,0.3),inset 0 8px 11px #ffffff' }}/>
-                <div style={{ position:'absolute', bottom:'-10px', width:'117px', height:'27px', background:'linear-gradient(to bottom,#ffffff,#e2e8f0)', borderRadius:'0 0 30px 30px', zIndex:1, boxShadow:'0 12px 20px rgba(0,0,0,0.2)' }}/>
-                <div style={{ position:'absolute', left:'-11px', top:'38px', width:'19px', height:'42px', background:'#ffffff', borderRadius:'11px 3px 5px 13px', transform:'rotate(12deg)', boxShadow:'-3px 4px 7px rgba(0,0,0,0.12)' }}/>
-                <div style={{ position:'absolute', right:'-11px', top:'38px', width:'19px', height:'42px', background:'#ffffff', borderRadius:'3px 11px 13px 5px', transform:'rotate(-12deg)', boxShadow:'3px 4px 7px rgba(0,0,0,0.12)' }}/>
-                <div style={{ position:'relative', zIndex:3, marginTop:'20px', width:'62px', height:'62px', borderRadius:'50%', background:'#edf2f7', border:'1px solid #cbd5e1', display:'flex', alignItems:'center', justifyContent: 'center', boxShadow:'inset 0 4px 8px rgba(148,163,184,0.5)' }}>
-                  <div style={{ width:'20px', height:'20px', borderRadius:'50%', background:'#ffffff', border:'1px solid #cbd5e1', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <div style={{ width:'4px', height:'4px', borderRadius:'50%', backgroundColor:activeAI==='AURA'?'#e0524d':'#5eb8ad', transition:'all 0.5s' }}/>
-                  </div>
-                  {[['top','4px'],['bottom','4px']].map(([p,v],i)=><div key={i} style={{ position:'absolute', [p]:v, width:'13px', height:'4px', background:'#cbd5e1', borderRadius:'2px' }}/>)}
-                  {[['left','4px'],['right','4px']].map(([p,v],i)=><div key={i} style={{ position:'absolute', [p]:v, width:'4px', height:'13px', background:'#cbd5e1', borderRadius:'2px' }}/>)}
-                </div>
-              </div>
+              style={{ position:'relative', zIndex:5, display:'flex', flexDirection:'column', alignItems:'center', margin: '20px 0' }}>
+              <RobotAvatar
+                expression={
+                  activeAI === 'AURA'
+                    ? (eyes === 'laughing' ? 'wink-smile' : 'smile')
+                    : (eyes === 'laughing' ? 'smile' : 'neutral')
+                }
+                size="lg"
+                glowColor={activeAI === 'AURA' ? '#f43f5e' : '#14b8a6'}
+                isTyping={eyes === 'normal'}
+              />
+            </motion.div>
               {/* Email pill */}
               {selectedProfile && (
                 <motion.div initial={{ opacity:0,y:8 }} animate={{ opacity:1,y:0 }} transition={{ delay:0.5 }}
@@ -1550,7 +1516,6 @@ export default function Auth({ onComplete }) {
                     style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#56a06f', boxShadow:'0 0 7px #56a06f', marginLeft:'3px' }}/>
                 </motion.div>
               )}
-            </motion.div>
 
             {/* Conversation node */}
             <motion.div key={dialogue} initial={{ opacity:0,y:12 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.6 }}
