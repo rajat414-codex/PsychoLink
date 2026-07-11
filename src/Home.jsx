@@ -643,7 +643,7 @@ export default function Home({ userProfile, onLogout }) {
                       <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}
                         style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'30px 20px' }}>
 
-                        <RobotAvatar expression="wink-smile" size="lg" glowColor={accent} style={{ marginBottom: '24px' }} />
+                        <RobotAvatar expression="happy" size="lg" glowColor={accent} style={{ marginBottom: '24px' }} />
                         <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'2.2rem', color:'#fff', marginBottom:'8px' }}>
                           {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : "Hello, I'm Max"}
                         </h2>

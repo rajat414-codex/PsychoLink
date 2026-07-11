@@ -127,7 +127,7 @@ function AIChatEngine({ user, setUser }) {
             <div style={{ background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(30px)', border: `1px solid ${ai.color}30`, padding: '30px 20px', borderRadius: '28px', textAlign: 'center' }}>
               <div style={{ marginBottom: '16px' }}>
                 <RobotAvatar
-                  expression={error ? 'dizzy' : isTyping ? 'wink' : 'smile'}
+                  expression={error ? 'dizzy' : isTyping ? 'happy' : 'smile'}
                   size="md"
                   glowColor={ai.color}
                   isTyping={isTyping}

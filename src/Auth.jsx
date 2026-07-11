@@ -1489,11 +1489,7 @@ export default function Auth({ onComplete }) {
             <motion.div animate={{ y:[0,-8,0] }} transition={{ duration:5, repeat:Infinity, ease:'easeInOut' }}
               style={{ position:'relative', zIndex:5, display:'flex', flexDirection:'column', alignItems:'center', margin: '20px 0' }}>
               <RobotAvatar
-                expression={
-                  activeAI === 'AURA'
-                    ? (eyes === 'laughing' ? 'wink-smile' : 'smile')
-                    : (eyes === 'laughing' ? 'smile' : 'neutral')
-                }
+                expression={eyes === 'laughing' ? 'happy' : 'smile'}
                 size="lg"
                 glowColor={activeAI === 'AURA' ? '#f43f5e' : '#14b8a6'}
                 isTyping={eyes === 'normal'}
