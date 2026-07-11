@@ -1,92 +1,91 @@
 import React from 'react';
 
 /**
- * Premium 3D AI Robot Avatar — "Faw" IP Design Style
- * 
- * Large astronaut-helmet head with dark visor, glowing teardrop eyes,
- * small curved smile, glossy white body, stubby rounded arms & legs.
- * 
- * Aura = pink glow | Max = cyan glow
+ * 3D Claymorphism AI Astronaut Mascot Avatar
+ * Inspired by high-fidelity 3D mascot aesthetics (Oppo Space Mascot)
  */
 export default function RobotAvatar({
-  expression = 'smile',
-  size = 'md',
-  glowColor = '#f43f5e',
+  expression = 'smile', // neutral, wink, smile, wink-smile, happy, sleep, dizzy, sad, cry
+  size = 'md',          // lg, md, sm, xs
+  glowColor = '#f43f5e', // Aura (pink) or Max (teal) or custom
   isTyping = false,
   className = '',
   style = {}
 }) {
-  const isAura =
-    glowColor.toLowerCase() === '#f43f5e' ||
-    glowColor.toLowerCase() === '#fda4af' ||
+  // Determine if Aura character (pink theme) or Max character (cyan/blue theme)
+  const isAura = 
+    glowColor.toLowerCase() === '#f43f5e' || 
+    glowColor.toLowerCase() === '#fda4af' || 
     glowColor.toLowerCase() === '#e0524d' ||
     glowColor.toLowerCase().includes('rose') ||
     glowColor.toLowerCase().includes('pink');
 
+  // Dimension mapping for the responsive container
   const sizes = {
-    lg: { w: 150, h: 160, vb: '0 0 200 220', showBody: true },
-    md: { w: 110, h: 118, vb: '0 0 200 220', showBody: true },
-    sm: { w: 60,  h: 56,  vb: '15 5 170 110', showBody: false },
-    xs: { w: 34,  h: 32,  vb: '15 5 170 110', showBody: false },
+    lg: { width: 140, height: 140, showBody: true, viewBox: '10 8 100 112' },
+    md: { width: 100, height: 100, showBody: true, viewBox: '10 8 100 112' },
+    sm: { width: 64,  height: 64,  showBody: false, viewBox: '10 8 100 86' },
+    xs: { width: 36,  height: 36,  showBody: false, viewBox: '10 8 100 86' }
   };
-  const d = sizes[size] || sizes.md;
 
-  // Theme
-  const accent = isAura ? '#f43f5e' : '#38bdf8';
-  const accentLight = isAura ? '#fb7185' : '#7dd3fc';
-  const glow = isAura ? '#f43f5e' : '#0ea5e9';
+  const dim = sizes[size] || sizes.md;
 
-  /* ── helpers ─────────────────────────────────────── */
+  // Theme colors based on Aura/Max profile
+  const accentColor = isAura ? '#f43f5e' : '#14b8a6';
+  const foreheadGemColor = isAura ? '#fca5a5' : '#5eead4';
+  const glowHex = isAura ? '#f43f5e' : '#06b6d4';
 
-  const Eyes = () => {
+  const renderEyes = () => {
     switch (expression) {
       case 'happy':
         return (
           <>
-            <path d="M 68 62 Q 78 48 88 62" stroke={accent} strokeWidth="6" strokeLinecap="round" fill="none" className="rv-glow" />
-            <path d="M 112 62 Q 122 48 132 62" stroke={accent} strokeWidth="6" strokeLinecap="round" fill="none" className="rv-glow" />
+            {/* Happy arch eyes ^ ^ */}
+            <path d="M 38 52 Q 45 42 52 52" stroke="#1c1e24" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+            <path d="M 68 52 Q 75 42 82 52" stroke="#1c1e24" strokeWidth="4.5" strokeLinecap="round" fill="none" />
           </>
         );
       case 'sleep':
         return (
           <>
-            <line x1="68" y1="58" x2="88" y2="58" stroke={accent} strokeWidth="5" strokeLinecap="round" className="rv-glow" />
-            <line x1="112" y1="58" x2="132" y2="58" stroke={accent} strokeWidth="5" strokeLinecap="round" className="rv-glow" />
+            {/* Sleeping straight line eyes */}
+            <line x1="39" y1="50" x2="49" y2="50" stroke="#1c1e24" strokeWidth="4.5" strokeLinecap="round" />
+            <line x1="71" y1="50" x2="81" y2="50" stroke="#1c1e24" strokeWidth="4.5" strokeLinecap="round" />
           </>
         );
       case 'dizzy':
         return (
           <>
-            <path d="M 70 50 L 86 66 M 86 50 L 70 66" stroke={accent} strokeWidth="5" strokeLinecap="round" className="rv-glow" />
-            <path d="M 114 50 L 130 66 M 130 50 L 114 66" stroke={accent} strokeWidth="5" strokeLinecap="round" className="rv-glow" />
+            {/* X X eyes */}
+            <path d="M 40 46 L 48 54 M 48 46 L 40 54" stroke="#1c1e24" strokeWidth="3.5" strokeLinecap="round" />
+            <path d="M 72 46 L 80 54 M 80 46 L 72 54" stroke="#1c1e24" strokeWidth="3.5" strokeLinecap="round" />
           </>
         );
       case 'sad':
         return (
           <>
-            {/* Droopy teardrop eyes */}
-            <path d="M 78 48 C 78 48, 68 56, 74 66 C 78 72, 84 68, 82 60 C 81 54, 78 48, 78 48 Z" fill={accent} className="rv-glow" />
-            <path d="M 122 48 C 122 48, 112 56, 118 66 C 122 72, 128 68, 126 60 C 125 54, 122 48, 122 48 Z" fill={accent} className="rv-glow" />
+            {/* Sad tilted vertical pill eyes */}
+            <rect x="42" y="44" width="7" height="14" rx="3.5" fill="#1c1e24" transform="rotate(10, 45.5, 51)" />
+            <rect x="71" y="44" width="7" height="14" rx="3.5" fill="#1c1e24" transform="rotate(-10, 74.5, 51)" />
           </>
         );
       case 'wink':
       case 'wink-smile':
         return (
           <>
-            {/* Left: full teardrop eye */}
-            <path d="M 78 46 C 78 46, 66 56, 72 68 C 76 74, 84 70, 84 62 C 84 54, 78 46, 78 46 Z" fill={accent} className="rv-glow" />
-            {/* Right: happy arch wink */}
-            <path d="M 112 62 Q 122 50 132 62" stroke={accent} strokeWidth="6" strokeLinecap="round" fill="none" className="rv-glow" />
+            {/* Left eye vertical pill, right eye winking curve */}
+            <rect x="43" y="44" width="7" height="14" rx="3.5" fill="#1c1e24" />
+            <path d="M 70 51 Q 75 56 80 51" stroke="#1c1e24" strokeWidth="4.5" strokeLinecap="round" fill="none" />
           </>
         );
       case 'cry':
         return (
           <>
-            <path d="M 78 46 C 78 46, 66 56, 72 68 C 76 74, 84 70, 84 62 C 84 54, 78 46, 78 46 Z" fill={accent} className="rv-glow" />
-            <path d="M 122 46 C 122 46, 110 56, 116 68 C 120 74, 128 70, 128 62 C 128 54, 122 46, 122 46 Z" fill={accent} className="rv-glow" />
-            {/* Tear drops */}
-            <path d="M 75 74 Q 76 82 75 90" stroke="#60a5fa" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.8" />
-            <path d="M 125 74 Q 126 82 125 90" stroke="#60a5fa" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.8" />
+            {/* Crying eyes (vertical pills + blue teardrops) */}
+            <rect x="43" y="44" width="7" height="14" rx="3.5" fill="#1c1e24" />
+            <rect x="70" y="44" width="7" height="14" rx="3.5" fill="#1c1e24" />
+            <path d="M 46.5 58 L 46.5 70" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M 73.5 58 L 73.5 70" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" />
           </>
         );
       case 'neutral':
@@ -94,182 +93,214 @@ export default function RobotAvatar({
       default:
         return (
           <>
-            {/* Teardrop-shaped eyes (signature Faw look) */}
-            <path d="M 78 46 C 78 46, 66 56, 72 68 C 76 74, 84 70, 84 62 C 84 54, 78 46, 78 46 Z" fill={accent} className="rv-glow" />
-            <path d="M 122 46 C 122 46, 110 56, 116 68 C 120 74, 128 70, 128 62 C 128 54, 122 46, 122 46 Z" fill={accent} className="rv-glow" />
+            {/* Cute vertical pill eyes */}
+            <rect x="43" y="44" width="7" height="14" rx="3.5" fill="#1c1e24" />
+            <rect x="70" y="44" width="7" height="14" rx="3.5" fill="#1c1e24" />
           </>
         );
     }
   };
 
-  const Mouth = () => {
+  const renderMouth = () => {
     switch (expression) {
       case 'neutral':
       case 'sleep':
-        return <line x1="93" y1="82" x2="107" y2="82" stroke={accent} strokeWidth="3.5" strokeLinecap="round" className="rv-glow" />;
+        return (
+          // Tiny neutral horizontal line
+          <line x1="57" y1="65" x2="63" y2="65" stroke={accentColor} strokeWidth="2.5" strokeLinecap="round" />
+        );
       case 'sad':
       case 'cry':
-        return <path d="M 92 86 Q 100 78 108 86" stroke={accent} strokeWidth="3.5" strokeLinecap="round" fill="none" className="rv-glow" />;
-      case 'dizzy':
-        return <circle cx="100" cy="84" r="5" fill={accent} className="rv-glow" />;
+        return (
+          // Tiny sad downward curve
+          <path d="M 56 67 Q 60 64 64 67" stroke={accentColor} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        );
+      case 'happy':
+      case 'smile':
+      case 'wink':
+      case 'wink-smile':
       default:
-        return <path d="M 92 80 Q 100 90 108 80" stroke={accent} strokeWidth="3.5" strokeLinecap="round" fill="none" className="rv-glow" />;
+        return (
+          // Tiny happy upward smile
+          <path d="M 56 64 Q 60 67.5 64 64" stroke={accentColor} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+        );
     }
   };
 
+  // Determine gradients to map dynamically
+  const headGrad = isAura ? 'url(#auraHeadGrad)' : 'url(#maxHeadGrad)';
+  const earGrad = isAura ? 'url(#auraEarGrad)' : 'url(#maxEarGrad)';
+
   return (
-    <div
-      className={`robot-avatar ${className}`}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: d.w,
-        height: d.h,
-        position: 'relative',
-        ...style,
+    <div 
+      className={`mascot-avatar-container ${className}`} 
+      style={{ 
+        display: 'inline-flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        width: `${dim.width}px`, 
+        height: `${dim.height}px`,
+        position: 'relative', 
+        filter: `drop-shadow(0 6px 12px rgba(0,0,0,0.16)) drop-shadow(0 0 12px ${glowHex}22)`,
+        ...style 
       }}
     >
       <style>{`
-        @keyframes rv-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-        @keyframes rv-shake{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-1.5px) rotate(-1.2deg)}75%{transform:translateY(1.5px) rotate(1.2deg)}}
-        @keyframes rv-wave{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-18deg)}}
-        .rv-bob{animation:${isTyping ? 'rv-shake .45s ease-in-out infinite' : 'rv-bob 3.8s ease-in-out infinite'}}
-        .rv-wave{transform-origin:148px 142px;animation:rv-wave 1.4s ease-in-out infinite}
-        .rv-glow{filter:drop-shadow(0 0 3px ${glow}) drop-shadow(0 0 8px ${glow}aa)}
+        @keyframes mascot-bob {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-3.5px); }
+        }
+        @keyframes mascot-shake {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          25% { transform: translateY(-1px) rotate(-0.8deg); }
+          75% { transform: translateY(1px) rotate(0.8deg); }
+        }
+        @keyframes mascot-arm-wave {
+          0%, 100% { transform: rotate(0deg); }
+          50% { transform: rotate(-12deg); }
+        }
+        .mascot-head-group {
+          transform-origin: 60px 80px;
+          animation: ${isTyping ? 'mascot-shake 0.5s ease-in-out infinite' : 'mascot-bob 4s ease-in-out infinite'};
+        }
+        .mascot-waving-arm {
+          transform-origin: 88px 94px;
+          animation: mascot-arm-wave 1.6s ease-in-out infinite;
+        }
       `}</style>
 
-      <svg viewBox={d.vb} style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+      <svg 
+        viewBox={dim.viewBox} 
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          display: 'block',
+          overflow: 'visible' 
+        }}
+      >
         <defs>
-          {/* Glossy white body gradient */}
-          <radialGradient id="rvBody" cx="40%" cy="30%" r="70%">
+          {/* Aura Head Gradient: White and Light Pink */}
+          <linearGradient id="auraHeadGrad" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="60%" stopColor="#f1f5f9" />
-            <stop offset="100%" stopColor="#cbd5e1" />
-          </radialGradient>
+            <stop offset="45%" stopColor="#fff2f5" />
+            <stop offset="100%" stopColor="#fbcfe8" />
+          </linearGradient>
 
-          {/* Helmet gradient */}
-          <radialGradient id="rvHelmet" cx="35%" cy="25%" r="75%">
+          {/* Max Head Gradient: White and Light Cyan/Blue */}
+          <linearGradient id="maxHeadGrad" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="45%" stopColor="#f0fdff" />
+            <stop offset="100%" stopColor="#bae6fd" />
+          </linearGradient>
+
+          {/* Suit Torso Gradient */}
+          <linearGradient id="suitGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#e2e8f0" />
+          </linearGradient>
+
+          {/* Metal Gradients for Straps & Rings */}
+          <linearGradient id="metalGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#cbd5e1" />
             <stop offset="50%" stopColor="#f8fafc" />
-            <stop offset="100%" stopColor="#c8cdd5" />
-          </radialGradient>
+            <stop offset="100%" stopColor="#94a3b8" />
+          </linearGradient>
 
-          {/* Visor dark gradient */}
-          <radialGradient id="rvVisor" cx="45%" cy="35%" r="65%">
-            <stop offset="0%" stopColor="#1e293b" />
-            <stop offset="100%" stopColor="#070a10" />
-          </radialGradient>
-
-          {/* Subtle arm highlight */}
-          <linearGradient id="rvArm" x1="0" y1="0" x2="1" y2="1">
+          {/* Aura Ears Gradient */}
+          <linearGradient id="auraEarGrad" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="100%" stopColor="#d1d5db" />
+            <stop offset="100%" stopColor="#fbcfe8" />
+          </linearGradient>
+
+          {/* Max Ears Gradient */}
+          <linearGradient id="maxEarGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#bae6fd" />
+          </linearGradient>
+
+          {/* Forehead Gem Gradient */}
+          <linearGradient id="gemGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor={foreheadGemColor} />
           </linearGradient>
         </defs>
 
-        {/* ── Body & Limbs (lg / md only) ── */}
-        {d.showBody && (
+        {/* 1. Neck and Body (torso representation) - Only for lg and md */}
+        {dim.showBody && (
           <g>
-            {/* ── Base glow ── */}
-            <ellipse cx="100" cy="212" rx="30" ry="4" fill={glow} opacity="0.18" className="rv-glow" />
-
-            {/* ── Left leg ── */}
-            <ellipse cx="84" cy="200" rx="12" ry="18" fill="url(#rvBody)" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-
-            {/* ── Right leg ── */}
-            <ellipse cx="116" cy="200" rx="12" ry="18" fill="url(#rvBody)" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-
-            {/* ── Torso (rounded pear) ── */}
-            <path
-              d="M 68 130 C 58 140, 54 170, 60 195 C 64 206, 80 210, 100 210 C 120 210, 136 206, 140 195 C 146 170, 142 140, 132 130 Z"
-              fill="url(#rvBody)"
-              stroke="rgba(0,0,0,0.05)"
-              strokeWidth="0.5"
+            {/* Neck Collar */}
+            <ellipse cx="60" cy="94" rx="18" ry="4.5" fill="url(#metalGrad)" stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" />
+            
+            {/* Suit Torso */}
+            <path 
+              d="M 37 94 C 37 94, 30 100, 30 120 L 90 120 C 90 100, 83 94, 83 94 Z" 
+              fill="url(#suitGrad)" 
+              stroke="rgba(0,0,0,0.05)" 
+              strokeWidth="0.5" 
             />
 
-            {/* Body 3D shine */}
-            <path d="M 72 145 C 72 145, 78 138, 94 136" stroke="#ffffff" strokeWidth="3" fill="none" opacity="0.6" strokeLinecap="round" />
+            {/* Silver shoulder straps */}
+            <path d="M 37 94 C 39 101, 44 105, 49 105" stroke="url(#metalGrad)" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M 83 94 C 81 101, 76 105, 71 105" stroke="url(#metalGrad)" strokeWidth="2" fill="none" strokeLinecap="round" />
 
-            {/* ── Left arm ── */}
-            <path
-              d="M 66 138 C 50 142, 40 158, 44 176 C 48 176, 54 160, 60 148 Z"
-              fill="url(#rvArm)"
-              stroke="rgba(0,0,0,0.04)"
-              strokeWidth="0.5"
-            />
-            {/* Left hand bulb */}
-            <circle cx="43" cy="176" r="7" fill="url(#rvArm)" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-
-            {/* ── Right arm (waving when wink-smile/happy) ── */}
-            {expression === 'wink-smile' || expression === 'happy' ? (
-              <g className="rv-wave">
-                <path
-                  d="M 134 138 C 150 130, 164 116, 168 100 C 164 98, 156 112, 146 130 Z"
-                  fill="url(#rvArm)"
-                  stroke="rgba(0,0,0,0.04)"
-                  strokeWidth="0.5"
-                />
-                <circle cx="168" cy="100" r="7" fill="url(#rvArm)" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
+            {/* Left Arm */}
+            <path d="M 33 94 C 26 99, 24 110, 28 120" stroke="url(#suitGrad)" strokeWidth="8" strokeLinecap="round" fill="none" />
+            
+            {/* Right Arm (Waving or Default) */}
+            {expression === 'wink-smile' ? (
+              <g className="mascot-waving-arm">
+                <path d="M 87 94 C 95 91, 102 81, 100 70" stroke="url(#suitGrad)" strokeWidth="8" strokeLinecap="round" fill="none" />
               </g>
             ) : (
-              <>
-                <path
-                  d="M 134 138 C 150 142, 160 158, 156 176 C 152 176, 146 160, 140 148 Z"
-                  fill="url(#rvArm)"
-                  stroke="rgba(0,0,0,0.04)"
-                  strokeWidth="0.5"
-                />
-                <circle cx="157" cy="176" r="7" fill="url(#rvArm)" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-              </>
+              <path d="M 87 94 C 94 99, 96 110, 92 120" stroke="url(#suitGrad)" strokeWidth="8" strokeLinecap="round" fill="none" />
             )}
+
+            {/* Chest Center Panel */}
+            <rect x="49" y="99" width="22" height="19" rx="3" fill="rgba(255,255,255,0.4)" stroke="url(#metalGrad)" strokeWidth="0.8" />
+            {/* EQ logo instead of Oppo to make it custom */}
+            <text x="60" y="111" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif" fill={accentColor} textAnchor="middle" letterSpacing="0.4">EQ</text>
+
+            {/* Belt strap */}
+            <rect x="40" y="115" width="40" height="3" rx="1.5" fill="url(#metalGrad)" />
+            <circle cx="46" cy="116.5" r="1" fill={accentColor} />
+            <circle cx="74" cy="116.5" r="1" fill={accentColor} />
+            <rect x="50" y="115.5" width="20" height="2" rx="1" fill={accentColor} />
           </g>
         )}
 
-        {/* ── Head group (bobbing) ── */}
-        <g className="rv-bob">
-          {/* ── Helmet shell ── */}
-          <ellipse
-            cx="100" cy="62"
-            rx="66" ry="56"
-            fill="url(#rvHelmet)"
-            stroke="rgba(255,255,255,0.9)"
-            strokeWidth="1"
+        {/* 2. Mascot Head & Face elements (Bobbing Group) */}
+        <g className="mascot-head-group">
+          {/* Side Bulbous Ears */}
+          <ellipse cx="17" cy="52" rx="6.5" ry="9" fill={earGrad} stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" />
+          <ellipse cx="103" cy="52" rx="6.5" ry="9" fill={earGrad} stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" />
+
+          {/* Main Teardrop Head Shape */}
+          <path 
+            d="M 60 12 C 73 12, 100 28, 100 52 C 100 74, 82 92, 60 92 C 38 92, 20 74, 20 52 C 20 28, 47 12, 60 12 Z" 
+            fill={headGrad} 
+            stroke="rgba(255, 255, 255, 0.9)" 
+            strokeWidth="0.75" 
           />
 
-          {/* Helmet 3D shine highlight */}
-          <path
-            d="M 52 38 C 60 24, 82 18, 108 20"
-            stroke="#ffffff"
-            strokeWidth="4"
-            fill="none"
-            opacity="0.55"
-            strokeLinecap="round"
+          {/* 3D Highlight Curve on Head */}
+          <path 
+            d="M 30 52 C 30 35, 45 22, 60 22" 
+            stroke="#ffffff" 
+            strokeWidth="2.5" 
+            fill="none" 
+            opacity="0.5" 
+            strokeLinecap="round" 
           />
 
-          {/* ── Visor (large dark face screen) ── */}
-          <ellipse
-            cx="100" cy="64"
-            rx="52" ry="44"
-            fill="url(#rvVisor)"
-            stroke="rgba(0,0,0,0.15)"
-            strokeWidth="1.5"
-          />
+          {/* Forehead Diamond Gem */}
+          <polygon points="60,25 62,28 60,31 58,28" fill="url(#gemGrad)" opacity="0.85" />
+          <circle cx="59.6" cy="27" r="0.5" fill="#ffffff" opacity="0.9" />
 
-          {/* Visor subtle inner edge highlight */}
-          <ellipse
-            cx="100" cy="64"
-            rx="49" ry="41"
-            fill="none"
-            stroke="rgba(255,255,255,0.04)"
-            strokeWidth="1"
-          />
-
-          {/* ── Eyes ── */}
-          <Eyes />
-
-          {/* ── Mouth ── */}
-          <Mouth />
+          {/* Eyes and Mouth */}
+          <g>
+            {renderEyes()}
+            {renderMouth()}
+          </g>
         </g>
       </svg>
     </div>
