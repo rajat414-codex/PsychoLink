@@ -13,8 +13,8 @@ export default function RobotAvatar({
   className = '',
   style = {}
 }) {
-  // Map standard sizes to pixel dimensions
-  const sizeMap = { lg: 160, md: 100, sm: 48, xs: 28 };
+  // Map standard sizes to pixel dimensions (scaled up for more impact)
+  const sizeMap = { lg: 240, md: 140, sm: 64, xs: 36 };
   const d = sizeMap[size] || sizeMap.md;
 
   const isSleep = expression === 'sleep';
@@ -68,25 +68,30 @@ export default function RobotAvatar({
     const scale = d / 100;
     
     return {
-      // Layer 1: Dense, main color dots
-      layer1: generateSphereShadows(Math.floor(500 * scale), d/2 - 2, activeColor),
-      // Layer 2: Sparse, slightly smaller pure white bright dots
-      layer2: generateSphereShadows(Math.floor(150 * scale), d/2 - 3, '#ffffff'),
-      // Layer 3: Inner volume dots
-      layer3: generateSphereShadows(Math.floor(250 * scale), d/2 - 6, activeColor),
+      // Layer 1: Super dense, main color dots (Front/edge mostly)
+      layer1: generateSphereShadows(Math.floor(2000 * scale), d/2 - 2, activeColor),
+      // Layer 2: Ultra bright white stars
+      layer2: generateSphereShadows(Math.floor(600 * scale), d/2 - 3, '#ffffff'),
+      // Layer 3: Inner volume, blurred for depth of field
+      layer3: generateSphereShadows(Math.floor(1200 * scale), d/2 - 6, activeColor),
     };
   }, [d, activeColor]);
 
   return (
-    <div className={`ai-particle-sphere ${className}`} style={{
-      width: d, height: d,
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: '50%',
-      ...style
-    }}>
+    <motion.div 
+      className={`ai-particle-sphere ${className}`}
+      animate={{ scale: isSleep ? [0.95, 1, 0.95] : [1, 1.03, 1] }}
+      transition={{ duration: pulseDuration * 2, repeat: Infinity, ease: "easeInOut" }}
+      style={{
+        width: d, height: d,
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '50%',
+        ...style
+      }}
+    >
       
       {/* Container Glowing Rim (Matches the bright edge in the user's reference) */}
       <motion.div
@@ -105,28 +110,28 @@ export default function RobotAvatar({
         }}
       />
 
-      {/* Rotating Particle Layers Container */}
-      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden', zIndex: 2 }}>
+      {/* Rotating Particle Layers Container (mix-blend-mode for insane brightness on overlaps) */}
+      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden', zIndex: 2, mixBlendMode: 'screen' }}>
         
         {/* Layer 1: Main color */}
         <motion.div
           animate={{ rotate: [0, 360] }}
           transition={{ duration: spinDuration, repeat: Infinity, ease: "linear" }}
-          style={{ position: 'absolute', top: '50%', left: '50%', width: '2px', height: '2px', borderRadius: '50%', boxShadow: layer1, opacity: baseOpacity }}
+          style={{ position: 'absolute', top: '50%', left: '50%', width: '1.5px', height: '1.5px', borderRadius: '50%', boxShadow: layer1, opacity: baseOpacity }}
         />
         
         {/* Layer 2: White bright dots (Rotates opposite) */}
         <motion.div
           animate={{ rotate: [360, 0] }}
           transition={{ duration: spinDuration * 1.2, repeat: Infinity, ease: "linear" }}
-          style={{ position: 'absolute', top: '50%', left: '50%', width: '1.5px', height: '1.5px', borderRadius: '50%', boxShadow: layer2, opacity: baseOpacity * 0.9 }}
+          style={{ position: 'absolute', top: '50%', left: '50%', width: '2px', height: '2px', borderRadius: '50%', boxShadow: layer2, opacity: baseOpacity * 0.9 }}
         />
         
-        {/* Layer 3: Inner volume */}
+        {/* Layer 3: Inner volume (Blurred for depth of field / volumetric look) */}
         <motion.div
           animate={{ rotate: [0, 360] }}
           transition={{ duration: spinDuration * 0.8, repeat: Infinity, ease: "linear" }}
-          style={{ position: 'absolute', top: '50%', left: '50%', width: '2px', height: '2px', borderRadius: '50%', boxShadow: layer3, opacity: baseOpacity * 0.7 }}
+          style={{ position: 'absolute', top: '50%', left: '50%', width: '1px', height: '1px', borderRadius: '50%', boxShadow: layer3, opacity: baseOpacity * 0.5, filter: 'blur(1px)' }}
         />
 
         {/* Core Processing Swirl (Only visible when typing) */}
@@ -152,6 +157,6 @@ export default function RobotAvatar({
         )}
       </div>
 
-    </div>
+    </motion.div>
   );
 }
