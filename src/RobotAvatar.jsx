@@ -29,8 +29,8 @@ export default function RobotAvatar({
 
   // Memoize the generation of the 3D particle sphere to keep performance extremely high
   const { layer1, layer2, layer3 } = useMemo(() => {
-    // Generates a 2D projection of points uniformly distributed on a 3D sphere surface
-    const generateSphereShadows = (count, radius, colorHex) => {
+    // Generates a woven "Torus Knot" particle pattern (hollow center, sweeping lines on the rim)
+    const generateWovenShadows = (count, R, r_minor, wraps, k_waves, colorHex) => {
       let r = 255, g = 255, b = 255;
       if (colorHex.startsWith('#')) {
         const hex = colorHex.replace('#', '');
@@ -41,21 +41,23 @@ export default function RobotAvatar({
       
       let shadows = [];
       for (let i = 0; i < count; i++) {
-        // Spherical coordinates
-        const theta = Math.random() * 2 * Math.PI;
-        const v = Math.random();
-        const phi = Math.acos(2 * v - 1);
+        // Continuous line wrapping around the circle `wraps` times
+        const theta = (i / count) * 2 * Math.PI * wraps;
         
-        // 3D to 2D projection
-        const x = (radius * Math.sin(phi) * Math.cos(theta)).toFixed(1);
-        const y = (radius * Math.sin(phi) * Math.sin(theta)).toFixed(1);
-        const z = radius * Math.cos(phi);
+        // The secondary angle creating the sweeping Moiré/wave patterns
+        const phi = k_waves * theta;
         
-        // Calculate opacity based on depth (z). 
-        // Edge of sphere (z=0) is brightest, center of sphere (z=radius) is dimmest.
-        // This gives it that hollow, glowing rim effect perfectly!
-        const zRatio = Math.abs(z) / radius;
-        const op = (0.15 + 0.85 * (1 - zRatio)).toFixed(2);
+        // Add a tiny bit of scatter so it looks like organic particles
+        const scatter = (Math.random() - 0.5) * (R * 0.05);
+        
+        // Torus 3D to 2D projection
+        const x = ((R + r_minor * Math.cos(phi) + scatter) * Math.cos(theta)).toFixed(1);
+        const y = ((R + r_minor * Math.cos(phi) + scatter) * Math.sin(theta)).toFixed(1);
+        const z = r_minor * Math.sin(phi);
+        
+        // Opacity based on 3D depth (z). Front is bright, back is dim.
+        const zRatio = (z + r_minor) / (2 * r_minor); // 0 (back) to 1 (front)
+        const op = (0.1 + 0.9 * zRatio).toFixed(2);
         
         shadows.push(`${x}px ${y}px 0px rgba(${r},${g},${b},${op})`);
       }
@@ -68,12 +70,12 @@ export default function RobotAvatar({
     const scale = d / 100;
     
     return {
-      // Layer 1: Super dense, main color dots (Front/edge mostly)
-      layer1: generateSphereShadows(Math.floor(2000 * scale), d/2 - 2, activeColor),
-      // Layer 2: Ultra bright white stars
-      layer2: generateSphereShadows(Math.floor(600 * scale), d/2 - 3, '#ffffff'),
-      // Layer 3: Inner volume, blurred for depth of field
-      layer3: generateSphereShadows(Math.floor(1200 * scale), d/2 - 6, activeColor),
+      // Layer 1: The main sweeping waves. R = d/2 - 10, r_minor = 10, wraps = 50, k = 12.5
+      layer1: generateWovenShadows(Math.floor(1500 * scale), d/2 - d*0.1, d*0.1, 80, 18.5, activeColor),
+      // Layer 2: Sparse, ultra bright white stars offset slightly
+      layer2: generateWovenShadows(Math.floor(400 * scale), d/2 - d*0.1, d*0.12, 40, 12.2, '#ffffff'),
+      // Layer 3: Inner subtle weave, slightly smaller major radius
+      layer3: generateWovenShadows(Math.floor(800 * scale), d/2 - d*0.15, d*0.08, 60, 24.1, activeColor),
     };
   }, [d, activeColor]);
 
@@ -97,8 +99,8 @@ export default function RobotAvatar({
       <motion.div
         animate={{
           boxShadow: isTyping 
-            ? [`inset 0 0 ${d*0.15}px ${activeColor}, 0 0 ${d*0.3}px ${activeColor}80`, `inset 0 0 ${d*0.25}px ${activeColor}, 0 0 ${d*0.4}px ${activeColor}A0`, `inset 0 0 ${d*0.15}px ${activeColor}, 0 0 ${d*0.3}px ${activeColor}80`]
-            : [`inset 0 0 ${d*0.1}px ${activeColor}, 0 0 ${d*0.15}px ${activeColor}50`, `inset 0 0 ${d*0.15}px ${activeColor}, 0 0 ${d*0.25}px ${activeColor}70`, `inset 0 0 ${d*0.1}px ${activeColor}, 0 0 ${d*0.15}px ${activeColor}50`]
+            ? [`inset 0 0 ${d*0.05}px ${activeColor}, 0 0 ${d*0.1}px ${activeColor}80`, `inset 0 0 ${d*0.1}px ${activeColor}, 0 0 ${d*0.2}px ${activeColor}A0`, `inset 0 0 ${d*0.05}px ${activeColor}, 0 0 ${d*0.1}px ${activeColor}80`]
+            : [`inset 0 0 ${d*0.02}px ${activeColor}, 0 0 ${d*0.05}px ${activeColor}50`, `inset 0 0 ${d*0.05}px ${activeColor}, 0 0 ${d*0.1}px ${activeColor}70`, `inset 0 0 ${d*0.02}px ${activeColor}, 0 0 ${d*0.05}px ${activeColor}50`]
         }}
         transition={{ duration: pulseDuration, repeat: Infinity, ease: "easeInOut" }}
         style={{
