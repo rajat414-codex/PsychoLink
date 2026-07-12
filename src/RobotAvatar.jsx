@@ -1,14 +1,14 @@
 import React from 'react';
 
 /**
- * Ultra-Premium 3D CSS Robot Avatar
- * Features a sleek dark titanium and frosted glass aesthetic, 
- * neon holographic expressions, and smooth floating animations.
+ * Ultra-Cute 3D CSS Robot Avatar (Faw/Eve style)
+ * Features a smooth matte white 3D body, large dark visor,
+ * expressive neon holographic face, and cute chubby proportions.
  */
 export default function RobotAvatar({
   expression = 'smile',
   size = 'md',
-  glowColor = '#f43f5e',
+  glowColor = '#00e5ff',
   isTyping = false,
   className = '',
   style = {}
@@ -24,90 +24,92 @@ export default function RobotAvatar({
   const s = scales[size] || scales.md;
   const showBody = size === 'lg' || size === 'md';
 
-  // Premium Neon Colors
-  const accent = isAura ? '#ff2a5f' : '#00e5ff';
-  const glow = isAura ? 'rgba(255,42,95,0.6)' : 'rgba(0,229,255,0.6)';
-  const glowSoft = isAura ? 'rgba(255,42,95,0.2)' : 'rgba(0,229,255,0.2)';
+  // Neon Colors for face
+  const accent = isAura ? '#ff477e' : '#22d3ee'; // A bright cyan or pink
+  const glow = isAura ? 'rgba(255, 71, 126, 0.6)' : 'rgba(34, 211, 238, 0.6)';
+  const glowSoft = isAura ? 'rgba(255, 71, 126, 0.2)' : 'rgba(34, 211, 238, 0.2)';
   
   const u = (v) => `${v * s}px`;
 
   const renderFace = () => {
-    const strokeW = "6";
+    const strokeW = "10"; // Very thick, cute strokes
     switch (expression) {
       case 'happy':
         return (
           <>
-            <path d="M 25 35 Q 35 15 45 35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
-            <path d="M 55 35 Q 65 15 75 35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
-            <path d="M 35 50 Q 50 65 65 50" stroke={accent} strokeWidth="5" strokeLinecap="round" fill="none" />
+            <path d="M 28 40 Q 35 25 42 40" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
+            <path d="M 58 40 Q 65 25 72 40" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
+            <path d="M 40 55 Q 50 65 60 55" stroke={accent} strokeWidth="6" strokeLinecap="round" fill="none" />
           </>
         );
       case 'sleep':
         return (
           <>
-            <line x1="25" y1="35" x2="45" y2="35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" />
-            <line x1="55" y1="35" x2="75" y2="35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" />
-            <circle cx="50" cy="50" r="4" fill={accent} opacity="0.6" />
+            <line x1="28" y1="40" x2="42" y2="40" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" />
+            <line x1="58" y1="40" x2="72" y2="40" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" />
+            <circle cx="50" cy="55" r="4" fill={accent} opacity="0.6" />
           </>
         );
       case 'sad':
         return (
           <>
-            <path d="M 25 30 Q 35 20 45 35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
-            <path d="M 75 30 Q 65 20 55 35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
-            <path d="M 40 55 Q 50 45 60 55" stroke={accent} strokeWidth="4" strokeLinecap="round" fill="none" />
+            <path d="M 28 32 Q 35 22 42 35" stroke={accent} strokeWidth="8" strokeLinecap="round" fill="none" />
+            <path d="M 72 32 Q 65 22 58 35" stroke={accent} strokeWidth="8" strokeLinecap="round" fill="none" />
+            <path d="M 42 60 Q 50 50 58 60" stroke={accent} strokeWidth="6" strokeLinecap="round" fill="none" />
           </>
         );
       case 'cry':
         return (
           <>
-            <path d="M 25 30 Q 35 20 45 35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
-            <path d="M 75 30 Q 65 20 55 35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
-            <path d="M 40 55 Q 50 45 60 55" stroke={accent} strokeWidth="4" strokeLinecap="round" fill="none" />
-            <line x1="35" y1="45" x2="35" y2="60" stroke="#00e5ff" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 4" />
-            <line x1="65" y1="45" x2="65" y2="60" stroke="#00e5ff" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 4" />
+            <path d="M 28 32 Q 35 22 42 35" stroke={accent} strokeWidth="8" strokeLinecap="round" fill="none" />
+            <path d="M 72 32 Q 65 22 58 35" stroke={accent} strokeWidth="8" strokeLinecap="round" fill="none" />
+            <path d="M 42 60 Q 50 50 58 60" stroke={accent} strokeWidth="6" strokeLinecap="round" fill="none" />
+            <line x1="35" y1="50" x2="35" y2="65" stroke={accent} strokeWidth="4" strokeLinecap="round" strokeDasharray="5 5" />
+            <line x1="65" y1="50" x2="65" y2="65" stroke={accent} strokeWidth="4" strokeLinecap="round" strokeDasharray="5 5" />
           </>
         );
       case 'wink':
         return (
           <>
-            <rect x="28" y="25" width="10" height="15" rx="5" fill={accent} />
-            <path d="M 55 35 Q 65 20 75 35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
-            <path d="M 40 48 Q 50 55 60 48" stroke={accent} strokeWidth="4" strokeLinecap="round" fill="none" />
+            <rect x="30" y="30" width="12" height="18" rx="6" fill={accent} />
+            <path d="M 58 40 Q 65 28 72 40" stroke={accent} strokeWidth="8" strokeLinecap="round" fill="none" />
+            <path d="M 42 55 Q 50 62 58 55" stroke={accent} strokeWidth="5" strokeLinecap="round" fill="none" />
           </>
         );
       case 'wink-smile':
         return (
           <>
-            <line x1="28" y1="28" x2="42" y2="35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" />
-            <line x1="42" y1="28" x2="28" y2="35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" />
-            <path d="M 55 35 Q 65 15 75 35" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" fill="none" />
-            <path d="M 35 50 Q 50 65 65 50" stroke={accent} strokeWidth="5" strokeLinecap="round" fill="none" />
+            <line x1="30" y1="33" x2="42" y2="40" stroke={accent} strokeWidth="8" strokeLinecap="round" />
+            <line x1="42" y1="33" x2="30" y2="40" stroke={accent} strokeWidth="8" strokeLinecap="round" />
+            <path d="M 58 40 Q 65 25 72 40" stroke={accent} strokeWidth="8" strokeLinecap="round" fill="none" />
+            <path d="M 40 55 Q 50 68 60 55" stroke={accent} strokeWidth="6" strokeLinecap="round" fill="none" />
           </>
         );
       case 'dizzy':
         return (
           <>
-            <path d="M 28 25 L 42 38 M 42 25 L 28 38" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" />
-            <path d="M 58 25 L 72 38 M 72 25 L 58 38" stroke={accent} strokeWidth={strokeW} strokeLinecap="round" />
-            <path d="M 40 55 Q 50 45 60 55" stroke={accent} strokeWidth="4" strokeLinecap="round" fill="none" />
+            <path d="M 30 30 L 42 42 M 42 30 L 30 42" stroke={accent} strokeWidth="8" strokeLinecap="round" />
+            <path d="M 58 30 L 70 42 M 70 30 L 58 42" stroke={accent} strokeWidth="8" strokeLinecap="round" />
+            <path d="M 42 60 Q 50 50 58 60" stroke={accent} strokeWidth="5" strokeLinecap="round" fill="none" />
           </>
         );
       case 'neutral':
         return (
           <>
-            <rect x="28" y="25" width="12" height="12" rx="4" fill={accent} />
-            <rect x="60" y="25" width="12" height="12" rx="4" fill={accent} />
-            <line x1="40" y1="50" x2="60" y2="50" stroke={accent} strokeWidth="4" strokeLinecap="round" />
+            <rect x="30" y="30" width="12" height="18" rx="6" fill={accent} />
+            <rect x="58" y="30" width="12" height="18" rx="6" fill={accent} />
+            <line x1="42" y1="58" x2="58" y2="58" stroke={accent} strokeWidth="5" strokeLinecap="round" />
           </>
         );
       case 'smile':
       default:
         return (
           <>
-            <rect x="28" y="22" width="10" height="20" rx="5" fill={accent} />
-            <rect x="62" y="22" width="10" height="20" rx="5" fill={accent} />
-            <path d="M 35 48 Q 50 60 65 48" stroke={accent} strokeWidth="5" strokeLinecap="round" fill="none" />
+            {/* Cute thick pill-shaped eyes */}
+            <rect x="30" y="28" width="14" height="22" rx="7" fill={accent} />
+            <rect x="56" y="28" width="14" height="22" rx="7" fill={accent} />
+            {/* Cute smile */}
+            <path d="M 38 56 Q 50 68 62 56" stroke={accent} strokeWidth="7" strokeLinecap="round" fill="none" />
           </>
         );
     }
@@ -115,36 +117,48 @@ export default function RobotAvatar({
 
   const waveAnim = expression === 'wink-smile' || expression === 'happy';
 
-  // Premium Material Styles
-  const darkGlass = {
-    background: 'linear-gradient(135deg, rgba(35, 38, 48, 0.95) 0%, rgba(18, 20, 25, 0.98) 100%)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255,255,255,0.08)',
+  // --- PREMIUM 3D MATTE WHITE STYLES ---
+  
+  // The head is a smooth, rounded block with a soft gradient for 3D depth
+  const headStyle = {
+    background: 'linear-gradient(155deg, #ffffff 0%, #f4f6f8 40%, #e2e6ec 100%)',
     boxShadow: `
-      inset 0 1px 2px rgba(255,255,255,0.15),
-      inset 0 -2px 5px rgba(0,0,0,0.8),
-      0 12px 24px rgba(0,0,0,0.6)
-    `
-  };
-
-  const bodyShell = {
-    background: 'linear-gradient(145deg, #2c303b 0%, #171920 100%)',
-    border: '1px solid rgba(255,255,255,0.05)',
-    boxShadow: `
-      inset -5px -5px 15px rgba(0,0,0,0.6),
-      inset 5px 5px 15px rgba(255,255,255,0.06),
-      0 15px 30px rgba(0,0,0,0.4)
-    `
-  };
-
-  const visorGlass = {
-    background: 'linear-gradient(145deg, #0c0d10 0%, #000000 100%)',
-    boxShadow: `
-      inset 0 5px 15px rgba(0,0,0,1),
-      0 2px 5px rgba(255,255,255,0.04)
+      inset 4px 4px 10px rgba(255,255,255,1),
+      inset -6px -8px 16px rgba(150,160,175,0.4),
+      0 12px 24px rgba(0,0,0,0.12),
+      0 4px 8px rgba(0,0,0,0.06)
     `,
-    border: '1px solid rgba(255,255,255,0.03)'
+    border: '1px solid rgba(255,255,255,0.7)'
+  };
+
+  // The dark glossy visor
+  const visorStyle = {
+    background: 'linear-gradient(145deg, #1b2436 0%, #0d121c 100%)',
+    boxShadow: `
+      inset 0 6px 12px rgba(0,0,0,0.8),
+      inset 0 -2px 6px rgba(255,255,255,0.1),
+      0 2px 4px rgba(255,255,255,0.5)
+    `,
+    border: '2px solid #cbd5e1'
+  };
+
+  // Body and limbs share the matte white 3D look
+  const bodyStyle = {
+    background: 'linear-gradient(145deg, #ffffff 0%, #e2e6ec 100%)',
+    boxShadow: `
+      inset 3px 3px 8px rgba(255,255,255,1),
+      inset -5px -8px 12px rgba(150,160,175,0.45),
+      0 10px 20px rgba(0,0,0,0.1)
+    `
+  };
+
+  const limbStyle = {
+    background: 'linear-gradient(145deg, #ffffff 0%, #d5dae2 100%)',
+    boxShadow: `
+      inset 2px 2px 6px rgba(255,255,255,1),
+      inset -4px -4px 8px rgba(150,160,175,0.5),
+      2px 4px 8px rgba(0,0,0,0.15)
+    `
   };
 
   return (
@@ -158,7 +172,7 @@ export default function RobotAvatar({
       <style>{`
         @keyframes rv-float {
           0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-8px) scale(1.01); }
+          50% { transform: translateY(-6px) scale(1.01); }
         }
         @keyframes rv-shake {
           0%, 100% { transform: translateY(0) rotate(0); }
@@ -167,19 +181,15 @@ export default function RobotAvatar({
         }
         @keyframes rv-wave {
           0%, 100% { transform: rotate(-10deg); }
-          50% { transform: rotate(-55deg); }
+          50% { transform: rotate(-65deg); }
         }
         @keyframes rv-glow-pulse {
-          0%, 100% { opacity: 0.6; filter: blur(8px); transform: scale(1); }
-          50% { opacity: 1; filter: blur(12px); transform: scale(1.05); }
+          0%, 100% { filter: drop-shadow(0 0 4px ${accent}) drop-shadow(0 0 12px ${glowSoft}); }
+          50% { filter: drop-shadow(0 0 8px ${accent}) drop-shadow(0 0 20px ${glow}); }
         }
         @keyframes rv-blink {
           0%, 92%, 100% { transform: scaleY(1); }
           96% { transform: scaleY(0.05); }
-        }
-        @keyframes rv-ears {
-          0%, 100% { transform: scaleY(1); opacity: 0.7; }
-          50% { transform: scaleY(1.15); opacity: 1; }
         }
       `}</style>
 
@@ -188,184 +198,172 @@ export default function RobotAvatar({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        animation: isTyping ? 'rv-shake 0.5s ease-in-out infinite' : 'rv-float 4.5s ease-in-out infinite',
+        animation: isTyping ? 'rv-shake 0.5s ease-in-out infinite' : 'rv-float 3.5s ease-in-out infinite',
+        position: 'relative'
       }}>
         
         {/* ═══ HEAD ═══ */}
         <div style={{
-          width: u(150), height: u(110),
-          borderRadius: u(55),
-          ...darkGlass,
+          width: u(160), height: u(125),
+          borderRadius: `${u(75)} ${u(75)} ${u(60)} ${u(60)}`,
+          ...headStyle,
           position: 'relative',
           zIndex: 10,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          // Slight tilt for cuteness
+          transform: 'rotate(-2deg)', 
         }}>
           
-          {/* Glass Visor */}
+          {/* Cute little antenna on top-left (robot's right) */}
           <div style={{
-            width: u(130), height: u(75),
-            borderRadius: u(35),
-            ...visorGlass,
+            position: 'absolute',
+            top: u(-18), right: u(35),
+            width: u(8), height: u(30),
+            borderRadius: u(4),
+            background: 'linear-gradient(90deg, #e2e6ec, #ffffff, #b0b8c5)',
+            transform: 'rotate(25deg)',
+            zIndex: -1,
+            boxShadow: `inset -2px -2px 4px rgba(0,0,0,0.1), 2px 2px 4px rgba(0,0,0,0.1)`
+          }} />
+
+          {/* Dark Glass Visor */}
+          <div style={{
+            width: u(135), height: u(90),
+            borderRadius: u(40),
+            ...visorStyle,
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            marginTop: u(5),
           }}>
             {/* Visor Glare (Glassmorphism Reflection) */}
             <div style={{
-              position: 'absolute', top: u(2), left: u(10),
-              width: u(90), height: u(25),
-              borderRadius: u(12),
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%)',
+              position: 'absolute', top: u(3), left: u(15),
+              width: u(90), height: u(30),
+              borderRadius: u(15),
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 100%)',
               pointerEvents: 'none',
               transform: 'rotate(-4deg)',
             }} />
 
             {/* Glowing Face Frame */}
             <svg viewBox="0 0 100 80" style={{
-              width: '90%', height: '90%',
-              filter: `drop-shadow(0 0 ${6*s}px ${accent}) drop-shadow(0 0 ${16*s}px ${glow})`,
+              width: '100%', height: '100%',
               animation: expression !== 'sleep' ? 'rv-blink 5.5s infinite' : 'none',
               transformOrigin: 'center',
+              animationName: expression !== 'sleep' ? 'rv-blink, rv-glow-pulse' : 'none',
+              animationDuration: '5.5s, 3s',
+              animationIterationCount: 'infinite, infinite',
             }}>
-              {renderFace()}
+              <g style={{ filter: `drop-shadow(0 0 ${4*s}px ${accent}) drop-shadow(0 0 ${12*s}px ${glowSoft})` }}>
+                {renderFace()}
+              </g>
             </svg>
-          </div>
-
-          {/* Left Ear */}
-          <div style={{
-            position: 'absolute', left: u(-14), top: '50%', marginTop: u(-20),
-            width: u(20), height: u(40),
-            borderRadius: u(10),
-            ...bodyShell,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: `inset 2px 2px 5px rgba(255,255,255,0.05), -4px 0 8px rgba(0,0,0,0.4)`
-          }}>
-             <div style={{
-               width: u(4), height: u(20),
-               background: accent,
-               borderRadius: u(2),
-               boxShadow: `0 0 ${8*s}px ${accent}`,
-               animation: 'rv-ears 2.5s infinite'
-             }} />
-          </div>
-
-          {/* Right Ear */}
-          <div style={{
-            position: 'absolute', right: u(-14), top: '50%', marginTop: u(-20),
-            width: u(20), height: u(40),
-            borderRadius: u(10),
-            ...bodyShell,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: `inset -2px 2px 5px rgba(255,255,255,0.05), 4px 0 8px rgba(0,0,0,0.4)`
-          }}>
-             <div style={{
-               width: u(4), height: u(20),
-               background: accent,
-               borderRadius: u(2),
-               boxShadow: `0 0 ${8*s}px ${accent}`,
-               animation: 'rv-ears 2.5s infinite 1.25s'
-             }} />
           </div>
         </div>
 
-        {/* ═══ BODY (lg/md only) ═══ */}
+        {/* ═══ BODY & LIMBS (lg/md only) ═══ */}
         {showBody && (
           <div style={{
-            width: u(120), height: u(95),
-            marginTop: u(-15),
-            borderRadius: u(40),
-            ...bodyShell,
+            width: u(100), height: u(95),
+            marginTop: u(-15), // Overlaps under head
+            borderRadius: `${u(40)} ${u(40)} ${u(50)} ${u(50)}`,
+            ...bodyStyle,
             position: 'relative',
-            zIndex: 9,
+            zIndex: 9, // Behind head
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            justifyContent: 'center',
           }}>
-            {/* Neck joint */}
+            {/* Soft shadow directly under head to add 3D depth */}
             <div style={{
-              width: u(40), height: u(25),
-              background: '#0d0f14',
-              borderRadius: u(10),
-              marginTop: u(-10),
-              zIndex: -1,
-              boxShadow: 'inset 0 -5px 10px rgba(0,0,0,0.8)'
+              width: '80%', height: u(15),
+              borderRadius: '50%',
+              background: 'rgba(0,0,0,0.1)',
+              filter: 'blur(4px)',
+              marginTop: u(5)
             }} />
 
-            {/* Glowing Core Engine */}
+            {/* Left Arm (Resting/pointing down slightly) */}
             <div style={{
-              marginTop: u(12),
-              width: u(45), height: u(45),
-              borderRadius: '50%',
-              background: `radial-gradient(circle, ${accent} 0%, #000 90%)`,
-              boxShadow: `0 0 ${15*s}px ${accent}, inset 0 0 ${10*s}px rgba(255,255,255,0.5)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              animation: 'rv-glow-pulse 3s infinite',
-              border: '2px solid rgba(255,255,255,0.05)'
-            }}>
-              <div style={{
-                width: u(22), height: u(22),
-                borderRadius: '50%',
-                background: '#fff',
-                boxShadow: `0 0 ${15*s}px #fff, 0 0 ${25*s}px ${accent}`
-              }} />
-            </div>
-
-            {/* Left Arm */}
-            <div style={{
-              position: 'absolute', left: u(-22), top: u(18),
-              width: u(28), height: u(65),
-              borderRadius: u(14),
-              ...bodyShell,
+              position: 'absolute', left: u(-18), top: u(20),
+              width: u(32), height: u(65),
+              borderRadius: u(16),
+              ...limbStyle,
               transformOrigin: 'top center',
-              transform: 'rotate(12deg)',
+              transform: 'rotate(20deg)',
+              zIndex: -1, // behind body
             }}>
+               {/* Joint indent */}
                <div style={{
-                 position: 'absolute', bottom: u(-8), left: '50%', transform: 'translateX(-50%)',
-                 width: u(20), height: u(20), borderRadius: '50%',
-                 background: '#15171e',
-                 border: `${2*s}px solid ${accent}`,
-                 boxShadow: `0 0 ${10*s}px ${glow}, inset 0 0 ${5*s}px ${glow}`
-               }}/>
+                 position: 'absolute', top: '50%', left: '10%', width: '80%', height: u(2),
+                 background: 'rgba(0,0,0,0.06)', borderRadius: '50%'
+               }} />
             </div>
 
             {/* Right Arm (Waving) */}
             <div style={{
-              position: 'absolute', right: u(-22), top: u(18),
-              width: u(28), height: u(65),
-              borderRadius: u(14),
-              ...bodyShell,
+              position: 'absolute', right: u(-22), top: u(15),
+              width: u(32), height: u(65),
+              borderRadius: u(16),
+              ...limbStyle,
               transformOrigin: 'top center',
-              transform: waveAnim ? 'rotate(-45deg)' : 'rotate(-12deg)',
+              transform: waveAnim ? 'rotate(-65deg)' : 'rotate(-25deg)',
               animation: waveAnim ? 'rv-wave 1.6s ease-in-out infinite' : 'none',
               transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              zIndex: 10, // in front of body
             }}>
+               {/* Joint indent */}
                <div style={{
-                 position: 'absolute', bottom: u(-8), left: '50%', transform: 'translateX(-50%)',
-                 width: u(20), height: u(20), borderRadius: '50%',
-                 background: '#15171e',
-                 border: `${2*s}px solid ${accent}`,
-                 boxShadow: `0 0 ${10*s}px ${glow}, inset 0 0 ${5*s}px ${glow}`
-               }}/>
+                 position: 'absolute', top: '50%', left: '10%', width: '80%', height: u(2),
+                 background: 'rgba(0,0,0,0.06)', borderRadius: '50%'
+               }} />
             </div>
+
+            {/* Left Leg */}
+            <div style={{
+              position: 'absolute', bottom: u(-25), left: u(15),
+              width: u(30), height: u(40),
+              borderRadius: u(15),
+              ...limbStyle,
+              zIndex: -1,
+              transform: 'rotate(5deg)'
+            }} />
+
+            {/* Right Leg (Slightly bent/lifted for a cute pose) */}
+            <div style={{
+              position: 'absolute', bottom: u(-22), right: u(15),
+              width: u(30), height: u(40),
+              borderRadius: u(15),
+              ...limbStyle,
+              zIndex: -1,
+              transform: 'rotate(-15deg)'
+            }} />
 
           </div>
         )}
       </div>
 
-      {/* Holographic Projection Base (lg/md only) */}
+      {/* Soft Ground Shadow (lg/md only) */}
       {showBody && (
         <div style={{
           marginTop: u(25),
-          width: u(140), height: u(12),
+          width: u(90), height: u(12),
           borderRadius: '50%',
-          background: `radial-gradient(ellipse, ${glow} 0%, transparent 75%)`,
-          boxShadow: `0 0 ${25*s}px ${glowSoft}`,
-          animation: 'rv-glow-pulse 4s infinite',
-        }} />
+          background: 'rgba(0,0,0,0.12)',
+          filter: 'blur(5px)',
+          animation: 'rv-float-shadow 3.5s ease-in-out infinite',
+        }}>
+           <style>{`
+             @keyframes rv-float-shadow {
+               0%, 100% { transform: scale(1); opacity: 1; }
+               50% { transform: scale(0.85); opacity: 0.6; }
+             }
+           `}</style>
+        </div>
       )}
     </div>
   );
