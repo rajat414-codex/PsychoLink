@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 /**
- * Ultra-Premium SaaS AI Avatar: "Fluid Aurora Glass Orb"
- * Completely abandons SVG and Particles for a hyper-realistic, 
- * glassmorphic lens housing organic, flowing liquid light.
+ * Ultra-Premium SaaS AI Avatar: "Liquid Metal Bubble"
+ * Uses an advanced SVG Gooey Filter applied to spinning metallic gradients
+ * to create a mesmerizing, hyper-realistic liquid mercury/lava-lamp effect.
  */
 export default function RobotAvatar({
   expression = 'smile',
@@ -21,145 +21,138 @@ export default function RobotAvatar({
   const isError = expression === 'dizzy' || expression === 'sad' || expression === 'cry';
 
   const activeColor = isError ? '#f43f5e' : glowColor;
+  
+  // Base speed multiplier. Sleep is slow, Typing is fast.
+  const speed = isTyping ? 0.4 : isSleep ? 2.5 : 1;
 
-  // Animation speeds
-  const rotateSpeed = isTyping ? 3 : isSleep ? 20 : 8;
-  const morphSpeed = isTyping ? 2 : isSleep ? 10 : 5;
-  const pulseSpeed = isTyping ? 1.5 : isSleep ? 5 : 3;
+  // Unique ID for the SVG filter to avoid collisions if multiple avatars are rendered on the same page
+  const filterId = useMemo(() => `gooey-${Math.random().toString(36).substr(2, 9)}`, []);
+
+  // Extremely realistic metallic liquid gradients.
+  // The harsh contrast from white to color to black gives it a glossy, 3D rendered look.
+  const liquidGradient = `radial-gradient(circle at 35% 35%, #ffffff 0%, ${activeColor} 45%, #111111 90%)`;
+  const hotGradient = `radial-gradient(circle at 35% 35%, #ffffff 0%, #ffffff 40%, ${activeColor} 90%)`;
 
   return (
-    <div className={`ai-aurora-glass ${className}`} style={{
+    <div className={`ai-liquid-metal ${className}`} style={{
       width: d, height: d,
       position: 'relative',
-      borderRadius: '50%',
-      // Dropshadow for the entire orb hitting the page
-      boxShadow: `0 ${d*0.1}px ${d*0.25}px rgba(0,0,0,0.15), 0 ${d*0.05}px ${d*0.1}px ${activeColor}30`,
+      // Drop shadow applies to the final merged gooey shape, lifting it off the page
+      filter: `drop-shadow(0 ${d*0.05}px ${d*0.1}px ${activeColor}60)`,
       ...style
     }}>
       
-      {/* 1. Base glow to illuminate the backdrop behind the glass */}
-      <motion.div
-        animate={{ scale: [1, 1.05, 1], opacity: isSleep ? [0.3, 0.5, 0.3] : [0.6, 1, 0.6] }}
-        transition={{ duration: pulseSpeed, repeat: Infinity, ease: "easeInOut" }}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          borderRadius: '50%',
-          background: `radial-gradient(circle at 50% 50%, ${activeColor} 0%, transparent 80%)`,
-          filter: `blur(${d*0.15}px)`,
-          zIndex: 0
-        }}
-      />
+      {/* 1. Invisible SVG defining the Gooey Liquid Filter */}
+      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+        <defs>
+          <filter id={filterId}>
+            {/* The blur amount dictates how "sticky" or "viscous" the liquid is */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation={d * 0.07} result="blur" />
+            {/* The color matrix crushes the alpha channel back to sharp edges, melting overlapping shapes together */}
+            <feColorMatrix in="blur" mode="matrix" values="
+              1 0 0 0 0  
+              0 1 0 0 0  
+              0 0 1 0 0  
+              0 0 0 25 -10" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+          </filter>
+        </defs>
+      </svg>
 
-      {/* 2. Fluid Inner Blobs (The "Aurora") */}
+      {/* 2. Gooey Physics Container */}
       <div style={{
+        width: '100%', height: '100%',
         position: 'absolute',
-        inset: 0,
-        borderRadius: '50%',
-        overflow: 'hidden', // Contain the liquid inside the sphere
-        zIndex: 1,
-        // Dark base inside the orb to make the light pop
-        background: '#0d1117' 
+        // Apply the liquid metal filter to all children inside this container
+        filter: `url(#${filterId})`,
       }}>
-        {/* Blob 1: Main Color */}
+        
+        {/* Central Core Metal Mass */}
         <motion.div
-          animate={{
-            rotate: [0, 360],
-            borderRadius: [
-              "40% 60% 70% 30% / 40% 50% 60% 50%",
-              "60% 40% 30% 70% / 50% 60% 40% 50%",
-              "40% 60% 70% 30% / 40% 50% 60% 50%"
-            ],
-            scale: isTyping ? [0.8, 1.3, 0.8] : [0.9, 1.15, 0.9]
-          }}
-          transition={{
-            rotate: { duration: rotateSpeed, repeat: Infinity, ease: "linear" },
-            borderRadius: { duration: morphSpeed, repeat: Infinity, ease: "easeInOut" },
-            scale: { duration: pulseSpeed, repeat: Infinity, ease: "easeInOut" }
-          }}
+          animate={{ scale: isTyping ? [0.9, 1.1, 0.9] : [1, 1.05, 1] }}
+          transition={{ duration: 3 * speed, repeat: Infinity, ease: "easeInOut" }}
           style={{
             position: 'absolute',
-            top: '-25%', left: '-25%',
-            width: '150%', height: '150%',
-            background: `radial-gradient(circle at 50% 50%, ${activeColor} 0%, transparent 65%)`,
-            filter: `blur(${d*0.12}px)`,
-            mixBlendMode: 'screen',
-            opacity: isSleep ? 0.5 : 1
+            top: '20%', left: '20%',
+            width: '60%', height: '60%',
+            borderRadius: '50%',
+            background: liquidGradient,
           }}
         />
 
-        {/* Blob 2: Secondary Color / White Highlight */}
+        {/* Orbiting Droplet 1 (Large, slow, stretches the core massively) */}
         <motion.div
-          animate={{
-            rotate: [360, 0],
-            borderRadius: [
-              "60% 40% 30% 70% / 50% 60% 40% 50%",
-              "40% 60% 70% 30% / 40% 50% 60% 50%",
-              "60% 40% 30% 70% / 50% 60% 40% 50%"
-            ]
-          }}
-          transition={{
-            rotate: { duration: rotateSpeed * 1.2, repeat: Infinity, ease: "linear" },
-            borderRadius: { duration: morphSpeed * 1.1, repeat: Infinity, ease: "easeInOut" }
-          }}
-          style={{
-            position: 'absolute',
-            bottom: '-15%', right: '-15%',
-            width: '110%', height: '110%',
-            background: `radial-gradient(circle at 50% 50%, #ffffff 0%, transparent 60%)`,
-            filter: `blur(${d*0.1}px)`,
-            mixBlendMode: 'overlay', // Overlay makes the white pop intensely when overlapping the color
-            opacity: isSleep ? 0.2 : 0.9
-          }}
-        />
-        
-        {/* Blob 3: Deep Core (Only visible when typing) */}
+          animate={{ rotate: [0, 360] }}
+          transition={{ duration: 5 * speed, repeat: Infinity, ease: "linear" }}
+          style={{ position: 'absolute', width: '100%', height: '100%' }}
+        >
+          <div style={{
+            position: 'absolute', top: '10%', left: '35%',
+            width: '45%', height: '45%',
+            borderRadius: '50%',
+            background: liquidGradient
+          }} />
+        </motion.div>
+
+        {/* Orbiting Droplet 2 (Medium, reverses direction, cuts across) */}
+        <motion.div
+          animate={{ rotate: [360, 0] }}
+          transition={{ duration: 7 * speed, repeat: Infinity, ease: "linear" }}
+          style={{ position: 'absolute', width: '100%', height: '100%' }}
+        >
+          <div style={{
+            position: 'absolute', top: '25%', left: '60%',
+            width: '35%', height: '35%',
+            borderRadius: '50%',
+            background: liquidGradient
+          }} />
+        </motion.div>
+
+        {/* Orbiting Droplet 3 (Small, erratic edge droplet) */}
+        <motion.div
+          animate={{ rotate: [0, 360] }}
+          transition={{ duration: 4 * speed, repeat: Infinity, ease: "linear" }}
+          style={{ position: 'absolute', width: '100%', height: '100%' }}
+        >
+          <div style={{
+            position: 'absolute', top: '60%', left: '20%',
+            width: '25%', height: '25%',
+            borderRadius: '50%',
+            background: liquidGradient
+          }} />
+        </motion.div>
+
+        {/* Hot Energy Droplet (Only visible when typing/processing) */}
         {isTyping && (
-           <motion.div
-             animate={{ rotate: [0, -360], scale: [0.6, 1.1, 0.6] }}
-             transition={{ duration: pulseSpeed, repeat: Infinity, ease: "easeInOut" }}
-             style={{
-               position: 'absolute',
-               top: '10%', left: '10%',
-               width: '80%', height: '80%',
-               background: `conic-gradient(from 0deg, transparent 0%, ${activeColor} 50%, transparent 100%)`,
-               filter: `blur(${d*0.06}px)`,
-               mixBlendMode: 'screen',
-             }}
-           />
+          <motion.div
+            animate={{ rotate: [0, -360] }}
+            transition={{ duration: 2 * speed, repeat: Infinity, ease: "linear" }}
+            style={{ position: 'absolute', width: '100%', height: '100%' }}
+          >
+            <div style={{
+              position: 'absolute', top: '45%', left: '65%',
+              width: '25%', height: '25%',
+              borderRadius: '50%',
+              background: hotGradient
+            }} />
+          </motion.div>
         )}
       </div>
 
-      {/* 3. The Physical Glass Lens (Glassmorphism Overlay) */}
+      {/* 3. Global Specular Highlight Overlay 
+          This sits OVER the liquid effect to unify the entire mass,
+          making it look like a single 3D glossy object reflecting a studio light. */}
       <div style={{
         position: 'absolute',
-        inset: 0,
+        top: '12%', left: '18%',
+        width: '35%', height: '20%',
         borderRadius: '50%',
-        zIndex: 2,
-        // The frosted glass effect over the liquid
-        backdropFilter: `blur(${d*0.06}px)`,
-        // Surface glare
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.05) 100%)',
-        // Physical rim light
-        border: '1px solid rgba(255,255,255,0.5)',
-        // 3D thickness (inset shadow)
-        boxShadow: `
-          inset 0 ${d*0.05}px ${d*0.08}px rgba(255,255,255,0.6),
-          inset 0 -${d*0.03}px ${d*0.06}px rgba(0,0,0,0.4)
-        `
-      }}>
-        {/* High-end specular highlight (the sharp dot reflection of a light source) */}
-        <div style={{
-          position: 'absolute',
-          top: '10%', left: '18%',
-          width: '25%', height: '15%',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 70%)',
-          transform: 'rotate(-30deg)',
-          filter: 'blur(1px)'
-        }} />
-      </div>
-
+        background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 65%)',
+        transform: 'rotate(-25deg)',
+        pointerEvents: 'none',
+        zIndex: 10,
+        filter: 'blur(1px)'
+      }} />
     </div>
   );
 }
