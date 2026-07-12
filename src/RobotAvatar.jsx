@@ -30,6 +30,7 @@ export default function RobotAvatar({
   const glowSoft = isAura ? 'rgba(255, 71, 126, 0.2)' : 'rgba(34, 211, 238, 0.2)';
   
   const u = (v) => `${v * s}px`;
+  const id = `rv-${accent.replace('#', '')}-${size}`;
 
   const renderFace = () => {
     const strokeW = "10"; // Very thick, cute strokes
@@ -170,24 +171,24 @@ export default function RobotAvatar({
       ...style,
     }}>
       <style>{`
-        @keyframes rv-float {
+        @keyframes rv-float-${id} {
           0%, 100% { transform: translateY(0) scale(1); }
           50% { transform: translateY(-6px) scale(1.01); }
         }
-        @keyframes rv-shake {
+        @keyframes rv-shake-${id} {
           0%, 100% { transform: translateY(0) rotate(0); }
           25% { transform: translateY(-2px) rotate(-1.5deg); }
           75% { transform: translateY(2px) rotate(1.5deg); }
         }
-        @keyframes rv-wave {
+        @keyframes rv-wave-${id} {
           0%, 100% { transform: rotate(-10deg); }
           50% { transform: rotate(-65deg); }
         }
-        @keyframes rv-glow-pulse {
-          0%, 100% { filter: drop-shadow(0 0 4px ${accent}) drop-shadow(0 0 12px ${glowSoft}); }
-          50% { filter: drop-shadow(0 0 8px ${accent}) drop-shadow(0 0 20px ${glow}); }
+        @keyframes rv-glow-pulse-${id} {
+          0%, 100% { filter: drop-shadow(0 0 ${4*s}px ${accent}) drop-shadow(0 0 ${12*s}px ${glowSoft}); }
+          50% { filter: drop-shadow(0 0 ${8*s}px ${accent}) drop-shadow(0 0 ${20*s}px ${glow}); }
         }
-        @keyframes rv-blink {
+        @keyframes rv-blink-${id} {
           0%, 92%, 100% { transform: scaleY(1); }
           96% { transform: scaleY(0.05); }
         }
@@ -198,7 +199,7 @@ export default function RobotAvatar({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        animation: isTyping ? 'rv-shake 0.5s ease-in-out infinite' : 'rv-float 3.5s ease-in-out infinite',
+        animation: isTyping ? `rv-shake-${id} 0.5s ease-in-out infinite` : `rv-float-${id} 3.5s ease-in-out infinite`,
         position: 'relative'
       }}>
         
@@ -253,13 +254,11 @@ export default function RobotAvatar({
             {/* Glowing Face Frame */}
             <svg viewBox="0 0 100 80" style={{
               width: '100%', height: '100%',
-              animation: expression !== 'sleep' ? 'rv-blink 5.5s infinite' : 'none',
-              transformOrigin: 'center',
-              animationName: expression !== 'sleep' ? 'rv-blink, rv-glow-pulse' : 'none',
-              animationDuration: '5.5s, 3s',
-              animationIterationCount: 'infinite, infinite',
+              animation: expression !== 'sleep' ? `rv-blink-${id} 5.5s infinite, rv-glow-pulse-${id} 3s infinite` : 'none',
+              filter: expression === 'sleep' ? `drop-shadow(0 0 ${4*s}px ${accent}) drop-shadow(0 0 ${12*s}px ${glowSoft})` : 'none',
+              transformOrigin: 'center'
             }}>
-              <g style={{ filter: `drop-shadow(0 0 ${4*s}px ${accent}) drop-shadow(0 0 ${12*s}px ${glowSoft})` }}>
+              <g>
                 {renderFace()}
               </g>
             </svg>
@@ -312,7 +311,7 @@ export default function RobotAvatar({
               ...limbStyle,
               transformOrigin: 'top center',
               transform: waveAnim ? 'rotate(-65deg)' : 'rotate(-25deg)',
-              animation: waveAnim ? 'rv-wave 1.6s ease-in-out infinite' : 'none',
+              animation: waveAnim ? `rv-wave-${id} 1.6s ease-in-out infinite` : 'none',
               transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
               zIndex: 10, // in front of body
             }}>
@@ -355,10 +354,10 @@ export default function RobotAvatar({
           borderRadius: '50%',
           background: 'rgba(0,0,0,0.12)',
           filter: 'blur(5px)',
-          animation: 'rv-float-shadow 3.5s ease-in-out infinite',
+          animation: `rv-float-shadow-${id} 3.5s ease-in-out infinite`,
         }}>
            <style>{`
-             @keyframes rv-float-shadow {
+             @keyframes rv-float-shadow-${id} {
                0%, 100% { transform: scale(1); opacity: 1; }
                50% { transform: scale(0.85); opacity: 0.6; }
              }
