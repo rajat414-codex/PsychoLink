@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
 /**
- * Modern SaaS AI "Particle Sphere" Avatar
- * Creates a mesmerizing 3D dotted sphere using calculated box-shadows.
+ * Ultra-Premium SaaS AI Avatar: "Fluid Aurora Glass Orb"
+ * Completely abandons SVG and Particles for a hyper-realistic, 
+ * glassmorphic lens housing organic, flowing liquid light.
  */
 export default function RobotAvatar({
   expression = 'smile',
@@ -13,152 +14,152 @@ export default function RobotAvatar({
   className = '',
   style = {}
 }) {
-  // Map standard sizes to pixel dimensions (scaled up for more impact)
   const sizeMap = { lg: 240, md: 140, sm: 64, xs: 36 };
   const d = sizeMap[size] || sizeMap.md;
 
   const isSleep = expression === 'sleep';
   const isError = expression === 'dizzy' || expression === 'sad' || expression === 'cry';
 
-  // State-based animation properties
-  const activeColor = isError ? '#f43f5e' : glowColor; 
-  const pulseDuration = isTyping ? 0.8 : isSleep ? 4 : 2.5;
-  const spinDuration = isTyping ? 8 : isSleep ? 30 : 15;
-  
-  const baseOpacity = isSleep ? 0.4 : 1;
+  const activeColor = isError ? '#f43f5e' : glowColor;
 
-  // Memoize the generation of the 3D particle sphere to keep performance extremely high
-  const { layer1, layer2, layer3 } = useMemo(() => {
-    // Generates a woven "Torus Knot" particle pattern (hollow center, sweeping lines on the rim)
-    const generateWovenShadows = (count, R, r_minor, wraps, k_waves, colorHex) => {
-      let r = 255, g = 255, b = 255;
-      if (colorHex.startsWith('#')) {
-        const hex = colorHex.replace('#', '');
-        r = parseInt(hex.substring(0, 2), 16) || 255;
-        g = parseInt(hex.substring(2, 4), 16) || 255;
-        b = parseInt(hex.substring(4, 6), 16) || 255;
-      }
-      
-      let shadows = [];
-      for (let i = 0; i < count; i++) {
-        // Continuous line wrapping around the circle `wraps` times
-        const theta = (i / count) * 2 * Math.PI * wraps;
-        
-        // The secondary angle creating the sweeping Moiré/wave patterns
-        const phi = k_waves * theta;
-        
-        // Add a tiny bit of scatter so it looks like organic particles
-        const scatter = (Math.random() - 0.5) * (R * 0.05);
-        
-        // Torus 3D to 2D projection
-        const x = ((R + r_minor * Math.cos(phi) + scatter) * Math.cos(theta)).toFixed(1);
-        const y = ((R + r_minor * Math.cos(phi) + scatter) * Math.sin(theta)).toFixed(1);
-        const z = r_minor * Math.sin(phi);
-        
-        // Opacity based on 3D depth (z). Front is bright, back is dim.
-        const zRatio = (z + r_minor) / (2 * r_minor); // 0 (back) to 1 (front)
-        const op = (0.1 + 0.9 * zRatio).toFixed(2);
-        
-        shadows.push(`${x}px ${y}px 0px rgba(${r},${g},${b},${op})`);
-      }
-      return shadows.join(', ') || '0px 0px 0px transparent';
-    };
-    
-    // Scale the number of dots based on the container size
-    // so `xs` sizes don't waste performance rendering dense dots you can't see,
-    // and `lg` sizes look beautifully dense.
-    const scale = d / 100;
-    
-    return {
-      // Layer 1: The main sweeping waves. R = d/2 - 10, r_minor = 10, wraps = 50, k = 12.5
-      layer1: generateWovenShadows(Math.floor(1500 * scale), d/2 - d*0.1, d*0.1, 80, 18.5, activeColor),
-      // Layer 2: Sparse, ultra bright white stars offset slightly
-      layer2: generateWovenShadows(Math.floor(400 * scale), d/2 - d*0.1, d*0.12, 40, 12.2, '#ffffff'),
-      // Layer 3: Inner subtle weave, slightly smaller major radius
-      layer3: generateWovenShadows(Math.floor(800 * scale), d/2 - d*0.15, d*0.08, 60, 24.1, activeColor),
-    };
-  }, [d, activeColor]);
+  // Animation speeds
+  const rotateSpeed = isTyping ? 3 : isSleep ? 20 : 8;
+  const morphSpeed = isTyping ? 2 : isSleep ? 10 : 5;
+  const pulseSpeed = isTyping ? 1.5 : isSleep ? 5 : 3;
 
   return (
-    <motion.div 
-      className={`ai-particle-sphere ${className}`}
-      animate={{ scale: isSleep ? [0.95, 1, 0.95] : [1, 1.03, 1] }}
-      transition={{ duration: pulseDuration * 2, repeat: Infinity, ease: "easeInOut" }}
-      style={{
-        width: d, height: d,
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: '50%',
-        ...style
-      }}
-    >
+    <div className={`ai-aurora-glass ${className}`} style={{
+      width: d, height: d,
+      position: 'relative',
+      borderRadius: '50%',
+      // Dropshadow for the entire orb hitting the page
+      boxShadow: `0 ${d*0.1}px ${d*0.25}px rgba(0,0,0,0.15), 0 ${d*0.05}px ${d*0.1}px ${activeColor}30`,
+      ...style
+    }}>
       
-      {/* Container Glowing Rim (Matches the bright edge in the user's reference) */}
+      {/* 1. Base glow to illuminate the backdrop behind the glass */}
       <motion.div
-        animate={{
-          boxShadow: isTyping 
-            ? [`inset 0 0 ${d*0.05}px ${activeColor}, 0 0 ${d*0.1}px ${activeColor}80`, `inset 0 0 ${d*0.1}px ${activeColor}, 0 0 ${d*0.2}px ${activeColor}A0`, `inset 0 0 ${d*0.05}px ${activeColor}, 0 0 ${d*0.1}px ${activeColor}80`]
-            : [`inset 0 0 ${d*0.02}px ${activeColor}, 0 0 ${d*0.05}px ${activeColor}50`, `inset 0 0 ${d*0.05}px ${activeColor}, 0 0 ${d*0.1}px ${activeColor}70`, `inset 0 0 ${d*0.02}px ${activeColor}, 0 0 ${d*0.05}px ${activeColor}50`]
-        }}
-        transition={{ duration: pulseDuration, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ scale: [1, 1.05, 1], opacity: isSleep ? [0.3, 0.5, 0.3] : [0.6, 1, 0.6] }}
+        transition={{ duration: pulseSpeed, repeat: Infinity, ease: "easeInOut" }}
         style={{
           position: 'absolute',
           inset: 0,
           borderRadius: '50%',
-          opacity: baseOpacity,
-          zIndex: 1
+          background: `radial-gradient(circle at 50% 50%, ${activeColor} 0%, transparent 80%)`,
+          filter: `blur(${d*0.15}px)`,
+          zIndex: 0
         }}
       />
 
-      {/* Rotating Particle Layers Container (mix-blend-mode for insane brightness on overlaps) */}
-      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden', zIndex: 2, mixBlendMode: 'screen' }}>
-        
-        {/* Layer 1: Main color */}
+      {/* 2. Fluid Inner Blobs (The "Aurora") */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        borderRadius: '50%',
+        overflow: 'hidden', // Contain the liquid inside the sphere
+        zIndex: 1,
+        // Dark base inside the orb to make the light pop
+        background: '#0d1117' 
+      }}>
+        {/* Blob 1: Main Color */}
         <motion.div
-          animate={{ rotate: [0, 360] }}
-          transition={{ duration: spinDuration, repeat: Infinity, ease: "linear" }}
-          style={{ position: 'absolute', top: '50%', left: '50%', width: '1.5px', height: '1.5px', borderRadius: '50%', boxShadow: layer1, opacity: baseOpacity }}
-        />
-        
-        {/* Layer 2: White bright dots (Rotates opposite) */}
-        <motion.div
-          animate={{ rotate: [360, 0] }}
-          transition={{ duration: spinDuration * 1.2, repeat: Infinity, ease: "linear" }}
-          style={{ position: 'absolute', top: '50%', left: '50%', width: '2px', height: '2px', borderRadius: '50%', boxShadow: layer2, opacity: baseOpacity * 0.9 }}
-        />
-        
-        {/* Layer 3: Inner volume (Blurred for depth of field / volumetric look) */}
-        <motion.div
-          animate={{ rotate: [0, 360] }}
-          transition={{ duration: spinDuration * 0.8, repeat: Infinity, ease: "linear" }}
-          style={{ position: 'absolute', top: '50%', left: '50%', width: '1px', height: '1px', borderRadius: '50%', boxShadow: layer3, opacity: baseOpacity * 0.5, filter: 'blur(1px)' }}
+          animate={{
+            rotate: [0, 360],
+            borderRadius: [
+              "40% 60% 70% 30% / 40% 50% 60% 50%",
+              "60% 40% 30% 70% / 50% 60% 40% 50%",
+              "40% 60% 70% 30% / 40% 50% 60% 50%"
+            ],
+            scale: isTyping ? [0.8, 1.3, 0.8] : [0.9, 1.15, 0.9]
+          }}
+          transition={{
+            rotate: { duration: rotateSpeed, repeat: Infinity, ease: "linear" },
+            borderRadius: { duration: morphSpeed, repeat: Infinity, ease: "easeInOut" },
+            scale: { duration: pulseSpeed, repeat: Infinity, ease: "easeInOut" }
+          }}
+          style={{
+            position: 'absolute',
+            top: '-25%', left: '-25%',
+            width: '150%', height: '150%',
+            background: `radial-gradient(circle at 50% 50%, ${activeColor} 0%, transparent 65%)`,
+            filter: `blur(${d*0.12}px)`,
+            mixBlendMode: 'screen',
+            opacity: isSleep ? 0.5 : 1
+          }}
         />
 
-        {/* Core Processing Swirl (Only visible when typing) */}
+        {/* Blob 2: Secondary Color / White Highlight */}
+        <motion.div
+          animate={{
+            rotate: [360, 0],
+            borderRadius: [
+              "60% 40% 30% 70% / 50% 60% 40% 50%",
+              "40% 60% 70% 30% / 40% 50% 60% 50%",
+              "60% 40% 30% 70% / 50% 60% 40% 50%"
+            ]
+          }}
+          transition={{
+            rotate: { duration: rotateSpeed * 1.2, repeat: Infinity, ease: "linear" },
+            borderRadius: { duration: morphSpeed * 1.1, repeat: Infinity, ease: "easeInOut" }
+          }}
+          style={{
+            position: 'absolute',
+            bottom: '-15%', right: '-15%',
+            width: '110%', height: '110%',
+            background: `radial-gradient(circle at 50% 50%, #ffffff 0%, transparent 60%)`,
+            filter: `blur(${d*0.1}px)`,
+            mixBlendMode: 'overlay', // Overlay makes the white pop intensely when overlapping the color
+            opacity: isSleep ? 0.2 : 0.9
+          }}
+        />
+        
+        {/* Blob 3: Deep Core (Only visible when typing) */}
         {isTyping && (
-          <motion.div
-            animate={{ 
-              scale: [0.6, 0.9, 0.6], 
-              opacity: [0.2, 0.6, 0.2],
-              rotate: [0, -360]
-            }}
-            transition={{ 
-              scale: { duration: pulseDuration, repeat: Infinity, ease: "easeInOut" },
-              opacity: { duration: pulseDuration, repeat: Infinity, ease: "easeInOut" },
-              rotate: { duration: spinDuration * 0.5, repeat: Infinity, ease: "linear" }
-            }}
-            style={{
-              position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-              width: '60%', height: '60%', borderRadius: '50%',
-              background: `conic-gradient(from 0deg, transparent 0%, ${activeColor} 50%, transparent 100%)`,
-              filter: 'blur(8px)'
-            }}
-          />
+           <motion.div
+             animate={{ rotate: [0, -360], scale: [0.6, 1.1, 0.6] }}
+             transition={{ duration: pulseSpeed, repeat: Infinity, ease: "easeInOut" }}
+             style={{
+               position: 'absolute',
+               top: '10%', left: '10%',
+               width: '80%', height: '80%',
+               background: `conic-gradient(from 0deg, transparent 0%, ${activeColor} 50%, transparent 100%)`,
+               filter: `blur(${d*0.06}px)`,
+               mixBlendMode: 'screen',
+             }}
+           />
         )}
       </div>
 
-    </motion.div>
+      {/* 3. The Physical Glass Lens (Glassmorphism Overlay) */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        borderRadius: '50%',
+        zIndex: 2,
+        // The frosted glass effect over the liquid
+        backdropFilter: `blur(${d*0.06}px)`,
+        // Surface glare
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.05) 100%)',
+        // Physical rim light
+        border: '1px solid rgba(255,255,255,0.5)',
+        // 3D thickness (inset shadow)
+        boxShadow: `
+          inset 0 ${d*0.05}px ${d*0.08}px rgba(255,255,255,0.6),
+          inset 0 -${d*0.03}px ${d*0.06}px rgba(0,0,0,0.4)
+        `
+      }}>
+        {/* High-end specular highlight (the sharp dot reflection of a light source) */}
+        <div style={{
+          position: 'absolute',
+          top: '10%', left: '18%',
+          width: '25%', height: '15%',
+          borderRadius: '50%',
+          background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 70%)',
+          transform: 'rotate(-30deg)',
+          filter: 'blur(1px)'
+        }} />
+      </div>
+
+    </div>
   );
 }
