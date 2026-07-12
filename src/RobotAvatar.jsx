@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 /**
- * Modern SaaS AI "Neural Core" Avatar
- * Replaces the old SVG robot with a sleek, dynamic, fluid holographic orb.
- * Fits perfectly into modern UI designs (like Siri, Gemini, or OpenAI).
+ * Modern SaaS AI "Particle Sphere" Avatar
+ * Creates a mesmerizing 3D dotted sphere using calculated box-shadows.
  */
 export default function RobotAvatar({
   expression = 'smile',
@@ -14,135 +13,145 @@ export default function RobotAvatar({
   className = '',
   style = {}
 }) {
-  // Map standard sizes to pixel dimensions that fit the existing UI layouts
-  const sizeMap = { lg: 150, md: 100, sm: 48, xs: 28 };
+  // Map standard sizes to pixel dimensions
+  const sizeMap = { lg: 160, md: 100, sm: 48, xs: 28 };
   const d = sizeMap[size] || sizeMap.md;
 
   const isSleep = expression === 'sleep';
   const isError = expression === 'dizzy' || expression === 'sad' || expression === 'cry';
 
   // State-based animation properties
-  const activeColor = isError ? '#f43f5e' : glowColor; // Turn red/pink on error
-  const pulseDuration = isTyping ? 0.8 : isSleep ? 4 : 2;
-  const spinDuration = isTyping ? 1.5 : isSleep ? 8 : 4;
+  const activeColor = isError ? '#f43f5e' : glowColor; 
+  const pulseDuration = isTyping ? 0.8 : isSleep ? 4 : 2.5;
+  const spinDuration = isTyping ? 8 : isSleep ? 30 : 15;
   
-  // Opacity for the sleep state
-  const baseOpacity = isSleep ? 0.6 : 1;
+  const baseOpacity = isSleep ? 0.4 : 1;
 
-  // Render varying thicknesses based on size to ensure it scales beautifully
-  const borderWidth = Math.max(1, Math.round(d * 0.02));
+  // Memoize the generation of the 3D particle sphere to keep performance extremely high
+  const { layer1, layer2, layer3 } = useMemo(() => {
+    // Generates a 2D projection of points uniformly distributed on a 3D sphere surface
+    const generateSphereShadows = (count, radius, colorHex) => {
+      let r = 255, g = 255, b = 255;
+      if (colorHex.startsWith('#')) {
+        const hex = colorHex.replace('#', '');
+        r = parseInt(hex.substring(0, 2), 16) || 255;
+        g = parseInt(hex.substring(2, 4), 16) || 255;
+        b = parseInt(hex.substring(4, 6), 16) || 255;
+      }
+      
+      let shadows = [];
+      for (let i = 0; i < count; i++) {
+        // Spherical coordinates
+        const theta = Math.random() * 2 * Math.PI;
+        const v = Math.random();
+        const phi = Math.acos(2 * v - 1);
+        
+        // 3D to 2D projection
+        const x = (radius * Math.sin(phi) * Math.cos(theta)).toFixed(1);
+        const y = (radius * Math.sin(phi) * Math.sin(theta)).toFixed(1);
+        const z = radius * Math.cos(phi);
+        
+        // Calculate opacity based on depth (z). 
+        // Edge of sphere (z=0) is brightest, center of sphere (z=radius) is dimmest.
+        // This gives it that hollow, glowing rim effect perfectly!
+        const zRatio = Math.abs(z) / radius;
+        const op = (0.15 + 0.85 * (1 - zRatio)).toFixed(2);
+        
+        shadows.push(`${x}px ${y}px 0px rgba(${r},${g},${b},${op})`);
+      }
+      return shadows.join(', ') || '0px 0px 0px transparent';
+    };
+    
+    // Scale the number of dots based on the container size
+    // so `xs` sizes don't waste performance rendering dense dots you can't see,
+    // and `lg` sizes look beautifully dense.
+    const scale = d / 100;
+    
+    return {
+      // Layer 1: Dense, main color dots
+      layer1: generateSphereShadows(Math.floor(500 * scale), d/2 - 2, activeColor),
+      // Layer 2: Sparse, slightly smaller pure white bright dots
+      layer2: generateSphereShadows(Math.floor(150 * scale), d/2 - 3, '#ffffff'),
+      // Layer 3: Inner volume dots
+      layer3: generateSphereShadows(Math.floor(250 * scale), d/2 - 6, activeColor),
+    };
+  }, [d, activeColor]);
 
   return (
-    <div className={`ai-core-avatar ${className}`} style={{
+    <div className={`ai-particle-sphere ${className}`} style={{
       width: d, height: d,
       position: 'relative',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      borderRadius: '50%',
       ...style
     }}>
       
-      {/* 1. Ambient Glow Halo */}
+      {/* Container Glowing Rim (Matches the bright edge in the user's reference) */}
       <motion.div
         animate={{
-          scale: isTyping ? [0.9, 1.2, 0.9] : isSleep ? [0.95, 1, 0.95] : [1, 1.05, 1],
-          opacity: [baseOpacity * 0.3, baseOpacity * 0.6, baseOpacity * 0.3],
-        }}
-        transition={{ duration: pulseDuration, repeat: Infinity, ease: "easeInOut" }}
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${activeColor}55 0%, transparent 70%)`,
-          filter: `blur(${d * 0.15}px)`,
-          zIndex: 1,
-        }}
-      />
-
-      {/* 2. Fluid Liquid Ring 1 */}
-      <motion.div
-        animate={{ rotate: [0, 360] }}
-        transition={{ duration: spinDuration, repeat: Infinity, ease: "linear" }}
-        style={{
-          position: 'absolute',
-          width: '85%',
-          height: '85%',
-          borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
-          border: `${borderWidth}px solid ${activeColor}70`,
-          boxShadow: `0 0 ${d * 0.1}px ${activeColor}40, inset 0 0 ${d * 0.05}px ${activeColor}40`,
-          zIndex: 2,
-        }}
-      />
-
-      {/* 3. Fluid Liquid Ring 2 (Opposite rotation, offsets for organic feel) */}
-      <motion.div
-        animate={{ rotate: [360, 0] }}
-        transition={{ duration: spinDuration * 1.3, repeat: Infinity, ease: "linear" }}
-        style={{
-          position: 'absolute',
-          width: '75%',
-          height: '75%',
-          borderRadius: '60% 40% 30% 70% / 50% 40% 50% 60%',
-          border: `${borderWidth}px solid ${activeColor}A0`,
-          zIndex: 3,
-          opacity: isSleep ? 0.3 : 0.8,
-        }}
-      />
-
-      {/* 4. The Solid Neural Core Sphere */}
-      <motion.div
-        animate={{ 
-          scale: isTyping ? [0.85, 1.1, 0.85] : [0.95, 1, 0.95],
           boxShadow: isTyping 
-            ? [`0 0 ${d*0.1}px ${activeColor}`, `0 0 ${d*0.3}px ${activeColor}`, `0 0 ${d*0.1}px ${activeColor}`]
-            : [`0 0 ${d*0.05}px ${activeColor}`, `0 0 ${d*0.15}px ${activeColor}`, `0 0 ${d*0.05}px ${activeColor}`]
+            ? [`inset 0 0 ${d*0.15}px ${activeColor}, 0 0 ${d*0.3}px ${activeColor}80`, `inset 0 0 ${d*0.25}px ${activeColor}, 0 0 ${d*0.4}px ${activeColor}A0`, `inset 0 0 ${d*0.15}px ${activeColor}, 0 0 ${d*0.3}px ${activeColor}80`]
+            : [`inset 0 0 ${d*0.1}px ${activeColor}, 0 0 ${d*0.15}px ${activeColor}50`, `inset 0 0 ${d*0.15}px ${activeColor}, 0 0 ${d*0.25}px ${activeColor}70`, `inset 0 0 ${d*0.1}px ${activeColor}, 0 0 ${d*0.15}px ${activeColor}50`]
         }}
         transition={{ duration: pulseDuration, repeat: Infinity, ease: "easeInOut" }}
         style={{
-          position: 'relative',
-          width: '50%',
-          height: '50%',
-          borderRadius: '50%',
-          // 3D sphere gradient effect with a bright top-left highlight
-          background: `radial-gradient(circle at 30% 30%, #ffffff 0%, ${activeColor} 60%, #000000 100%)`,
-          zIndex: 4,
-          opacity: baseOpacity,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Core Swirl Animation (Simulating data processing inside) */}
-        {isTyping && (
-           <motion.div
-             animate={{ rotate: [0, 360] }}
-             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-             style={{
-               position: 'absolute',
-               width: '150%',
-               height: '150%',
-               background: `conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)`,
-               mixBlendMode: 'overlay'
-             }}
-           />
-        )}
-
-        {/* Glossy Glass Highlight */}
-        <div style={{
           position: 'absolute',
-          top: '10%',
-          left: '15%',
-          width: '35%',
-          height: '25%',
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.1) 100%)',
+          inset: 0,
           borderRadius: '50%',
-          filter: 'blur(1px)',
-          transform: 'rotate(-25deg)',
-          zIndex: 5
-        }} />
-      </motion.div>
+          opacity: baseOpacity,
+          zIndex: 1
+        }}
+      />
+
+      {/* Rotating Particle Layers Container */}
+      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden', zIndex: 2 }}>
+        
+        {/* Layer 1: Main color */}
+        <motion.div
+          animate={{ rotate: [0, 360] }}
+          transition={{ duration: spinDuration, repeat: Infinity, ease: "linear" }}
+          style={{ position: 'absolute', top: '50%', left: '50%', width: '2px', height: '2px', borderRadius: '50%', boxShadow: layer1, opacity: baseOpacity }}
+        />
+        
+        {/* Layer 2: White bright dots (Rotates opposite) */}
+        <motion.div
+          animate={{ rotate: [360, 0] }}
+          transition={{ duration: spinDuration * 1.2, repeat: Infinity, ease: "linear" }}
+          style={{ position: 'absolute', top: '50%', left: '50%', width: '1.5px', height: '1.5px', borderRadius: '50%', boxShadow: layer2, opacity: baseOpacity * 0.9 }}
+        />
+        
+        {/* Layer 3: Inner volume */}
+        <motion.div
+          animate={{ rotate: [0, 360] }}
+          transition={{ duration: spinDuration * 0.8, repeat: Infinity, ease: "linear" }}
+          style={{ position: 'absolute', top: '50%', left: '50%', width: '2px', height: '2px', borderRadius: '50%', boxShadow: layer3, opacity: baseOpacity * 0.7 }}
+        />
+
+        {/* Core Processing Swirl (Only visible when typing) */}
+        {isTyping && (
+          <motion.div
+            animate={{ 
+              scale: [0.6, 0.9, 0.6], 
+              opacity: [0.2, 0.6, 0.2],
+              rotate: [0, -360]
+            }}
+            transition={{ 
+              scale: { duration: pulseDuration, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: pulseDuration, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: spinDuration * 0.5, repeat: Infinity, ease: "linear" }
+            }}
+            style={{
+              position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+              width: '60%', height: '60%', borderRadius: '50%',
+              background: `conic-gradient(from 0deg, transparent 0%, ${activeColor} 50%, transparent 100%)`,
+              filter: 'blur(8px)'
+            }}
+          />
+        )}
+      </div>
+
     </div>
   );
 }
