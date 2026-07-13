@@ -4,11 +4,9 @@ import { motion } from 'framer-motion';
 /**
  * Premium Chat Bubble AI Avatar
  * Renders the exact chat bubble shape with glowing vertical pill eyes from the user's reference image.
- * Features:
- * - High-fidelity squarish chat bubble path.
- * - Dynamic pill-shaped LED eyes that morph expressions (happy arches, dizzy crosses, sleep lines, default vertical pills).
- * - Interactive hover floating animation.
- * - Rich color theme gradients matching the active AI core.
+ * Enhancements:
+ * - Sharp high-contrast double-rendered eyes (glow underlay + sharp white overlay).
+ * - Perfectly proportioned eye spacing for maximum clarity.
  */
 export default function RobotAvatar({
   expression = 'smile',
@@ -29,15 +27,19 @@ export default function RobotAvatar({
 
   // Render SVG eye shapes based on emotion
   const renderEyes = () => {
-    // Left eye center at X=84, Right eye center at X=116 (out of viewBox 200x200)
+    // Left eye center at X=83, Right eye center at X=117 (out of viewBox 200x200)
     const isHappy = expression === 'happy' || expression === 'smile' || expression === 'laughing';
     
     if (isHappy) {
       return (
         <>
           {/* Happy arched closed eyes ^ ^ */}
-          <path d="M 72,100 Q 84,78 96,100" fill="none" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" filter="url(#eye-glow)" />
-          <path d="M 104,100 Q 116,78 128,100" fill="none" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" filter="url(#eye-glow)" />
+          {/* Glow Underlay */}
+          <path d="M 70,102 Q 83,76 96,102" fill="none" stroke="#ffffff" strokeWidth="13" strokeLinecap="round" opacity="0.6" filter="url(#eye-glow)" />
+          <path d="M 104,102 Q 117,76 130,102" fill="none" stroke="#ffffff" strokeWidth="13" strokeLinecap="round" opacity="0.6" filter="url(#eye-glow)" />
+          {/* Sharp Overlay */}
+          <path d="M 70,102 Q 83,76 96,102" fill="none" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" />
+          <path d="M 104,102 Q 117,76 130,102" fill="none" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" />
         </>
       );
     }
@@ -48,32 +50,48 @@ export default function RobotAvatar({
         return (
           <>
             {/* Cross eyes X X */}
-            <path d="M 76,82 L 92,98 M 92,82 L 76,98" fill="none" stroke="#ffffff" strokeWidth="8" strokeLinecap="round" filter="url(#eye-glow)" />
-            <path d="M 108,82 L 124,98 M 124,82 L 108,98" fill="none" stroke="#ffffff" strokeWidth="8" strokeLinecap="round" filter="url(#eye-glow)" />
+            {/* Glow Underlay */}
+            <path d="M 73,81 L 93,101 M 93,81 L 73,101" fill="none" stroke="#ffffff" strokeWidth="10" strokeLinecap="round" opacity="0.6" filter="url(#eye-glow)" />
+            <path d="M 107,81 L 127,101 M 127,81 L 107,101" fill="none" stroke="#ffffff" strokeWidth="10" strokeLinecap="round" opacity="0.6" filter="url(#eye-glow)" />
+            {/* Sharp Overlay */}
+            <path d="M 73,81 L 93,101 M 93,81 L 73,101" fill="none" stroke="#ffffff" strokeWidth="8" strokeLinecap="round" />
+            <path d="M 107,81 L 127,101 M 127,81 L 107,101" fill="none" stroke="#ffffff" strokeWidth="8" strokeLinecap="round" />
           </>
         );
       case 'sleep':
         return (
           <>
             {/* Flat sleeping lines - - */}
-            <line x1="74" y1="90" x2="94" y2="90" stroke="#ffffff" strokeWidth="9" strokeLinecap="round" filter="url(#eye-glow)" />
-            <line x1="106" y1="90" x2="126" y2="90" stroke="#ffffff" strokeWidth="9" strokeLinecap="round" filter="url(#eye-glow)" />
+            {/* Glow Underlay */}
+            <line x1="72" y1="91" x2="94" y2="91" stroke="#ffffff" strokeWidth="11" strokeLinecap="round" opacity="0.6" filter="url(#eye-glow)" />
+            <line x1="106" y1="91" x2="128" y2="91" stroke="#ffffff" strokeWidth="11" strokeLinecap="round" opacity="0.6" filter="url(#eye-glow)" />
+            {/* Sharp Overlay */}
+            <line x1="72" y1="91" x2="94" y2="91" stroke="#ffffff" strokeWidth="9" strokeLinecap="round" />
+            <line x1="106" y1="91" x2="128" y2="91" stroke="#ffffff" strokeWidth="9" strokeLinecap="round" />
           </>
         );
       case 'sad':
         return (
           <>
             {/* Sad downward slanted eyes */}
-            <path d="M 72,90 Q 84,112 96,90" fill="none" stroke="#ffffff" strokeWidth="11" strokeLinecap="round" filter="url(#eye-glow)" />
-            <path d="M 104,90 Q 116,112 128,90" fill="none" stroke="#ffffff" strokeWidth="11" strokeLinecap="round" filter="url(#eye-glow)" />
+            {/* Glow Underlay */}
+            <path d="M 70,90 Q 83,114 96,90" fill="none" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" opacity="0.6" filter="url(#eye-glow)" />
+            <path d="M 104,90 Q 117,114 130,90" fill="none" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" opacity="0.6" filter="url(#eye-glow)" />
+            {/* Sharp Overlay */}
+            <path d="M 70,90 Q 83,114 96,90" fill="none" stroke="#ffffff" strokeWidth="10" strokeLinecap="round" />
+            <path d="M 104,90 Q 117,114 130,90" fill="none" stroke="#ffffff" strokeWidth="10" strokeLinecap="round" />
           </>
         );
       default:
         return (
           <>
             {/* Default Vertical Pill-Shaped Eyes from Reference Image */}
-            <rect x="75" y="72" width="18" height="46" rx="9" fill="#ffffff" filter="url(#eye-glow)" />
-            <rect x="107" y="72" width="18" height="46" rx="9" fill="#ffffff" filter="url(#eye-glow)" />
+            {/* Glow Underlay */}
+            <rect x="73" y="71" width="20" height="48" rx="10" fill="#ffffff" opacity="0.6" filter="url(#eye-glow)" />
+            <rect x="107" y="71" width="20" height="48" rx="10" fill="#ffffff" opacity="0.6" filter="url(#eye-glow)" />
+            {/* Sharp Overlay */}
+            <rect x="73" y="71" width="20" height="48" rx="10" fill="#ffffff" />
+            <rect x="107" y="71" width="20" height="48" rx="10" fill="#ffffff" />
           </>
         );
     }
@@ -90,7 +108,7 @@ export default function RobotAvatar({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        filter: `drop-shadow(0 4px 20px ${glow}44) drop-shadow(0 0 12px ${glow}33)`,
+        filter: `drop-shadow(0 4px 20px ${glow}33) drop-shadow(0 0 10px ${glow}22)`,
         ...style
       }}
     >
@@ -102,8 +120,8 @@ export default function RobotAvatar({
       >
         <defs>
           {/* Subtle glow for the eyes */}
-          <filter id="eye-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+          <filter id="eye-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
