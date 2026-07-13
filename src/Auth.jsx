@@ -518,10 +518,22 @@ export default function Auth({ onComplete }) {
         : voices.find(v=>v.name.includes('David')||v.name.includes('Google UK English Male'));
       if(v) u.voice=v;
       u.rate=0.92; u.pitch=core==='AURA'?1.3:0.78; u.volume=1;
-      u.onend=()=>{ setEyes('laughing'); setTimeout(()=>onComplete&&onComplete(profile||selectedProfile),1400); };
+      // Estimate speech duration to trigger the happy expression ~1.5s before the audio ends
+      const wordCount = text.split(' ').length;
+      const estimatedDuration = wordCount * 480; // 480ms average per word at 0.92 rate
+      const happyDelay = Math.max(1000, estimatedDuration - 1500);
+
+      const happyTimer = setTimeout(() => {
+        setEyes('laughing');
+      }, happyDelay);
+
+      u.onend=()=>{ 
+        clearTimeout(happyTimer);
+        setEyes('laughing'); 
+        setTimeout(()=>onComplete&&onComplete(profile||selectedProfile),1400); 
+      };
       window.speechSynthesis.speak(u);
     }
-    setTimeout(()=>setEyes('laughing'),1000);
   };
 
   const goAIHub = (profile) => {
