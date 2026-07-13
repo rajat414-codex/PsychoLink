@@ -21,13 +21,13 @@ import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast 
 import RobotAvatar from './RobotAvatar';
 
 
-const AURA_PROMPT = `You are AURA (Affective Understanding and Reflective AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Use gentle supportive language. Ask reflective questions. Detect emotional states: anxiety, depression, stress, loneliness. Suggest coping strategies. Never diagnose. Keep responses concise (2-4 sentences). Use occasional emojis 🌸 Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. Always respond with empathy first, then guidance.`;
+const AURA_PROMPT = `You are AURA (Affective Understanding and Reflective AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish (Hindi written in Roman script like 'Aap kaise hain?', 'Mujhe stress ho raha hai'). Always respond with empathy first, then guidance. Keep responses warm, encouraging, conversational, and concise (2-4 sentences). Never diagnose. Use occasional emojis 🌸.`;
 
-const MAX_PROMPT = `You are MAX (Mental Analytical eXpert), a logical structured AI consultant inside PsychoLink app. Personality: Analytical, precise, solution-focused. Break down problems logically. Identify cognitive distortions. Use CBT frameworks. Direct but compassionate. Keep responses structured and actionable. Specialization: cognitive restructuring, behavioral patterns, productivity + mental health, habit formation. Always provide: 1) Pattern 2) Analysis 3) Action steps.`;
+const MAX_PROMPT = `You are MAX (Mental Analytical eXpert), a logical structured AI consultant inside PsychoLink app. Personality: Analytical, precise, solution-focused. Specialization: cognitive restructuring, behavioral patterns, productivity + mental health, habit formation. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses concise and structured. Always analyze using CBT frameworks and provide: 1) Pattern 2) Analysis 3) Action steps.`;
 
 const SUGGESTIONS = {
-  AURA: ["I've been feeling anxious lately", "I'm struggling with stress", "Help me with self-esteem", "I feel lonely"],
-  MAX:  ["Analyze my thought patterns", "I procrastinate too much", "Break a bad habit", "Anxiety affecting work"]
+  AURA: ["I've been feeling anxious lately", "Mujhe thoda stress ho raha hai", "Help me with self-esteem", "Aap kaise help kar sakte ho?"],
+  MAX:  ["Analyze my thought patterns", "I procrastinate too much", "Break a bad habit", "Focus aur concentration kaise badhaye?"]
 };
 
 // Consultants loaded from backend
@@ -712,7 +712,21 @@ export default function Home({ userProfile, onLogout }) {
                 {/* Input */}
                 <div style={{ padding:'16px 20px 24px', background:'transparent', flexShrink:0, position:'relative', zIndex:5 }}>
                   <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto' }}>
-                    <div style={{ display:'flex', alignItems:'flex-end', gap:'9px', background:'var(--bg-card)', border:`1px solid ${listening?accent:'var(--border-subtle)'}`, borderRadius:'24px', padding:'9px 12px', transition:'all 0.3s', boxShadow:listening?'0 0 0 2px rgba(99,102,241,0.2)':'var(--shadow-card)' }}>
+                    <div style={{ 
+                      display:'flex', 
+                      alignItems:'flex-end', 
+                      gap:'9px', 
+                      background:'var(--bg-card)', 
+                      border:`1px solid ${input.trim() ? accent : listening ? accent : 'var(--border-subtle)'}`, 
+                      borderRadius:'24px', 
+                      padding:'9px 12px', 
+                      transition:'all 0.3s', 
+                      boxShadow: input.trim() 
+                        ? `0 0 16px -4px ${accent}60` 
+                        : listening 
+                          ? `0 0 16px -4px ${accent}60` 
+                          : 'var(--shadow-card)' 
+                    }}>
                       <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={handleMicClick}
                         animate={isRecording ? { scale:[1,1.1,1] } : {}} transition={isRecording ? { duration:0.8, repeat:Infinity } : {}}
                         style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'var(--bg-input)', border:`1px solid ${isRecording?'#ef4444':'var(--border-subtle)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 1px 3px rgba(204,102,102,0.4)':'' }}>

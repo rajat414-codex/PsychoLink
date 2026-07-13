@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Auth from './Auth'
 import Home from './Home'
 import humanAiCreation from './assets/human_ai_creation.png'
+import FloatingChatbot from './FloatingChatbot';
 
 
 // ── TRANSITION SCREEN ────────────────────────────────────
@@ -185,6 +186,7 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'fixed', top: 0, left: 0, background: 'var(--bg-app)', backgroundImage: 'radial-gradient(circle at 50% 50%, var(--accent-purple-dim) 0%, var(--accent-max-dim) 50%, transparent 80%)' }}>
       <AppleEmoji/>
+      {screen !== 'home' && <FloatingChatbot />}
       <AnimatePresence mode="wait">
 
         {screen === 'splash' && (
