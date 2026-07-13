@@ -115,10 +115,10 @@ export default function FloatingChatbot() {
         }
     };
 
-    const accent = activeAI === 'AURA' ? '#f43f5e' : '#14b8a6';
+    const accent = activeAI === 'AURA' ? '#ef4444' : '#22c55e';
     const bgGlow = activeAI === 'AURA' 
-        ? 'radial-gradient(circle at 50% -20%, rgba(244, 63, 94, 0.08) 0%, transparent 60%)' 
-        : 'radial-gradient(circle at 50% -20%, rgba(20, 184, 166, 0.08) 0%, transparent 60%)';
+        ? 'radial-gradient(circle at 50% -20%, rgba(239, 68, 68, 0.08) 0%, transparent 60%)' 
+        : 'radial-gradient(circle at 50% -20%, rgba(34, 197, 94, 0.08) 0%, transparent 60%)';
 
     return (
         <>
@@ -247,7 +247,7 @@ export default function FloatingChatbot() {
                                         onClick={() => setActiveAI('AURA')}
                                         style={{
                                             border: 'none',
-                                            background: activeAI === 'AURA' ? '#f43f5e' : 'transparent',
+                                            background: activeAI === 'AURA' ? '#ef4444' : 'transparent',
                                             color: activeAI === 'AURA' ? '#fff' : 'rgba(255, 255, 255, 0.4)',
                                             fontSize: '0.72rem',
                                             fontWeight: 700,
@@ -263,7 +263,7 @@ export default function FloatingChatbot() {
                                         onClick={() => setActiveAI('MAX')}
                                         style={{
                                             border: 'none',
-                                            background: activeAI === 'MAX' ? '#14b8a6' : 'transparent',
+                                            background: activeAI === 'MAX' ? '#22c55e' : 'transparent',
                                             color: activeAI === 'MAX' ? '#fff' : 'rgba(255, 255, 255, 0.4)',
                                             fontSize: '0.72rem',
                                             fontWeight: 700,
