@@ -122,9 +122,9 @@ export default function Home({ userProfile, onLogout }) {
   const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
-  const accent   = activeAI === 'AURA' ? '#f43f5e' : '#14b8a6';
-  const accentB  = activeAI === 'AURA' ? 'rgba(244,63,94,0.03)' : 'rgba(20,184,166,0.03)';
-  const accentBr = activeAI === 'AURA' ? 'rgba(244,63,94,0.12)' : 'rgba(20,184,166,0.12)';
+  const accent   = activeAI === 'AURA' ? '#ef4444' : '#22c55e';
+  const accentB  = activeAI === 'AURA' ? 'rgba(239,68,68,0.03)' : 'rgba(34,197,94,0.03)';
+  const accentBr = activeAI === 'AURA' ? 'rgba(239,68,68,0.12)' : 'rgba(34,197,94,0.12)';
 
   const activeSession = sessions[activeAI].find(s => s.active) || sessions[activeAI][0];
   const messages      = activeSession?.messages || [];
@@ -442,7 +442,7 @@ export default function Home({ userProfile, onLogout }) {
         <motion.div 
           animate={{ x: [-20, 20, -20], y: [-20, 20, -20] }}
           transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position:'absolute', top:'-10%', left:'15%', width:'400px', height:'400px', borderRadius:'50%', background: activeAI === 'AURA' ? 'radial-gradient(circle, rgba(244,63,94,0.035) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(20,184,166,0.035) 0%, transparent 70%)', filter:'blur(60px)', transition:'all 1s' }}
+          style={{ position:'absolute', top:'-10%', left:'15%', width:'400px', height:'400px', borderRadius:'50%', background: activeAI === 'AURA' ? 'radial-gradient(circle, rgba(239,68,68,0.035) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(34,197,94,0.035) 0%, transparent 70%)', filter:'blur(60px)', transition:'all 1s' }}
         />
         <motion.div 
           animate={{ x: [20, -20, 20], y: [20, -20, 20] }}

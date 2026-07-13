@@ -1488,7 +1488,7 @@ export default function Auth({ onComplete }) {
             {/* Toggle */}
             <div style={{ position:'relative', zIndex:20, marginTop:'16px', marginBottom:'16px' }}>
               <div style={{ background:'rgba(255,255,255,0.04)', backdropFilter:'blur(30px)', padding:'5px', borderRadius:'40px', border:'1px solid rgba(255,255,255,0.08)', display:'flex', gap:'4px', boxShadow:'0 16px 40px rgba(0,0,0,0.5)' }}>
-                {[{k:'AURA',l:'Feminine Core · Aura',g:'linear-gradient(135deg,#e0524d,#c0392b)',sh:'0 4px 12px rgba(0,0,0,0.35)'},{k:'MAX',l:'Analytic Engine · Max',g:'linear-gradient(135deg,#5eb8ad,#4a9488)',sh:'0 8px 20px rgba(13,148,136,0.35)'}].map(ai=>(
+                {[{k:'AURA',l:'Feminine Core · Aura',g:'linear-gradient(135deg,#ef4444,#991b1b)',sh:'0 4px 12px rgba(239,68,68,0.35)'},{k:'MAX',l:'Analytic Engine · Max',g:'linear-gradient(135deg,#22c55e,#166534)',sh:'0 8px 20px rgba(34,197,94,0.35)'}].map(ai=>(
                   <button key={ai.k} onClick={()=>toggleAI(ai.k)}
                     style={{ padding:'10px 26px', border:'none', borderRadius:'30px', cursor:'pointer', fontSize:'0.88rem', fontWeight:'600', fontFamily:G, fontStyle:'italic', letterSpacing:'0.5px', transition:'all 0.4s', background:activeAI===ai.k?ai.g:'transparent', color:activeAI===ai.k?'#fff':'rgba(255,255,255,0.35)', boxShadow:activeAI===ai.k?ai.sh:'none', userSelect:'none' }}>
                     {ai.l}
@@ -1503,7 +1503,7 @@ export default function Auth({ onComplete }) {
               <RobotAvatar
                 expression={eyes === 'laughing' ? 'happy' : 'smile'}
                 size="lg"
-                glowColor={activeAI === 'AURA' ? '#f43f5e' : '#14b8a6'}
+                glowColor={activeAI === 'AURA' ? '#ff3b30' : '#22c55e'}
                 isTyping={eyes === 'normal'}
               />
             </motion.div>

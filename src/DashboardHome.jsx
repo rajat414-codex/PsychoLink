@@ -358,24 +358,24 @@ export default function DashboardHome({
           {/* Right Column: AI Core quick select, Emotion Mix */}
           <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
             {/* Aura Core selector */}
-            <Card delay={0.42} glow="#f43f5e" hover onClick={() => { setActiveAI('AURA'); setTab('chat'); }} style={{ padding:18 }}>
+            <Card delay={0.42} glow="#ef4444" hover onClick={() => { setActiveAI('AURA'); setTab('chat'); }} style={{ padding:18 }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8, position:'relative', zIndex:2 }}>
-                <div style={{ width:36, height:36, borderRadius:10, background:'rgba(244,63,94,0.08)', border:'1px solid rgba(244,63,94,0.15)', display:'flex', alignItems:'center', justifyContent:'center' }}><RobotAvatar expression="smile" size="xs" glowColor="#f43f5e" /></div>
-                <div style={{ width:24, height:24, borderRadius:'50%', background:'rgba(244,63,94,0.08)', display:'flex', alignItems:'center', justifyContent:'center', color:'#f43f5e' }}><FaArrowRight size={8}/></div>
+                <div style={{ width:36, height:36, borderRadius:10, background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.15)', display:'flex', alignItems:'center', justifyContent:'center' }}><RobotAvatar expression="smile" size="xs" glowColor="#ef4444" /></div>
+                <div style={{ width:24, height:24, borderRadius:'50%', background:'rgba(239,68,68,0.08)', display:'flex', alignItems:'center', justifyContent:'center', color:'#ef4444' }}><FaArrowRight size={8}/></div>
               </div>
               <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:800, fontSize:'1.1rem', color:'#fff' }}>Aura Core</p>
-              <p style={{ margin:'0 0 6px', fontSize:'0.62rem', color:'#f43f5e', fontFamily:S, letterSpacing:'1.5px', fontWeight:700 }}>EMOTIONAL SUPPORT</p>
+              <p style={{ margin:'0 0 6px', fontSize:'0.62rem', color:'#ef4444', fontFamily:S, letterSpacing:'1.5px', fontWeight:700 }}>EMOTIONAL SUPPORT</p>
               <p style={{ margin:0, fontSize:'0.78rem', color:'var(--text-secondary)', fontFamily:J, lineHeight:1.4 }}>Empathic checks and reflections.</p>
             </Card>
 
             {/* Max Core selector */}
-            <Card delay={0.48} glow="#14b8a6" hover onClick={() => { setActiveAI('MAX'); setTab('chat'); }} style={{ padding:18 }}>
+            <Card delay={0.48} glow="#22c55e" hover onClick={() => { setActiveAI('MAX'); setTab('chat'); }} style={{ padding:18 }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8, position:'relative', zIndex:2 }}>
-                <div style={{ width:36, height:36, borderRadius:10, background:'rgba(20,184,166,0.08)', border:'1px solid rgba(20,184,166,0.15)', display:'flex', alignItems:'center', justifyContent:'center' }}><RobotAvatar expression="neutral" size="xs" glowColor="#14b8a6" /></div>
-                <div style={{ width:24, height:24, borderRadius:'50%', background:'rgba(20,184,166,0.08)', display:'flex', alignItems:'center', justifyContent:'center', color:'#14b8a6' }}><FaArrowRight size={8}/></div>
+                <div style={{ width:36, height:36, borderRadius:10, background:'rgba(34,197,94,0.08)', border:'1px solid rgba(34,197,94,0.15)', display:'flex', alignItems:'center', justifyContent:'center' }}><RobotAvatar expression="neutral" size="xs" glowColor="#22c55e" /></div>
+                <div style={{ width:24, height:24, borderRadius:'50%', background:'rgba(34,197,94,0.08)', display:'flex', alignItems:'center', justifyContent:'center', color:'#22c55e' }}><FaArrowRight size={8}/></div>
               </div>
               <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:800, fontSize:'1.1rem', color:'#fff' }}>Max Core</p>
-              <p style={{ margin:'0 0 6px', fontSize:'0.62rem', color:'#14b8a6', fontFamily:S, letterSpacing:'1.5px', fontWeight:700 }}>COGNITIVE ANALYSIS</p>
+              <p style={{ margin:'0 0 6px', fontSize:'0.62rem', color:'#22c55e', fontFamily:S, letterSpacing:'1.5px', fontWeight:700 }}>COGNITIVE ANALYSIS</p>
               <p style={{ margin:0, fontSize:'0.78rem', color:'var(--text-secondary)', fontFamily:J, lineHeight:1.4 }}>Identify patterns and clear solutions.</p>
             </Card>
 
