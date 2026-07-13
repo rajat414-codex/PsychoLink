@@ -138,18 +138,26 @@ function AIChatEngine({ user, setUser }) {
             </div>
 
             {/* Translucent Chat Bubble Frame */}
-            <div style={{ background: 'rgba(255, 255, 255, 0.01)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '28px', padding: '20px', height: '340px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div ref={scrollRef} style={{ overflowY: 'auto', flexGrow: 1, marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '4px' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.015)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '28px', padding: '20px', height: '370px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+              <div ref={scrollRef} style={{ overflowY: 'auto', flexGrow: 1, marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '14px', paddingRight: '4px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 {messages.map((msg, index) => (
                   <motion.div key={index}
-                    initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
                     style={{
                       alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                      background: msg.role === 'user' ? '#fff' : 'rgba(255,255,255,0.04)',
-                      color: msg.role === 'user' ? '#000' : '#fff',
-                      padding: '12px 16px', borderRadius: '18px', fontSize: '0.85rem', maxWidth: '85%', fontWeight: '500',
+                      background: msg.role === 'user' ? 'linear-gradient(135deg, var(--accent-purple) 0%, #4f46e5 100%)' : 'rgba(255,255,255,0.02)',
+                      color: '#fff',
+                      padding: '12px 18px', 
+                      borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '4px 18px 18px 18px', 
+                      fontSize: '0.85rem', 
+                      maxWidth: '85%', 
+                      fontWeight: '500',
                       border: msg.role === 'user' ? 'none' : '1px solid rgba(255,255,255,0.04)',
-                      whiteSpace: 'pre-wrap', lineHeight: 1.5
+                      borderLeft: msg.role === 'user' ? 'none' : `3px solid ${ai.color}`,
+                      boxShadow: msg.role === 'user' ? '0 8px 24px rgba(99, 102, 241, 0.25)' : `0 4px 20px ${ai.glow}`,
+                      whiteSpace: 'pre-wrap', 
+                      lineHeight: 1.5,
+                      fontFamily: "'Plus Jakarta Sans', sans-serif"
                     }}>
                     {msg.text}
                   </motion.div>
@@ -162,15 +170,16 @@ function AIChatEngine({ user, setUser }) {
                       initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                       style={{
                         alignSelf: 'flex-start',
-                        background: 'rgba(255,255,255,0.04)',
+                        background: 'rgba(255,255,255,0.02)',
                         border: '1px solid rgba(255,255,255,0.04)',
-                        padding: '12px 16px', borderRadius: '18px',
-                        display: 'flex', gap: '4px', alignItems: 'center'
+                        borderLeft: `3px solid ${ai.color}`,
+                        padding: '12px 18px', borderRadius: '4px 18px 18px 18px',
+                        display: 'flex', gap: '5px', alignItems: 'center'
                       }}>
                       {[0,1,2].map(i => (
                         <motion.div key={i}
-                          animate={{ opacity: [0.3, 1, 0.3], y: [0, -3, 0] }}
-                          transition={{ duration: 0.9, repeat: Infinity, delay: i*0.15 }}
+                          animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }}
+                          transition={{ duration: 1.0, repeat: Infinity, delay: i*0.18, ease: 'easeInOut' }}
                           style={{ width: '6px', height: '6px', borderRadius: '50%', background: ai.color }}/>
                       ))}
                     </motion.div>
@@ -187,17 +196,26 @@ function AIChatEngine({ user, setUser }) {
               )}
 
               {/* Action Box Panel Input */}
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <input
                   type="text" value={input} onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   disabled={isTyping}
-                  placeholder={`Sync data with ${ai.name}...`}
-                  style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '12px', color: '#fff', fontSize: '0.85rem', outline: 'none', opacity: isTyping ? 0.6 : 1 }}
+                  placeholder={`Message ${ai.name}...`}
+                  style={{ flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '12px 16px', color: '#fff', fontSize: '0.86rem', outline: 'none', opacity: isTyping ? 0.6 : 1, transition: 'all 0.25s', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                  onFocus={e => { e.target.style.borderColor = ai.color; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.03)'; }}
                 />
                 <button onClick={handleSend} disabled={isTyping}
-                  style={{ background: ai.color, color: '#000', border: 'none', borderRadius: '14px', width: '44px', cursor: isTyping ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '1.1rem', opacity: isTyping ? 0.6 : 1 }}>
-                  {isTyping ? '···' : '→'}
+                  style={{ background: ai.color, color: '#000', border: 'none', borderRadius: '50%', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isTyping ? 'not-allowed' : 'pointer', opacity: isTyping ? 0.6 : 1, boxShadow: `0 4px 12px ${ai.color}35`, transition: 'all 0.25s', flexShrink: 0 }}>
+                  {isTyping ? (
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} style={{ width: '14px', height: '14px', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.2)', borderTopColor: '#000' }}/>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>

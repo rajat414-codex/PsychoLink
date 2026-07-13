@@ -342,19 +342,22 @@ export default function FloatingChatbot() {
                                         </div>
                                         {/* Message Text */}
                                         <div style={{
-                                            padding: '10px 14px',
-                                            fontSize: '0.84rem',
-                                            lineHeight: 1.5,
-                                            borderRadius: '16px',
-                                            borderTopLeftRadius: isUser ? '16px' : '4px',
-                                            borderTopRightRadius: isUser ? '4px' : '16px',
-                                            background: isUser 
-                                                ? (activeAI === 'AURA' ? 'linear-gradient(135deg, rgba(244, 63, 94, 0.1), rgba(244, 63, 94, 0.03))' : 'linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(20, 184, 166, 0.03))') 
-                                                : 'rgba(255, 255, 255, 0.03)',
-                                            border: `1px solid ${isUser ? (activeAI === 'AURA' ? 'rgba(244, 63, 94, 0.25)' : 'rgba(20, 184, 166, 0.25)') : 'rgba(255, 255, 255, 0.04)'}`,
-                                            color: isUser ? '#fff' : 'rgba(255, 255, 255, 0.9)',
-                                            wordBreak: 'break-word',
-                                            whiteSpace: 'pre-wrap'
+                                             padding: '10px 16px',
+                                             fontSize: '0.84rem',
+                                             lineHeight: 1.5,
+                                             borderRadius: '16px',
+                                             borderTopLeftRadius: isUser ? '16px' : '4px',
+                                             borderTopRightRadius: isUser ? '4px' : '16px',
+                                             background: isUser 
+                                                 ? 'linear-gradient(135deg, var(--accent-purple) 0%, #4f46e5 100%)'
+                                                 : 'rgba(255, 255, 255, 0.02)',
+                                             border: isUser ? 'none' : '1px solid rgba(255, 255, 255, 0.04)',
+                                             borderLeft: isUser ? 'none' : `3px solid ${accent}`,
+                                             boxShadow: isUser ? '0 6px 18px rgba(99, 102, 241, 0.2)' : `0 4px 15px ${activeAI === 'AURA' ? 'rgba(244, 63, 94, 0.04)' : 'rgba(20, 184, 166, 0.04)'}`,
+                                             color: '#fff',
+                                             wordBreak: 'break-word',
+                                             whiteSpace: 'pre-wrap',
+                                             fontFamily: "'Plus Jakarta Sans', sans-serif"
                                         }}>
                                             {msg.content}
                                         </div>
