@@ -5,6 +5,7 @@ import { API_BASE } from './config';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple, FaPhoneAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaEnvelope, FaChevronRight, FaPlus } from 'react-icons/fa';
 import humanAiCreation from './assets/human_ai_creation.png';
+import RobotAvatar from './RobotAvatar';
 
 const Spinner = ({ color='#8b87f5', size=22 }) => (
   <div style={{ display:'flex', justifyContent:'center', padding:'12px' }}>
