@@ -710,10 +710,10 @@ export default function Auth({ onComplete }) {
                 style={{ position:'absolute', left:g.x, top:g.y, width:'500px', height:'500px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(80px)', zIndex:1, pointerEvents:'none' }}/>
             ))}
 
-            {/* The main container box split 50-50 */}
+            {/* The main container box - Centered Form */}
             <motion.div initial={{ y:25, opacity:0 }} animate={{ y:0, opacity:1 }} transition={{ delay:0.1 }}
               style={{
-                width:'920px',
+                width:'460px',
                 height:'580px',
                 display:'flex',
                 borderRadius:'28px',
@@ -724,65 +724,6 @@ export default function Auth({ onComplete }) {
                 position:'relative'
               }}
             >
-              {/* Left Side: Solid Dark Charcoal Info Branding */}
-              <div style={{
-                width:'460px',
-                background:'var(--bg-card)',
-                padding:'44px 40px',
-                display:'flex',
-                flexDirection:'column',
-                justifyContent:'space-between',
-                position:'relative',
-                borderRight:'1px solid var(--border-subtle)'
-              }}>
-                {shine}
-
-                {/* Logo Top Left */}
-                <div style={{ userSelect:'none' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'4px' }}>
-                    <motion.div animate={{ scale:[1,1.4,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
-                      style={{ width:'8px', height:'8px', borderRadius:'50%', background:'var(--accent-purple)', boxShadow:'none' }}/>
-                    <span style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'1.45rem', color:'#fff', letterSpacing:'0.5px' }}>Cognitive Social</span>
-                  </div>
-                  <div style={{ paddingLeft:'18px' }}>
-                    <span style={{ fontFamily:S, fontWeight:'700', fontSize:'0.65rem', letterSpacing:'5px', color:'var(--accent-purple)', textTransform:'uppercase' }}>
-                      CONSULTATION
-                    </span>
-                  </div>
-                </div>
-
-                {/* Center visual: Floating Human-AI Creation Artwork inside a beautiful slot */}
-                <div style={{ display:'flex', justifyContent:'center', alignItems:'center', flex:1 }}>
-                  <motion.div
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-                    style={{
-                      width: '280px',
-                      height: '210px',
-                      background: 'var(--bg-input)',
-                      border: '1.5px solid var(--border-subtle)',
-                      borderRadius: '24px',
-                      boxShadow: 'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)',
-                      overflow: 'hidden',
-                      position: 'relative'
-                    }}
-                  >
-                    <img src={humanAiCreation} alt="Human & AI Synthesis" style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }} />
-                  </motion.div>
-                </div>
-
-                {/* Bottom Quote */}
-                <div style={{ paddingLeft:'4px' }}>
-                  <p style={{ fontFamily:P, fontStyle:'italic', fontSize:'1.02rem', color:'var(--text-secondary)', lineHeight:'1.7', margin:'0 0 12px' }}>
-                    "The ocean calms the mind the way therapy calms the soul."
-                  </p>
-                  <div style={{ width:'36px', height:'2px', background:'linear-gradient(90deg,var(--accent-purple),transparent)', borderRadius:'2px' }}/>
-                </div>
-              </div>
 
               {/* Right Side: The login form card */}
               <div style={{
@@ -944,10 +885,10 @@ export default function Auth({ onComplete }) {
                 style={{ position:'absolute', left:g.x, top:g.y, width:'500px', height:'500px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(80px)', zIndex:1, pointerEvents:'none' }}/>
             ))}
 
-            {/* The main container box split 50-50 */}
+            {/* The main container box - Centered Form */}
             <motion.div initial={{ y:25, opacity:0 }} animate={{ y:0, opacity:1 }} transition={{ delay:0.1 }}
               style={{
-                width:'920px',
+                width:'460px',
                 height:'620px',
                 display:'flex',
                 borderRadius:'28px',
@@ -958,65 +899,6 @@ export default function Auth({ onComplete }) {
                 position:'relative'
               }}
             >
-              {/* Left Side: Solid Dark Charcoal Info Branding */}
-              <div style={{
-                width:'460px',
-                background:'var(--bg-card)',
-                padding:'44px 40px',
-                display:'flex',
-                flexDirection:'column',
-                justifyContent:'space-between',
-                position:'relative',
-                borderRight:'1px solid var(--border-subtle)'
-              }}>
-                {shine}
-
-                {/* Logo Top Left */}
-                <div style={{ userSelect:'none' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'4px' }}>
-                    <motion.div animate={{ scale:[1,1.4,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
-                      style={{ width:'8px', height:'8px', borderRadius:'50%', background:'var(--accent-purple)', boxShadow:'none' }}/>
-                    <span style={{ fontFamily:G, fontWeight:'600', fontStyle:'italic', fontSize:'1.45rem', color:'#fff', letterSpacing:'0.5px' }}>Cognitive Social</span>
-                  </div>
-                  <div style={{ paddingLeft:'18px' }}>
-                    <span style={{ fontFamily:S, fontWeight:'700', fontSize:'0.65rem', letterSpacing:'5px', color:'var(--accent-purple)', textTransform:'uppercase' }}>
-                      CONSULTATION
-                    </span>
-                  </div>
-                </div>
-
-                {/* Center visual: Floating Human-AI Creation Artwork inside a beautiful slot */}
-                <div style={{ display:'flex', justifyContent:'center', alignItems:'center', flex:1 }}>
-                  <motion.div
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-                    style={{
-                      width: '280px',
-                      height: '210px',
-                      background: 'var(--bg-input)',
-                      border: '1.5px solid var(--border-subtle)',
-                      borderRadius: '24px',
-                      boxShadow: 'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)',
-                      overflow: 'hidden',
-                      position: 'relative'
-                    }}
-                  >
-                    <img src={humanAiCreation} alt="Human & AI Synthesis" style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }} />
-                  </motion.div>
-                </div>
-
-                {/* Bottom Quote */}
-                <div style={{ paddingLeft:'4px' }}>
-                  <p style={{ fontFamily:P, fontStyle:'italic', fontSize:'1.02rem', color:'var(--text-secondary)', lineHeight:'1.7', margin:'0 0 12px' }}>
-                    "The ocean calms the mind the way therapy calms the soul."
-                  </p>
-                  <div style={{ width:'36px', height:'2px', background:'linear-gradient(90deg,var(--accent-purple),transparent)', borderRadius:'2px' }}/>
-                </div>
-              </div>
 
               {/* Right Side: The signup form */}
               <div style={{
@@ -1309,10 +1191,10 @@ export default function Auth({ onComplete }) {
             {/* Scenic warm sunset background */}
             <SunsetBg opacity={0.65}/>
             
-            {/* The main container box split 50-50 */}
+            {/* The main container box - Centered Form */}
             <motion.div initial={{ y:25, opacity:0 }} animate={{ y:0, opacity:1 }} transition={{ delay:0.1 }}
               style={{
-                width:'920px',
+                width:'460px',
                 height:'580px',
                 display:'flex',
                 borderRadius:'28px',
@@ -1418,46 +1300,6 @@ export default function Auth({ onComplete }) {
                 <p style={{ margin:0, textAlign:'center', color:'rgba(255,255,255,0.22)', fontSize:'0.75rem', fontFamily:J }}>
                   Already Have An Account? <span onClick={()=>setScreen('landing')} style={{ color:'#e0524d', cursor:'pointer', fontWeight:'600' }}>Login</span>
                 </p>
-              </div>
-
-              {/* Right Side: Transparent Glassmorphism card overlay */}
-              <div style={{
-                width:'460px',
-                background:'linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                backdropFilter:'blur(24px)',
-                WebkitBackdropFilter:'blur(24px)',
-                padding:'44px',
-                display:'flex',
-                flexDirection:'column',
-                alignItems:'center',
-                justifyContent:'center',
-                borderLeft:'1px solid rgba(255,255,255,0.08)'
-              }}>
-                {/* Floating Human-AI Creation Artwork */}
-                <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-                  style={{
-                    width: '320px',
-                    height: '240px',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1.5px solid rgba(255, 255, 255, 0.22)',
-                    borderRadius: '24px',
-                    boxShadow: '0 25px 50px rgba(0,0,0,0.6), 0 0 30px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <img src={humanAiCreation} alt="Human & AI Synthesis" style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: '22px'
-                  }} />
-                </motion.div>
               </div>
 
             </motion.div>

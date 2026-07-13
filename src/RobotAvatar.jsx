@@ -2,9 +2,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 /**
- * Ultra-Premium SaaS AI Avatar: "The Modern Intelligence Aura"
- * Inspired by the absolute peak of current AI design (Apple Intelligence / ChatGPT Voice).
- * Features a deep, pure black core surrounded by a fluid, multi-colored, spinning holographic aura.
+ * Ultra-Premium Futuristic AI Robot Avatar
+ * Replaces the old circular pulsing aura with a cute, high-tech, vector robot face.
+ * Features:
+ * - Glowing customizable LED eyes that morph based on the current expression (smile, happy, sad, dizzy, sleep, default).
+ * - Glowing communication antenna on top.
+ * - Digital speaker/mouth wave that animates into a speaking wave when typing/processing.
+ * - Clean SVG layout with micro-shadows and rich gradients.
  */
 export default function RobotAvatar({
   expression = 'smile',
@@ -14,189 +18,232 @@ export default function RobotAvatar({
   className = '',
   style = {}
 }) {
-  const sizeMap = { lg: 240, md: 140, sm: 64, xs: 36 };
+  const sizeMap = { lg: 220, md: 130, sm: 64, xs: 36 };
   const d = sizeMap[size] || sizeMap.md;
 
-  const isSleep = expression === 'sleep';
+  // Determine core theme color
   const isError = expression === 'dizzy' || expression === 'sad' || expression === 'cry';
+  const color = isError ? '#f43f5e' : glowColor;
 
-  // Base colors for the aura
-  const primaryColor = isError ? '#f43f5e' : glowColor;
-  
-  // Create a stunning multi-color fluid gradient based on the primary color
-  // If the primary color is teal, it blends teal, purple, deep blue, and white.
-  // If it's pink, it blends pink, orange, purple, and white.
-  const gradient = isError 
-    ? `conic-gradient(from 0deg, #f43f5e, #fb923c, #9333ea, #f43f5e)`
-    : `conic-gradient(from 0deg, ${primaryColor}, #8b5cf6, #3b82f6, #e0e7ff, ${primaryColor})`;
-
-  // Animation timings
-  const spinSpeed = isTyping ? 1.5 : isSleep ? 8 : 4;
-  const pulseSpeed = isTyping ? 1 : isSleep ? 4 : 2;
-
-  // When typing, the black core shrinks slightly, exposing MORE of the raging colorful energy
-  const coreScale = isTyping ? 0.8 : isSleep ? 0.95 : 0.9;
-  const auraScale = isTyping ? 1.15 : isSleep ? 0.95 : 1.05;
+  // Render SVG eye shapes based on emotion
+  const renderEyes = () => {
+    // Left eye center at X=70, Right eye center at X=130 (out of viewBox 200x200)
+    switch (expression) {
+      case 'happy':
+        return (
+          <>
+            {/* Happy arched eyes ^ ^ */}
+            <path d="M 55,105 Q 70,85 85,105" fill="none" stroke={color} strokeWidth="7" strokeLinecap="round" filter="url(#led-glow)" />
+            <path d="M 115,105 Q 130,85 145,105" fill="none" stroke={color} strokeWidth="7" strokeLinecap="round" filter="url(#led-glow)" />
+          </>
+        );
+      case 'smile':
+        return (
+          <>
+            {/* Soft smiling eyes */}
+            <path d="M 58,102 Q 70,90 82,102" fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" filter="url(#led-glow)" />
+            <path d="M 118,102 Q 130,90 142,102" fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" filter="url(#led-glow)" />
+            {/* Cheerful small blush circles */}
+            <circle cx="58" cy="115" r="7" fill={`${color}25`} filter="url(#blush-blur)" />
+            <circle cx="142" cy="115" r="7" fill={`${color}25`} filter="url(#blush-blur)" />
+          </>
+        );
+      case 'sad':
+      case 'cry':
+        return (
+          <>
+            {/* Sad downward slanting/arched eyes */}
+            <path d="M 55,95 Q 70,110 85,95" fill="none" stroke={color} strokeWidth="7" strokeLinecap="round" filter="url(#led-glow)" />
+            <path d="M 115,95 Q 130,110 145,95" fill="none" stroke={color} strokeWidth="7" strokeLinecap="round" filter="url(#led-glow)" />
+          </>
+        );
+      case 'dizzy':
+        return (
+          <>
+            {/* Cross eyes X X */}
+            <path d="M 60,90 L 80,110 M 80,90 L 60,110" fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" filter="url(#led-glow)" />
+            <path d="M 120,90 L 140,110 M 140,90 L 120,110" fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" filter="url(#led-glow)" />
+          </>
+        );
+      case 'sleep':
+        return (
+          <>
+            {/* Flat sleeping lines - - */}
+            <line x1="58" y1="100" x2="82" y2="100" stroke={color} strokeWidth="6" strokeLinecap="round" filter="url(#led-glow)" />
+            <line x1="118" y1="100" x2="142" y2="100" stroke={color} strokeWidth="6" strokeLinecap="round" filter="url(#led-glow)" />
+          </>
+        );
+      default:
+        return (
+          <>
+            {/* Default circular glowing eyes */}
+            <circle cx="70" cy="100" r="11" fill={color} filter="url(#led-glow)" />
+            <circle cx="130" cy="100" r="11" fill={color} filter="url(#led-glow)" />
+            {/* Cute pupil highlight */}
+            <circle cx="67" cy="97" r="3" fill="#ffffff" />
+            <circle cx="127" cy="97" r="3" fill="#ffffff" />
+          </>
+        );
+    }
+  };
 
   return (
-    <div className={`ai-modern-aura ${className}`} style={{
-      width: d, height: d,
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      ...style
-    }}>
-      
-      {/* 1. The Raging Holographic Aura (The glowing edge) */}
-      <motion.div
-        animate={{ 
-          rotate: [0, 360],
-          scale: [auraScale * 0.98, auraScale * 1.02, auraScale * 0.98]
-        }}
-        transition={{ 
-          rotate: { duration: spinSpeed, repeat: Infinity, ease: "linear" },
-          scale: { duration: pulseSpeed, repeat: Infinity, ease: "easeInOut" }
-        }}
-        style={{
-          position: 'absolute',
-          inset: '-5%', // Extend slightly beyond the container
-          borderRadius: '50%',
-          background: gradient,
-          // Extreme blur creates the "Apple Intelligence" fluid light bleed
-          filter: `blur(${d * 0.15}px)`,
-          opacity: isSleep ? 0.4 : 1,
-          zIndex: 0
-        }}
-      />
-
-      {/* 2. Secondary Inner Aura (For intense brightness near the edge) */}
-      <motion.div
-        animate={{ 
-          rotate: [360, 0]
-        }}
-        transition={{ 
-          rotate: { duration: spinSpeed * 1.5, repeat: Infinity, ease: "linear" }
-        }}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          borderRadius: '50%',
-          background: gradient,
-          filter: `blur(${d * 0.05}px)`,
-          opacity: isSleep ? 0.2 : 0.8,
-          zIndex: 1
-        }}
-      />
-
-      {/* 3. The Deep Void Core (The solid black center) */}
-      <motion.div
-        animate={{ 
-          scale: [coreScale, coreScale * 0.98, coreScale] 
-        }}
-        transition={{ 
-          duration: pulseSpeed * 0.5, repeat: Infinity, ease: "easeInOut" 
-        }}
-        style={{
-          position: 'absolute',
-          width: '100%', height: '100%',
-          borderRadius: '50%',
-          background: '#080808',
-          zIndex: 2,
-          // Subtle physical rim light on the black sphere itself
-          boxShadow: `inset 0 0 ${d * 0.05}px rgba(255,255,255,0.08), 0 0 ${d * 0.02}px rgba(0,0,0,0.5)`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden'
-        }}
+    <motion.div
+      className={`ai-robot-avatar ${className}`}
+      animate={{ y: [0, -6, 0] }}
+      transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      style={{
+        width: d, height: d,
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...style
+      }}
+    >
+      <svg
+        viewBox="0 0 200 200"
+        width="100%"
+        height="100%"
+        style={{ overflow: 'visible' }}
       >
-        {/* Subtle physical sheen reflection on the core surface */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 50%)',
-          borderRadius: '50%',
-          pointerEvents: 'none',
-          zIndex: 4
-        }} />
+        <defs>
+          {/* LED Eyes Glow Filter */}
+          <filter id="led-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
 
-        {/* Dynamic Concentric Ring 1 (Dashed, outer) */}
-        <motion.div
-          animate={{ rotate: [0, 360] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-          style={{
-            position: 'absolute',
-            width: '68%', height: '68%',
-            borderRadius: '50%',
-            border: `1px dashed rgba(255, 255, 255, 0.1)`,
-            borderColor: `${primaryColor}20`,
-            zIndex: 1
-          }}
+          {/* Blush blur effect */}
+          <filter id="blush-blur">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
+
+          {/* Helmet Gradient */}
+          <linearGradient id="helmet-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#1e2230" />
+            <stop offset="50%" stopColor="#151722" />
+            <stop offset="100%" stopColor="#0b0c12" />
+          </linearGradient>
+
+          {/* Visor Gradient */}
+          <linearGradient id="visor-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#08090d" />
+            <stop offset="100%" stopColor="#020305" />
+          </linearGradient>
+
+          {/* Ear Accent Gradient */}
+          <linearGradient id="ear-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={color} />
+            <stop offset="100%" stopColor="#0b0c12" />
+          </linearGradient>
+        </defs>
+
+        {/* 1. ANTENNA */}
+        {/* Stem */}
+        <line x1="100" y1="50" x2="100" y2="25" stroke="#25293c" strokeWidth="6" strokeLinecap="round" />
+        <line x1="100" y1="45" x2="100" y2="25" stroke={color} strokeWidth="2" opacity="0.6" />
+        {/* Glowing bulb */}
+        <motion.circle
+          cx="100"
+          cy="20"
+          r="8"
+          fill={color}
+          filter="url(#led-glow)"
+          animate={isTyping ? { scale: [1, 1.25, 1], opacity: [0.7, 1, 0.7] } : { opacity: [0.8, 1, 0.8] }}
+          transition={{ duration: 1.2, repeat: Infinity }}
         />
 
-        {/* Dynamic Concentric Ring 2 (Dotted, inner) */}
-        <motion.div
-          animate={{ rotate: [360, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-          style={{
-            position: 'absolute',
-            width: '48%', height: '48%',
-            borderRadius: '50%',
-            border: `1px dotted rgba(255, 255, 255, 0.08)`,
-            zIndex: 2
-          }}
+        {/* 2. EARS / SIDE SENSORS */}
+        {/* Left Ear */}
+        <rect x="18" y="85" width="12" height="40" rx="6" fill={`url(#ear-grad)`} transform="rotate(10 18 85)" />
+        <circle cx="23" cy="105" r="3" fill={color} filter="url(#led-glow)" />
+        {/* Right Ear */}
+        <rect x="170" y="85" width="12" height="40" rx="6" fill={`url(#ear-grad)`} transform="rotate(-10 170 85)" />
+        <circle cx="177" cy="105" r="3" fill={color} filter="url(#led-glow)" />
+
+        {/* 3. MAIN HELMET / SHELL */}
+        <rect
+          x="30"
+          y="45"
+          width="140"
+          height="120"
+          rx="40"
+          fill="url(#helmet-grad)"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="1.5"
         />
 
-        {/* Glowing Neural Node in the exact center */}
-        <motion.div
-          animate={{ 
-            scale: isSleep ? [0.85, 1.05, 0.85] : [1, 1.18, 1],
-            opacity: isSleep ? [0.3, 0.5, 0.3] : [0.7, 0.95, 0.7]
-          }}
-          transition={{ 
-            duration: pulseSpeed, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
-          }}
-          style={{
-            position: 'absolute',
-            width: '24%', height: '24%',
-            borderRadius: '50%',
-            background: `radial-gradient(circle, #ffffff 0%, ${primaryColor} 60%, transparent 100%)`,
-            boxShadow: `0 0 ${d * 0.08}px ${primaryColor}80, inset 0 0 4px rgba(255,255,255,0.8)`,
-            filter: 'blur(0.5px)',
-            zIndex: 3
-          }}
+        {/* 4. BLACK SCREEN VISOR */}
+        <rect
+          x="42"
+          y="62"
+          width="116"
+          height="86"
+          rx="26"
+          fill="url(#visor-grad)"
+          stroke="rgba(255,255,255,0.04)"
+          strokeWidth="1"
         />
 
-        {/* Subtle processing ring inside the core (Only visible when typing) */}
-        {isTyping && (
-          <motion.div
-            animate={{ 
-              rotate: [0, 360],
-              scale: [0.8, 1, 0.8],
-              opacity: [0.2, 0.8, 0.2]
-            }}
-            transition={{ 
-              rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-              scale: { duration: 1, repeat: Infinity, ease: "easeInOut" },
-              opacity: { duration: 1, repeat: Infinity, ease: "easeInOut" }
-            }}
-            style={{
-              position: 'absolute',
-              width: '80%', height: '80%',
-              borderRadius: '50%',
-              border: `1.5px solid transparent`,
-              borderTopColor: primaryColor,
-              borderBottomColor: primaryColor,
-              filter: 'blur(1.5px)',
-              zIndex: 0
-            }}
+        {/* Visor shine accent */}
+        <path
+          d="M 52,72 Q 100,66 148,72"
+          fill="none"
+          stroke="rgba(255,255,255,0.06)"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+
+        {/* 5. LED EYES */}
+        {renderEyes()}
+
+        {/* 6. SPEAKING SOUNDWAVE / MOUTH */}
+        {isTyping ? (
+          /* Talking animated audio wave */
+          <g>
+            {[-12, -6, 0, 6, 12].map((offset, i) => (
+              <motion.line
+                key={i}
+                x1={100 + offset}
+                y1="125"
+                x2={100 + offset}
+                y2="135"
+                stroke={color}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                filter="url(#led-glow)"
+                animate={{
+                  y1: [127, 122, 127],
+                  y2: [133, 138, 133]
+                }}
+                transition={{
+                  duration: 0.6,
+                  repeat: Infinity,
+                  delay: i * 0.1,
+                  ease: 'easeInOut'
+                }}
+              />
+            ))}
+          </g>
+        ) : (
+          /* Silent flat digital status mouth line */
+          <line
+            x1="90"
+            y1="130"
+            x2="110"
+            y2="130"
+            stroke={color}
+            strokeWidth="3"
+            strokeLinecap="round"
+            opacity="0.8"
+            filter="url(#led-glow)"
           />
         )}
-      </motion.div>
-      
-    </div>
+      </svg>
+    </motion.div>
   );
 }
