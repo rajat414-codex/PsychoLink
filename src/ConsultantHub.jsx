@@ -154,7 +154,7 @@ export function JoinConsultantModal({ onClose, accent = 'var(--accent-purple)' }
         {/* Security disclaimer note */}
         <div style={{ padding: '14px', borderRadius: '16px', background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.12)', marginTop: '4px' }}>
           <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.5, fontFamily: J }}>
-            🛡️ <b>Bank Details Security Note:</b> Aapki bank details platform par poori tarah surakshit hain. Inka upyog kewal aapke session earnings (payouts/transfers) ko direct transfer karne ke liye kiya jayega. Hum in details ko kabhi kisi ke sath share ya misuse nahi karenge.
+            🛡️ <b>Bank Details Security Note:</b> Your bank details are fully secure on our platform. They will only be used to process your direct session earnings (payouts/transfers) and will never be shared or used for any other purpose.
           </p>
         </div>
 

@@ -903,16 +903,6 @@ export default function Home({ userProfile, onLogout }) {
                       {/* Grid background */}
                       <div className="neural-grid" style={{ position: 'absolute', inset: 0, opacity: 0.3, borderRadius: '20px' }} />
 
-                      {/* Rotating rings */}
-                      <div className="hologram-ring-cw" style={{
-                        position: 'absolute', width: '80%', height: '80%',
-                        borderRadius: '50%', border: `1px dashed ${accent}30`
-                      }} />
-                      <div className="hologram-ring-ccw" style={{
-                        position: 'absolute', width: '70%', height: '70%',
-                        borderRadius: '50%', border: `1px dotted ${accent}40`
-                      }} />
-
                       {/* Scanner sweep line */}
                       <div className="scanner-line" style={{ '--scanner-color': accent }} />
 
