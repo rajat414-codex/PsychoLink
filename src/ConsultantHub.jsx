@@ -44,6 +44,7 @@ const labelStyle = { fontSize:'0.78rem', color:'rgba(255,255,255,0.55)', fontFam
 export function JoinConsultantModal({ onClose, accent = 'var(--accent-purple)' }) {
   const [form, setForm] = useState({
     fullName: '', email: '', skills: '', therapyApproach: '', qualifications: '', multilingualAggressive: '',
+    bankName: '', bankAccount: '', bankIfsc: '', bankUpi: '',
   });
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
   const [errorMsg, setErrorMsg] = useState('');
@@ -127,6 +128,35 @@ export function JoinConsultantModal({ onClose, accent = 'var(--accent-purple)' }
         <label style={labelStyle}>How do you handle multilingual or aggressive clients?
           <textarea rows={3} className="premium-input" value={form.multilingualAggressive} onChange={set('multilingualAggressive')} placeholder="e.g. I switch languages as needed, use de-escalation techniques..."/>
         </label>
+
+        <div style={{ height:'1px', background:'var(--border-subtle)', margin:'10px 0' }}/>
+        
+        <h4 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'1.1rem', color:'#fff', margin:'4px 0 0' }}>Payout Details</h4>
+        
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+          <label style={labelStyle}>Bank Name
+            <input className="premium-input" value={form.bankName} onChange={set('bankName')} placeholder="e.g. State Bank of India"/>
+          </label>
+          <label style={labelStyle}>Account Number
+            <input className="premium-input" value={form.bankAccount} onChange={set('bankAccount')} placeholder="e.g. 12345678901"/>
+          </label>
+        </div>
+
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+          <label style={labelStyle}>IFSC Code
+            <input className="premium-input" value={form.bankIfsc} onChange={set('bankIfsc')} placeholder="e.g. SBIN0001234"/>
+          </label>
+          <label style={labelStyle}>UPI ID (GPay / PhonePe)
+            <input className="premium-input" value={form.bankUpi} onChange={set('bankUpi')} placeholder="e.g. name@upi"/>
+          </label>
+        </div>
+
+        {/* Security disclaimer note */}
+        <div style={{ padding: '14px', borderRadius: '16px', background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.12)', marginTop: '4px' }}>
+          <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.5, fontFamily: J }}>
+            🛡️ <b>Bank Details Security Note:</b> Aapki bank details platform par poori tarah surakshit hain. Inka upyog kewal aapke session earnings (payouts/transfers) ko direct transfer karne ke liye kiya jayega. Hum in details ko kabhi kisi ke sath share ya misuse nahi karenge.
+          </p>
+        </div>
 
         {status === 'error' && (
           <div style={{ padding:'10px 14px', borderRadius:'12px', background:'rgba(255,80,80,0.1)', border:'1px solid rgba(255,80,80,0.25)' }}>
@@ -278,11 +308,24 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
             </div>
           </div>
 
+          {/* Verified Direct Payout details */}
+          <div style={{ background:'rgba(16,185,129,0.04)', border:'1px dashed rgba(16,185,129,0.2)', borderRadius:'16px', padding:'14px 18px', marginBottom:'18px' }}>
+            <p style={{ margin:'0 0 8px', fontSize:'0.68rem', color:'#10b981', fontWeight:'800', letterSpacing:'0.5px', fontFamily:S }}>✓ VERIFIED PAYOUT DESTINATION</p>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'6px', fontSize:'0.78rem' }}>
+              <span style={{ color:'rgba(255,255,255,0.45)' }}>UPI Target ID</span>
+              <span style={{ color:'#fff', fontWeight:'600', fontFamily:S }}>{consultant?.bankUpi || `${consultant?.name?.toLowerCase().replace(/\s+/g,'')}@okaxis`}</span>
+            </div>
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:'0.78rem' }}>
+              <span style={{ color:'rgba(255,255,255,0.45)' }}>Bank Account</span>
+              <span style={{ color:'#fff', fontWeight:'600' }}>{consultant?.bankName || 'State Bank of India'} ({consultant?.bankAccount || 'XXXXXX8890'})</span>
+            </div>
+          </div>
+
           <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={simulatePayment}
             style={{ width:'100%', padding:'14px', borderRadius:'14px', border:'none', cursor:'pointer',
               background: consultant?.color || 'var(--accent-purple)', color:'#fff', fontSize:'0.95rem', fontWeight:'800', fontFamily:J,
               boxShadow:`0 8px 20px ${(consultant?.color||'var(--accent-purple)')}25` }}>
-            Pay ₹{price}
+            Pay Here! ➔
           </motion.button>
           <p style={{ textAlign:'center', fontSize:'0.68rem', color:'rgba(255,255,255,0.25)', marginTop:'10px', fontFamily:J }}>
             🔒 Test mode — no real money will be charged

@@ -25,11 +25,11 @@ const CONSULTANTS_FILE     = path.join(DATA_DIR, 'consultants.json');
 const APPLICATIONS_FILE    = path.join(DATA_DIR, 'applications.json');
 
 const SEED_CONSULTANTS = [
-  { id: 1, name:'Dr. Priya Sharma', spec:'Anxiety & CBT',            rating:4.9, sessions:240, color:'#ec4899', avail:true,  exp:'8 yrs',  price:199 },
-  { id: 2, name:'Dr. Arjun Mehta',  spec:'Depression & Mindfulness', rating:4.8, sessions:180, color:'#8b5cf6', avail:true,  exp:'6 yrs',  price:199 },
-  { id: 3, name:'Dr. Sara Ali',     spec:'Trauma & PTSD',            rating:4.9, sessions:320, color:'#2dd4bf', avail:false, exp:'12 yrs', price:249 },
-  { id: 4, name:'Dr. Ravi Nair',    spec:'Stress & Burnout',         rating:4.7, sessions:150, color:'#f59e0b', avail:true,  exp:'5 yrs',  price:199 },
-  { id: 5, name:'Rajat Kamal',      spec:'Founder · Peer Support',   rating:5.0, sessions:60,  color:'#5eb8ad', avail:true,  exp:'2 yrs',  price:199 },
+  { id: 1, name:'Dr. Priya Sharma', spec:'Anxiety & CBT',            rating:4.9, sessions:240, color:'#ec4899', avail:true,  exp:'8 yrs',  price:199, bankName:'SBI', bankAccount:'XXXXXX8890', bankIfsc:'SBIN0001234', bankUpi:'priyasharma@okaxis' },
+  { id: 2, name:'Dr. Arjun Mehta',  spec:'Depression & Mindfulness', rating:4.8, sessions:180, color:'#8b5cf6', avail:true,  exp:'6 yrs',  price:199, bankName:'HDFC', bankAccount:'XXXXXX3344', bankIfsc:'HDFC0000987', bankUpi:'arjunmehta@okhdfc' },
+  { id: 3, name:'Dr. Sara Ali',     spec:'Trauma & PTSD',            rating:4.9, sessions:320, color:'#2dd4bf', avail:false, exp:'12 yrs', price:249, bankName:'ICICI', bankAccount:'XXXXXX5522', bankIfsc:'ICIC0000456', bankUpi:'saraali@okicici' },
+  { id: 4, name:'Dr. Ravi Nair',    spec:'Stress & Burnout',         rating:4.7, sessions:150, color:'#f59e0b', avail:true,  exp:'5 yrs',  price:199, bankName:'Axis Bank', bankAccount:'XXXXXX9911', bankIfsc:'UTIB0000111', bankUpi:'ravinair@okaxis' },
+  { id: 5, name:'Rajat Kamal',      spec:'Founder · Peer Support',   rating:5.0, sessions:60,  color:'#5eb8ad', avail:true,  exp:'2 yrs',  price:199, bankName:'SBI', bankAccount:'XXXXXX1212', bankIfsc:'SBIN0004567', bankUpi:'rajatkamal@okaxis' },
 ];
 
 function ensureDataFiles() {
@@ -94,7 +94,7 @@ app.delete('/api/consultants/:id', (req, res) => {
 
 // ── POST /api/consultants/apply — "Join as Consultant" form submit ──
 app.post('/api/consultants/apply', async (req, res) => {
-  const { fullName, email, skills, therapyApproach, qualifications, multilingualAggressive } = req.body;
+  const { fullName, email, skills, therapyApproach, qualifications, multilingualAggressive, bankName, bankAccount, bankIfsc, bankUpi } = req.body;
 
   if (!fullName || !email) {
     return res.status(400).json({ error: 'fullName and email are required' });
@@ -109,6 +109,10 @@ app.post('/api/consultants/apply', async (req, res) => {
     therapyApproach: therapyApproach || '',
     qualifications: qualifications || '',
     multilingualAggressive: multilingualAggressive || '',
+    bankName:       bankName || '',
+    bankAccount:    bankAccount || '',
+    bankIfsc:       bankIfsc || '',
+    bankUpi:        bankUpi || '',
     submittedAt: new Date().toISOString(),
     status: 'pending',
   };
@@ -186,6 +190,10 @@ app.post('/api/admin/applications/:id/approve', async (req, res) => {
     price: 199,
     qualifications:  application.qualifications,
     therapyApproach: application.therapyApproach,
+    bankName:        application.bankName || '',
+    bankAccount:     application.bankAccount || '',
+    bankIfsc:        application.bankIfsc || '',
+    bankUpi:         application.bankUpi || '',
   };
   consultants.push(newConsultant);
   writeJSON(CONSULTANTS_FILE, consultants);
