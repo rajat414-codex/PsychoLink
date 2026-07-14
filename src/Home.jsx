@@ -396,6 +396,15 @@ export default function Home({ userProfile, onLogout }) {
     try { return JSON.parse(localStorage.getItem('eq_used_free') || '{}'); } catch { return {}; }
   });
   const [activeProfile, setActiveProfile]   = useState(null);
+  const [myProfileData, setMyProfileData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('equilibrium_my_profile');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [showCreateProfileModal, setShowCreateProfileModal] = useState(false);
   const bottomRef   = useRef(null);
   const textareaRef = useRef(null);
   const srRef       = useRef(null);
@@ -822,6 +831,71 @@ export default function Home({ userProfile, onLogout }) {
               </div>
             )}
             {tab !== 'chat' && <div style={{ flex:1 }}/>}
+
+            {/* My Social Profile Link */}
+            {myProfileData ? (
+              <div style={{ padding: '0 14px 10px' }}>
+                <motion.button 
+                  whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.06)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setTab('consult');
+                    setActiveProfile({
+                      id: 'my-user-profile',
+                      name: myProfileData.name,
+                      spec: myProfileData.bio || 'Sharing my mindfulness journey.',
+                      color: myProfileData.color || '#ec4899',
+                      isUser: true
+                    });
+                  }}
+                  style={{ 
+                    width: '100%', 
+                    padding: '10px', 
+                    borderRadius: '12px', 
+                    background: 'rgba(255,255,255,0.03)', 
+                    border: '1px solid rgba(255,255,255,0.08)', 
+                    color: '#fff', 
+                    fontSize: '0.8rem', 
+                    fontWeight: '700', 
+                    cursor: 'pointer', 
+                    fontFamily: J,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <span style={{ fontSize: '0.95rem' }}>👤</span> My Instagram Profile
+                </motion.button>
+              </div>
+            ) : (
+              <div style={{ padding: '0 14px 10px' }}>
+                <motion.button 
+                  whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.05)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowCreateProfileModal(true)}
+                  style={{ 
+                    width: '100%', 
+                    padding: '10px', 
+                    borderRadius: '12px', 
+                    background: 'rgba(255,255,255,0.02)', 
+                    border: '1px dashed rgba(255,255,255,0.15)', 
+                    color: 'rgba(255,255,255,0.65)', 
+                    fontSize: '0.8rem', 
+                    fontWeight: '600', 
+                    cursor: 'pointer', 
+                    fontFamily: J,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span style={{ fontSize: '0.95rem' }}>✨</span> Create Social Profile
+                </motion.button>
+              </div>
+            )}
 
             {/* User + Logout */}
             <div style={{ padding:'12px 14px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
@@ -1603,7 +1677,100 @@ export default function Home({ userProfile, onLogout }) {
         )}
       </AnimatePresence>
 
+      {/* ── CREATE SOCIAL PROFILE MODAL ── */}
+      <AnimatePresence>
+        {showCreateProfileModal && (
+          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} onClick={() => setShowCreateProfileModal(false)}
+            style={{ position:'fixed', inset:0, background:'rgba(4,3,10,0.85)', backdropFilter:'blur(8px)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+            <motion.div initial={{ scale:0.94, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:0.94, y:20 }} onClick={e => e.stopPropagation()}
+              style={{ width:'100%', maxWidth:420, background:'#141417', border:'1px solid rgba(255,255,255,0.08)', borderRadius:24, padding:30, position:'relative', boxShadow:'0 24px 60px rgba(0,0,0,0.55)' }}>
+              
+              <button onClick={() => setShowCreateProfileModal(false)} style={{ position:'absolute', top:16, right:16, width:30, height:30, borderRadius:9, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.5)', cursor:'pointer', fontWeight:700 }}>✕</button>
 
+              <div style={{ textAlign:'center', marginBottom:22 }}>
+                <h3 style={{ fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.6rem', color:'#fff', margin:'0 0 6px' }}>Create Social Profile</h3>
+                <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.85rem', margin:0, fontFamily:J }}>Build your Instagram-style wellness profile</p>
+              </div>
+
+              {/* Form fields */}
+              <div style={{ display:'flex', flexDirection:'column', gap:16, marginBottom:22 }}>
+                <div>
+                  <label style={{ display:'block', fontSize:'0.76rem', color:'rgba(255,255,255,0.45)', fontWeight:'600', marginBottom:'6px', fontFamily:S }}>PROFILE NAME</label>
+                  <input type="text" id="create-profile-name" defaultValue={userProfile?.name || 'User'} placeholder="E.g. Priya Sharma"
+                    style={{ width:'100%', padding:'10px 12px', background:'#10141f', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', color:'#fff', fontSize:'0.84rem', outline:'none', fontFamily:J }} />
+                </div>
+                <div>
+                  <label style={{ display:'block', fontSize:'0.76rem', color:'rgba(255,255,255,0.45)', fontWeight:'600', marginBottom:'6px', fontFamily:S }}>BIO / TAGLINE</label>
+                  <textarea rows={2} id="create-profile-bio" defaultValue="Sharing my mindfulness journey." placeholder="Tell others about yourself..."
+                    style={{ width:'100%', padding:'10px 12px', background:'#10141f', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', color:'#fff', fontSize:'0.84rem', outline:'none', resize:'none', fontFamily:J }} />
+                </div>
+                <div>
+                  <label style={{ display:'block', fontSize:'0.76rem', color:'rgba(255,255,255,0.45)', fontWeight:'600', marginBottom:'6px', fontFamily:S }}>THEME COLOR</label>
+                  <div style={{ display:'flex', gap:10 }}>
+                    {['#ec4899', '#8b5cf6', '#0d9488', '#d97706'].map(c => (
+                      <button 
+                        key={c}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const buttons = e.currentTarget.parentElement.children;
+                          for (let btn of buttons) {
+                            btn.style.boxShadow = 'none';
+                          }
+                          e.currentTarget.style.boxShadow = '0 0 0 2px #fff';
+                        }}
+                        style={{ 
+                          width:30, 
+                          height:30, 
+                          borderRadius:'50%', 
+                          background:c, 
+                          border:'none', 
+                          cursor:'pointer',
+                          transition:'all 0.2s',
+                          boxShadow: c === '#ec4899' ? '0 0 0 2px #fff' : 'none'
+                        }}
+                        data-color={c}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}
+                onClick={() => {
+                  const name = document.getElementById('create-profile-name').value;
+                  const bio = document.getElementById('create-profile-bio').value;
+                  let selectedColor = '#ec4899';
+                  const colorButtons = document.querySelectorAll('[data-color]');
+                  for (let btn of colorButtons) {
+                    if (btn.style.boxShadow.includes('rgb(255, 255, 255)')) {
+                      selectedColor = btn.getAttribute('data-color');
+                    }
+                  }
+
+                  const profile = { name, bio, color: selectedColor };
+                  setMyProfileData(profile);
+                  try {
+                    localStorage.setItem('equilibrium_my_profile', JSON.stringify(profile));
+                  } catch (err) {}
+                  setShowCreateProfileModal(false);
+                  
+                  // Redirect directly to newly created profile
+                  setTab('consult');
+                  setActiveProfile({
+                    id: 'my-user-profile',
+                    name: profile.name,
+                    spec: profile.bio || 'Sharing my mindfulness journey.',
+                    color: profile.color || '#ec4899',
+                    isUser: true
+                  });
+                }}
+                style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', cursor:'pointer', background:`linear-gradient(135deg, ${accent}, #8b5cf6)`, color:'#fff', fontSize:'0.95rem', fontWeight:800, fontFamily:J }}>
+                Create Profile & View →
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

@@ -389,6 +389,7 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
     }
   });
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploadReelOpen, setUploadReelOpen] = useState(false);
   const [lightboxPost, setLightboxPost] = useState(null);
   const [activeTab, setActiveTab] = useState("posts");
   const [activeReelIndex, setActiveReelIndex] = useState(null);
@@ -406,6 +407,10 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
       const saved = localStorage.getItem(`equilibrium_posts_${consultant.id}`);
       if (saved) return JSON.parse(saved);
     } catch (e) {}
+    // If it's the user's profile, start empty
+    if (consultant.isUser) {
+      return [];
+    }
     // Seed default posts
     return [
       { 
@@ -457,6 +462,10 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
         }
       }
     } catch {}
+    // If it's the user's profile, start empty
+    if (consultant.isUser) {
+      return [];
+    }
     return [
       {
         id: `${consultant.id}-r1`,
@@ -485,9 +494,14 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
     ];
   });
 
-  // State for upload form
+  // State for upload form (posts)
   const [caption, setCaption] = useState('');
   const [imageSrc, setImageSrc] = useState('');
+
+  // State for upload form (reels)
+  const [reelCaption, setReelCaption] = useState('');
+  const [reelMusic, setReelMusic] = useState('');
+  const [reelVideoSrc, setReelVideoSrc] = useState('');
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -525,6 +539,87 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
     setUploadOpen(false);
   };
 
+  const handleReelFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setReelVideoSrc(url);
+    }
+  };
+
+  const handleReelUpload = () => {
+    if (!reelVideoSrc) return;
+    const newReel = {
+      id: `custom-reel-${Date.now()}`,
+      videoUrl: reelVideoSrc,
+      caption: reelCaption || 'Mindfulness moment. 🧘‍♂️🌸',
+      likes: 0,
+      liked: false,
+      music: reelMusic || 'Original Sound',
+      creator: { name: consultant.name, color: consultant.color || '#ec4899' }
+    };
+    
+    // 1. Update this profile's reels
+    const updatedProfileReels = [newReel, ...reels];
+    setReels(updatedProfileReels);
+    try {
+      localStorage.setItem(`equilibrium_reels_${consultant.id}`, JSON.stringify(updatedProfileReels));
+    } catch {}
+
+    // 2. Prepend to global Calm Reels list too!
+    try {
+      const savedGlobal = localStorage.getItem('equilibrium_global_reels');
+      let globalList = [];
+      if (savedGlobal) {
+        globalList = JSON.parse(savedGlobal);
+      } else {
+        // seed list
+        globalList = [
+          {
+            id: 'global-r1',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            caption: 'Ground yourself in the present. Breathe in calm, breathe out stress. 🧘‍♂️✨ #mindfulness #innerpeace',
+            likes: 184,
+            liked: false,
+            music: 'Aura Calming Vibes - Original Sound',
+            creator: { name: 'Dr. Priya Sharma', color: '#ec4899' }
+          },
+          {
+            id: 'global-r2',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            caption: 'Quiet river flow to calm an anxious mind. Let your thoughts wash away. 🌲🌊 #naturehealing #peace',
+            likes: 242,
+            liked: false,
+            music: 'Calming Forest Stream - Healing Sound',
+            creator: { name: 'Dr. Vikranth Mehta', color: '#10b981' }
+          },
+          {
+            id: 'global-r3',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            caption: 'Release physical tension, embrace positive vibes. You are safe. 🌈✨ #mentalhealth #zen',
+            likes: 156,
+            liked: false,
+            music: 'Zen Ambient Lo-Fi Chill',
+            creator: { name: 'Neha Kapoor', color: '#8b5cf6' }
+          }
+        ];
+      }
+      
+      const newGlobalReel = {
+        ...newReel,
+        id: `global-custom-${Date.now()}`
+      };
+      const updatedGlobal = [newGlobalReel, ...globalList];
+      localStorage.setItem('equilibrium_global_reels', JSON.stringify(updatedGlobal));
+    } catch (e) {}
+
+    // Reset
+    setReelVideoSrc('');
+    setReelCaption('');
+    setReelMusic('');
+    setUploadReelOpen(false);
+  };
+
   return (
     <div style={{ padding: '0 10px', maxWidth: '840px', margin: '0 auto', fontFamily: J, color: '#fff' }}>
       
@@ -534,15 +629,27 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
           <FaArrowLeft size={12}/> Back to Experts
         </button>
         
-        {/* Upload Post button */}
-        <motion.button 
-          whileHover={{ scale: 1.03 }} 
-          whileTap={{ scale: 0.97 }} 
-          onClick={() => setUploadOpen(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: `linear-gradient(135deg, ${accent}, #8b5cf6)`, border: 'none', borderRadius: '12px', padding: '8px 16px', color: '#fff', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', fontFamily: J }}
-        >
-          <FaCamera size={12}/> Upload Post
-        </motion.button>
+        {/* Upload buttons (only for user's own profile) */}
+        {consultant.isUser && (
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <motion.button 
+              whileHover={{ scale: 1.03 }} 
+              whileTap={{ scale: 0.97 }} 
+              onClick={() => setUploadOpen(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: `linear-gradient(135deg, ${accent}, #8b5cf6)`, border: 'none', borderRadius: '12px', padding: '8px 16px', color: '#fff', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', fontFamily: J }}
+            >
+              <FaCamera size={12}/> Upload Post
+            </motion.button>
+            <motion.button 
+              whileHover={{ scale: 1.03 }} 
+              whileTap={{ scale: 0.97 }} 
+              onClick={() => setUploadReelOpen(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: `linear-gradient(135deg, #10b981, #14b8a6)`, border: 'none', borderRadius: '12px', padding: '8px 16px', color: '#fff', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', fontFamily: J }}
+            >
+              <FaPlay size={9}/> Upload Reel
+            </motion.button>
+          </div>
+        )}
       </div>
 
       {/* Instagram Header section */}
@@ -559,24 +666,28 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
             <h2 style={{ fontSize: '1.4rem', fontWeight: '700', margin: 0, fontFamily: J }}>
               {consultant.name.toLowerCase().replace(/\s+/g,'_')}
             </h2>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <motion.button 
-                whileHover={{ scale: 1.02 }} 
-                whileTap={{ scale: 0.98 }}
-                onClick={handleFollowToggle}
-                style={{ padding: '6px 20px', borderRadius: '10px', border: isFollowing ? '1px solid rgba(255,255,255,0.15)' : 'none', background: isFollowing ? 'rgba(255,255,255,0.05)' : '#fff', color: isFollowing ? '#fff' : '#0a0a0c', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', fontFamily: J, display: 'flex', alignItems: 'center', gap: '4px' }}
-              >
-                {isFollowing ? <><FaUserCheck size={11}/> Following</> : 'Follow'}
-              </motion.button>
-              
-              <motion.button 
-                whileHover={{ scale: 1.02 }} 
-                whileTap={{ scale: 0.98 }}
-                style={{ padding: '6px 16px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', fontFamily: J }}
-              >
-                Message
-              </motion.button>
-            </div>
+            
+            {/* Hide follow/message if it's the user's own profile */}
+            {!consultant.isUser && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <motion.button 
+                  whileHover={{ scale: 1.02 }} 
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleFollowToggle}
+                  style={{ padding: '6px 20px', borderRadius: '10px', border: isFollowing ? '1px solid rgba(255,255,255,0.15)' : 'none', background: isFollowing ? 'rgba(255,255,255,0.05)' : '#fff', color: isFollowing ? '#fff' : '#0a0a0c', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', fontFamily: J, display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  {isFollowing ? <><FaUserCheck size={11}/> Following</> : 'Follow'}
+                </motion.button>
+                
+                <motion.button 
+                  whileHover={{ scale: 1.02 }} 
+                  whileTap={{ scale: 0.98 }}
+                  style={{ padding: '6px 16px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', fontFamily: J }}
+                >
+                  Message
+                </motion.button>
+              </div>
+            )}
           </div>
 
           {/* Counts (Real Counts: starting at 0) */}
@@ -594,10 +705,16 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
 
           {/* Bio text */}
           <div>
-            <p style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: '700', color: '#fff' }}>Dr. {consultant.name.replace('Dr. ', '')}</p>
-            <p style={{ margin: '0 0 2px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>{consultant.spec} Specialist</p>
+            <p style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: '700', color: '#fff' }}>
+              {consultant.isUser ? consultant.name : `Dr. ${consultant.name.replace('Dr. ', '')}`}
+            </p>
+            <p style={{ margin: '0 0 2px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>
+              {consultant.isUser ? 'Member Profile' : `${consultant.spec} Specialist`}
+            </p>
             <p style={{ margin: '0 0 6px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.4' }}>
-              🌿 Helping you build emotional resilience and mental clarity. Certified in {consultant.spec.split('&')[1] || 'Cognitive Behavioral Therapy'}.
+              {consultant.isUser 
+                ? `🌿 ${consultant.spec || 'Sharing my mindfulness journey and self-care moments.'}`
+                : `🌿 Helping you build emotional resilience and mental clarity. Certified in ${consultant.spec.split('&')[1] || 'Cognitive Behavioral Therapy'}.`}
             </p>
             <a href={`https://psycholink.in/${consultant.name.toLowerCase().replace(/\s+/g,'')}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.82rem', color: consultant.color, textDecoration: 'none', fontWeight: '600' }}>
               psycholink.in/{consultant.name.toLowerCase().replace(/\s+/g,'')}
@@ -699,40 +816,46 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
         )
       ) : (
         /* Reels Grid View */
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '40px' }}>
-          {reels.map((reel, index) => (
-            <motion.div 
-              key={reel.id}
-              whileHover={{ scale: 1.015 }}
-              onClick={() => setActiveReelIndex(index)}
-              style={{ 
-                aspectRatio: '9/16', 
-                borderRadius: '12px', 
-                overflow: 'hidden', 
-                background: '#090b11', 
-                cursor: 'pointer',
-                position: 'relative',
-                border: '1px solid rgba(255,255,255,0.04)',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
-              }}
-            >
-              {/* Cover Video Preview */}
-              <video src={reel.videoUrl} muted playsInline referrerPolicy="no-referrer" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
-              
-              {/* Play Overlay Button */}
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.25)' }}>
-                <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.2)' }}>
-                  <FaPlay size={9} color="#fff" style={{ marginLeft: 2 }} />
+        reels.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)' }}>
+            No reels uploaded yet.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '40px' }}>
+            {reels.map((reel, index) => (
+              <motion.div 
+                key={reel.id}
+                whileHover={{ scale: 1.015 }}
+                onClick={() => setActiveReelIndex(index)}
+                style={{ 
+                  aspectRatio: '9/16', 
+                  borderRadius: '12px', 
+                  overflow: 'hidden', 
+                  background: '#090b11', 
+                  cursor: 'pointer',
+                  position: 'relative',
+                  border: '1px solid rgba(255,255,255,0.04)',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
+                }}
+              >
+                {/* Cover Video Preview */}
+                <video src={reel.videoUrl} muted playsInline referrerPolicy="no-referrer" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+                
+                {/* Play Overlay Button */}
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.25)' }}>
+                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <FaPlay size={9} color="#fff" style={{ marginLeft: 2 }} />
+                  </div>
                 </div>
-              </div>
 
-              {/* Likes on overlay */}
-              <div style={{ position: 'absolute', bottom: 10, left: 10, display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#fff', fontWeight: '700', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
-                <FaHeart size={9} color="#fff"/> {reel.likes + (reel.liked ? 1 : 0)}
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                {/* Likes on overlay */}
+                <div style={{ position: 'absolute', bottom: 10, left: 10, display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#fff', fontWeight: '700', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+                  <FaHeart size={9} color="#fff"/> {reel.likes + (reel.liked ? 1 : 0)}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )
       )}
 
       {/* Upload Post Modal */}
@@ -779,6 +902,62 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
                 style={{ width: '100%', padding: '12px', background: imageSrc ? accent : 'rgba(255,255,255,0.05)', color: imageSrc ? '#fff' : 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '0.9rem', cursor: imageSrc ? 'pointer' : 'not-allowed', fontFamily: J }}
               >
                 Post to Feed
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Upload Reel Modal */}
+      <AnimatePresence>
+        {uploadReelOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setUploadReelOpen(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(9,10,15,0.85)', backdropFilter: 'blur(6px)', zIndex: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <motion.div initial={{ scale: 0.95, y: 15 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 15 }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: '440px', background: '#171c28', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', padding: '26px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', position: 'relative' }}>
+              
+              <button onClick={() => setUploadReelOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
+                <FaTimes size={14}/>
+              </button>
+
+              <h3 style={{ fontFamily: G, fontStyle: 'italic', fontSize: '1.3rem', margin: '0 0 16px' }}>Upload New Reel</h3>
+              
+              {/* File Input */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px' }}>SELECT VIDEO FILE</label>
+                <input type="file" accept="video/*" onChange={handleReelFileChange} style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }} />
+              </div>
+
+              {/* Video Preview */}
+              {reelVideoSrc && (
+                <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', background: '#10141f', marginBottom: '18px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <video src={reelVideoSrc} muted controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+              )}
+
+              {/* Caption */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px' }}>CAPTION</label>
+                <textarea rows={2} value={reelCaption} onChange={e => setReelCaption(e.target.value)} placeholder="Write something inspiring..." style={{ width: '100%', padding: '10px 12px', background: '#10141f', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', color: '#fff', fontSize: '0.84rem', outline: 'none', resize: 'none' }} />
+              </div>
+
+              {/* Music Name */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px' }}>MUSIC TRACK NAME</label>
+                <input type="text" value={reelMusic} onChange={e => setReelMusic(e.target.value)} placeholder="E.g. Calming Waves - Original Sound" style={{ width: '100%', padding: '10px 12px', background: '#10141f', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', color: '#fff', fontSize: '0.84rem', outline: 'none' }} />
+              </div>
+
+              {/* Submit button */}
+              <motion.button 
+                whileHover={{ scale: 1.02 }} 
+                whileTap={{ scale: 0.98 }}
+                onClick={handleReelUpload}
+                disabled={!reelVideoSrc}
+                style={{ width: '100%', padding: '12px', background: reelVideoSrc ? accent : 'rgba(255,255,255,0.05)', color: reelVideoSrc ? '#fff' : 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '0.9rem', cursor: reelVideoSrc ? 'pointer' : 'not-allowed', fontFamily: J }}
+              >
+                Post Reel
               </motion.button>
             </motion.div>
           </motion.div>
