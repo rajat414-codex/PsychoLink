@@ -4,7 +4,7 @@ import { API_BASE } from './config';
 import {
   FaBrain, FaRobot, FaHistory, FaSignOutAlt, FaPlus, FaPlay,
   FaPaperPlane, FaMicrophone, FaStop, FaVolumeUp,
-  FaHome, FaComments, FaUserMd, FaChartLine, FaBell,
+  FaHome, FaComments, FaUserMd, FaChartLine, FaBell, FaUser,
   FaHeart, FaFire, FaSmile, FaArrowRight, FaLeaf, FaBolt,
   FaBook, FaWind, FaCloudSun, FaCopy, FaCheck
 } from 'react-icons/fa';
@@ -350,6 +350,194 @@ function CalmReelsScreen({ accent, accentB, accentBr }) {
 
 
 
+// ─────────────────────────────────────────────────────────────────
+// ProfileCreationScreen — Full-tab form setup for User Profile
+// ─────────────────────────────────────────────────────────────────
+function ProfileCreationScreen({ userProfile, onSave, accent }) {
+  const J = "'Plus Jakarta Sans', sans-serif";
+  const S = "'Space Grotesk', sans-serif";
+  const G = "'Cormorant Garamond', serif";
+
+  const [pfp, setPfp] = useState('');
+  const [username, setUsername] = useState('');
+  const [name, setName] = useState(userProfile?.name || '');
+  const [gender, setGender] = useState('Male');
+  const [preferences, setPreferences] = useState([]);
+
+  const PREF_OPTIONS = ['Stress Relief', 'Anxiety Control', 'Meditation', 'Sleep Restoration', 'Mindfulness', 'Emotional Balance'];
+
+  const handlePfpChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPfp(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const togglePref = (pref) => {
+    if (preferences.includes(pref)) {
+      setPreferences(preferences.filter(p => p !== pref));
+    } else {
+      setPreferences([...preferences, pref]);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!username.trim() || !name.trim()) return;
+    
+    const profile = {
+      username: username.trim().toLowerCase().replace(/\s+/g,'_'),
+      name: name.trim(),
+      gender,
+      preferences,
+      pfp: pfp || '',
+      bio: `Preferences: ${preferences.join(', ')}.`
+    };
+    onSave(profile);
+  };
+
+  return (
+    <div style={{ maxWidth: '500px', margin: '40px auto', padding: '0 20px', fontFamily: J, color: '#fff' }}>
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <h2 style={{ fontFamily: G, fontStyle: 'italic', fontWeight: 800, fontSize: '2rem', color: '#fff', margin: '0 0 8px' }}>Create Your Account</h2>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.88rem', margin: 0 }}>Join the social wellness circle & share your posts</p>
+      </div>
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+        {/* PFP Uploader */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          <label htmlFor="pfp-upload" style={{ cursor: 'pointer', position: 'relative' }}>
+            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', transition: 'all 0.3s' }}>
+              {pfp ? (
+                <img src={pfp} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <span style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.3)' }}>📸</span>
+              )}
+            </div>
+          </label>
+          <input id="pfp-upload" type="file" accept="image/*" onChange={handlePfpChange} style={{ display: 'none' }} />
+          <span style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>SET YOUR PROFILE PICTURE</span>
+        </div>
+
+        {/* Username */}
+        <div>
+          <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px', fontFamily: S }}>USERNAME</label>
+          <div style={{ display: 'flex', alignItems: 'center', background: '#10141f', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '0 12px' }}>
+            <span style={{ color: 'rgba(255,255,255,0.3)', marginRight: '4px', fontSize: '0.9rem' }}>@</span>
+            <input 
+              type="text" 
+              required
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="username" 
+              style={{ width: '100%', padding: '10px 0', background: 'none', border: 'none', color: '#fff', fontSize: '0.88rem', outline: 'none' }} 
+            />
+          </div>
+        </div>
+
+        {/* Full Name */}
+        <div>
+          <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px', fontFamily: S }}>FULL NAME</label>
+          <input 
+            type="text" 
+            required
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="E.g. Priya Sharma" 
+            style={{ width: '100%', padding: '10px 12px', background: '#10141f', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', color: '#fff', fontSize: '0.88rem', outline: 'none' }} 
+          />
+        </div>
+
+        {/* Gender */}
+        <div>
+          <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '8px', fontFamily: S }}>GENDER</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+            {['Male', 'Female', 'Non-Binary'].map(g => (
+              <button 
+                key={g}
+                type="button"
+                onClick={() => setGender(g)}
+                style={{ 
+                  padding: '9px 0', 
+                  borderRadius: '10px', 
+                  border: `1px solid ${gender === g ? accent : 'rgba(255,255,255,0.06)'}`, 
+                  background: gender === g ? `${accent}15` : 'rgba(255,255,255,0.02)', 
+                  color: gender === g ? '#fff' : 'rgba(255,255,255,0.4)', 
+                  fontSize: '0.82rem', 
+                  fontWeight: '700', 
+                  cursor: 'pointer',
+                  transition: 'all 0.25s' 
+                }}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Preferences */}
+        <div>
+          <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '8px', fontFamily: S }}>MINDFULNESS PREFERENCES</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {PREF_OPTIONS.map(opt => {
+              const active = preferences.includes(opt);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => togglePref(opt)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.78rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    border: `1px solid ${active ? accent : 'rgba(255,255,255,0.08)'}`,
+                    background: active ? `${accent}20` : 'rgba(255,255,255,0.015)',
+                    color: active ? '#fff' : 'rgba(255,255,255,0.5)'
+                  }}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Submit */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={!username.trim() || !name.trim()}
+          style={{ 
+            width: '100%', 
+            padding: '12px', 
+            background: `linear-gradient(135deg, ${accent}, #8b5cf6)`, 
+            color: '#fff', 
+            border: 'none', 
+            borderRadius: '12px', 
+            fontWeight: '700', 
+            fontSize: '0.9rem', 
+            cursor: 'pointer', 
+            marginTop: '10px' 
+          }}
+        >
+          Create Account & View Profile
+        </motion.button>
+      </form>
+    </div>
+  );
+}
+
+
+
+
 export default function Home({ userProfile, onLogout }) {
   const [tab,       setTab]       = useState('home');
   const [activeAI,  setActiveAI]  = useState('AURA');
@@ -437,6 +625,7 @@ export default function Home({ userProfile, onLogout }) {
     { id:'journal',    icon:<FaBook size={15}/>,         label:'Journal'      },
     { id:'calm',       icon:<FaSpa size={15}/>,          label:'Calm Studio'  },
     { id:'calm-reels', icon:<FaPlay size={11}/>,         label:'Calm Reels'   },
+    { id:'my-profile', icon:<FaUser size={13}/>,         label: myProfileData ? 'My Profile' : 'Create Account' },
   ];
 
   useEffect(() => {
@@ -832,70 +1021,6 @@ export default function Home({ userProfile, onLogout }) {
             )}
             {tab !== 'chat' && <div style={{ flex:1 }}/>}
 
-            {/* My Social Profile Link */}
-            {myProfileData ? (
-              <div style={{ padding: '0 14px 10px' }}>
-                <motion.button 
-                  whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.06)' }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    setTab('consult');
-                    setActiveProfile({
-                      id: 'my-user-profile',
-                      name: myProfileData.name,
-                      spec: myProfileData.bio || 'Sharing my mindfulness journey.',
-                      color: myProfileData.color || '#ec4899',
-                      isUser: true
-                    });
-                  }}
-                  style={{ 
-                    width: '100%', 
-                    padding: '10px', 
-                    borderRadius: '12px', 
-                    background: 'rgba(255,255,255,0.03)', 
-                    border: '1px solid rgba(255,255,255,0.08)', 
-                    color: '#fff', 
-                    fontSize: '0.8rem', 
-                    fontWeight: '700', 
-                    cursor: 'pointer', 
-                    fontFamily: J,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  <span style={{ fontSize: '0.95rem' }}>👤</span> My Instagram Profile
-                </motion.button>
-              </div>
-            ) : (
-              <div style={{ padding: '0 14px 10px' }}>
-                <motion.button 
-                  whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.05)' }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowCreateProfileModal(true)}
-                  style={{ 
-                    width: '100%', 
-                    padding: '10px', 
-                    borderRadius: '12px', 
-                    background: 'rgba(255,255,255,0.02)', 
-                    border: '1px dashed rgba(255,255,255,0.15)', 
-                    color: 'rgba(255,255,255,0.65)', 
-                    fontSize: '0.8rem', 
-                    fontWeight: '600', 
-                    cursor: 'pointer', 
-                    fontFamily: J,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <span style={{ fontSize: '0.95rem' }}>✨</span> Create Social Profile
-                </motion.button>
-              </div>
-            )}
 
             {/* User + Logout */}
             <div style={{ padding:'12px 14px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
@@ -943,6 +1068,7 @@ export default function Home({ userProfile, onLogout }) {
               :tab==='consult'    ? 'Consultants'
               :tab==='calm'       ? 'Calm Studio'
               :tab==='calm-reels' ? 'Calm Reels'
+              :tab==='my-profile' ? (myProfileData ? 'My Profile' : 'Create Account')
               :tab==='journal'    ? 'My Journal'
               :                     'My Progress'}
             </span>
@@ -1450,6 +1576,38 @@ export default function Home({ userProfile, onLogout }) {
               </motion.div>
             )}
 
+            {/* ══ MY SOCIAL PROFILE ══════════════════════════════════ */}
+            {tab === 'my-profile' && (
+              <motion.div key="my-profile" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
+                style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
+                {myProfileData ? (
+                  <ConsultantProfile 
+                    consultant={{
+                      id: 'my-user-profile',
+                      name: myProfileData.name,
+                      spec: myProfileData.bio || 'Sharing my mindfulness journey.',
+                      color: myProfileData.color || '#ec4899',
+                      isUser: true,
+                      pfp: myProfileData.pfp
+                    }}
+                    accent={accent}
+                    onBack={() => setTab('home')}
+                  />
+                ) : (
+                  <ProfileCreationScreen 
+                    userProfile={userProfile} 
+                    accent={accent}
+                    onSave={(profile) => {
+                      setMyProfileData(profile);
+                      try {
+                        localStorage.setItem('equilibrium_my_profile', JSON.stringify(profile));
+                      } catch {}
+                    }}
+                  />
+                )}
+              </motion.div>
+            )}
+
             {/* ══ JOURNAL ════════════════════════════════════════════ */}
             {tab === 'journal' && (
               <motion.div key="journal" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
@@ -1677,100 +1835,7 @@ export default function Home({ userProfile, onLogout }) {
         )}
       </AnimatePresence>
 
-      {/* ── CREATE SOCIAL PROFILE MODAL ── */}
-      <AnimatePresence>
-        {showCreateProfileModal && (
-          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} onClick={() => setShowCreateProfileModal(false)}
-            style={{ position:'fixed', inset:0, background:'rgba(4,3,10,0.85)', backdropFilter:'blur(8px)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-            <motion.div initial={{ scale:0.94, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:0.94, y:20 }} onClick={e => e.stopPropagation()}
-              style={{ width:'100%', maxWidth:420, background:'#141417', border:'1px solid rgba(255,255,255,0.08)', borderRadius:24, padding:30, position:'relative', boxShadow:'0 24px 60px rgba(0,0,0,0.55)' }}>
-              
-              <button onClick={() => setShowCreateProfileModal(false)} style={{ position:'absolute', top:16, right:16, width:30, height:30, borderRadius:9, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.5)', cursor:'pointer', fontWeight:700 }}>✕</button>
 
-              <div style={{ textAlign:'center', marginBottom:22 }}>
-                <h3 style={{ fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.6rem', color:'#fff', margin:'0 0 6px' }}>Create Social Profile</h3>
-                <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.85rem', margin:0, fontFamily:J }}>Build your Instagram-style wellness profile</p>
-              </div>
-
-              {/* Form fields */}
-              <div style={{ display:'flex', flexDirection:'column', gap:16, marginBottom:22 }}>
-                <div>
-                  <label style={{ display:'block', fontSize:'0.76rem', color:'rgba(255,255,255,0.45)', fontWeight:'600', marginBottom:'6px', fontFamily:S }}>PROFILE NAME</label>
-                  <input type="text" id="create-profile-name" defaultValue={userProfile?.name || 'User'} placeholder="E.g. Priya Sharma"
-                    style={{ width:'100%', padding:'10px 12px', background:'#10141f', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', color:'#fff', fontSize:'0.84rem', outline:'none', fontFamily:J }} />
-                </div>
-                <div>
-                  <label style={{ display:'block', fontSize:'0.76rem', color:'rgba(255,255,255,0.45)', fontWeight:'600', marginBottom:'6px', fontFamily:S }}>BIO / TAGLINE</label>
-                  <textarea rows={2} id="create-profile-bio" defaultValue="Sharing my mindfulness journey." placeholder="Tell others about yourself..."
-                    style={{ width:'100%', padding:'10px 12px', background:'#10141f', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'10px', color:'#fff', fontSize:'0.84rem', outline:'none', resize:'none', fontFamily:J }} />
-                </div>
-                <div>
-                  <label style={{ display:'block', fontSize:'0.76rem', color:'rgba(255,255,255,0.45)', fontWeight:'600', marginBottom:'6px', fontFamily:S }}>THEME COLOR</label>
-                  <div style={{ display:'flex', gap:10 }}>
-                    {['#ec4899', '#8b5cf6', '#0d9488', '#d97706'].map(c => (
-                      <button 
-                        key={c}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          const buttons = e.currentTarget.parentElement.children;
-                          for (let btn of buttons) {
-                            btn.style.boxShadow = 'none';
-                          }
-                          e.currentTarget.style.boxShadow = '0 0 0 2px #fff';
-                        }}
-                        style={{ 
-                          width:30, 
-                          height:30, 
-                          borderRadius:'50%', 
-                          background:c, 
-                          border:'none', 
-                          cursor:'pointer',
-                          transition:'all 0.2s',
-                          boxShadow: c === '#ec4899' ? '0 0 0 2px #fff' : 'none'
-                        }}
-                        data-color={c}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}
-                onClick={() => {
-                  const name = document.getElementById('create-profile-name').value;
-                  const bio = document.getElementById('create-profile-bio').value;
-                  let selectedColor = '#ec4899';
-                  const colorButtons = document.querySelectorAll('[data-color]');
-                  for (let btn of colorButtons) {
-                    if (btn.style.boxShadow.includes('rgb(255, 255, 255)')) {
-                      selectedColor = btn.getAttribute('data-color');
-                    }
-                  }
-
-                  const profile = { name, bio, color: selectedColor };
-                  setMyProfileData(profile);
-                  try {
-                    localStorage.setItem('equilibrium_my_profile', JSON.stringify(profile));
-                  } catch (err) {}
-                  setShowCreateProfileModal(false);
-                  
-                  // Redirect directly to newly created profile
-                  setTab('consult');
-                  setActiveProfile({
-                    id: 'my-user-profile',
-                    name: profile.name,
-                    spec: profile.bio || 'Sharing my mindfulness journey.',
-                    color: profile.color || '#ec4899',
-                    isUser: true
-                  });
-                }}
-                style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', cursor:'pointer', background:`linear-gradient(135deg, ${accent}, #8b5cf6)`, color:'#fff', fontSize:'0.95rem', fontWeight:800, fontFamily:J }}>
-                Create Profile & View →
-              </motion.button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
     </div>
   );
