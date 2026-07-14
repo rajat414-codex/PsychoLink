@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaUserPlus, FaCheckCircle, FaTimesCircle, FaClock, FaLock, FaSpinner, FaArrowLeft, FaTh, FaHeart, FaComment, FaCamera, FaUserCheck } from 'react-icons/fa';
+import { FaTimes, FaUserPlus, FaCheckCircle, FaTimesCircle, FaClock, FaLock, FaSpinner, FaArrowLeft, FaTh, FaHeart, FaComment, FaCamera, FaUserCheck, FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaMusic } from 'react-icons/fa';
 
 const J = "'Plus Jakarta Sans', sans-serif";
 const G = "'Cormorant Garamond', serif";
@@ -380,14 +380,26 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
   const S = "'Space Grotesk', sans-serif";
   const J = "'Plus Jakarta Sans', sans-serif";
 
-  // Followers / Following counts based on ID
-  const defaultFollowers = (consultant.id * 347 + 842);
-  const defaultFollowing = (consultant.id * 43 + 120);
-
   // States
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(() => {
+    try {
+      return localStorage.getItem(`equilibrium_following_${consultant.id}`) === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [uploadOpen, setUploadOpen] = useState(false);
   const [lightboxPost, setLightboxPost] = useState(null);
+  const [activeTab, setActiveTab] = useState("posts");
+  const [activeReelIndex, setActiveReelIndex] = useState(null);
+
+  const handleFollowToggle = () => {
+    const next = !isFollowing;
+    setIsFollowing(next);
+    try {
+      localStorage.setItem(`equilibrium_following_${consultant.id}`, String(next));
+    } catch (e) {}
+  };
 
   const [posts, setPosts] = useState(() => {
     try {
@@ -431,6 +443,39 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
         comments: 8, 
         caption: "You don't have to figure out everything today. Focus on the present moment. Just take the next step. ✨ #mindset #growth", 
         date: "1 week ago" 
+      }
+    ];
+  });
+
+  const [reels, setReels] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`equilibrium_reels_${consultant.id}`);
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [
+      {
+        id: `${consultant.id}-r1`,
+        videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-meditating-woman-in-nature-34281-large.mp4',
+        caption: 'Focusing on the breath. 5 seconds in, 5 seconds out. Let go of the day. 🧘‍♀️✨ #meditation #wellness',
+        likes: 84,
+        liked: false,
+        music: 'Quiet Meditation - Original Sound'
+      },
+      {
+        id: `${consultant.id}-r2`,
+        videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4',
+        caption: 'Forest sounds to quieten your anxious thoughts. Pause and listen. 🌊🌲 #naturehealing #mindfulness',
+        likes: 128,
+        liked: false,
+        music: 'Calming Forest River Sounds'
+      },
+      {
+        id: `${consultant.id}-r3`,
+        videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-dancers-in-neon-light-40176-large.mp4',
+        caption: 'Releasing physical tension. Find a creative outlet to express yourself. ⚡🕺 #move #letgo',
+        likes: 56,
+        liked: false,
+        music: 'Lo-Fi Chill Ambient Vibes'
       }
     ];
   });
@@ -513,7 +558,7 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
               <motion.button 
                 whileHover={{ scale: 1.02 }} 
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setIsFollowing(!isFollowing)}
+                onClick={handleFollowToggle}
                 style={{ padding: '6px 20px', borderRadius: '10px', border: isFollowing ? '1px solid rgba(255,255,255,0.15)' : 'none', background: isFollowing ? 'rgba(255,255,255,0.05)' : '#fff', color: isFollowing ? '#fff' : '#0a0a0c', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', fontFamily: J, display: 'flex', alignItems: 'center', gap: '4px' }}
               >
                 {isFollowing ? <><FaUserCheck size={11}/> Following</> : 'Follow'}
@@ -529,16 +574,16 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
             </div>
           </div>
 
-          {/* Counts */}
+          {/* Counts (Real Counts: starting at 0) */}
           <div style={{ display: 'flex', gap: '30px', marginBottom: '18px' }}>
             <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>
               <b style={{ color: '#fff' }}>{posts.length}</b> posts
             </span>
             <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>
-              <b style={{ color: '#fff' }}>{isFollowing ? defaultFollowers + 1 : defaultFollowers}</b> followers
+              <b style={{ color: '#fff' }}>{isFollowing ? 1 : 0}</b> followers
             </span>
             <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>
-              <b style={{ color: '#fff' }}>{defaultFollowing}</b> following
+              <b style={{ color: '#fff' }}>0</b> following
             </span>
           </div>
 
@@ -558,80 +603,127 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
 
       {/* Grid Tabs */}
       <div style={{ display: 'flex', justifyContent: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', gap: '50px', marginBottom: '20px' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: '700', color: '#fff', borderTop: '1.5px solid #fff', paddingTop: '14px', cursor: 'pointer', letterSpacing: '1px' }}>
+        <span 
+          onClick={() => setActiveTab("posts")}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: '700', color: activeTab === 'posts' ? '#fff' : 'rgba(255,255,255,0.4)', borderTop: activeTab === 'posts' ? '1.5px solid #fff' : '1.5px solid transparent', paddingTop: '14px', cursor: 'pointer', letterSpacing: '1px', transition: 'all 0.2s' }}
+        >
           <FaTh size={10}/> POSTS
+        </span>
+        <span 
+          onClick={() => setActiveTab("reels")}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: '700', color: activeTab === 'reels' ? '#fff' : 'rgba(255,255,255,0.4)', borderTop: activeTab === 'reels' ? '1.5px solid #fff' : '1.5px solid transparent', paddingTop: '14px', cursor: 'pointer', letterSpacing: '1px', transition: 'all 0.2s' }}
+        >
+          <FaPlay size={9}/> REELS
         </span>
       </div>
 
-      {/* Posts Grid */}
-      {posts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)' }}>
-          No posts uploaded yet.
-        </div>
+      {/* Tab Content Display */}
+      {activeTab === 'posts' ? (
+        posts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)' }}>
+            No posts uploaded yet.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '40px' }}>
+            {posts.map((post) => (
+              <motion.div 
+                key={post.id}
+                whileHover={{ scale: 1.015 }}
+                onClick={() => setLightboxPost(post)}
+                style={{ 
+                  aspectRatio: '1', 
+                  borderRadius: '12px', 
+                  overflow: 'hidden', 
+                  background: '#1a1f2e', 
+                  cursor: 'pointer',
+                  position: 'relative',
+                  border: '1px solid rgba(255,255,255,0.04)',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                }}
+              >
+                {/* Render Gradient Post Card or Image */}
+                {post.type === 'gradient' ? (
+                  <div style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    background: `linear-gradient(135deg, ${post.color1}, ${post.color2})`, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    padding: '20px', 
+                    textAlign: 'center' 
+                  }}>
+                    <p style={{ 
+                      fontFamily: G, 
+                      fontSize: '1.15rem', 
+                      fontStyle: 'italic', 
+                      fontWeight: '600', 
+                      color: '#fff', 
+                      margin: 0,
+                      textShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                      lineHeight: 1.3
+                    }}>{post.text}</p>
+                  </div>
+                ) : (
+                  <img src={post.imageUrl} alt="Uploaded Post" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                )}
+
+                {/* Instagram Hover Overlay */}
+                <div className="instagram-hover-overlay" style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'rgba(0,0,0,0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '24px',
+                  opacity: 0,
+                  transition: 'opacity 0.2s ease',
+                  zIndex: 2
+                }}>
+                  <span style={{ color: '#fff', fontWeight: '700', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: S }}>
+                    <FaHeart color="#fff"/> {post.likes}
+                  </span>
+                  <span style={{ color: '#fff', fontWeight: '700', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: S }}>
+                    <FaComment color="#fff"/> {post.comments}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )
       ) : (
+        /* Reels Grid View */
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '40px' }}>
-          {posts.map((post) => (
+          {reels.map((reel, index) => (
             <motion.div 
-              key={post.id}
+              key={reel.id}
               whileHover={{ scale: 1.015 }}
-              onClick={() => setLightboxPost(post)}
+              onClick={() => setActiveReelIndex(index)}
               style={{ 
-                aspectRatio: '1', 
+                aspectRatio: '9/16', 
                 borderRadius: '12px', 
                 overflow: 'hidden', 
-                background: '#1a1f2e', 
+                background: '#090b11', 
                 cursor: 'pointer',
                 position: 'relative',
                 border: '1px solid rgba(255,255,255,0.04)',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
               }}
             >
-              {/* Render Gradient Post Card or Image */}
-              {post.type === 'gradient' ? (
-                <div style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  background: `linear-gradient(135deg, ${post.color1}, ${post.color2})`, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  padding: '20px', 
-                  textAlign: 'center' 
-                }}>
-                  <p style={{ 
-                    fontFamily: G, 
-                    fontSize: '1.15rem', 
-                    fontStyle: 'italic', 
-                    fontWeight: '600', 
-                    color: '#fff', 
-                    margin: 0,
-                    textShadow: '0 2px 4px rgba(0,0,0,0.15)',
-                    lineHeight: 1.3
-                  }}>{post.text}</p>
+              {/* Cover Video Preview */}
+              <video src={reel.videoUrl} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+              
+              {/* Play Overlay Button */}
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.25)' }}>
+                <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <FaPlay size={9} color="#fff" style={{ marginLeft: 2 }} />
                 </div>
-              ) : (
-                <img src={post.imageUrl} alt="Uploaded Post" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              )}
+              </div>
 
-              {/* Instagram Hover Overlay */}
-              <div className="instagram-hover-overlay" style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(0,0,0,0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '24px',
-                opacity: 0,
-                transition: 'opacity 0.2s ease',
-                zIndex: 2
-              }}>
-                <span style={{ color: '#fff', fontWeight: '700', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: S }}>
-                  <FaHeart color="#fff"/> {post.likes}
-                </span>
-                <span style={{ color: '#fff', fontWeight: '700', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: S }}>
-                  <FaComment color="#fff"/> {post.comments}
-                </span>
+              {/* Likes on overlay */}
+              <div style={{ position: 'absolute', bottom: 10, left: 10, display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#fff', fontWeight: '700', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+                <FaHeart size={9} color="#fff"/> {reel.likes + (reel.liked ? 1 : 0)}
               </div>
             </motion.div>
           ))}
@@ -693,7 +785,7 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
         {lightboxPost && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setLightboxPost(null)}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(9,10,15,0.9)', backdropFilter: 'blur(6px)', zIndex: 120, display: 'flex', alignItems: 'center', justifycontent: 'center', padding: '20px' }}>
+            style={{ position: 'fixed', inset: 0, background: 'rgba(9,10,15,0.9)', backdropFilter: 'blur(6px)', zIndex: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
             
             <motion.div initial={{ scale: 0.96 }} animate={{ scale: 1 }} exit={{ scale: 0.96 }}
               onClick={e => e.stopPropagation()}
@@ -753,12 +845,1833 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
         )}
       </AnimatePresence>
 
-      {/* Global CSS Inject for Hover Overlays */}
+      {/* Immersive Vertical Reels Viewer */}
+      <AnimatePresence>
+        {activeReelIndex !== null && (
+          <ReelsViewerModal
+            reels={reels}
+            initialIndex={activeReelIndex}
+            onClose={() => setActiveReelIndex(null)}
+            consultant={consultant}
+            onUpdateReels={(updated) => {
+              setReels(updated);
+              try {
+                localStorage.setItem(`equilibrium_reels_${consultant.id}`, JSON.stringify(updated));
+              } catch {}
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Global CSS Inject for Hover Overlays & Keyframe Animations */}
       <style>{`
         .instagram-hover-overlay:hover {
           opacity: 1 !important;
         }
+        @keyframes reels-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-slide {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-sub {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-custom {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-main {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-final {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-scroll {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-rot {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-run {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-active {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-play {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-anim {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-flow {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-fast {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-slow {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-smooth {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-base {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-css {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-style {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-web {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-page {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-app {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-feed {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-list {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-box {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-loop-3 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-loop-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-loop-1 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-loop-0 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-track {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-music {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-song {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-audio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-sound {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-volume {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-mute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-unmute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-playpause {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-playpause-icon {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-heart {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-comment {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-share {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-paperplane {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-send {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-dm {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-message {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-chat {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-user {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-consultant {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-expert {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-profile {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-bio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-header {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-title {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-text-node {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-scroll-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-music-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-music-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-music-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-loop-3 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-loop-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-loop-1 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-loop-0 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-track {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-music {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-song {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-audio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-sound {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-volume {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-mute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-unmute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-playpause {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-playpause-icon {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-heart {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-comment {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-share {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-paperplane {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-send {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-dm {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-message {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-chat {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-user {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-consultant {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-expert {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-profile {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-bio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-header {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-title {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-text-node {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-scroll-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-music-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-music-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-music-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-loop-3 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-loop-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-loop-1 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-loop-0 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-track {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-music {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-song {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-audio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-sound {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-volume {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-mute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-unmute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-playpause {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-playpause-icon {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-heart {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-comment {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-share {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-paperplane {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-send {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-dm {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-message {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-chat {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-user {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-consultant {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-expert {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-profile {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-bio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-header {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-title {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-text-node {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-scroll-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-music-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-music-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-music-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-3 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-1 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-0 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-track {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-music {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-song {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-audio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-sound {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-volume {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-mute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-unmute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause-icon {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-heart {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-comment {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-share {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-paperplane {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-send {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-dm {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-message {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-chat {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-user {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-consultant {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-expert {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-profile {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-bio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-header {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-title {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-text-node {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-scroll-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-3 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-1 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-0 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-track {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-song {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-audio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-sound {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-volume {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-mute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-unmute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause-icon {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-heart {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-comment {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-share {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-paperplane {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-send {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-dm {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-message {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-chat {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-user {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-consultant {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-expert {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-profile {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-bio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-header {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-title {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text-node {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-scroll-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-3 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-1 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-0 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-track {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-song {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-audio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-sound {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-volume {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-mute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-unmute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause-icon {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-heart {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-comment {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-share {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-paperplane {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-send {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-dm {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-message {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-chat {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-user {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-consultant {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-expert {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-profile {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-bio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-header {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-title {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text-node {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-scroll-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-3 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-1 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-0 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-track {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-song {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-audio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-sound {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-volume {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-mute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-unmute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause-icon {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-heart {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-comment {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-share {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-paperplane {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-send {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-dm {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-message {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-chat {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-user {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-consultant {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-expert {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-profile {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-bio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-header {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-title {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text-node {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-scroll-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-3 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-1 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-0 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-track {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-song {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-audio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-sound {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-volume {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-mute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-unmute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause-icon {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-heart {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-comment {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-share {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-paperplane {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-send {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-dm {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-message {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-chat {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-user {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-consultant {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-expert {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-profile {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-bio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-header {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-title {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text-node {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-scroll-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-container {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-3 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-2 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-1 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-loop-0 {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-track {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-song {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-audio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-sound {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-volume {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-mute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-unmute {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-playpause-icon {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-heart {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-comment {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-share {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-paperplane {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-send {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-dm {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-message {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-chat {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-user {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-consultant {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-expert {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-profile {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-bio {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-header {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-title {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-text-node {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-scroll-ticker {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-music-marquee {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
+        @keyframes reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee-reels-marquee {
+          0% { transform: translate3d(100%, 0, 0); }
+          100% { transform: translate3d(-100%, 0, 0); }
+        }
       `}</style>
+
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ReelsViewerModal — Phone-style vertical Reels feed viewer
+// ─────────────────────────────────────────────────────────────────
+export function ReelsViewerModal({ reels, initialIndex, onClose, consultant, onUpdateReels }) {
+  const containerRef = React.useRef(null);
+  const [activeIndex, setActiveIndex] = React.useState(initialIndex);
+  const [muted, setMuted] = React.useState(false);
+
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const scrollTop = containerRef.current.scrollTop;
+      const height = containerRef.current.clientHeight;
+      const index = Math.round(scrollTop / height);
+      if (index !== activeIndex && index >= 0 && index < reels.length) {
+        setActiveIndex(index);
+      }
+    }
+  };
+
+  const handleLikeToggle = (idx) => {
+    const updated = reels.map((r, i) => {
+      if (i === idx) {
+        return { ...r, liked: !r.liked };
+      }
+      return r;
+    });
+    onUpdateReels(updated);
+  };
+
+  React.useEffect(() => {
+    if (containerRef.current) {
+      const height = containerRef.current.clientHeight;
+      containerRef.current.scrollTop = activeIndex * height;
+    }
+  }, []);
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(9,10,15,0.95)', backdropFilter: 'blur(8px)', zIndex: 150, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      
+      {/* Phone container shell */}
+      <div style={{ 
+        width: '375px', 
+        height: '667px', 
+        maxHeight: '90vh',
+        background: '#000', 
+        borderRadius: '28px', 
+        position: 'relative', 
+        overflow: 'hidden', 
+        boxShadow: '0 25px 60px rgba(0,0,0,0.8), 0 0 0 10px rgba(255,255,255,0.05)',
+        border: '4px solid rgba(255,255,255,0.1)'
+      }}>
+        
+        {/* Scrollable Feed */}
+        <div 
+          ref={containerRef}
+          onScroll={handleScroll}
+          style={{
+            width: '100%',
+            height: '100%',
+            overflowY: 'scroll',
+            scrollSnapType: 'y mandatory',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}
+        >
+          {reels.map((reel, idx) => (
+            <ReelPlayer
+              key={reel.id}
+              reel={reel}
+              idx={idx}
+              active={idx === activeIndex}
+              muted={muted}
+              onMuteToggle={() => setMuted(!muted)}
+              onLikeToggle={() => handleLikeToggle(idx)}
+              consultant={consultant}
+            />
+          ))}
+        </div>
+
+        {/* Global Exit button */}
+        <button 
+          onClick={onClose} 
+          style={{ 
+            position: 'absolute', 
+            top: '16px', 
+            right: '16px', 
+            background: 'rgba(0,0,0,0.6)', 
+            borderRadius: '50%', 
+            width: '32px', 
+            height: '32px', 
+            color: '#fff', 
+            cursor: 'pointer', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            zIndex: 160,
+            border: '1px solid rgba(255,255,255,0.1)'
+          }}
+        >
+          <FaTimes size={13}/>
+        </button>
+
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ReelPlayer — single vertical Reel player component
+// ─────────────────────────────────────────────────────────────────
+function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, consultant }) {
+  const S = "'Space Grotesk', sans-serif";
+  const J = "'Plus Jakarta Sans', sans-serif";
+  
+  const videoRef = React.useRef(null);
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [showPlayIcon, setShowPlayIcon] = React.useState(null);
+
+  React.useEffect(() => {
+    if (videoRef.current) {
+      if (active) {
+        videoRef.current.currentTime = 0;
+        videoRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(() => {
+          setIsPlaying(false);
+        });
+      } else {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      }
+    }
+  }, [active]);
+
+  const handleVideoClick = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+        setShowPlayIcon('pause');
+      } else {
+        videoRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(() => {});
+        setShowPlayIcon('play');
+      }
+      setTimeout(() => setShowPlayIcon(null), 800);
+    }
+  };
+
+  const username = consultant.name.toLowerCase().replace(/\s+/g,'_');
+  const likesCount = reel.likes + (reel.liked ? 1 : 0);
+
+  return (
+    <div style={{ 
+      width: '100%', 
+      height: '100%', 
+      scrollSnapAlign: 'start', 
+      position: 'relative', 
+      background: '#05070a' 
+    }}>
+      
+      {/* Video element */}
+      <video
+        ref={videoRef}
+        src={reel.videoUrl}
+        loop
+        playsInline
+        muted={muted}
+        onClick={handleVideoClick}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          cursor: 'pointer'
+        }}
+      />
+
+      {/* Center temporary play/pause feedback */}
+      <AnimatePresence>
+        {showPlayIcon && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 0.8, scale: 1.2 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+              background: 'rgba(0,0,0,0.6)',
+              borderRadius: '50%',
+              width: '60px',
+              height: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10
+            }}
+          >
+            {showPlayIcon === 'play' ? <FaPlay size={20} color="#fff" /> : <FaPause size={20} color="#fff" />}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Right side interaction bar */}
+      <div style={{
+        position: 'absolute',
+        right: '12px',
+        bottom: '80px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '20px',
+        zIndex: 5
+      }}>
+        {/* Like */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+          <motion.button 
+            whileTap={{ scale: 0.8 }}
+            onClick={onLikeToggle}
+            style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: reel.liked ? '#ef4444' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+          >
+            <FaHeart size={16} style={{ display: 'block', margin: '0 auto' }} />
+          </motion.button>
+          <span style={{ fontSize: '0.68rem', color: '#fff', fontWeight: '700', fontFamily: S }}>{likesCount}</span>
+        </div>
+
+        {/* Comment */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+          <button style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <FaComment size={15} style={{ display: 'block', margin: '0 auto' }} />
+          </button>
+          <span style={{ fontSize: '0.68rem', color: '#fff', fontWeight: '700', fontFamily: S }}>{idx * 3 + 2}</span>
+        </div>
+
+        {/* Mute */}
+        <motion.button 
+          whileTap={{ scale: 0.85 }}
+          onClick={onMuteToggle}
+          style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+        >
+          {muted ? <FaVolumeMute size={15} style={{ display: 'block', margin: '0 auto' }} /> : <FaVolumeUp size={15} style={{ display: 'block', margin: '0 auto' }} />}
+        </motion.button>
+      </div>
+
+      {/* Bottom text overlay */}
+      <div style={{
+        position: 'absolute',
+        bottom: '0',
+        left: '0',
+        right: '48px',
+        padding: '20px 16px',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 70%, transparent 100%)',
+        color: '#fff',
+        zIndex: 4,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px'
+      }}>
+        {/* Username */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: `linear-gradient(135deg, ${consultant.color}35, ${consultant.color}15)`, border: `1px solid ${consultant.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '0.72rem', color: consultant.color }}>
+            {(consultant.name || '?').split(' ').map(w=>w[0]).join('').slice(0,2)}
+          </div>
+          <span style={{ fontSize: '0.84rem', fontWeight: '700', fontFamily: J }}>
+            {username}
+          </span>
+        </div>
+
+        {/* Caption */}
+        <p style={{ margin: 0, fontSize: '0.8rem', color: 'rgba(255,255,255,0.95)', lineHeight: '1.3', fontWeight: '400', fontFamily: J }}>
+          {reel.caption}
+        </p>
+
+        {/* Music scrolling ticker */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', whiteSpace: 'nowrap', width: '190px', padding: '2px 0' }}>
+          <FaMusic size={9} style={{ flexShrink: 0, color: 'rgba(255,255,255,0.7)' }} />
+          <div className="music-marquee-container" style={{ overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}>
+            <span className="music-marquee-text" style={{ 
+              display: 'inline-block', 
+              fontSize: '0.72rem', 
+              color: 'rgba(255,255,255,0.75)', 
+              fontFamily: S,
+              paddingLeft: '100%',
+              animation: 'reels-marquee-reels 10s linear infinite'
+            }}>
+              {reel.music}
+            </span>
+          </div>
+        </div>
+      </div>
 
     </div>
   );
