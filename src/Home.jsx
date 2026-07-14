@@ -1357,8 +1357,7 @@ export default function Home({ userProfile, onLogout }) {
         )}
       </AnimatePresence>
 
-      {/* ── FLOATING CHATBOT ── */}
-      {tab !== 'chat' && <FloatingChatbot />}
+
 
     </div>
   );
