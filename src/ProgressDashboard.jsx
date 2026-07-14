@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
-import { FaFire } from 'react-icons/fa';
 
 const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
 const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
@@ -14,6 +13,24 @@ const TREND = [
   { w:'W4', anxiety:52, stress:46 },
   { w:'W5', anxiety:36, stress:50 },
   { w:'W6', anxiety:34, stress:40 },
+];
+
+const ALL_TASKS = [
+  { text: "Practice 4-7-8 breathing for 3 minutes to regulate your nervous system.", category: "Mental Health", color: "#10b981" },
+  { text: "Active Listening: Listen to someone today without preparing your response beforehand.", category: "Soft Skill", color: "#8b5cf6" },
+  { text: "Express Gratitude: Write down 3 micro-moments that brought a smile to your face today.", category: "Mental Health", color: "#10b981" },
+  { text: "Clarity in Speech: Focus on speaking at a measured, calm pace in your next conversation.", category: "Soft Skill", color: "#8b5cf6" },
+  { text: "Digital Detox: Disconnect from all digital screens 45 minutes before sleeping.", category: "Mental Health", color: "#10b981" },
+  { text: "Constructive Feedback: Reframe a critique today using positive 'I-statements'.", category: "Soft Skill", color: "#8b5cf6" },
+  { text: "Mindful Walking: Take a 10-minute walk outside observing only the sounds around you.", category: "Mental Health", color: "#10b981" },
+  { text: "Assertive Boundaries: Politely decline a low-priority task to protect your mental energy.", category: "Soft Skill", color: "#8b5cf6" },
+  { text: "Self-Compassion: Write down a recent mistake and answer yourself with kindness.", category: "Mental Health", color: "#10b981" },
+  { text: "Body Language Check: Stand or sit with an open, relaxed posture in your next chat.", category: "Soft Skill", color: "#8b5cf6" },
+  { text: "Mindful Hydration: Sip a glass of water slowly, focusing on the temperature and sensation.", category: "Mental Health", color: "#10b981" },
+  { text: "Empathy Exercise: Put yourself in the shoes of someone you recently disagreed with.", category: "Soft Skill", color: "#8b5cf6" },
+  { text: "Reframing Thoughts: Identify a negative self-talk statement and rephrase it constructively.", category: "Mental Health", color: "#10b981" },
+  { text: "Clear Emailing: Write a concise email today, removing all fillers like 'just' or 'actually'.", category: "Soft Skill", color: "#8b5cf6" },
+  { text: "Cognitive Rest: Take a 5-minute silent break mid-day with absolutely no audio or text input.", category: "Mental Health", color: "#10b981" }
 ];
 
 function Card({ children, style, delay=0, glow }) {
@@ -165,7 +182,52 @@ function ProgressCircleCard({ title, value, gradientId, colors, ribbonColor, sub
   );
 }
 
-export default function ProgressDashboard({ accent, accentB, accentBr }) {
+export default function ProgressDashboard({ accent }) {
+  const getDailyTasks = () => {
+    const day = new Date().getDate();
+    const i1 = (day * 7) % ALL_TASKS.length;
+    const i2 = (day * 13 + 3) % ALL_TASKS.length;
+    const i3 = (day * 19 + 7) % ALL_TASKS.length;
+    
+    let taskIndices = [i1, i2, i3];
+    if (taskIndices[0] === taskIndices[1]) taskIndices[1] = (taskIndices[1] + 1) % ALL_TASKS.length;
+    if (taskIndices[2] === taskIndices[0] || taskIndices[2] === taskIndices[1]) {
+      taskIndices[2] = (taskIndices[2] + 2) % ALL_TASKS.length;
+    }
+    
+    return [
+      { ...ALL_TASKS[taskIndices[0]], id: 't1' },
+      { ...ALL_TASKS[taskIndices[1]], id: 't2' },
+      { ...ALL_TASKS[taskIndices[2]], id: 't3' },
+    ];
+  };
+
+  const todayKey = `equilibrium_tasks_${new Date().toISOString().split('T')[0]}`;
+  const [completed, setCompleted] = React.useState(() => {
+    try {
+      const saved = localStorage.getItem(todayKey);
+      return saved ? JSON.parse(saved) : { t1: false, t2: false, t3: false };
+    } catch {
+      return { t1: false, t2: false, t3: false };
+    }
+  });
+
+  const toggleTask = (id) => {
+    setCompleted(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      try {
+        localStorage.setItem(todayKey, JSON.stringify(next));
+      } catch (e) {
+        console.error(e);
+      }
+      return next;
+    });
+  };
+
+  const tasks = React.useMemo(() => getDailyTasks(), []);
+  const completedCount = Object.values(completed).filter(Boolean).length;
+  const progressPercent = (completedCount / 3) * 100;
+
   return (
     <motion.div key="progress" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
       style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
@@ -225,43 +287,99 @@ export default function ProgressDashboard({ accent, accentB, accentBr }) {
 
       </div>
 
-      {/* Bottom Full-Width Activity Tracking Heatmap */}
+      {/* Bottom Full-Width Daily Mental Health & Soft Skills Challenges */}
       <Card glow={accent} style={{ padding: '20px 22px' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:700, fontSize:'0.92rem', color:'#ededef', letterSpacing:'-0.2px' }}>Activity Tracking</p>
-            <p style={{ margin:0, fontSize:'0.72rem', color:'rgba(255,255,255,0.35)', fontFamily:J }}>Self-care streaks (last 35 days)</p>
+            <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:700, fontSize:'0.92rem', color:'#ededef', letterSpacing:'-0.2px' }}>
+              Daily Mind & Skill Challenges
+            </p>
+            <p style={{ margin:0, fontSize:'0.72rem', color:'rgba(255,255,255,0.35)', fontFamily:J }}>
+              3 custom tasks generated daily to build emotional resilience and communication skills
+            </p>
           </div>
-          <span style={{ fontSize:'0.74rem', color:'#f59e0b', fontWeight:700, fontFamily:S, display:'flex', alignItems:'center', gap:5 }}>
-            <FaFire size={11}/> 7 days active
+          <span style={{ fontSize:'0.74rem', color:accent, fontWeight:700, fontFamily:S, background: `${accent}15`, padding: '5px 12px', borderRadius: '10px', border: `1px solid ${accent}25` }}>
+            📅 {new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
           </span>
         </div>
 
-        {/* Heatmap grid */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:6, padding: '4px 0' }}>
-          {[...Array(35)].map((_,i) => {
-            const active = i > 27 || ((i*7+3)%10) > 4;
-            const intensity = active ? (0.3 + ((i*13)%70)/100) : 0;
+        {/* Task rows */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+          {tasks.map((task) => {
+            const isDone = completed[task.id];
             return (
-              <motion.div key={i} initial={{ opacity:0, scale:0.5 }} animate={{ opacity:1, scale:1 }} transition={{ delay:0.2+i*0.01 }}
-                whileHover={{ scale:1.2, borderColor: active ? accent : 'rgba(255,255,255,0.1)' }}
+              <div 
+                key={task.id}
+                onClick={() => toggleTask(task.id)}
                 style={{ 
-                  aspectRatio:'1', 
-                  borderRadius:6, 
-                  background: active ? accent : 'rgba(255,255,255,0.02)', 
-                  opacity: active ? intensity : 1, 
-                  border: active ? 'none' : '1px solid rgba(255,255,255,0.04)',
-                  transition: 'border-color 0.15s ease'
-                }}/>
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 14, 
+                  padding: '12px 16px', 
+                  background: isDone ? 'rgba(255,255,255,0.01)' : 'rgba(255,255,255,0.02)', 
+                  border: isDone ? '1px solid rgba(255,255,255,0.02)' : '1px solid rgba(255,255,255,0.04)', 
+                  borderRadius: 16,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {/* Custom Checkbox circle */}
+                <div style={{ 
+                  width: 20, 
+                  height: 20, 
+                  borderRadius: '50%', 
+                  border: `2px solid ${isDone ? task.color : 'rgba(255,255,255,0.2)'}`, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  background: isDone ? `${task.color}20` : 'transparent',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0
+                }}>
+                  {isDone && <span style={{ width: 8, height: 8, borderRadius: '50%', background: task.color }} />}
+                </div>
+
+                {/* Badge & Text */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <span style={{ 
+                    fontSize: '0.64rem', 
+                    color: task.color, 
+                    fontWeight: '800', 
+                    fontFamily: S, 
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    {task.category}
+                  </span>
+                  <span style={{ 
+                    fontSize: '0.84rem', 
+                    color: isDone ? 'rgba(255,255,255,0.35)' : '#fff', 
+                    fontFamily: J,
+                    textDecoration: isDone ? 'line-through' : 'none',
+                    transition: 'all 0.2s ease',
+                    lineHeight: 1.4
+                  }}>
+                    {task.text}
+                  </span>
+                </div>
+              </div>
             );
           })}
         </div>
 
-        {/* Legend */}
-        <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:16, justifyContent:'flex-end' }}>
-          <span style={{ fontSize:'0.64rem', color:'rgba(255,255,255,0.25)', fontFamily:S }}>Less</span>
-          {[0.2,0.4,0.6,0.8,1].map((o,i)=><span key={i} style={{ width:10, height:10, borderRadius:3, background:accent, opacity:o }}/>)}
-          <span style={{ fontSize:'0.64rem', color:'rgba(255,255,255,0.25)', fontFamily:S }}>More</span>
+        {/* Progress Bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.04)', borderRadius: '3px', overflow: 'hidden' }}>
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              style={{ height: '100%', background: `linear-gradient(90deg, ${accent}, #8b5cf6)`, borderRadius: '3px' }}
+            />
+          </div>
+          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', fontFamily: S, fontWeight: '700', minWidth: '95px', textAlign: 'right' }}>
+            {completedCount} of 3 completed
+          </span>
         </div>
 
         {/* Ribbon tag */}
