@@ -189,6 +189,38 @@ export default function RobotAvatar({
                   ))}
                 </motion.div>
 
+              ) : expression === 'analyzing' || expression === 'thinking' ? (
+                <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  style={{ display: 'flex', gap: `${24 * s}px`, zIndex: 10 }}>
+                  {[0, 1].map(i => (
+                    <motion.div
+                      key={i}
+                      animate={{
+                        scaleY: [1, 0.4, 1],
+                        opacity: [0.6, 1, 0.6],
+                        boxShadow: [
+                          `0 0 ${4*s}px #ffffff`,
+                          `0 0 ${12*s}px ${glowColor}`,
+                          `0 0 ${4*s}px #ffffff`
+                        ]
+                      }}
+                      transition={{
+                        duration: 1.2,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: i * 0.2
+                      }}
+                      style={{
+                        width: `${16 * s}px`,
+                        height: `${5 * s}px`,
+                        borderRadius: `${2.5 * s}px`,
+                        backgroundColor: '#ffffff',
+                        boxShadow: `0 0 ${6 * s}px ${glowColor}`
+                      }}
+                    />
+                  ))}
+                </motion.div>
+
               ) : (
                 /* Default clean white oval eyes — zero border, zero outline */
                 <motion.div key="default" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}

@@ -6,7 +6,7 @@ import {
   FaPaperPlane, FaMicrophone, FaStop, FaVolumeUp,
   FaHome, FaComments, FaUserMd, FaChartLine, FaBell,
   FaHeart, FaFire, FaSmile, FaArrowRight, FaLeaf, FaBolt,
-  FaBook, FaWind, FaCloudSun
+  FaBook, FaWind, FaCloudSun, FaCopy, FaCheck
 } from 'react-icons/fa';
 import BrainReport from './NeurologicalReport';
 import BreathingModal from './BreathingModal';
@@ -19,6 +19,7 @@ import ProgressDashboard from './ProgressDashboard';
 import { FaSpa, FaCrown } from 'react-icons/fa';
 import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast } from './ConsultantHub';
 import RobotAvatar from './RobotAvatar';
+import FloatingChatbot from './FloatingChatbot';
 
 
 const AURA_PROMPT = `You are AURA (Affective Understanding and Reflective AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish (Hindi written in Roman script like 'Aap kaise hain?', 'Mujhe stress ho raha hai'). Always respond with empathy first, then guidance. Keep responses warm, encouraging, conversational, and concise (2-4 sentences). Never diagnose. Use occasional emojis 🌸.`;
@@ -29,6 +30,56 @@ const SUGGESTIONS = {
   AURA: ["I've been feeling anxious lately", "Mujhe thoda stress ho raha hai", "Help me with self-esteem", "Aap kaise help kar sakte ho?"],
   MAX:  ["Analyze my thought patterns", "I procrastinate too much", "Break a bad habit", "Focus aur concentration kaise badhaye?"]
 };
+
+const SUGGESTIONS_ENHANCED = {
+  AURA: [
+    { text: "I've been feeling anxious lately", sub: "Emotional support & grounding", icon: "🌸" },
+    { text: "Mujhe thoda stress ho raha hai", sub: "Instant stress relief chat", icon: "🍃" },
+    { text: "Help me with self-esteem", sub: "Boost confidence & resilience", icon: "✨" },
+    { text: "Aap kaise help kar sakte ho?", sub: "Learn about Aura's features", icon: "💡" }
+  ],
+  MAX: [
+    { text: "Analyze my thought patterns", sub: "CBT behavioral assessment", icon: "🧠" },
+    { text: "I procrastinate too much", sub: "Productivity hack & structure", icon: "⚡" },
+    { text: "Break a bad habit", sub: "Habit loop reprogramming", icon: "🎯" },
+    { text: "Focus aur concentration kaise badhaye?", sub: "Deep work focus guidelines", icon: "🔍" }
+  ]
+};
+
+function VisualWaveform({ accent, active }) {
+  return (
+    <div style={{ display: 'flex', gap: '3.5px', alignItems: 'center', height: '24px', padding: '0 8px' }}>
+      {[...Array(15)].map((_, i) => {
+        const heights = [10, 22, 14, 28, 18, 24, 12, 26, 16, 20, 10, 18, 26, 14, 8];
+        const h = heights[i % heights.length];
+        return (
+          <motion.div
+            key={i}
+            animate={active ? {
+              scaleY: [0.3, 1, 0.3],
+              height: [h * 0.4, h, h * 0.4],
+            } : {
+              scaleY: 0.3,
+              height: 8,
+            }}
+            transition={{
+              duration: 0.8 + (i % 3) * 0.2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: i * 0.05
+            }}
+            style={{
+              width: '3px',
+              backgroundColor: accent,
+              borderRadius: '2px',
+              transformOrigin: 'center'
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 // Consultants loaded from backend
 
@@ -86,6 +137,9 @@ export default function Home({ userProfile, onLogout }) {
   const [moodToday,      setMoodToday]      = useState(null);
   const [showBreath,     setShowBreath]     = useState(false);
   const [showSOS,        setShowSOS]        = useState(false);
+  const [speechRate, setSpeechRate] = useState(1.0);
+  const [isAiSpeaking, setIsAiSpeaking] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState(null);
   const [isRecording,    setIsRecording]    = useState(false);
   const [recordDuration, setRecordDuration] = useState(0);
   const mediaRecRef    = useRef(null);
@@ -279,9 +333,23 @@ export default function Home({ userProfile, onLogout }) {
       ? voices.find(v => v.name.includes('Zira') || v.name.includes('Samantha'))
       : voices.find(v => v.name.includes('David') || v.name.includes('Google UK English Male'));
     if (v) u.voice = v;
-    u.rate  = 0.9;
+    u.rate  = speechRate;
     u.pitch = activeAI === 'AURA' ? 1.2 : 0.8;
+    u.onstart = () => setIsAiSpeaking(true);
+    u.onend = () => setIsAiSpeaking(false);
+    u.onerror = () => setIsAiSpeaking(false);
     window.speechSynthesis.speak(u);
+  };
+
+  const handleCopyText = (text, index) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const clearActiveSession = () => {
+    if (!window.confirm("Are you sure you want to clear this conversation history?")) return;
+    updateSession([], 'New conversation');
   };
 
   const fmt = d => d ? new Date(d).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' }) : '';
@@ -627,9 +695,15 @@ export default function Home({ userProfile, onLogout }) {
                     </>
                   )}
                 </div>
+
+                {/* Session controls top bar */}
                 {messages.length > 1 && (
-                  <div style={{ flexShrink:0, display:'flex', justifyContent:'flex-end', padding:'12px 24px 0', position:'relative', zIndex:2 }}>
-                    <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto', display:'flex', justifyContent:'flex-end' }}>
+                  <div style={{ flexShrink:0, display:'flex', justifyContent:'flex-end', padding:'12px 24px 0', position:'relative', zIndex:10 }}>
+                    <div style={{ maxWidth:'1080px', width:'100%', margin:'0 auto', display:'flex', justifyContent:'flex-end', gap:'8px' }}>
+                      <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={clearActiveSession}
+                        style={{ padding:'7px 14px', borderRadius:20, border:'1px solid rgba(255,255,255,0.08)', background:'rgba(255,255,255,0.02)', color:'rgba(255,255,255,0.5)', fontSize:'0.75rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:6 }}>
+                        🗑️ Clear Session
+                      </motion.button>
                       <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={getSessionSummary}
                         style={{ padding:'7px 14px', borderRadius:20, border:`1px solid ${accentBr}`, background:accentB, color:accent, fontSize:'0.75rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:6 }}>
                         📋 Session Summary
@@ -637,117 +711,290 @@ export default function Home({ userProfile, onLogout }) {
                     </div>
                   </div>
                 )}
-                <div style={{ flex:1, overflowY:'auto', padding:'8px 20px 10px', display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
-                  <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto', display:'flex', flexDirection:'column', gap:'14px', flex:1, justifyContent:messages.length===0?'center':'flex-start' }}>
-                    {messages.length === 0 && (
-                      <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}
-                        style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'30px 20px' }}>
 
-                        <RobotAvatar expression="happy" size="lg" glowColor={accent} style={{ marginBottom: '24px' }} />
-                        <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'2.2rem', color:'#fff', marginBottom:'8px' }}>
-                          {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : "Hello, I'm Max"}
-                        </h2>
-                        <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.88rem', lineHeight:'1.75', maxWidth:'420px', marginBottom:'32px', fontFamily:J }}>
-                          {activeAI === 'AURA'
-                            ? "I'm your emotional anchor. Here to listen and support you through anything."
-                            : "I'm your cognitive analyst. Ready to break down patterns and build solutions."}
+                {/* 2-Column Console Layout */}
+                <div style={{ flex:1, display:'flex', position:'relative', overflow:'hidden', zIndex:1 }}>
+                  
+                  {/* Left Column: Messages list & input */}
+                  <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', position:'relative' }}>
+                    
+                    {/* Scrollable chat thread */}
+                    <div style={{ flex:1, overflowY:'auto', padding:'8px 20px 10px', display:'flex', flexDirection:'column' }}>
+                      <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto', display:'flex', flexDirection:'column', gap:'14px', flex:1, justifyContent:messages.length===0?'center':'flex-start' }}>
+                        {messages.length === 0 && (
+                          <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}
+                            style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'30px 20px' }}>
+
+                            <div style={{ position:'relative', marginBottom:'24px' }}>
+                              <RobotAvatar expression="happy" size="lg" glowColor={accent} />
+                              <div className="scanner-line" style={{ '--scanner-color': accent, width: '130px', margin: '0 auto', left: '50px' }} />
+                            </div>
+                            <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'2.2rem', color:'#fff', marginBottom:'8px' }}>
+                              {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : "Hello, I'm Max"}
+                            </h2>
+                            <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.88rem', lineHeight:'1.75', maxWidth:'420px', marginBottom:'32px', fontFamily:J }}>
+                              {activeAI === 'AURA'
+                                ? "I'm your emotional anchor. Here to listen and support you through anything."
+                                : "I'm your cognitive analyst. Ready to break down patterns and build solutions."}
+                            </p>
+                            
+                            {/* Suggestion Cards */}
+                            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', width:'100%', maxWidth:'650px', margin:'0 auto' }}>
+                              {SUGGESTIONS_ENHANCED[activeAI].map((s,i) => (
+                                <motion.button key={i} whileHover={{ background:'rgba(255,255,255,0.035)', borderColor:`${accent}30`, y:-3 }} whileTap={{ scale:0.98 }}
+                                  onClick={() => sendMsg(s.text)}
+                                  style={{ padding:'18px', background:'rgba(255,255,255,0.015)', border:'1px solid var(--border-subtle)', borderRadius:'20px', color:'rgba(255,255,255,0.7)', fontSize:'0.84rem', cursor:'pointer', fontFamily:J, textAlign:'left', lineHeight:1.4, transition:'all 0.25s', display:'flex', flexDirection:'column', justifyContent:'space-between', gap:8, boxShadow:'var(--shadow-card)' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <span style={{ fontSize: '1.25rem' }}>{s.icon}</span>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                      <span style={{ fontWeight:'700', color: '#fff' }}>{s.text}</span>
+                                      <span style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.35)', marginTop: '2px' }}>{s.sub}</span>
+                                    </div>
+                                  </div>
+                                  <span style={{ fontSize:'0.72rem', color:accent, fontWeight:'800', letterSpacing:'0.5px', marginTop: '6px' }}>ASK ASSISTANT ➔</span>
+                                </motion.button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {messages.map((msg,i) => (
+                          <motion.div key={i} initial={{ opacity:0, y:8, scale:0.98 }} animate={{ opacity:1, y:0, scale:1 }} transition={{ duration:0.25 }}
+                            style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start', alignItems:'flex-end', gap:'12px' }}>
+
+                            {msg.role !== 'user' && (
+                              <RobotAvatar expression="smile" size="sm" glowColor={accent} style={{ marginBottom: '18px', flexShrink: 0 }} />
+                            )}
+                            <div style={{ maxWidth:'72%' }}>
+                              <div style={{ 
+                                padding:'12px 18px', 
+                                background:msg.role==='user'?`linear-gradient(135deg, ${accent}15, ${accent}04)`:'rgba(255,255,255,0.015)', 
+                                border:`1px solid ${msg.role==='user'?accent+'35':'var(--border-subtle)'}`, 
+                                borderRadius:msg.role==='user'?'20px 20px 4px 20px':'20px 20px 20px 4px', 
+                                color:'rgba(255,255,255,0.92)', 
+                                fontSize:'0.88rem', 
+                                lineHeight:'1.65', 
+                                fontFamily:J, 
+                                whiteSpace:'pre-wrap', 
+                                backdropFilter: 'blur(10px)',
+                                boxShadow:msg.role==='user'?`0 8px 32px ${accent}05, inset 0 1px 0 rgba(255,255,255,0.03)`:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)' 
+                              }}>
+                                {msg.audioUrl ? (
+                                  <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                                    <audio src={msg.audioUrl} controls style={{ height:32, maxWidth:200, filter:'invert(1) hue-rotate(180deg)', opacity:0.85 }}/>
+                                    <span style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:S }}>{msg.audioDuration}s</span>
+                                  </div>
+                                ) : msg.content}
+                              </div>
+                              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginTop:'4px', justifyContent:msg.role==='user'?'flex-end':'flex-start', padding: '0 4px' }}>
+                                <span style={{ fontSize:'0.61rem', color:'rgba(255,255,255,0.2)', fontFamily:S }}>{fmt(msg.ts)}</span>
+                                {msg.role === 'assistant' && (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <motion.button whileHover={{ color:accent }} whileTap={{ scale:0.9 }} onClick={() => speakText(msg.content)}
+                                      title="Speak response"
+                                      style={{ background:'none', border:'none', color:'rgba(255,255,255,0.22)', cursor:'pointer', padding:0, transition:'color 0.2s', display:'flex', alignItems:'center' }}>
+                                      <FaVolumeUp size={10}/>
+                                    </motion.button>
+                                    <motion.button whileHover={{ color:accent }} whileTap={{ scale:0.9 }} onClick={() => handleCopyText(msg.content, i)}
+                                      title="Copy response"
+                                      style={{ background:'none', border:'none', color:'rgba(255,255,255,0.22)', cursor:'pointer', padding:0, transition:'color 0.2s', display:'flex', alignItems:'center' }}>
+                                      {copiedIndex === i ? <FaCheck size={10} color="#10b981"/> : <FaCopy size={10}/>}
+                                    </motion.button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            {msg.role === 'user' && (
+                              <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},var(--accent-purple))`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginBottom:'18px', fontWeight:'800', fontSize:'0.72rem', color:'#fff', boxShadow: `0 4px 10px ${accent}25` }}>
+                                {(userProfile?.name || 'U')[0].toUpperCase()}
+                              </div>
+                            )}
+                          </motion.div>
+                        ))}
+
+                        {loading && (
+                          <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} style={{ display:'flex', alignItems:'flex-end', gap:'12px' }}>
+                            <RobotAvatar expression="analyzing" size="sm" glowColor={accent} isTyping={true} />
+                            <TypingDots color={accent}/>
+                          </motion.div>
+                        )}
+                        <div ref={bottomRef}/>
+                      </div>
+                    </div>
+
+                    {/* Text Input Panel */}
+                    <div style={{ padding:'16px 20px 24px', background:'transparent', flexShrink:0, position:'relative', zIndex:5 }}>
+                      <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto' }}>
+                        <div style={{ 
+                          display:'flex', 
+                          alignItems:'flex-end', 
+                          gap:'9px', 
+                          background:'rgba(255,255,255,0.015)', 
+                          border:`1px solid ${input.trim() ? accent : listening ? accent : 'var(--border-subtle)'}`, 
+                          borderRadius:'24px', 
+                          padding:'9px 12px', 
+                          transition:'all 0.3s', 
+                          backdropFilter: 'blur(20px)',
+                          boxShadow: input.trim() 
+                            ? `0 0 20px -4px ${accent}45` 
+                            : listening 
+                              ? `0 0 20px -4px ${accent}45` 
+                              : '0 8px 32px rgba(0,0,0,0.2)' 
+                        }}>
+                          <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={handleMicClick}
+                            animate={isRecording ? { scale:[1,1.1,1] } : {}} transition={isRecording ? { duration:0.8, repeat:Infinity } : {}}
+                            style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'rgba(255,255,255,0.03)', border:`1px solid ${isRecording?'#ef4444':'var(--border-subtle)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 0 15px rgba(239,68,68,0.5)':'' }}>
+                            {isRecording ? <FaStop size={11} color="#fff"/> : <FaMicrophone size={12} color="rgba(255,255,255,0.4)"/>}
+                          </motion.button>
+                          
+                          <textarea ref={textareaRef} value={input}
+                            onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight,110) + 'px'; }}
+                            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
+                            placeholder={isRecording ? `🔴 Recording... ${recordDuration}s (click mic to send)` : `Message ${activeAI==='AURA'?'Aura':'Max'}...`}
+                            rows={1}
+                            style={{ flex:1, background:'none', border:'none', color:'rgba(255,255,255,0.88)', fontSize:'0.9rem', fontFamily:J, resize:'none', lineHeight:'1.5', maxHeight:'110px', minHeight:'22px', padding:'7px 0', overflowY:'auto' }}/>
+                          
+                          {/* Recording status waveform overlay */}
+                          {isRecording && (
+                            <div style={{ marginRight: '10px', display: 'flex', alignItems: 'center' }}>
+                              <VisualWaveform accent="#ef4444" active={true} />
+                            </div>
+                          )}
+
+                          <motion.button whileHover={input.trim()?{scale:1.06}:{}} whileTap={input.trim()?{scale:0.94}:{}} onClick={() => sendMsg()}
+                            style={{ width:'36px', height:'36px', borderRadius:'50%', background:input.trim()?accent:'rgba(255,255,255,0.03)', border:`1px solid ${input.trim()?accent:'var(--border-subtle)'}`, cursor:input.trim()?'pointer':'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:input.trim()?`0 4px 12px ${accent}40`:'' }}>
+                            <FaPaperPlane size={13} color={input.trim()?'#fff':'rgba(255,255,255,0.22)'} style={{ marginLeft:'1px' }}/>
+                          </motion.button>
+                        </div>
+                        <p style={{ textAlign:'center', fontSize:'0.61rem', color:'rgba(255,255,255,0.14)', fontFamily:S, letterSpacing:'0.5px', margin:'7px 0 0' }}>
+                          {activeAI==='AURA'?'Aura · Emotional Support AI':'Max · Cognitive Analysis AI'} — Not a substitute for professional therapy
                         </p>
-                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', width:'100%', maxWidth:'600px', margin:'0 auto' }}>
-                          {SUGGESTIONS[activeAI].map((s,i) => (
-                            <motion.button key={i} whileHover={{ background:'var(--bg-card)', borderColor:'rgba(255,255,255,0.12)', y:-2 }} whileTap={{ scale:0.98 }}
-                              onClick={() => sendMsg(s)}
-                              style={{ padding:'16px', background:'var(--bg-input)', border:'1px solid var(--border-subtle)', borderRadius:'16px', color:'rgba(255,255,255,0.7)', fontSize:'0.84rem', cursor:'pointer', fontFamily:J, textAlign:'left', lineHeight:1.4, transition:'all 0.2s', display:'flex', flexDirection:'column', justifyContent:'space-between', gap:8 }}>
-                              <span style={{ fontWeight:'600' }}>{s}</span>
-                              <span style={{ fontSize:'0.72rem', color:accent, fontWeight:'700', letterSpacing:'0.5px' }}>ASK ASSISTANT ➔</span>
-                            </motion.button>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Right Column: Holographic AI Diagnostic Dock */}
+                  <div className="glass-panel" style={{
+                    width: '320px',
+                    borderLeft: '1px solid var(--border-subtle)',
+                    borderTop: 'none', borderRight: 'none', borderBottom: 'none',
+                    display: 'flex', flexDirection: 'column',
+                    padding: '24px 20px',
+                    overflowY: 'auto',
+                    background: 'rgba(8,10,16,0.4)',
+                    backdropFilter: 'blur(30px)',
+                    zIndex: 5,
+                    gap: '20px'
+                  }}>
+                    {/* Orb Portal / Scanner Container */}
+                    <div className="scanner-container" style={{
+                      width: '100%',
+                      aspectRatio: '1',
+                      borderRadius: '20px',
+                      background: 'rgba(255,255,255,0.01)',
+                      border: `1px solid ${accent}25`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative',
+                      boxShadow: `0 8px 32px -10px ${accent}15, inset 0 0 20px ${accent}0b`
+                    }}>
+                      {/* Grid background */}
+                      <div className="neural-grid" style={{ position: 'absolute', inset: 0, opacity: 0.3, borderRadius: '20px' }} />
+
+                      {/* Rotating rings */}
+                      <div className="hologram-ring-cw" style={{
+                        position: 'absolute', width: '80%', height: '80%',
+                        borderRadius: '50%', border: `1px dashed ${accent}30`
+                      }} />
+                      <div className="hologram-ring-ccw" style={{
+                        position: 'absolute', width: '70%', height: '70%',
+                        borderRadius: '50%', border: `1px dotted ${accent}40`
+                      }} />
+
+                      {/* Scanner sweep line */}
+                      <div className="scanner-line" style={{ '--scanner-color': accent }} />
+
+                      {/* Avatar */}
+                      <RobotAvatar
+                        expression={loading ? 'analyzing' : isAiSpeaking ? 'happy' : isRecording ? 'sleep' : 'smile'}
+                        size="md"
+                        glowColor={accent}
+                        isTyping={loading}
+                      />
+                    </div>
+
+                    {/* AI Info & Sync */}
+                    <div style={{ textAlign: 'center' }}>
+                      <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', color: '#fff', fontFamily: S, letterSpacing: '0.5px', fontWeight: '700' }}>
+                        {activeAI === 'AURA' ? 'AURA // EMOTIVE CORE' : 'MAX // COGNITIVE NEXUS'}
+                      </h3>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 8px', borderRadius: '12px', background: loading ? `${accent}15` : 'rgba(16,185,129,0.08)', border: `1px solid ${loading ? `${accent}30` : 'rgba(16,185,129,0.2)'}` }}>
+                        <motion.div
+                          animate={{ opacity: [1, 0.4, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                          style={{ width: '6px', height: '6px', borderRadius: '50%', background: loading ? accent : '#10b981' }}
+                        />
+                        <span style={{ fontSize: '0.62rem', fontWeight: '800', color: loading ? accent : '#10b981', letterSpacing: '0.5px' }}>
+                          {loading ? 'PROCESSING' : 'ONLINE'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Audio / Waveform monitor */}
+                    <div style={{ padding: '14px', borderRadius: '16px', background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                      <p style={{ margin: '0 0 10px', fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', fontWeight: '700', letterSpacing: '0.5px', fontFamily: S }}>VOCAL SYNC FREQUENCY</p>
+                      <div style={{ display: 'flex', justifyContent: 'center', height: '32px', alignItems: 'center' }}>
+                        <VisualWaveform accent={accent} active={isAiSpeaking || isRecording || loading} />
+                      </div>
+                    </div>
+
+                    {/* Vocal playback configuration */}
+                    <div style={{ padding: '14px', borderRadius: '16px', background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.04)', display:'flex', flexDirection:'column', gap:'10px' }}>
+                      <div>
+                        <p style={{ margin: '0 0 6px', fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', fontWeight: '700', letterSpacing: '0.5px', fontFamily: S }}>SPEECH SYNTHESIS RATE</p>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          {[0.75, 1.0, 1.25, 1.5].map(rate => (
+                            <button
+                              key={rate}
+                              onClick={() => setSpeechRate(rate)}
+                              style={{
+                                flex: 1, padding: '6px 0', borderRadius: '8px',
+                                border: `1px solid ${speechRate === rate ? accent : 'rgba(255,255,255,0.06)'}`,
+                                background: speechRate === rate ? `${accent}15` : 'rgba(255,255,255,0.02)',
+                                color: speechRate === rate ? '#fff' : 'rgba(255,255,255,0.4)',
+                                fontSize: '0.72rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.25s'
+                              }}
+                            >
+                              {rate}x
+                            </button>
                           ))}
                         </div>
-                      </motion.div>
-                    )}
-
-                    {messages.map((msg,i) => (
-                      <motion.div key={i} initial={{ opacity:0, y:8, scale:0.98 }} animate={{ opacity:1, y:0, scale:1 }} transition={{ duration:0.25 }}
-                        style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start', alignItems:'flex-end', gap:'12px' }}>
-
-                        {msg.role !== 'user' && (
-                          <RobotAvatar expression="smile" size="sm" glowColor={accent} style={{ marginBottom: '18px', flexShrink: 0 }} />
-                        )}
-                        <div style={{ maxWidth:'72%' }}>
-                          <div style={{ padding:'12px 16px', background:msg.role==='user'?`linear-gradient(135deg, ${accent}20, ${accent}0b)`:'var(--bg-card)', border:`1px solid ${msg.role==='user'?accent+'44':'var(--border-subtle)'}`, borderRadius:msg.role==='user'?'18px 18px 4px 18px':'18px 18px 18px 4px', color:'rgba(255,255,255,0.9)', fontSize:'0.88rem', lineHeight:'1.65', fontFamily:J, whiteSpace:'pre-wrap', boxShadow:msg.role==='user'?`0 8px 32px ${accent}0b, inset 0 1px 0 rgba(255,255,255,0.03)`:'var(--shadow-premium), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
-                            {msg.audioUrl ? (
-                              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                                <audio src={msg.audioUrl} controls style={{ height:32, maxWidth:200, filter:'invert(1) hue-rotate(180deg)', opacity:0.85 }}/>
-                                <span style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:S }}>{msg.audioDuration}s</span>
-                              </div>
-                            ) : msg.content}
-                          </div>
-                          <div style={{ display:'flex', alignItems:'center', gap:'7px', marginTop:'3px', justifyContent:msg.role==='user'?'flex-end':'flex-start' }}>
-                            <span style={{ fontSize:'0.61rem', color:'rgba(255,255,255,0.16)', fontFamily:S }}>{fmt(msg.ts)}</span>
-                            {msg.role === 'assistant' && (
-                              <motion.button whileHover={{ color:accent }} whileTap={{ scale:0.9 }} onClick={() => speakText(msg.content)}
-                                style={{ background:'none', border:'none', color:'rgba(255,255,255,0.16)', cursor:'pointer', padding:0, transition:'color 0.2s' }}>
-                                <FaVolumeUp size={9}/>
-                              </motion.button>
-                            )}
-                          </div>
-                        </div>
-                        {msg.role === 'user' && (
-                          <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:`linear-gradient(135deg,${accent},var(--accent-purple))`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginBottom:'18px', fontWeight:'800', fontSize:'0.72rem', color:'#fff' }}>
-                            {(userProfile?.name || 'U')[0].toUpperCase()}
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-
-                    {loading && (
-                      <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} style={{ display:'flex', alignItems:'flex-end', gap:'12px' }}>
-                        <RobotAvatar expression="wink" size="sm" glowColor={accent} isTyping={true} />
-                        <TypingDots color={accent}/>
-                      </motion.div>
-                    )}
-                    <div ref={bottomRef}/>
-                  </div>
-                </div>
-
-                {/* Input */}
-                <div style={{ padding:'16px 20px 24px', background:'transparent', flexShrink:0, position:'relative', zIndex:5 }}>
-                  <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto' }}>
-                    <div style={{ 
-                      display:'flex', 
-                      alignItems:'flex-end', 
-                      gap:'9px', 
-                      background:'var(--bg-card)', 
-                      border:`1px solid ${input.trim() ? accent : listening ? accent : 'var(--border-subtle)'}`, 
-                      borderRadius:'24px', 
-                      padding:'9px 12px', 
-                      transition:'all 0.3s', 
-                      boxShadow: input.trim() 
-                        ? `0 0 16px -4px ${accent}60` 
-                        : listening 
-                          ? `0 0 16px -4px ${accent}60` 
-                          : 'var(--shadow-card)' 
-                    }}>
-                      <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={handleMicClick}
-                        animate={isRecording ? { scale:[1,1.1,1] } : {}} transition={isRecording ? { duration:0.8, repeat:Infinity } : {}}
-                        style={{ width:'36px', height:'36px', borderRadius:'50%', background:isRecording?'#ef4444':'var(--bg-input)', border:`1px solid ${isRecording?'#ef4444':'var(--border-subtle)'}`, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:isRecording?'0 1px 3px rgba(204,102,102,0.4)':'' }}>
-                        {isRecording ? <FaStop size={11} color="#fff"/> : <FaMicrophone size={12} color="rgba(255,255,255,0.4)"/>}
-                      </motion.button>
-                      <textarea ref={textareaRef} value={input}
-                        onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight,110) + 'px'; }}
-                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
-                        placeholder={isRecording ? `🔴 Recording... ${recordDuration}s (click mic to send)` : `Message ${activeAI==='AURA'?'Aura':'Max'}...`}
-                        rows={1}
-                        style={{ flex:1, background:'none', border:'none', color:'rgba(255,255,255,0.88)', fontSize:'0.9rem', fontFamily:J, resize:'none', lineHeight:'1.5', maxHeight:'110px', minHeight:'22px', padding:'7px 0', overflowY:'auto' }}/>
-                      <motion.button whileHover={input.trim()?{scale:1.06}:{}} whileTap={input.trim()?{scale:0.94}:{}} onClick={() => sendMsg()}
-                        style={{ width:'36px', height:'36px', borderRadius:'50%', background:input.trim()?accent:'rgba(255,255,255,0.03)', border:`1px solid ${input.trim()?accent:'var(--border-subtle)'}`, cursor:input.trim()?'pointer':'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.3s', boxShadow:input.trim()?'var(--shadow-premium)':'' }}>
-                        <FaPaperPlane size={13} color={input.trim()?'#fff':'rgba(255,255,255,0.22)'} style={{ marginLeft:'1px' }}/>
-                      </motion.button>
+                      </div>
                     </div>
-                    <p style={{ textAlign:'center', fontSize:'0.61rem', color:'rgba(255,255,255,0.14)', fontFamily:S, letterSpacing:'0.5px', margin:'7px 0 0' }}>
-                      {activeAI==='AURA'?'Aura · Emotional Support AI':'Max · Cognitive Analysis AI'} — Not a substitute for professional therapy
-                    </p>
+
+                    {/* Diagnostic log terminal */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <p style={{ margin: '0 0 6px', fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', fontWeight: '700', letterSpacing: '0.5px', fontFamily: S }}>DIAGNOSTIC STATUS LOG</p>
+                      <div style={{
+                        flex: 1, minHeight: '120px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.03)',
+                        borderRadius: '12px', padding: '12px 10px', fontFamily: S, fontSize: '0.64rem', color: 'rgba(255,255,255,0.35)',
+                        lineHeight: '1.5', display: 'flex', flexDirection: 'column', gap: '4px'
+                      }}>
+                        <div style={{ color: accent }}>&gt; Initializing {activeAI} Link...</div>
+                        <div>&gt; Empathic resonance: OK</div>
+                        <div>&gt; Voice modulation rate: {speechRate}x</div>
+                        {listening && <div style={{ color: '#10b981' }}>&gt; WebSpeech listening...</div>}
+                        {isRecording && <div style={{ color: '#ef4444' }}>&gt; MediaRecorder stream active...</div>}
+                        {isAiSpeaking && <div style={{ color: accent }}>&gt; Synthesizer feeding speaker...</div>}
+                        <div style={{ marginTop: 'auto', color: 'rgba(255,255,255,0.15)' }}>SYSTEM SYNC: ACTIVE</div>
+                      </div>
+                    </div>
                   </div>
+
                 </div>
+
               </motion.div>
             )}
 
@@ -1119,6 +1366,9 @@ export default function Home({ userProfile, onLogout }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── FLOATING CHATBOT ── */}
+      {tab !== 'chat' && <FloatingChatbot />}
 
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE } from './config';
+import RobotAvatar from './RobotAvatar';
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -324,22 +325,26 @@ export default function FloatingChatbot() {
                                         }}
                                     >
                                         {/* Avatar */}
-                                        <div style={{
-                                            width: '26px',
-                                            height: '26px',
-                                            borderRadius: '50%',
-                                            background: '#161825',
-                                            border: `1px solid ${isUser ? 'rgba(255,255,255,0.08)' : (activeAI === 'AURA' ? 'rgba(244, 63, 94, 0.3)' : 'rgba(20, 184, 166, 0.3)')}`,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontSize: '0.65rem',
-                                            fontWeight: 800,
-                                            flexShrink: 0,
-                                            color: isUser ? 'rgba(255,255,255,0.5)' : accent
-                                        }}>
-                                            {initials}
-                                        </div>
+                                        {isUser ? (
+                                            <div style={{
+                                                width: '26px',
+                                                height: '26px',
+                                                borderRadius: '50%',
+                                                background: '#161825',
+                                                border: '1px solid rgba(255,255,255,0.08)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '0.65rem',
+                                                fontWeight: 800,
+                                                flexShrink: 0,
+                                                color: 'rgba(255,255,255,0.5)'
+                                            }}>
+                                                U
+                                            </div>
+                                        ) : (
+                                            <RobotAvatar expression="smile" size="xs" glowColor={accent} style={{ flexShrink: 0 }} />
+                                        )}
                                         {/* Message Text */}
                                         <div style={{
                                              padding: '10px 16px',
@@ -359,7 +364,7 @@ export default function FloatingChatbot() {
                                              whiteSpace: 'pre-wrap',
                                              fontFamily: "'Plus Jakarta Sans', sans-serif"
                                         }}>
-                                            {msg.content}
+                                             {msg.content}
                                         </div>
                                     </div>
                                 );
@@ -368,22 +373,7 @@ export default function FloatingChatbot() {
                             {/* Bouncing typing indicator */}
                             {isTyping && (
                                 <div style={{ display: 'flex', gap: '10px', alignSelf: 'flex-start' }}>
-                                    <div style={{
-                                        width: '26px',
-                                        height: '26px',
-                                        borderRadius: '50%',
-                                        background: '#161825',
-                                        border: `1px solid ${activeAI === 'AURA' ? 'rgba(244, 63, 94, 0.3)' : 'rgba(20, 184, 166, 0.3)'}`,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '0.65rem',
-                                        fontWeight: 800,
-                                        flexShrink: 0,
-                                        color: accent
-                                    }}>
-                                        {activeAI === 'AURA' ? 'AU' : 'MX'}
-                                    </div>
+                                    <RobotAvatar expression="analyzing" size="xs" glowColor={accent} isTyping={true} style={{ flexShrink: 0 }} />
                                     <div style={{
                                         display: 'flex',
                                         gap: '4px',
