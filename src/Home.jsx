@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE } from './config';
 import {
-  FaBrain, FaRobot, FaHistory, FaSignOutAlt, FaPlus,
+  FaBrain, FaRobot, FaHistory, FaSignOutAlt, FaPlus, FaPlay,
   FaPaperPlane, FaMicrophone, FaStop, FaVolumeUp,
   FaHome, FaComments, FaUserMd, FaChartLine, FaBell,
   FaHeart, FaFire, FaSmile, FaArrowRight, FaLeaf, FaBolt,
@@ -17,7 +17,7 @@ import VideoCall from './VideoCall';
 import { FaVideo, FaPhone } from 'react-icons/fa';
 import ProgressDashboard from './ProgressDashboard';
 import { FaSpa, FaCrown } from 'react-icons/fa';
-import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile } from './ConsultantHub';
+import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile, ReelsViewerModal } from './ConsultantHub';
 import RobotAvatar from './RobotAvatar';
 import FloatingChatbot from './FloatingChatbot';
 
@@ -120,6 +120,233 @@ function MoodChart({ color, data }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────
+// CalmReelsScreen — Dedicated Calm Reels Tab Section
+// ─────────────────────────────────────────────────────────────────
+function CalmReelsScreen({ accent, accentB, accentBr }) {
+  const G = "'Cormorant Garamond', serif";
+  const S = "'Space Grotesk', sans-serif";
+  const J = "'Plus Jakarta Sans', sans-serif";
+
+  const [reels, setReels] = useState(() => {
+    try {
+      const saved = localStorage.getItem('equilibrium_global_reels');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.length > 0 && !parsed[0].videoUrl.includes('mixkit')) {
+          return parsed;
+        }
+      }
+    } catch {}
+    return [
+      {
+        id: 'global-r1',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+        caption: 'Ground yourself in the present. Breathe in calm, breathe out stress. 🧘‍♂️✨ #mindfulness #innerpeace',
+        likes: 184,
+        liked: false,
+        music: 'Aura Calming Vibes - Original Sound',
+        creator: { name: 'Dr. Priya Sharma', color: '#ec4899' }
+      },
+      {
+        id: 'global-r2',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+        caption: 'Quiet river flow to calm an anxious mind. Let your thoughts wash away. 🌲🌊 #naturehealing #peace',
+        likes: 242,
+        liked: false,
+        music: 'Calming Forest Stream - Healing Sound',
+        creator: { name: 'Dr. Vikranth Mehta', color: '#10b981' }
+      },
+      {
+        id: 'global-r3',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+        caption: 'Release physical tension, embrace positive vibes. You are safe. 🌈✨ #mentalhealth #zen',
+        likes: 156,
+        liked: false,
+        music: 'Zen Ambient Lo-Fi Chill',
+        creator: { name: 'Neha Kapoor', color: '#8b5cf6' }
+      }
+    ];
+  });
+
+  const [activeReelIndex, setActiveReelIndex] = useState(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [caption, setCaption] = useState('');
+  const [music, setMusic] = useState('');
+  const [videoSrc, setVideoSrc] = useState('');
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setVideoSrc(url);
+    }
+  };
+
+  const handleUpload = () => {
+    if (!videoSrc) return;
+    const newReel = {
+      id: `custom-reel-${Date.now()}`,
+      videoUrl: videoSrc,
+      caption: caption || 'My mindfulness moment. 🌸',
+      likes: 0,
+      liked: false,
+      music: music || 'Original Sound',
+      creator: { name: 'You', color: accent }
+    };
+    const updated = [newReel, ...reels];
+    setReels(updated);
+    try {
+      localStorage.setItem('equilibrium_global_reels', JSON.stringify(updated));
+    } catch {}
+
+    // Reset
+    setVideoSrc('');
+    setCaption('');
+    setMusic('');
+    setUploadOpen(false);
+  };
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '22px 20px 32px', color: '#fff', fontFamily: J }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '16px' }}>
+        <div>
+          <h2 style={{ fontFamily: G, fontStyle: 'italic', fontWeight: 800, fontSize: '1.7rem', letterSpacing: '-0.5px', color: '#fff', margin: '0 0 4px' }}>Calm Reels</h2>
+          <p style={{ color: 'rgba(255,255,255,0.32)', fontSize: '0.86rem', margin: 0 }}>Zen video loops and stress-free breathing clips</p>
+        </div>
+
+        <motion.button 
+          whileHover={{ scale: 1.03 }} 
+          whileTap={{ scale: 0.97 }} 
+          onClick={() => setUploadOpen(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: `linear-gradient(135deg, ${accent}, #8b5cf6)`, border: 'none', borderRadius: '12px', padding: '8px 16px', color: '#fff', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', fontFamily: J }}
+        >
+          <FaPlay size={9}/> Upload Reel
+        </motion.button>
+      </div>
+
+      {/* Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+        {reels.map((reel, index) => (
+          <motion.div 
+            key={reel.id}
+            whileHover={{ scale: 1.015 }}
+            onClick={() => setActiveReelIndex(index)}
+            style={{ 
+              aspectRatio: '9/16', 
+              borderRadius: '16px', 
+              overflow: 'hidden', 
+              background: '#090b11', 
+              cursor: 'pointer',
+              position: 'relative',
+              border: '1px solid rgba(255,255,255,0.04)',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
+            }}
+          >
+            {/* Cover Video Preview */}
+            <video src={reel.videoUrl} muted playsInline referrerPolicy="no-referrer" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+            
+            {/* Play Overlay Button */}
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.2)' }}>
+                <FaPlay size={10} color="#fff" style={{ marginLeft: 2 }} />
+              </div>
+            </div>
+
+            {/* Creator details overlay */}
+            <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.4)', padding: '4px 8px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div style={{ width: 14, height: 14, borderRadius: '50%', background: reel.creator.color, fontSize: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
+                {reel.creator.name[0]}
+              </div>
+              <span style={{ fontSize: '0.62rem', fontWeight: '600', color: '#fff' }}>{reel.creator.name.replace('Dr. ','')}</span>
+            </div>
+
+            {/* Likes count */}
+            <div style={{ position: 'absolute', bottom: 12, left: 12, display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#fff', fontWeight: '700', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+              <FaHeart size={10} color="#fff"/> {reel.likes + (reel.liked ? 1 : 0)}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Upload Modal */}
+      <AnimatePresence>
+        {uploadOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setUploadOpen(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(9,10,15,0.85)', backdropFilter: 'blur(6px)', zIndex: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <motion.div initial={{ scale: 0.95, y: 15 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 15 }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: '440px', background: '#171c28', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', padding: '26px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', position: 'relative' }}>
+              
+              <button onClick={() => setUploadOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
+                ✕
+              </button>
+
+              <h3 style={{ fontFamily: G, fontStyle: 'italic', fontSize: '1.3rem', margin: '0 0 16px' }}>Upload Calm Reel</h3>
+              
+              {/* File Input */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px' }}>SELECT VIDEO FILE</label>
+                <input type="file" accept="video/*" onChange={handleFileChange} style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }} />
+              </div>
+
+              {/* Video Preview */}
+              {videoSrc && (
+                <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', background: '#10141f', marginBottom: '18px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <video src={videoSrc} muted controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+              )}
+
+              {/* Caption */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px' }}>CAPTION</label>
+                <textarea rows={2} value={caption} onChange={e => setCaption(e.target.value)} placeholder="E.g. Take a deep breath..." style={{ width: '100%', padding: '10px 12px', background: '#10141f', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', color: '#fff', fontSize: '0.84rem', outline: 'none', resize: 'none' }} />
+              </div>
+
+              {/* Music Name */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px' }}>MUSIC TRACK NAME</label>
+                <input type="text" value={music} onChange={e => setMusic(e.target.value)} placeholder="E.g. Calming Waves - Original Sound" style={{ width: '100%', padding: '10px 12px', background: '#10141f', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', color: '#fff', fontSize: '0.84rem', outline: 'none' }} />
+              </div>
+
+              {/* Submit button */}
+              <motion.button 
+                whileHover={{ scale: 1.02 }} 
+                whileTap={{ scale: 0.98 }}
+                onClick={handleUpload}
+                disabled={!videoSrc}
+                style={{ width: '100%', padding: '12px', background: videoSrc ? accent : 'rgba(255,255,255,0.05)', color: videoSrc ? '#fff' : 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '0.9rem', cursor: videoSrc ? 'pointer' : 'not-allowed', fontFamily: J }}
+              >
+                Post Reel
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reels modal viewer */}
+      <AnimatePresence>
+        {activeReelIndex !== null && (
+          <ReelsViewerModal
+            reels={reels}
+            initialIndex={activeReelIndex}
+            onClose={() => setActiveReelIndex(null)}
+            consultant={{ name: reels[activeReelIndex].creator.name, color: reels[activeReelIndex].creator.color }}
+            onUpdateReels={(updated) => {
+              setReels(updated);
+              try {
+                localStorage.setItem('equilibrium_global_reels', JSON.stringify(updated));
+              } catch {}
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 
 
 
@@ -193,13 +420,14 @@ export default function Home({ userProfile, onLogout }) {
   ];
 
   const navItems = [
-    { id:'home',     icon:<FaHome size={15}/>,      label:'Home'         },
-    { id:'chat',     icon:<FaComments size={15}/>,   label:'AI Chat'      },
-    { id:'report',   icon:<FaBrain size={15}/>,      label:'Brain Report' },
-    { id:'consult',  icon:<FaUserMd size={15}/>,     label:'Consultants'  },
-    { id:'progress', icon:<FaChartLine size={15}/>,  label:'Progress'     },
-    { id:'journal',  icon:<FaBook size={15}/>,       label:'Journal'      },
-    { id:'calm',     icon:<FaSpa size={15}/>,        label:'Calm Studio'  },
+    { id:'home',       icon:<FaHome size={15}/>,        label:'Home'         },
+    { id:'chat',       icon:<FaComments size={15}/>,     label:'AI Chat'      },
+    { id:'report',     icon:<FaBrain size={15}/>,        label:'Brain Report' },
+    { id:'consult',    icon:<FaUserMd size={15}/>,       label:'Consultants'  },
+    { id:'progress',   icon:<FaChartLine size={15}/>,    label:'Progress'     },
+    { id:'journal',    icon:<FaBook size={15}/>,         label:'Journal'      },
+    { id:'calm',       icon:<FaSpa size={15}/>,          label:'Calm Studio'  },
+    { id:'calm-reels', icon:<FaPlay size={11}/>,         label:'Calm Reels'   },
   ];
 
   useEffect(() => {
@@ -635,11 +863,14 @@ export default function Home({ userProfile, onLogout }) {
                 style={{ width:'6px', height:'6px', borderRadius:'50%', background:accent, transition:'background 0.5s' }}/>
             )}
             <span style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'0.96rem', color:'#fff' }}>
-              {tab==='home'    ? 'Dashboard'
-              :tab==='chat'    ? (activeAI==='AURA' ? 'Aura · Emotional AI' : 'Max · Cognitive AI')
-              :tab==='report'  ? 'Neural Brain Report'
-              :tab==='consult' ? 'Consultants'
-              :                  'My Progress'}
+              {tab==='home'       ? 'Dashboard'
+              :tab==='chat'       ? (activeAI==='AURA' ? 'Aura · Emotional AI' : 'Max · Cognitive AI')
+              :tab==='report'     ? 'Neural Brain Report'
+              :tab==='consult'    ? 'Consultants'
+              :tab==='calm'       ? 'Calm Studio'
+              :tab==='calm-reels' ? 'Calm Reels'
+              :tab==='journal'    ? 'My Journal'
+              :                     'My Progress'}
             </span>
           </div>
  
@@ -1134,6 +1365,14 @@ export default function Home({ userProfile, onLogout }) {
               <motion.div key="calm" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
                 style={{ position:'absolute', inset:0 }}>
                 <CalmLibrary accent={accent} accentB={accentB} accentBr={accentBr} isPremium={isPremium} onUpgrade={() => setShowUpgrade(true)}/>
+              </motion.div>
+            )}
+
+            {/* ══ CALM REELS ═════════════════════════════════════════ */}
+            {tab === 'calm-reels' && (
+              <motion.div key="calm-reels" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
+                style={{ position:'absolute', inset:0 }}>
+                <CalmReelsScreen accent={accent} accentB={accentB} accentBr={accentBr} />
               </motion.div>
             )}
 

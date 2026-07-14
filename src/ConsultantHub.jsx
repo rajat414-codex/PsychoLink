@@ -450,12 +450,17 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
   const [reels, setReels] = useState(() => {
     try {
       const saved = localStorage.getItem(`equilibrium_reels_${consultant.id}`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.length > 0 && !parsed[0].videoUrl.includes('mixkit')) {
+          return parsed;
+        }
+      }
     } catch {}
     return [
       {
         id: `${consultant.id}-r1`,
-        videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-meditating-woman-in-nature-34281-large.mp4',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
         caption: 'Focusing on the breath. 5 seconds in, 5 seconds out. Let go of the day. 🧘‍♀️✨ #meditation #wellness',
         likes: 84,
         liked: false,
@@ -463,7 +468,7 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
       },
       {
         id: `${consultant.id}-r2`,
-        videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
         caption: 'Forest sounds to quieten your anxious thoughts. Pause and listen. 🌊🌲 #naturehealing #mindfulness',
         likes: 128,
         liked: false,
@@ -471,7 +476,7 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
       },
       {
         id: `${consultant.id}-r3`,
-        videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-dancers-in-neon-light-40176-large.mp4',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
         caption: 'Releasing physical tension. Find a creative outlet to express yourself. ⚡🕺 #move #letgo',
         likes: 56,
         liked: false,
@@ -712,7 +717,7 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
               }}
             >
               {/* Cover Video Preview */}
-              <video src={reel.videoUrl} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+              <video src={reel.videoUrl} muted playsInline referrerPolicy="no-referrer" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
               
               {/* Play Overlay Button */}
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.25)' }}>
@@ -2548,6 +2553,7 @@ function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, cons
         playsInline
         muted={muted}
         onClick={handleVideoClick}
+        referrerPolicy="no-referrer"
         style={{
           width: '100%',
           height: '100%',
@@ -2555,6 +2561,31 @@ function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, cons
           cursor: 'pointer'
         }}
       />
+      {/* Central Play Button Overlay when paused */}
+      {!isPlaying && (
+        <div 
+          onClick={handleVideoClick}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'rgba(0,0,0,0.55)',
+            borderRadius: '50%',
+            width: '58px',
+            height: '58px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10,
+            cursor: 'pointer',
+            border: '1.5px solid rgba(255,255,255,0.35)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
+          }}
+        >
+          <FaPlay size={18} color="#fff" style={{ marginLeft: 3 }} />
+        </div>
+      )}
 
       {/* Center temporary play/pause feedback */}
       <AnimatePresence>
