@@ -17,7 +17,7 @@ import VideoCall from './VideoCall';
 import { FaVideo, FaPhone } from 'react-icons/fa';
 import ProgressDashboard from './ProgressDashboard';
 import { FaSpa, FaCrown } from 'react-icons/fa';
-import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast } from './ConsultantHub';
+import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile } from './ConsultantHub';
 import RobotAvatar from './RobotAvatar';
 import FloatingChatbot from './FloatingChatbot';
 
@@ -168,6 +168,7 @@ export default function Home({ userProfile, onLogout }) {
   const [usedFree,       setUsedFree]       = useState(() => {
     try { return JSON.parse(localStorage.getItem('eq_used_free') || '{}'); } catch { return {}; }
   });
+  const [activeProfile, setActiveProfile]   = useState(null);
   const bottomRef   = useRef(null);
   const textareaRef = useRef(null);
   const srRef       = useRef(null);
@@ -1006,99 +1007,118 @@ export default function Home({ userProfile, onLogout }) {
               <motion.div key="consult" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
                 style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
 
-                {/* Header */}
-                <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:20, flexWrap:'wrap', gap:12 }}>
-                  <div>
-                    <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.7rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>Our Experts</h2>
-                    <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', margin:0, fontFamily:J }}>First session free · ₹199/session thereafter</p>
-                  </div>
-                  <div style={{ display:'flex', gap:10 }}>
-                    <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
-                      onClick={() => { setShowApps(true); fetchApplications(); }}
-                      style={{ padding:'9px 16px', borderRadius:12, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.55)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
-                      ⚙️ Applications
-                    </motion.button>
-                    <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={() => setShowJoin(true)}
-                      style={{ padding:'9px 16px', borderRadius:12, border:`1px solid ${accentBr}`, background:accentB, color:accent, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
-                      + Join as Consultant
-                    </motion.button>
-                  </div>
-                </div>
-
-                {/* Empty state */}
-                {consultants.length === 0 && (
-                  <div style={{ textAlign:'center', padding:'60px 20px', color:'rgba(255,255,255,0.25)', fontSize:'0.88rem', fontFamily:J }}>
-                    <div style={{ fontSize:'2.5rem', marginBottom:12 }}>🔍</div>
-                    No consultants yet. Be the first to join!
-                  </div>
-                )}
-
-                {/* Consultant cards */}
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:16 }}>
-                  {consultants.map((c,i) => (
-                    <motion.div key={c.id||i} initial={{ opacity:0, y:14 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.05+i*0.07 }}
-                      whileHover={{ y:-4, borderColor:'rgba(255,255,255,0.11)', boxShadow:'var(--shadow-premium)' }}
-                      style={{ background:'var(--bg-card)', border:`1px solid var(--border-subtle)`, borderRadius:22, padding:22, transition:'all 0.3s', position:'relative', overflow:'hidden', boxShadow:`var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)` }}>
-                      <div style={{ position:'absolute', top:'-20px', right:'-20px', width:100, height:100, borderRadius:'50%', background:`radial-gradient(circle,${c.color}0a,transparent 70%)`, pointerEvents:'none' }}/>
-                      {/* Remove button (admin) */}
-                      <motion.button whileHover={{ scale:1.12 }} whileTap={{ scale:0.9 }} onClick={(e)=>{ e.stopPropagation(); removeConsultant(c); }}
-                        title="Remove consultant"
-                        style={{ position:'absolute', top:14, left:14, width:26, height:26, borderRadius:8, background:'rgba(244,63,94,0.08)', border:'1px solid rgba(244,63,94,0.2)', color:'#f43f5e', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.7rem', fontWeight:800, zIndex:5 }}>
-                        ✕
-                      </motion.button>
-                      {/* Availability badge */}
-                      <div style={{ position:'absolute', top:16, right:16, display:'flex', alignItems:'center', gap:5, padding:'3px 9px', borderRadius:20, background:c.avail?'rgba(16,185,129,0.08)':'rgba(255,255,255,0.04)', border:`1px solid ${c.avail?'rgba(16,185,129,0.15)':'rgba(255,255,255,0.06)'}` }}>
-                        <div style={{ width:5, height:5, borderRadius:'50%', background:c.avail?'#10b981':'rgba(255,255,255,0.2)' }}/>
-                        <span style={{ fontSize:'0.65rem', fontWeight:700, color:c.avail?'#10b981':'rgba(255,255,255,0.3)', fontFamily:S }}>{c.avail?'Online':'Busy'}</span>
+                {activeProfile ? (
+                  <ConsultantProfile
+                    consultant={activeProfile}
+                    onBack={() => setActiveProfile(null)}
+                    accent={accent}
+                  />
+                ) : (
+                  <>
+                    {/* Header */}
+                    <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:20, flexWrap:'wrap', gap:12 }}>
+                      <div>
+                        <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.7rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>Our Experts</h2>
+                        <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', margin:0, fontFamily:J }}>First session free · ₹199/session thereafter</p>
                       </div>
-                      {/* Info */}
-                      <div style={{ display:'flex', gap:14, marginBottom:14, alignItems:'flex-start' }}>
-                        <div style={{ width:52, height:52, borderRadius:'50%', background:`linear-gradient(135deg,${c.color}35,${c.color}15)`, border:`2px solid ${c.color}35`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontWeight:800, fontSize:'1.1rem', color:c.color, boxShadow:'var(--shadow-premium)' }}>
-                          {(c.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2)}
-                        </div>
-                        <div>
-                          <p style={{ margin:'0 0 2px', fontSize:'0.95rem', fontWeight:700, color:'#fff' }}>{c.name}</p>
-                          <p style={{ margin:'0 0 4px', fontSize:'0.76rem', color:'rgba(255,255,255,0.38)' }}>{c.spec}</p>
-                          <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                            <span style={{ fontSize:'0.72rem', color:'#f59e0b', fontWeight:700 }}>★ {c.rating}</span>
-                            <span style={{ fontSize:'0.68rem', color:'rgba(255,255,255,0.25)' }}>{c.sessions} sessions</span>
-                            <span style={{ fontSize:'0.68rem', color:'rgba(255,255,255,0.25)' }}>{c.exp}</span>
+                      <div style={{ display:'flex', gap:10 }}>
+                        <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
+                          onClick={() => { setShowApps(true); fetchApplications(); }}
+                          style={{ padding:'9px 16px', borderRadius:12, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.55)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
+                          ⚙️ Applications
+                        </motion.button>
+                        <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={() => setShowJoin(true)}
+                          style={{ padding:'9px 16px', borderRadius:12, border:`1px solid ${accentBr}`, background:accentB, color:accent, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
+                          + Join as Consultant
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* Empty state */}
+                    {consultants.length === 0 && (
+                      <div style={{ textAlign:'center', padding:'60px 20px', color:'rgba(255,255,255,0.25)', fontSize:'0.88rem', fontFamily:J }}>
+                        <div style={{ fontSize:'2.5rem', marginBottom:12 }}>🔍</div>
+                        No consultants yet. Be the first to join!
+                      </div>
+                    )}
+
+                    {/* Consultant cards */}
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:16 }}>
+                      {consultants.map((c,i) => (
+                        <motion.div key={c.id||i} initial={{ opacity:0, y:14 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.05+i*0.07 }}
+                          whileHover={{ y:-4, borderColor:'rgba(255,255,255,0.11)', boxShadow:'var(--shadow-premium)' }}
+                          style={{ background:'var(--bg-card)', border:`1px solid var(--border-subtle)`, borderRadius:22, padding:22, transition:'all 0.3s', position:'relative', overflow:'hidden', boxShadow:`var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)` }}>
+                          <div style={{ position:'absolute', top:'-20px', right:'-20px', width:100, height:100, borderRadius:'50%', background:`radial-gradient(circle,${c.color}0a,transparent 70%)`, pointerEvents:'none' }}/>
+                          {/* Remove button (admin) */}
+                          <motion.button whileHover={{ scale:1.12 }} whileTap={{ scale:0.9 }} onClick={(e)=>{ e.stopPropagation(); removeConsultant(c); }}
+                            title="Remove consultant"
+                            style={{ position:'absolute', top:14, left:14, width:26, height:26, borderRadius:8, background:'rgba(244,63,94,0.08)', border:'1px solid rgba(244,63,94,0.2)', color:'#f43f5e', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.7rem', fontWeight:800, zIndex:5 }}>
+                            ✕
+                          </motion.button>
+                          {/* Availability badge */}
+                          <div style={{ position:'absolute', top:16, right:16, display:'flex', alignItems:'center', gap:5, padding:'3px 9px', borderRadius:20, background:c.avail?'rgba(16,185,129,0.08)':'rgba(255,255,255,0.04)', border:`1px solid ${c.avail?'rgba(16,185,129,0.15)':'rgba(255,255,255,0.06)'}` }}>
+                            <div style={{ width:5, height:5, borderRadius:'50%', background:c.avail?'#10b981':'rgba(255,255,255,0.2)' }}/>
+                            <span style={{ fontSize:'0.65rem', fontWeight:700, color:c.avail?'#10b981':'rgba(255,255,255,0.3)', fontFamily:S }}>{c.avail?'Online':'Busy'}</span>
                           </div>
-                        </div>
-                      </div>
-                      {/* Free / paid badge */}
-                      {!usedFree[c.id] && (
-                        <div style={{ marginBottom:10, padding:'4px 10px', borderRadius:20, background:'rgba(16,185,129,0.06)', border:'1px solid rgba(16,185,129,0.15)', display:'inline-flex', alignItems:'center', gap:5 }}>
-                          <span style={{ fontSize:'0.68rem', color:'#10b981', fontWeight:700 }}>🎁 First session free</span>
-                        </div>
-                      )}
-                      {usedFree[c.id] && (
-                        <div style={{ marginBottom:10, padding:'4px 10px', borderRadius:20, background:accentB, border:`1px solid ${accentBr}`, display:'inline-flex', alignItems:'center', gap:5 }}>
-                          <span style={{ fontSize:'0.68rem', color:accent, fontWeight:700 }}>₹{c.price||199} / session</span>
-                        </div>
-                      )}
-                      <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }} onClick={() => c.avail && handleBookConsultant(c)}
-                        style={{ width:'100%', padding:'11px', background:c.avail?`linear-gradient(135deg,${c.color},${c.color}cc)`:'rgba(255,255,255,0.03)', border:`1px solid ${c.avail?c.color:'rgba(255,255,255,0.06)'}`, borderRadius:12, color:c.avail?'#fff':'rgba(255,255,255,0.22)', fontSize:'0.84rem', fontWeight:700, cursor:c.avail?'pointer':'not-allowed', fontFamily:J, transition:'all 0.2s', boxShadow:c.avail?'var(--shadow-premium)':'' }}>
-                        {!c.avail ? 'Unavailable' : usedFree[c.id] ? `Pay ₹${c.price||199} & Book →` : 'Book Free Session →'}
-                      </motion.button>
-                      {/* In-app call buttons */}
-                      {c.avail && (
-                        <div style={{ display:'flex', gap:8, marginTop:8 }}>
-                          <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
-                            onClick={() => setCall({ consultant:c, audioOnly:false })}
-                            style={{ flex:1, padding:'10px', background:'rgba(255,255,255,0.04)', border:`1px solid ${c.color}44`, borderRadius:12, color:c.color, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-                            <FaVideo size={12}/> Video
-                          </motion.button>
-                          <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
-                            onClick={() => setCall({ consultant:c, audioOnly:true })}
-                            style={{ flex:1, padding:'10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:12, color:'rgba(255,255,255,0.7)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-                            <FaPhone size={11}/> Voice
-                          </motion.button>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
+                          {/* Info */}
+                          <div style={{ display:'flex', gap:14, marginBottom:14, alignItems:'flex-start' }}>
+                            <div style={{ width:52, height:52, borderRadius:'50%', background:`linear-gradient(135deg,${c.color}35,${c.color}15)`, border:`2px solid ${c.color}35`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontWeight:800, fontSize:'1.1rem', color:c.color, boxShadow:'var(--shadow-premium)' }}>
+                              {(c.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2)}
+                            </div>
+                            <div>
+                              <p style={{ margin:'0 0 2px', fontSize:'0.95rem', fontWeight:700, color:'#fff' }}>{c.name}</p>
+                              <p style={{ margin:'0 0 4px', fontSize:'0.76rem', color:'rgba(255,255,255,0.38)' }}>{c.spec}</p>
+                              <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+                                <span style={{ fontSize:'0.72rem', color:'#f59e0b', fontWeight:700 }}>★ {c.rating}</span>
+                                <span style={{ fontSize:'0.68rem', color:'rgba(255,255,255,0.25)' }}>{c.sessions} sessions</span>
+                                <span style={{ fontSize:'0.68rem', color:'rgba(255,255,255,0.25)' }}>{c.exp}</span>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Free / paid badge */}
+                          {!usedFree[c.id] && (
+                            <div style={{ marginBottom:10, padding:'4px 10px', borderRadius:20, background:'rgba(16,185,129,0.06)', border:'1px solid rgba(16,185,129,0.15)', display:'inline-flex', alignItems:'center', gap:5 }}>
+                              <span style={{ fontSize:'0.68rem', color:'#10b981', fontWeight:700 }}>🎁 First session free</span>
+                            </div>
+                          )}
+                          {usedFree[c.id] && (
+                            <div style={{ marginBottom:10, padding:'4px 10px', borderRadius:20, background:accentB, border:`1px solid ${accentBr}`, display:'inline-flex', alignItems:'center', gap:5 }}>
+                              <span style={{ fontSize:'0.68rem', color:accent, fontWeight:700 }}>₹{c.price||199} / session</span>
+                            </div>
+                          )}
+                          
+                          {/* Actions row */}
+                          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                            <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={() => setActiveProfile(c)}
+                              style={{ flex: 1, padding:'11px', background:'rgba(255,255,255,0.04)', border:'1px solid var(--border-subtle)', borderRadius:12, color:'rgba(255,255,255,0.75)', fontSize:'0.8rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
+                              View Profile
+                            </motion.button>
+                            <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={() => c.avail && handleBookConsultant(c)}
+                              style={{ flex: 1.2, padding:'11px', background:c.avail?`linear-gradient(135deg,${c.color},${c.color}cc)`:'rgba(255,255,255,0.03)', border:`1px solid ${c.avail?c.color:'rgba(255,255,255,0.06)'}`, borderRadius:12, color:c.avail?'#fff':'rgba(255,255,255,0.22)', fontSize:'0.8rem', fontWeight:700, cursor:c.avail?'pointer':'not-allowed', fontFamily:J, transition:'all 0.2s', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                              {!c.avail ? 'Busy' : usedFree[c.id] ? `Pay ₹${c.price||199}` : 'Book Free'}
+                            </motion.button>
+                          </div>
+
+                          {/* In-app call buttons */}
+                          {c.avail && (
+                            <div style={{ display:'flex', gap:8 }}>
+                              <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
+                                onClick={() => setCall({ consultant:c, audioOnly:false })}
+                                style={{ flex:1, padding:'10px', background:'rgba(255,255,255,0.04)', border:`1px solid ${c.color}44`, borderRadius:12, color:c.color, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                                <FaVideo size={12}/> Video
+                              </motion.button>
+                              <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
+                                onClick={() => setCall({ consultant:c, audioOnly:true })}
+                                style={{ flex:1, padding:'10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:12, color:'rgba(255,255,255,0.7)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                                <FaPhone size={11}/> Voice
+                              </motion.button>
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </>
+                )}
 
               </motion.div>
             )}
