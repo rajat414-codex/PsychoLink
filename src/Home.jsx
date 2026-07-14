@@ -1100,19 +1100,6 @@ export default function Home({ userProfile, onLogout }) {
                   ))}
                 </div>
 
-                {/* Join CTA banner */}
-                <motion.div initial={{ opacity:0, y:14 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.3 }}
-                  style={{ padding:'22px 26px', borderRadius:22, background:'linear-gradient(135deg,rgba(139,92,246,0.14),rgba(236,72,153,0.14))', border:'1px solid rgba(139,92,246,0.2)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:20 }}>
-                  <div>
-                    <p style={{ margin:'0 0 4px', fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.2rem', color:'#fff' }}>Are you a mental health professional? 🌟</p>
-                    <p style={{ margin:0, fontSize:'0.82rem', color:'rgba(255,255,255,0.4)', fontFamily:J }}>Join our platform — reach thousands of people who need your help.</p>
-                  </div>
-                  <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={() => setShowJoin(true)}
-                    style={{ padding:'13px 22px', background:'var(--accent-purple)', border:'none', borderRadius:14, color:'#0a0a0c', fontSize:'0.88rem', fontWeight:700, cursor:'pointer', fontFamily:J, flexShrink:0, boxShadow:'0 4px 12px rgba(0,0,0,0.35)', whiteSpace:'nowrap' }}>
-                    Apply Now →
-                  </motion.button>
-                </motion.div>
-
               </motion.div>
             )}
 
