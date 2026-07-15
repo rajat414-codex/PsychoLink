@@ -38,6 +38,13 @@ const fieldStyle = {
 };
 const labelStyle = { fontSize:'0.78rem', color:'rgba(255,255,255,0.55)', fontFamily:J, fontWeight:'600' };
 
+export const VIDEO_PRESETS = [
+  { id: 'v1', name: 'Zen Garden', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', icon: '🧘‍♂️' },
+  { id: 'v2', name: 'Forest Stream', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', icon: '🌲' },
+  { id: 'v3', name: 'Ambient Chill', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', icon: '🌌' },
+  { id: 'v4', name: 'Breathing Wave', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', icon: '🌊' }
+];
+
 // ─────────────────────────────────────────────────────────────────
 // Avatar Presets & Helpers
 // ─────────────────────────────────────────────────────────────────
@@ -115,6 +122,41 @@ export function renderAvatar(pfp, name, color, size = 110, fontSize = '2.2rem') 
       </span>
     </div>
   );
+}
+
+export function compressImage(base64Str, callback) {
+  if (!base64Str) return callback('');
+  if (!base64Str.startsWith('data:image/')) return callback(base64Str);
+  
+  const img = new Image();
+  img.src = base64Str;
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    const MAX_WIDTH = 600;
+    const MAX_HEIGHT = 600;
+    let width = img.width;
+    let height = img.height;
+
+    if (width > height) {
+      if (width > MAX_WIDTH) {
+        height *= MAX_WIDTH / width;
+        width = MAX_WIDTH;
+      }
+    } else {
+      if (height > MAX_HEIGHT) {
+        width *= MAX_HEIGHT / height;
+        height = MAX_HEIGHT;
+      }
+    }
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+    callback(canvas.toDataURL('image/jpeg', 0.7));
+  };
+  img.onerror = () => {
+    callback(base64Str);
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -844,7 +886,9 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImageSrc(reader.result);
+        compressImage(reader.result, (compressed) => {
+          setImageSrc(compressed);
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -869,6 +913,59 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
       localStorage.setItem(`equilibrium_posts_${consultant.id}`, JSON.stringify(updated));
     } catch (e) {}
 
+    // Also copy/prepend this post to global Calm Reels list too! (as an image-type reel)
+    try {
+      const savedGlobal = localStorage.getItem('equilibrium_global_reels');
+      let globalList = [];
+      if (savedGlobal) {
+        globalList = JSON.parse(savedGlobal);
+      } else {
+        // seed list
+        globalList = [
+          {
+            id: 'global-r1',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            caption: 'Ground yourself in the present. Breathe in calm, breathe out stress. 🧘‍♂️✨ #mindfulness #innerpeace',
+            likes: 184,
+            liked: false,
+            music: 'Aura Calming Vibes - Original Sound',
+            creator: { name: 'Dr. Priya Sharma', color: '#ec4899' }
+          },
+          {
+            id: 'global-r2',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            caption: 'Quiet river flow to calm an anxious mind. Let your thoughts wash away. 🌲🌊 #naturehealing #peace',
+            likes: 242,
+            liked: false,
+            music: 'Calming Forest Stream - Healing Sound',
+            creator: { name: 'Dr. Vikranth Mehta', color: '#10b981' }
+          },
+          {
+            id: 'global-r3',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            caption: 'Release physical tension, embrace positive vibes. You are safe. 🌈✨ #mentalhealth #zen',
+            likes: 156,
+            liked: false,
+            music: 'Zen Ambient Lo-Fi Chill',
+            creator: { name: 'Neha Kapoor', color: '#8b5cf6' }
+          }
+        ];
+      }
+
+      const newGlobalReel = {
+        id: `global-custom-post-${Date.now()}`,
+        imageUrl: imageSrc,
+        caption: caption || 'Mindfulness moment. 🧘‍♂️🌸',
+        likes: 0,
+        liked: false,
+        music: 'Quiet Contemplation',
+        creator: { name: consultant.name, color: consultant.color || '#ec4899', pfp: consultant.pfp }
+      };
+
+      const updatedGlobal = [newGlobalReel, ...globalList];
+      localStorage.setItem('equilibrium_global_reels', JSON.stringify(updatedGlobal));
+    } catch (e) {}
+
     // Reset
     setImageSrc('');
     setCaption('');
@@ -878,8 +975,15 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
   const handleReelFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setReelVideoSrc(url);
+      if (file.size > 1.5 * 1024 * 1024) {
+        alert("Video size exceeds 1.5MB. For local storage prototype, please use small videos under 1.5MB, or choose one of our Zen video presets below.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReelVideoSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -1271,8 +1375,47 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
               
               {/* File Input */}
               <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px' }}>SELECT VIDEO FILE</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', margin: 0 }}>SELECT VIDEO FILE (Max 1.5MB)</label>
+                  {reelVideoSrc && (
+                    <button type="button" onClick={() => setReelVideoSrc('')} style={{ background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.2)', color: '#f43f5e', fontSize: '0.62rem', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer' }}>Clear</button>
+                  )}
+                </div>
                 <input type="file" accept="video/*" onChange={handleReelFileChange} style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }} />
+              </div>
+
+              {/* Video Presets */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '8px' }}>OR CHOOSE ZEN VIDEO LOOP PRESET</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                  {VIDEO_PRESETS.map((preset) => {
+                    const active = reelVideoSrc === preset.url;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => setReelVideoSrc(preset.url)}
+                        style={{
+                          padding: '6px 4px',
+                          background: active ? `${accent}25` : 'rgba(255,255,255,0.02)',
+                          border: active ? `2px solid ${accent}` : '1.5px solid rgba(255,255,255,0.08)',
+                          borderRadius: '12px',
+                          color: '#fff',
+                          fontSize: '0.68rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <span style={{ fontSize: '1.1rem' }}>{preset.icon}</span>
+                        <span style={{ fontSize: '0.62rem', opacity: active ? 1 : 0.7 }}>{preset.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Video Preview */}
@@ -3089,46 +3232,74 @@ function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, cons
       background: '#05070a' 
     }}>
       
-      {/* Video element */}
-      <video
-        ref={videoRef}
-        src={reel.videoUrl}
-        loop
-        playsInline
-        muted={muted}
-        onClick={handleVideoClick}
-        referrerPolicy="no-referrer"
-        style={{
+      {/* Visual element (Video or Image) */}
+      {reel.imageUrl ? (
+        <div style={{
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
-          cursor: 'pointer'
-        }}
-      />
-      {/* Central Play Button Overlay when paused */}
-      {!isPlaying && (
-        <div 
-          onClick={handleVideoClick}
-          style={{
+          backgroundImage: `url(${reel.imageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative'
+        }}>
+          {/* Blurred background for aesthetic fit */}
+          <div style={{
             position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'rgba(0,0,0,0.55)',
-            borderRadius: '50%',
-            width: '58px',
-            height: '58px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 10,
-            cursor: 'pointer',
-            border: '1.5px solid rgba(255,255,255,0.35)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
-          }}
-        >
-          <FaPlay size={18} color="#fff" style={{ marginLeft: 3 }} />
+            inset: 0,
+            backgroundImage: `url(${reel.imageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(20px) brightness(0.5)',
+            zIndex: 1
+          }} />
+          <img src={reel.imageUrl} alt="" style={{ width: '100%', height: 'auto', maxHeight: '100%', objectFit: 'contain', zIndex: 2, position: 'relative' }} />
         </div>
+      ) : (
+        <>
+          <video
+            ref={videoRef}
+            src={reel.videoUrl}
+            loop
+            playsInline
+            muted={muted}
+            onClick={handleVideoClick}
+            referrerPolicy="no-referrer"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              cursor: 'pointer'
+            }}
+          />
+          {/* Central Play Button Overlay when paused */}
+          {!isPlaying && (
+            <div 
+              onClick={handleVideoClick}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: 'rgba(0,0,0,0.55)',
+                borderRadius: '50%',
+                width: '58px',
+                height: '58px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10,
+                cursor: 'pointer',
+                border: '1.5px solid rgba(255,255,255,0.35)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
+              }}
+            >
+              <FaPlay size={18} color="#fff" style={{ marginLeft: 3 }} />
+            </div>
+          )}
+        </>
       )}
 
       {/* Center temporary play/pause feedback */}

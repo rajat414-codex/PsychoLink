@@ -17,7 +17,7 @@ import VideoCall from './VideoCall';
 import { FaVideo, FaPhone } from 'react-icons/fa';
 import ProgressDashboard from './ProgressDashboard';
 import { FaSpa, FaCrown } from 'react-icons/fa';
-import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile, ReelsViewerModal, PRESET_AVATARS, parsePresetAvatar, renderAvatar } from './ConsultantHub';
+import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile, ReelsViewerModal, PRESET_AVATARS, parsePresetAvatar, renderAvatar, compressImage, VIDEO_PRESETS } from './ConsultantHub';
 import RobotAvatar from './RobotAvatar';
 import FloatingChatbot from './FloatingChatbot';
 
@@ -178,8 +178,15 @@ function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setVideoSrc(url);
+      if (file.size > 1.5 * 1024 * 1024) {
+        alert("Video size exceeds 1.5MB. For local storage prototype, please use small videos under 1.5MB, or choose one of our Zen video presets below.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setVideoSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -204,15 +211,16 @@ function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData
       localStorage.setItem('equilibrium_global_reels', JSON.stringify(updated));
     } catch {}
 
-    // Also save to user's profile reels list in localStorage (under key `equilibrium_reels_my-user-profile`)
+    // Also save to user's profile reels list in localStorage (under key `equilibrium_reels_my-user-profile-${email}`)
     try {
-      const savedUserReels = localStorage.getItem('equilibrium_reels_my-user-profile');
+      const email = userProfile?.email || 'default';
+      const savedUserReels = localStorage.getItem(`equilibrium_reels_my-user-profile-${email}`);
       let userReelsList = [];
       if (savedUserReels) {
         userReelsList = JSON.parse(savedUserReels);
       }
       const updatedUserReels = [newReel, ...userReelsList];
-      localStorage.setItem('equilibrium_reels_my-user-profile', JSON.stringify(updatedUserReels));
+      localStorage.setItem(`equilibrium_reels_my-user-profile-${email}`, JSON.stringify(updatedUserReels));
     } catch (e) {
       console.error("Error saving user reel:", e);
     }
@@ -261,8 +269,12 @@ function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData
               boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
             }}
           >
-            {/* Cover Video Preview */}
-            <video src={reel.videoUrl} muted playsInline referrerPolicy="no-referrer" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+            {/* Cover Video/Image Preview */}
+            {reel.imageUrl ? (
+              <img src={reel.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+            ) : (
+              <video src={reel.videoUrl} muted playsInline referrerPolicy="no-referrer" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+            )}
             
             {/* Play Overlay Button */}
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
@@ -303,14 +315,57 @@ function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData
               
               {/* File Input */}
               <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '6px' }}>SELECT VIDEO FILE</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', margin: 0 }}>SELECT VIDEO FILE (Max 1.5MB)</label>
+                  {videoSrc && (
+                    <button type="button" onClick={() => setVideoSrc('')} style={{ background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.2)', color: '#f43f5e', fontSize: '0.62rem', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer' }}>Clear</button>
+                  )}
+                </div>
                 <input type="file" accept="video/*" onChange={handleFileChange} style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }} />
+              </div>
+
+              {/* Video Presets */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: 'rgba(255,255,255,0.45)', fontWeight: '600', marginBottom: '8px' }}>OR CHOOSE ZEN VIDEO LOOP PRESET</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                  {VIDEO_PRESETS.map((preset) => {
+                    const active = videoSrc === preset.url;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => setVideoSrc(preset.url)}
+                        style={{
+                          padding: '6px 4px',
+                          background: active ? `${accent}25` : 'rgba(255,255,255,0.02)',
+                          border: active ? `2px solid ${accent}` : '1.5px solid rgba(255,255,255,0.08)',
+                          borderRadius: '12px',
+                          color: '#fff',
+                          fontSize: '0.68rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <span style={{ fontSize: '1.1rem' }}>{preset.icon}</span>
+                        <span style={{ fontSize: '0.62rem', opacity: active ? 1 : 0.7 }}>{preset.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Video Preview */}
               {videoSrc && (
                 <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', background: '#10141f', marginBottom: '18px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <video src={videoSrc} muted controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  {videoSrc.startsWith('data:image/') ? (
+                    <img src={videoSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  ) : (
+                    <video src={videoSrc} muted controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  )}
                 </div>
               )}
 
@@ -389,7 +444,9 @@ function ProfileCreationScreen({ userProfile, onSave, accent }) {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPfp(reader.result);
+        compressImage(reader.result, (compressed) => {
+          setPfp(compressed);
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -679,7 +736,8 @@ export default function Home({ userProfile, onLogout }) {
   const [activeProfile, setActiveProfile]   = useState(null);
   const [myProfileData, setMyProfileData] = useState(() => {
     try {
-      const saved = localStorage.getItem('equilibrium_my_profile');
+      const email = userProfile?.email || 'default';
+      const saved = localStorage.getItem(`equilibrium_my_profile_${email}`);
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -1678,7 +1736,7 @@ export default function Home({ userProfile, onLogout }) {
                 {myProfileData ? (
                   <ConsultantProfile 
                     consultant={{
-                      id: 'my-user-profile',
+                      id: `my-user-profile-${userProfile?.email || 'default'}`,
                       name: myProfileData.name,
                       spec: myProfileData.bio || 'Sharing my mindfulness journey.',
                       color: myProfileData.color || '#ec4899',
@@ -1692,7 +1750,8 @@ export default function Home({ userProfile, onLogout }) {
                     onUpdateProfile={(updatedProfile) => {
                       setMyProfileData(updatedProfile);
                       try {
-                        localStorage.setItem('equilibrium_my_profile', JSON.stringify(updatedProfile));
+                        const email = userProfile?.email || 'default';
+                        localStorage.setItem(`equilibrium_my_profile_${email}`, JSON.stringify(updatedProfile));
                       } catch {}
                     }}
                   />
@@ -1703,7 +1762,8 @@ export default function Home({ userProfile, onLogout }) {
                     onSave={(profile) => {
                       setMyProfileData(profile);
                       try {
-                        localStorage.setItem('equilibrium_my_profile', JSON.stringify(profile));
+                        const email = userProfile?.email || 'default';
+                        localStorage.setItem(`equilibrium_my_profile_${email}`, JSON.stringify(profile));
                       } catch {}
                     }}
                   />
