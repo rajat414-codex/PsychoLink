@@ -950,6 +950,7 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
   const [reelCaption, setReelCaption] = useState('');
   const [reelMusic, setReelMusic] = useState('');
   const [reelVideoSrc, setReelVideoSrc] = useState('');
+  const resolvedReelPreviewSrc = useVideoUrl(reelVideoSrc);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -1500,7 +1501,7 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
               {/* Video Preview */}
               {reelVideoSrc && (
                 <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', background: '#10141f', marginBottom: '18px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <video src={reelVideoSrc} muted controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  <video src={resolvedReelPreviewSrc} muted controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
               )}
 

@@ -222,6 +222,7 @@ function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData
   const [caption, setCaption] = useState('');
   const [music, setMusic] = useState('');
   const [videoSrc, setVideoSrc] = useState('');
+  const resolvedPreviewSrc = useVideoUrl(videoSrc);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -386,7 +387,7 @@ function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData
                   {videoSrc.startsWith('data:image/') ? (
                     <img src={videoSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                   ) : (
-                    <video src={videoSrc} muted controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <video src={resolvedPreviewSrc} muted controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                   )}
                 </div>
               )}
