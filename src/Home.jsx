@@ -761,7 +761,13 @@ export default function Home({ userProfile, onLogout }) {
     try {
       const email = userProfile?.email || 'default';
       const saved = localStorage.getItem(`equilibrium_my_profile_${email}`);
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.name) {
+          return parsed;
+        }
+      }
+      return null;
     } catch {
       return null;
     }

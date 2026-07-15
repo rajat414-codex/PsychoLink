@@ -1182,7 +1182,7 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
           {/* Top Row: Name, Follow */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '16px', flexWrap: 'wrap' }}>
             <h2 style={{ fontSize: '1.4rem', fontWeight: '700', margin: 0, fontFamily: J }}>
-              {consultant.name.toLowerCase().replace(/\s+/g,'_')}
+              {(consultant?.name || 'User').toLowerCase().replace(/\s+/g,'_')}
             </h2>
             
             {consultant.isUser && (
@@ -1235,7 +1235,7 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
           {/* Bio text */}
           <div>
             <p style={{ margin: '0 0 4px', fontSize: '0.9rem', fontWeight: '700', color: '#fff' }}>
-              {consultant.isUser ? consultant.name : `Dr. ${consultant.name.replace('Dr. ', '')}`}
+              {consultant.isUser ? (consultant.name || 'User') : `Dr. ${(consultant.name || 'User').replace('Dr. ', '')}`}
             </p>
             <p style={{ margin: '0 0 2px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>
               {consultant.isUser ? 'Member Profile' : `${consultant.spec} Specialist`}
@@ -1245,8 +1245,8 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
                 ? `🌿 ${consultant.spec || 'Sharing my mindfulness journey and self-care moments.'}`
                 : `🌿 Helping you build emotional resilience and mental clarity. Certified in ${consultant.spec.split('&')[1] || 'Cognitive Behavioral Therapy'}.`}
             </p>
-            <a href={`https://psycholink.in/${consultant.name.toLowerCase().replace(/\s+/g,'')}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.82rem', color: consultant.color, textDecoration: 'none', fontWeight: '600' }}>
-              psycholink.in/{consultant.name.toLowerCase().replace(/\s+/g,'')}
+            <a href={`https://psycholink.in/${(consultant.name || 'user').toLowerCase().replace(/\s+/g,'')}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.82rem', color: consultant.color, textDecoration: 'none', fontWeight: '600' }}>
+              psycholink.in/{(consultant.name || 'user').toLowerCase().replace(/\s+/g,'')}
             </a>
           </div>
         </div>
@@ -1563,14 +1563,14 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
                       {(consultant.name || '?').split(' ').map(w=>w[0]).join('').slice(0,2)}
                     </div>
                     <span style={{ fontSize: '0.84rem', fontWeight: '700' }}>
-                      {consultant.name.toLowerCase().replace(/\s+/g,'_')}
+                      {(consultant?.name || 'User').toLowerCase().replace(/\s+/g,'_')}
                     </span>
                   </div>
 
                   {/* Caption */}
                   <div style={{ fontSize: '0.86rem', color: 'rgba(255,255,255,0.85)', lineHeight: '1.4', overflowY: 'auto', maxHeight: '180px', paddingBottom: '10px' }}>
                     <span style={{ fontWeight: '700', marginRight: '6px' }}>
-                      {consultant.name.toLowerCase().replace(/\s+/g,'_')}
+                      {(consultant?.name || 'User').toLowerCase().replace(/\s+/g,'_')}
                     </span>
                     {lightboxPost.caption || "Self-reflection moment."}
                   </div>
@@ -3298,9 +3298,9 @@ function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, cons
     }
   };
 
-  const creatorName = reel.creator?.name || consultant.name;
-  const creatorColor = reel.creator?.color || consultant.color || '#ec4899';
-  const creatorPfp = reel.creator?.pfp || consultant.pfp;
+  const creatorName = reel.creator?.name || consultant?.name || 'User';
+  const creatorColor = reel.creator?.color || consultant?.color || '#ec4899';
+  const creatorPfp = reel.creator?.pfp || consultant?.pfp;
   const username = creatorName.toLowerCase().replace(/\s+/g,'_');
   const likesCount = reel.likes + (reel.liked ? 1 : 0);
 
