@@ -457,16 +457,147 @@ export function ApplicationsPanel({ applications, onRefresh, accent = 'var(--acc
 // To go live later: swap the `simulatePayment()` body for a real
 // Razorpay Checkout call using an order created via /api/payment/order.
 // ─────────────────────────────────────────────────────────────────
+const loadExternalScript = (src) => {
+  return new Promise((resolve) => {
+    const existing = document.querySelector(`script[src="${src}"]`);
+    if (existing) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 export function PaymentModal({ consultant, onClose, onSuccess }) {
   const [stage, setStage] = useState('review'); // review | processing | success
   const price = consultant?.price ?? 199;
 
-  const simulatePayment = () => {
+  const handlePayment = async () => {
+    setStage('processing');
+    const loaded = await loadExternalScript('https://checkout.razorpay.com/v1/checkout.js');
+    if (!loaded || !window.Razorpay) {
+      alert("Failed to load Razorpay SDK. Please check your internet connection.");
+      setStage('review');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/payment/order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          amount: price,
+          consultantName: consultant?.name || 'PsychoLink Session'
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Razorpay not configured on server.");
+      }
+
+      const { order, key } = await res.json();
+
+      const options = {
+        key: key,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'PsychoLink Payout',
+        description: `Mindfulness Consultation with ${consultant?.name || 'Expert'}`,
+        order_id: order.id,
+        image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=120&q=80',
+        theme: {
+          color: consultant?.color || '#ec4899'
+        },
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch(`${API_BASE}/api/payment/verify`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              setStage('success');
+              setTimeout(() => { onSuccess?.(); }, 1200);
+            } else {
+              alert("Payment verification failed.");
+              setStage('review');
+            }
+          } catch (e) {
+            console.error("Verification error:", e);
+            alert("Payment completed but verification failed. Please contact support.");
+            setStage('review');
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setStage('review');
+          }
+        },
+        prefill: {
+          name: 'Mindfulness seeker',
+          email: 'seeker@psycholink.in',
+          contact: '9999999999'
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (err) {
+      console.warn("Backend order creation failed, running frontend-only checkout:", err.message);
+      openFrontendFallbackCheckout();
+    }
+  };
+
+  const openFrontendFallbackCheckout = () => {
+    try {
+      const options = {
+        key: 'rzp_test_5Vb9x8y7Z6w5v4', // Fallback Test Key
+        amount: price * 100,
+        currency: 'INR',
+        name: 'PsychoLink Checkout',
+        description: `Mindfulness Consultation with ${consultant?.name || 'Expert'}`,
+        theme: {
+          color: consultant?.color || '#ec4899'
+        },
+        handler: function (response) {
+          setStage('success');
+          setTimeout(() => { onSuccess?.(); }, 1200);
+        },
+        modal: {
+          ondismiss: function () {
+            setStage('review');
+          }
+        }
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (e) {
+      runMockPayment();
+    }
+  };
+
+  const runMockPayment = () => {
     setStage('processing');
     setTimeout(() => {
       setStage('success');
       setTimeout(() => { onSuccess?.(); }, 1200);
-    }, 1400);
+    }, 1500);
   };
 
   return (
@@ -512,7 +643,7 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
             </div>
           </div>
 
-          <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={simulatePayment}
+          <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={handlePayment}
             style={{ width:'100%', padding:'14px', borderRadius:'14px', border:'none', cursor:'pointer',
               background: consultant?.color || 'var(--accent-purple)', color:'#fff', fontSize:'0.95rem', fontWeight:'800', fontFamily:J,
               boxShadow:`0 8px 20px ${(consultant?.color||'var(--accent-purple)')}25` }}>

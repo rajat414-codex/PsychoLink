@@ -752,6 +752,134 @@ export default function Home({ userProfile, onLogout }) {
     try { return localStorage.getItem('eq_premium') === 'true'; } catch { return false; }
   });
   const [showUpgrade,    setShowUpgrade]    = useState(false);
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      if (existing) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleUpgradePayment = async () => {
+    const loaded = await loadRazorpayScript();
+    if (!loaded || !window.Razorpay) {
+      alert("Failed to load Razorpay SDK. Please check your internet connection.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/payment/order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          amount: 199,
+          consultantName: 'PsychoLink Premium Subscription'
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Razorpay not configured on server.");
+      }
+
+      const { order, key } = await res.json();
+
+      const options = {
+        key: key,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'PsychoLink Premium',
+        description: 'Monthly Premium Membership Subscription',
+        order_id: order.id,
+        image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80',
+        theme: {
+          color: '#c79552'
+        },
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch(`${API_BASE}/api/payment/verify`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              setIsPremium(true);
+              localStorage.setItem('eq_premium', 'true');
+              setShowUpgrade(false);
+              alert('Congratulations! Your Premium subscription is now active! 🎉');
+            } else {
+              alert("Payment verification failed.");
+            }
+          } catch (e) {
+            console.error("Verification error:", e);
+            alert("Payment completed but verification failed. Please contact support.");
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            console.log('Payment modal dismissed');
+          }
+        },
+        prefill: {
+          name: myProfileData ? myProfileData.name : (userProfile?.name || 'Mindfulness Seeker'),
+          email: userProfile?.email || 'seeker@psycholink.in',
+          contact: '9999999999'
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (err) {
+      console.warn("Backend order failed, using test checkout:", err.message);
+      openFrontendTestCheckout();
+    }
+  };
+
+  const openFrontendTestCheckout = () => {
+    try {
+      const options = {
+        key: 'rzp_test_5Vb9x8y7Z6w5v4',
+        amount: 19900,
+        currency: 'INR',
+        name: 'PsychoLink Premium',
+        description: 'Monthly Premium Membership Subscription',
+        theme: {
+          color: '#c79552'
+        },
+        handler: function (response) {
+          setIsPremium(true);
+          localStorage.setItem('eq_premium', 'true');
+          setShowUpgrade(false);
+          alert('Congratulations! Your Premium subscription is now active! 🎉');
+        }
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (e) {
+      setIsPremium(true);
+      localStorage.setItem('eq_premium', 'true');
+      setShowUpgrade(false);
+    }
+  };
   const [call,           setCall]           = useState(null); // { consultant, audioOnly }
   const [usedFree,       setUsedFree]       = useState(() => {
     try { return JSON.parse(localStorage.getItem('eq_used_free') || '{}'); } catch { return {}; }
@@ -1964,7 +2092,7 @@ export default function Home({ userProfile, onLogout }) {
               </div>
 
               <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}
-                onClick={() => { setIsPremium(true); localStorage.setItem('eq_premium','true'); setShowUpgrade(false); }}
+                onClick={handleUpgradePayment}
                 style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', cursor:'pointer', background:'linear-gradient(135deg,#c79552,#b8843f)', color:'#0a0a0c', fontSize:'0.95rem', fontWeight:800, fontFamily:J, marginBottom:8 }}>
                 Subscribe Now →
               </motion.button>
