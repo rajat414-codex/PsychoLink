@@ -17,7 +17,7 @@ import VideoCall from './VideoCall';
 import { FaVideo, FaPhone } from 'react-icons/fa';
 import ProgressDashboard from './ProgressDashboard';
 import { FaSpa, FaCrown } from 'react-icons/fa';
-import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile, ReelsViewerModal, PRESET_AVATARS, parsePresetAvatar, renderAvatar, compressImage, VIDEO_PRESETS } from './ConsultantHub';
+import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile, ReelsViewerModal, PRESET_AVATARS, parsePresetAvatar, renderAvatar, compressImage, VIDEO_PRESETS, saveVideoBlob, useVideoUrl } from './ConsultantHub';
 import RobotAvatar from './RobotAvatar';
 import FloatingChatbot from './FloatingChatbot';
 
@@ -121,6 +121,54 @@ function MoodChart({ color, data }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// ReelGridItem — single grid item cover loader for CalmReelsScreen
+// ─────────────────────────────────────────────────────────────────
+function ReelGridItem({ reel, onClick }) {
+  const resolvedSrc = useVideoUrl(reel.videoUrl);
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.015 }}
+      onClick={onClick}
+      style={{ 
+        aspectRatio: '9/16', 
+        borderRadius: '16px', 
+        overflow: 'hidden', 
+        background: '#090b11', 
+        cursor: 'pointer',
+        position: 'relative',
+        border: '1px solid rgba(255,255,255,0.04)',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
+      }}
+    >
+      {/* Cover Video/Image Preview */}
+      {reel.imageUrl ? (
+        <img src={reel.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+      ) : (
+        <video src={resolvedSrc} muted playsInline referrerPolicy="no-referrer" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+      )}
+      
+      {/* Play Overlay Button */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
+        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.2)' }}>
+          <FaPlay size={10} color="#fff" style={{ marginLeft: 2 }} />
+        </div>
+      </div>
+
+      {/* Creator details overlay */}
+      <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.4)', padding: '4px 8px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.1)' }}>
+        {renderAvatar(reel.creator.pfp, reel.creator.name, reel.creator.color, 14, '0.45rem')}
+        <span style={{ fontSize: '0.62rem', fontWeight: '600', color: '#fff' }}>{reel.creator.name.replace('Dr. ','')}</span>
+      </div>
+
+      {/* Likes count */}
+      <div style={{ position: 'absolute', bottom: 12, left: 12, display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#fff', fontWeight: '700', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+        <FaHeart size={10} color="#fff"/> {reel.likes + (reel.liked ? 1 : 0)}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
 // CalmReelsScreen — Dedicated Calm Reels Tab Section
 // ─────────────────────────────────────────────────────────────────
 function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData }) {
@@ -178,15 +226,24 @@ function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1.5 * 1024 * 1024) {
-        alert("Video size exceeds 1.5MB. For local storage prototype, please use small videos under 1.5MB, or choose one of our Zen video presets below.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setVideoSrc(reader.result);
+      const videoElement = document.createElement('video');
+      videoElement.preload = 'metadata';
+      videoElement.src = URL.createObjectURL(file);
+      videoElement.onloadedmetadata = () => {
+        URL.revokeObjectURL(videoElement.src);
+        const duration = videoElement.duration;
+        if (duration > 95) {
+          alert("Video duration cannot exceed 1 minute and 35 seconds (1:35).");
+          return;
+        }
+        const videoId = `video-blob-${Date.now()}`;
+        saveVideoBlob(videoId, file).then(() => {
+          setVideoSrc(`db:${videoId}`);
+        }).catch(err => {
+          console.error("Error saving video to IndexedDB:", err);
+          alert("Failed to store video. Please try again.");
+        });
       };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -254,46 +311,11 @@ function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData
       {/* Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
         {reels.map((reel, index) => (
-          <motion.div 
-            key={reel.id}
-            whileHover={{ scale: 1.015 }}
-            onClick={() => setActiveReelIndex(index)}
-            style={{ 
-              aspectRatio: '9/16', 
-              borderRadius: '16px', 
-              overflow: 'hidden', 
-              background: '#090b11', 
-              cursor: 'pointer',
-              position: 'relative',
-              border: '1px solid rgba(255,255,255,0.04)',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
-            }}
-          >
-            {/* Cover Video/Image Preview */}
-            {reel.imageUrl ? (
-              <img src={reel.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
-            ) : (
-              <video src={reel.videoUrl} muted playsInline referrerPolicy="no-referrer" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
-            )}
-            
-            {/* Play Overlay Button */}
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.2)' }}>
-                <FaPlay size={10} color="#fff" style={{ marginLeft: 2 }} />
-              </div>
-            </div>
-
-            {/* Creator details overlay */}
-            <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.4)', padding: '4px 8px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.1)' }}>
-              {renderAvatar(reel.creator.pfp, reel.creator.name, reel.creator.color, 14, '0.45rem')}
-              <span style={{ fontSize: '0.62rem', fontWeight: '600', color: '#fff' }}>{reel.creator.name.replace('Dr. ','')}</span>
-            </div>
-
-            {/* Likes count */}
-            <div style={{ position: 'absolute', bottom: 12, left: 12, display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#fff', fontWeight: '700', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
-              <FaHeart size={10} color="#fff"/> {reel.likes + (reel.liked ? 1 : 0)}
-            </div>
-          </motion.div>
+          <ReelGridItem 
+            key={reel.id} 
+            reel={reel} 
+            onClick={() => setActiveReelIndex(index)} 
+          />
         ))}
       </div>
 

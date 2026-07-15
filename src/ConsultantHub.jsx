@@ -159,6 +159,76 @@ export function compressImage(base64Str, callback) {
   };
 }
 
+const dbName = "PsychoLinkDB";
+const storeName = "videos";
+
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(dbName, 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.createObjectStore(storeName, { keyPath: "id" });
+      }
+    };
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+export function saveVideoBlob(id, blob) {
+  return initDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(storeName, "readwrite");
+      const store = transaction.objectStore(storeName);
+      store.put({ id, blob });
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = (e) => reject(e.target.error);
+    });
+  });
+}
+
+export function getVideoBlob(id) {
+  return initDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(storeName, "readonly");
+      const store = transaction.objectStore(storeName);
+      const request = store.get(id);
+      request.onsuccess = (e) => resolve(e.target.result?.blob || null);
+      request.onerror = (e) => reject(e.target.error);
+    });
+  });
+}
+
+export function useVideoUrl(url) {
+  const [resolvedUrl, setResolvedUrl] = useState('');
+  
+  useEffect(() => {
+    if (!url) return;
+    if (url.startsWith('db:')) {
+      const id = url.replace('db:', '');
+      let objectUrl = '';
+      getVideoBlob(id).then(blob => {
+        if (blob) {
+          objectUrl = URL.createObjectURL(blob);
+          setResolvedUrl(objectUrl);
+        }
+      }).catch(err => {
+        console.error("Error retrieving video blob:", err);
+      });
+      return () => {
+        if (objectUrl) {
+          URL.revokeObjectURL(objectUrl);
+        }
+      };
+    } else {
+      setResolvedUrl(url);
+    }
+  }, [url]);
+
+  return resolvedUrl;
+}
+
 // ─────────────────────────────────────────────────────────────────
 // JoinConsultantModal — "Join as a Consultant" application form
 // ─────────────────────────────────────────────────────────────────
@@ -975,15 +1045,24 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
   const handleReelFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1.5 * 1024 * 1024) {
-        alert("Video size exceeds 1.5MB. For local storage prototype, please use small videos under 1.5MB, or choose one of our Zen video presets below.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setReelVideoSrc(reader.result);
+      const videoElement = document.createElement('video');
+      videoElement.preload = 'metadata';
+      videoElement.src = URL.createObjectURL(file);
+      videoElement.onloadedmetadata = () => {
+        URL.revokeObjectURL(videoElement.src);
+        const duration = videoElement.duration;
+        if (duration > 95) {
+          alert("Video duration cannot exceed 1 minute and 35 seconds (1:35).");
+          return;
+        }
+        const videoId = `video-blob-${Date.now()}`;
+        saveVideoBlob(videoId, file).then(() => {
+          setReelVideoSrc(`db:${videoId}`);
+        }).catch(err => {
+          console.error("Error saving video to IndexedDB:", err);
+          alert("Failed to store video. Please try again.");
+        });
       };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -3184,9 +3263,10 @@ function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, cons
   const videoRef = React.useRef(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [showPlayIcon, setShowPlayIcon] = React.useState(null);
+  const resolvedSrc = useVideoUrl(reel.videoUrl);
 
   React.useEffect(() => {
-    if (videoRef.current) {
+    if (videoRef.current && resolvedSrc) {
       if (active) {
         videoRef.current.currentTime = 0;
         videoRef.current.play().then(() => {
@@ -3199,7 +3279,7 @@ function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, cons
         setIsPlaying(false);
       }
     }
-  }, [active]);
+  }, [active, resolvedSrc]);
 
   const handleVideoClick = () => {
     if (videoRef.current) {
@@ -3261,7 +3341,7 @@ function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, cons
         <>
           <video
             ref={videoRef}
-            src={reel.videoUrl}
+            src={resolvedSrc}
             loop
             playsInline
             muted={muted}
