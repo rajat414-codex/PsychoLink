@@ -17,7 +17,7 @@ import VideoCall from './VideoCall';
 import { FaVideo, FaPhone } from 'react-icons/fa';
 import ProgressDashboard from './ProgressDashboard';
 import { FaSpa, FaCrown } from 'react-icons/fa';
-import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile, ReelsViewerModal } from './ConsultantHub';
+import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile, ReelsViewerModal, PRESET_AVATARS, parsePresetAvatar, renderAvatar } from './ConsultantHub';
 import RobotAvatar from './RobotAvatar';
 import FloatingChatbot from './FloatingChatbot';
 
@@ -123,7 +123,7 @@ function MoodChart({ color, data }) {
 // ─────────────────────────────────────────────────────────────────
 // CalmReelsScreen — Dedicated Calm Reels Tab Section
 // ─────────────────────────────────────────────────────────────────
-function CalmReelsScreen({ accent, accentB, accentBr }) {
+function CalmReelsScreen({ accent, accentB, accentBr, userProfile, myProfileData }) {
   const G = "'Cormorant Garamond', serif";
   const S = "'Space Grotesk', sans-serif";
   const J = "'Plus Jakarta Sans', sans-serif";
@@ -185,6 +185,10 @@ function CalmReelsScreen({ accent, accentB, accentBr }) {
 
   const handleUpload = () => {
     if (!videoSrc) return;
+    const userName = myProfileData ? myProfileData.name : (userProfile?.name || 'You');
+    const userColor = myProfileData?.color || accent;
+    const userPfp = myProfileData ? myProfileData.pfp : userProfile?.picture;
+
     const newReel = {
       id: `custom-reel-${Date.now()}`,
       videoUrl: videoSrc,
@@ -192,13 +196,26 @@ function CalmReelsScreen({ accent, accentB, accentBr }) {
       likes: 0,
       liked: false,
       music: music || 'Original Sound',
-      creator: { name: 'You', color: accent }
+      creator: { name: userName, color: userColor, pfp: userPfp }
     };
     const updated = [newReel, ...reels];
     setReels(updated);
     try {
       localStorage.setItem('equilibrium_global_reels', JSON.stringify(updated));
     } catch {}
+
+    // Also save to user's profile reels list in localStorage (under key `equilibrium_reels_my-user-profile`)
+    try {
+      const savedUserReels = localStorage.getItem('equilibrium_reels_my-user-profile');
+      let userReelsList = [];
+      if (savedUserReels) {
+        userReelsList = JSON.parse(savedUserReels);
+      }
+      const updatedUserReels = [newReel, ...userReelsList];
+      localStorage.setItem('equilibrium_reels_my-user-profile', JSON.stringify(updatedUserReels));
+    } catch (e) {
+      console.error("Error saving user reel:", e);
+    }
 
     // Reset
     setVideoSrc('');
@@ -256,9 +273,7 @@ function CalmReelsScreen({ accent, accentB, accentBr }) {
 
             {/* Creator details overlay */}
             <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.4)', padding: '4px 8px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.1)' }}>
-              <div style={{ width: 14, height: 14, borderRadius: '50%', background: reel.creator.color, fontSize: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
-                {reel.creator.name[0]}
-              </div>
+              {renderAvatar(reel.creator.pfp, reel.creator.name, reel.creator.color, 14, '0.45rem')}
               <span style={{ fontSize: '0.62rem', fontWeight: '600', color: '#fff' }}>{reel.creator.name.replace('Dr. ','')}</span>
             </div>
 
@@ -364,6 +379,9 @@ function ProfileCreationScreen({ userProfile, onSave, accent }) {
   const [gender, setGender] = useState('Male');
   const [preferences, setPreferences] = useState([]);
 
+  const [customEmoji, setCustomEmoji] = useState('😊');
+  const [customColor, setCustomColor] = useState('#ec4899');
+
   const PREF_OPTIONS = ['Stress Relief', 'Anxiety Control', 'Meditation', 'Sleep Restoration', 'Mindfulness', 'Emotional Balance'];
 
   const handlePfpChange = (e) => {
@@ -388,6 +406,14 @@ function ProfileCreationScreen({ userProfile, onSave, accent }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!username.trim() || !name.trim()) return;
+
+    let finalColor = '#ec4899';
+    const parsedPreset = parsePresetAvatar(pfp);
+    if (parsedPreset) {
+      finalColor = parsedPreset.color;
+    } else if (pfp && pfp.startsWith('preset:custom:')) {
+      finalColor = customColor;
+    }
     
     const profile = {
       username: username.trim().toLowerCase().replace(/\s+/g,'_'),
@@ -395,7 +421,8 @@ function ProfileCreationScreen({ userProfile, onSave, accent }) {
       gender,
       preferences,
       pfp: pfp || '',
-      bio: `Preferences: ${preferences.join(', ')}.`
+      bio: `Preferences: ${preferences.join(', ')}.`,
+      color: finalColor
     };
     onSave(profile);
   };
@@ -411,16 +438,82 @@ function ProfileCreationScreen({ userProfile, onSave, accent }) {
         {/* PFP Uploader */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
           <label htmlFor="pfp-upload" style={{ cursor: 'pointer', position: 'relative' }}>
-            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', transition: 'all 0.3s' }}>
-              {pfp ? (
-                <img src={pfp} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <span style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.3)' }}>📸</span>
-              )}
-            </div>
+            {renderAvatar(pfp, name || 'User', customColor, 100, '2rem')}
           </label>
           <input id="pfp-upload" type="file" accept="image/*" onChange={handlePfpChange} style={{ display: 'none' }} />
-          <span style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>SET YOUR PROFILE PICTURE</span>
+          
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <span style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>SET YOUR PROFILE PICTURE</span>
+            {pfp && (
+              <button 
+                type="button" 
+                onClick={() => setPfp('')}
+                style={{ padding: '0 6px', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.2)', color: '#f43f5e', fontSize: '0.66rem', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Preset & Custom Builder Section */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', width: '100%' }}>
+          <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontWeight: '700', letterSpacing: '0.5px', fontFamily: S }}>OR CHOOSE AESTHETIC PRESET</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '8px', width: '100%', maxWidth: '360px' }}>
+            {PRESET_AVATARS.map((preset) => {
+              const active = pfp === `preset:${preset.id}`;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => setPfp(`preset:${preset.id}`)}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: preset.grad,
+                    border: active ? '2px solid #fff' : '1.5px solid transparent',
+                    boxShadow: active ? '0 0 8px rgba(255,255,255,0.4)' : 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    padding: 0
+                  }}
+                  title={preset.name}
+                >
+                  {preset.emoji}
+                </button>
+              );
+            })}
+          </div>
+          
+          {/* Custom builder */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '6px' }}>
+            <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)' }}>Custom Builder:</span>
+            <input 
+              type="color" 
+              value={customColor} 
+              onChange={(e) => {
+                setCustomColor(e.target.value);
+                setPfp(`preset:custom:${customEmoji}:${e.target.value}`);
+              }}
+              style={{ width: '22px', height: '22px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', background: 'none', padding: 0 }}
+            />
+            <input 
+              type="text" 
+              maxLength={2} 
+              value={customEmoji} 
+              onChange={(e) => {
+                setCustomEmoji(e.target.value);
+                setPfp(`preset:custom:${e.target.value}:${customColor}`);
+              }}
+              placeholder="😊"
+              style={{ width: '32px', padding: '2px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', textAlign: 'center', outline: 'none' }}
+            />
+          </div>
         </div>
 
         {/* Username */}
@@ -1025,14 +1118,16 @@ export default function Home({ userProfile, onLogout }) {
             {/* User + Logout */}
             <div style={{ padding:'12px 14px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 12px', borderRadius:'14px', background:'rgba(255,255,255,0.01)', border:'1px solid var(--border-subtle)' }}>
-                <div style={{ width:'32px', height:'32px', borderRadius:'50%', background: userProfile?.picture ? 'transparent' : 'linear-gradient(135deg, #374151, #111827)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'0.8rem', flexShrink:0, color:'rgba(255,255,255,0.85)', overflow:'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  {userProfile?.picture
-                    ? <img src={userProfile.picture} alt="" referrerPolicy="no-referrer" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
-                    : (userProfile?.name || 'U')[0].toUpperCase()}
-                </div>
+                {renderAvatar(
+                  myProfileData ? myProfileData.pfp : userProfile?.picture,
+                  myProfileData ? myProfileData.name : (userProfile?.name || 'User'),
+                  myProfileData?.color || '#ec4899',
+                  32,
+                  '0.8rem'
+                )}
                 <div style={{ flex:1, overflow:'hidden', minWidth:0 }}>
-                  <p style={{ margin:0, fontSize:'0.8rem', fontWeight:'600', color:'rgba(255,255,255,0.85)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{userProfile?.name || 'User'}</p>
-                  <p style={{ margin:0, fontSize:'0.64rem', color:'rgba(255,255,255,0.3)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{userProfile?.email || ''}</p>
+                  <p style={{ margin:0, fontSize:'0.8rem', fontWeight:'600', color:'rgba(255,255,255,0.85)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{myProfileData ? myProfileData.name : (userProfile?.name || 'User')}</p>
+                  <p style={{ margin:0, fontSize:'0.64rem', color:'rgba(255,255,255,0.3)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{myProfileData ? `@${myProfileData.username}` : (userProfile?.email || '')}</p>
                 </div>
                 <motion.button whileHover={{ color:'#f43f5e', background: 'rgba(244,63,94,0.05)' }} whileTap={{ scale:0.9 }} onClick={onLogout}
                   style={{ background:'none', border:'none', color:'rgba(255,255,255,0.25)', cursor:'pointer', padding:'6px', borderRadius:'8px', transition:'all 0.2s', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -1572,7 +1667,7 @@ export default function Home({ userProfile, onLogout }) {
             {tab === 'calm-reels' && (
               <motion.div key="calm-reels" initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
                 style={{ position:'absolute', inset:0 }}>
-                <CalmReelsScreen accent={accent} accentB={accentB} accentBr={accentBr} />
+                <CalmReelsScreen accent={accent} accentB={accentB} accentBr={accentBr} userProfile={userProfile} myProfileData={myProfileData} />
               </motion.div>
             )}
 
@@ -1588,10 +1683,18 @@ export default function Home({ userProfile, onLogout }) {
                       spec: myProfileData.bio || 'Sharing my mindfulness journey.',
                       color: myProfileData.color || '#ec4899',
                       isUser: true,
-                      pfp: myProfileData.pfp
+                      pfp: myProfileData.pfp,
+                      gender: myProfileData.gender,
+                      preferences: myProfileData.preferences
                     }}
                     accent={accent}
                     onBack={() => setTab('home')}
+                    onUpdateProfile={(updatedProfile) => {
+                      setMyProfileData(updatedProfile);
+                      try {
+                        localStorage.setItem('equilibrium_my_profile', JSON.stringify(updatedProfile));
+                      } catch {}
+                    }}
                   />
                 ) : (
                   <ProfileCreationScreen 

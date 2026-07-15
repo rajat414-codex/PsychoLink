@@ -39,6 +39,85 @@ const fieldStyle = {
 const labelStyle = { fontSize:'0.78rem', color:'rgba(255,255,255,0.55)', fontFamily:J, fontWeight:'600' };
 
 // ─────────────────────────────────────────────────────────────────
+// Avatar Presets & Helpers
+// ─────────────────────────────────────────────────────────────────
+export const PRESET_AVATARS = [
+  { id: '1', emoji: '🧘‍♀️', name: 'Zen', grad: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)', color: '#0d9488' },
+  { id: '2', emoji: '🌸', name: 'Blossom', grad: 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)', color: '#ec4899' },
+  { id: '3', emoji: '🌊', name: 'Ocean', grad: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)', color: '#2563eb' },
+  { id: '4', emoji: '🌿', name: 'Nature', grad: 'linear-gradient(135deg, #059669 0%, #10b981 100%)', color: '#059669' },
+  { id: '5', emoji: '✨', name: 'Spark', grad: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)', color: '#7c3aed' },
+  { id: '6', emoji: '🧠', name: 'Clarity', grad: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)', color: '#4f46e5' },
+  { id: '7', emoji: '☀️', name: 'Sunset', grad: 'linear-gradient(135deg, #ea580c 0%, #f97316 100%)', color: '#ea580c' },
+  { id: '8', emoji: '🦉', name: 'Wisdom', grad: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)', color: '#d97706' },
+];
+
+export function parsePresetAvatar(pfp) {
+  if (pfp && pfp.startsWith('preset:')) {
+    const parts = pfp.split(':');
+    if (parts[1] === 'custom') {
+      const emoji = parts[2] || '🧘‍♀️';
+      const color = parts[3] || '#ec4899';
+      return {
+        id: 'custom',
+        emoji,
+        grad: `linear-gradient(135deg, ${color} 0%, ${color}bb 100%)`,
+        color
+      };
+    }
+    const id = parts[1];
+    const preset = PRESET_AVATARS.find(p => p.id === id);
+    if (preset) return preset;
+  }
+  return null;
+}
+
+export function renderAvatar(pfp, name, color, size = 110, fontSize = '2.2rem') {
+  const preset = parsePresetAvatar(pfp);
+  const sizeStr = typeof size === 'number' ? `${size}px` : size;
+  const style = {
+    width: sizeStr,
+    height: sizeStr,
+    borderRadius: '50%',
+    overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    border: `1.5px solid ${preset ? preset.color : (color || 'rgba(255,255,255,0.12)')}`,
+    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+    position: 'relative'
+  };
+
+  if (preset) {
+    return (
+      <div style={{ ...style, background: preset.grad }}>
+        <span style={{ fontSize: `calc(${sizeStr} * 0.52)` }}>
+          {preset.emoji}
+        </span>
+      </div>
+    );
+  }
+
+  if (pfp) {
+    return (
+      <div style={style}>
+        <img src={pfp} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      </div>
+    );
+  }
+
+  const initialColor = color || '#ec4899';
+  return (
+    <div style={{ ...style, background: `linear-gradient(135deg, ${initialColor}35, ${initialColor}15)`, border: `3px solid ${initialColor}` }}>
+      <span style={{ fontWeight: '800', fontSize, color: initialColor }}>
+        {(name || '?').split(' ').map(w => w[0]).join('').slice(0, 2)}
+      </span>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
 // JoinConsultantModal — "Join as a Consultant" application form
 // ─────────────────────────────────────────────────────────────────
 export function JoinConsultantModal({ onClose, accent = 'var(--accent-purple)' }) {
@@ -375,7 +454,263 @@ export function FreeSessionToast({ consultant, onClose }) {
   );
 }
 
-export function ConsultantProfile({ consultant, onBack, accent }) {
+// ─────────────────────────────────────────────────────────────────
+// EditProfileModal — Modal form to edit user profile details
+// ─────────────────────────────────────────────────────────────────
+function EditProfileModal({ consultant, onClose, onSave, accent = 'var(--accent-purple)' }) {
+  const J = "'Plus Jakarta Sans', sans-serif";
+  const S = "'Space Grotesk', sans-serif";
+  const G = "'Cormorant Garamond', serif";
+
+  const [name, setName] = useState(consultant.name || '');
+  const [bio, setBio] = useState(consultant.spec || '');
+  const [pfp, setPfp] = useState(consultant.pfp || '');
+  const [gender, setGender] = useState(consultant.gender || 'Male');
+  const [preferences, setPreferences] = useState(consultant.preferences || []);
+
+  const [customEmoji, setCustomEmoji] = useState('😊');
+  const [customColor, setCustomColor] = useState(consultant.color || '#ec4899');
+
+  const PREF_OPTIONS = ['Stress Relief', 'Anxiety Control', 'Meditation', 'Sleep Restoration', 'Mindfulness', 'Emotional Balance'];
+
+  React.useEffect(() => {
+    if (pfp && pfp.startsWith('preset:custom:')) {
+      const parts = pfp.split(':');
+      if (parts[2]) setCustomEmoji(parts[2]);
+      if (parts[3]) setCustomColor(parts[3]);
+    }
+  }, [pfp]);
+
+  const handlePfpChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPfp(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const togglePref = (pref) => {
+    if (preferences.includes(pref)) {
+      setPreferences(preferences.filter(p => p !== pref));
+    } else {
+      setPreferences([...preferences, pref]);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    
+    let finalColor = consultant.color || '#ec4899';
+    const parsedPreset = parsePresetAvatar(pfp);
+    if (parsedPreset) {
+      finalColor = parsedPreset.color;
+    } else if (pfp && pfp.startsWith('preset:custom:')) {
+      finalColor = customColor;
+    }
+
+    onSave({
+      username: name.trim().toLowerCase().replace(/\s+/g,'_'),
+      name: name.trim(),
+      bio: bio.trim(),
+      pfp,
+      gender,
+      preferences,
+      color: finalColor
+    });
+  };
+
+  return (
+    <ModalShell onClose={onClose} accent={accent} maxWidth="500px">
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <h3 style={{ fontFamily: G, fontStyle: 'italic', fontWeight: 800, fontSize: '1.8rem', color: '#fff', margin: '0 0 4px' }}>Edit Profile</h3>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', margin: 0 }}>Customize your social wellness presence</p>
+      </div>
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px', color: '#fff', fontFamily: J }}>
+        
+        {/* Avatar Builder */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          {renderAvatar(pfp, name, customColor, 90, '1.8rem')}
+          
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <label htmlFor="modal-pfp-upload" style={{ cursor: 'pointer', padding: '6px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.78rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              📸 Upload Photo
+            </label>
+            <input id="modal-pfp-upload" type="file" accept="image/*" onChange={handlePfpChange} style={{ display: 'none' }} />
+            
+            {pfp && (
+              <button 
+                type="button" 
+                onClick={() => setPfp('')}
+                style={{ padding: '6px 14px', borderRadius: '10px', background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.2)', color: '#f43f5e', fontSize: '0.78rem', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+          
+          {/* Preset options */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center', width: '100%', marginTop: '4px' }}>
+            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontWeight: '700', letterSpacing: '0.5px' }}>CHOOSE AESTHETIC PRESET</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '8px', width: '100%', maxWidth: '360px' }}>
+              {PRESET_AVATARS.map((preset) => {
+                const active = pfp === `preset:${preset.id}`;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => setPfp(`preset:${preset.id}`)}
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: preset.grad,
+                      border: active ? '2px solid #fff' : '1.5px solid transparent',
+                      boxShadow: active ? '0 0 8px rgba(255,255,255,0.4)' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      padding: 0
+                    }}
+                    title={preset.name}
+                  >
+                    {preset.emoji}
+                  </button>
+                );
+              })}
+            </div>
+            
+            {/* Custom builder */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
+              <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)' }}>Custom:</span>
+              <input 
+                type="color" 
+                value={customColor} 
+                onChange={(e) => {
+                  setCustomColor(e.target.value);
+                  setPfp(`preset:custom:${customEmoji}:${e.target.value}`);
+                }}
+                style={{ width: '22px', height: '22px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', background: 'none', padding: 0 }}
+              />
+              <input 
+                type="text" 
+                maxLength={2} 
+                value={customEmoji} 
+                onChange={(e) => {
+                  setCustomEmoji(e.target.value);
+                  setPfp(`preset:custom:${e.target.value}:${customColor}`);
+                }}
+                placeholder="😊"
+                style={{ width: '32px', padding: '2px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', textAlign: 'center', outline: 'none' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Full Name */}
+        <div>
+          <label style={labelStyle}>FULL NAME</label>
+          <input 
+            type="text" 
+            required 
+            value={name} 
+            onChange={e => setName(e.target.value)} 
+            style={fieldStyle} 
+          />
+        </div>
+
+        {/* Bio */}
+        <div>
+          <label style={labelStyle}>BIO / BIO-SPEC</label>
+          <input 
+            type="text" 
+            value={bio} 
+            onChange={e => setBio(e.target.value)} 
+            placeholder="E.g. Sharing my mindfulness journey."
+            style={fieldStyle} 
+          />
+        </div>
+
+        {/* Gender */}
+        <div>
+          <label style={{ ...labelStyle, display: 'block', marginBottom: '6px' }}>GENDER</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+            {['Male', 'Female', 'Non-Binary'].map(g => (
+              <button 
+                key={g} 
+                type="button" 
+                onClick={() => setGender(g)} 
+                style={{ 
+                  padding: '7px 0', 
+                  borderRadius: '10px', 
+                  border: `1px solid ${gender === g ? accent : 'rgba(255,255,255,0.06)'}`, 
+                  background: gender === g ? `${accent}15` : 'rgba(255,255,255,0.02)', 
+                  color: gender === g ? '#fff' : 'rgba(255,255,255,0.4)', 
+                  fontSize: '0.8rem', 
+                  fontWeight: '700', 
+                  cursor: 'pointer', 
+                  transition: 'all 0.25s' 
+                }}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Preferences */}
+        <div>
+          <label style={{ ...labelStyle, display: 'block', marginBottom: '6px' }}>MINDFULNESS PREFERENCES</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {PREF_OPTIONS.map(opt => {
+              const active = preferences.includes(opt);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => togglePref(opt)}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: '20px',
+                    fontSize: '0.74rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    border: `1px solid ${active ? accent : 'rgba(255,255,255,0.08)'}`,
+                    background: active ? `${accent}20` : 'rgba(255,255,255,0.015)',
+                    color: active ? '#fff' : 'rgba(255,255,255,0.5)'
+                  }}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <motion.button 
+          whileHover={{ scale: 1.02 }} 
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          disabled={!name.trim()}
+          style={{ width: '100%', padding: '11px', background: `linear-gradient(135deg, ${accent}, #8b5cf6)`, color: '#fff', border: 'none', borderRadius: '12px', fontWeight: '700', fontSize: '0.88rem', cursor: 'pointer', marginTop: '10px' }}
+        >
+          Save Changes
+        </motion.button>
+      </form>
+    </ModalShell>
+  );
+}
+
+export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile }) {
   const G = "'Cormorant Garamond', serif";
   const S = "'Space Grotesk', sans-serif";
   const J = "'Plus Jakarta Sans', sans-serif";
@@ -393,6 +728,7 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
   const [lightboxPost, setLightboxPost] = useState(null);
   const [activeTab, setActiveTab] = useState("posts");
   const [activeReelIndex, setActiveReelIndex] = useState(null);
+  const [editingOpen, setEditingOpen] = useState(false);
 
   const handleFollowToggle = () => {
     const next = !isFollowing;
@@ -556,7 +892,7 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
       likes: 0,
       liked: false,
       music: reelMusic || 'Original Sound',
-      creator: { name: consultant.name, color: consultant.color || '#ec4899' }
+      creator: { name: consultant.name, color: consultant.color || '#ec4899', pfp: consultant.pfp }
     };
     
     // 1. Update this profile's reels
@@ -655,9 +991,7 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
       {/* Instagram Header section */}
       <div style={{ display: 'flex', gap: '40px', marginBottom: '40px', alignItems: 'center', flexWrap: 'wrap' }}>
         {/* Profile Avatar */}
-        <div style={{ width: '110px', height: '110px', borderRadius: '50%', background: `linear-gradient(135deg, ${consultant.color}35, ${consultant.color}15)`, border: `3px solid ${consultant.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '2.2rem', color: consultant.color, boxShadow: '0 8px 24px rgba(0,0,0,0.3)', flexShrink: 0 }}>
-          {(consultant.name || '?').split(' ').map(w=>w[0]).join('').slice(0,2)}
-        </div>
+        {renderAvatar(consultant.pfp, consultant.name, consultant.color, 110, '2.2rem')}
 
         {/* Profile Stats & Bio details */}
         <div style={{ flex: 1, minWidth: '280px' }}>
@@ -666,6 +1000,17 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
             <h2 style={{ fontSize: '1.4rem', fontWeight: '700', margin: 0, fontFamily: J }}>
               {consultant.name.toLowerCase().replace(/\s+/g,'_')}
             </h2>
+            
+            {consultant.isUser && (
+              <motion.button 
+                whileHover={{ scale: 1.02 }} 
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setEditingOpen(true)}
+                style={{ padding: '6px 16px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', fontFamily: J }}
+              >
+                Edit Profile
+              </motion.button>
+            )}
             
             {/* Hide follow/message if it's the user's own profile */}
             {!consultant.isUser && (
@@ -1042,6 +1387,23 @@ export function ConsultantProfile({ consultant, onBack, accent }) {
               try {
                 localStorage.setItem(`equilibrium_reels_${consultant.id}`, JSON.stringify(updated));
               } catch {}
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Edit Profile Modal */}
+      <AnimatePresence>
+        {editingOpen && (
+          <EditProfileModal
+            consultant={consultant}
+            accent={accent}
+            onClose={() => setEditingOpen(false)}
+            onSave={(updated) => {
+              if (onUpdateProfile) {
+                onUpdateProfile(updated);
+              }
+              setEditingOpen(false);
             }}
           />
         )}
@@ -2712,7 +3074,10 @@ function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, cons
     }
   };
 
-  const username = consultant.name.toLowerCase().replace(/\s+/g,'_');
+  const creatorName = reel.creator?.name || consultant.name;
+  const creatorColor = reel.creator?.color || consultant.color || '#ec4899';
+  const creatorPfp = reel.creator?.pfp || consultant.pfp;
+  const username = creatorName.toLowerCase().replace(/\s+/g,'_');
   const likesCount = reel.likes + (reel.liked ? 1 : 0);
 
   return (
@@ -2852,9 +3217,7 @@ function ReelPlayer({ reel, idx, active, muted, onMuteToggle, onLikeToggle, cons
       }}>
         {/* Username */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: `linear-gradient(135deg, ${consultant.color}35, ${consultant.color}15)`, border: `1px solid ${consultant.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '0.72rem', color: consultant.color }}>
-            {(consultant.name || '?').split(' ').map(w=>w[0]).join('').slice(0,2)}
-          </div>
+          {renderAvatar(creatorPfp, creatorName, creatorColor, 28, '0.72rem')}
           <span style={{ fontSize: '0.84rem', fontWeight: '700', fontFamily: J }}>
             {username}
           </span>
