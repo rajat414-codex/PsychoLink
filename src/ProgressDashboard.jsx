@@ -1,18 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
 const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
 
 const TREND = [
-  { w:'W1', anxiety:66, stress:72 },
-  { w:'W2', anxiety:62, stress:60 },
-  { w:'W3', anxiety:48, stress:64 },
-  { w:'W4', anxiety:52, stress:46 },
-  { w:'W5', anxiety:36, stress:50 },
-  { w:'W6', anxiety:34, stress:40 },
+  { w:'Week 1', anxiety:66, stress:72, calm:48 },
+  { w:'Week 2', anxiety:62, stress:60, calm:55 },
+  { w:'Week 3', anxiety:48, stress:64, calm:68 },
+  { w:'Week 4', anxiety:52, stress:46, calm:74 },
+  { w:'Week 5', anxiety:36, stress:50, calm:82 },
+  { w:'Week 6', anxiety:34, stress:40, calm:88 },
 ];
 
 const ALL_TASKS = [
@@ -33,159 +33,119 @@ const ALL_TASKS = [
   { text: "Cognitive Rest: Take a 5-minute silent break mid-day with absolutely no audio or text input.", category: "Mental Health", color: "#10b981" }
 ];
 
-function Card({ children, style, delay=0, glow }) {
+/* ── Tooltip ── */
+function ChartTip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
   return (
-    <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay, duration:0.55, ease:[0.22,1,0.36,1] }}
-      whileHover={{ y:-3, borderColor: glow ? `${glow}35` : 'rgba(255,255,255,0.08)', boxShadow: '0 12px 30px rgba(0,0,0,0.35)', transition:{ duration:0.2, ease:'easeOut' } }}
-      style={{
-        position:'relative', overflow:'hidden',
-        background:'#111622',
-        border: glow ? `1px solid ${glow}18` : '1px solid rgba(255,255,255,0.04)',
-        borderRadius:24, padding:20,
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.02)',
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-        ...style
-      }}>
-      {children}
-    </motion.div>
-  );
-}
-
-function GradientRing({ value, gradientId, colors }) {
-  const radius = 42;
-  const strokeWidth = 7;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (value / 100) * circumference;
-
-  return (
-    <div style={{ position: 'relative', width: 110, height: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <svg width="110" height="110" style={{ transform: 'rotate(-90deg)' }}>
-        <defs>
-          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={colors[0]} />
-            <stop offset="100%" stopColor={colors[1]} />
-          </linearGradient>
-        </defs>
-        {/* Track */}
-        <circle
-          cx="55" cy="55" r={radius}
-          fill="transparent"
-          stroke="rgba(255, 255, 255, 0.03)"
-          strokeWidth={strokeWidth}
-        />
-        {/* Fill */}
-        <motion.circle
-          cx="55" cy="55" r={radius}
-          fill="transparent"
-          stroke={`url(#${gradientId})`}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: strokeDashoffset }}
-          transition={{ duration: 1.5, ease: 'easeOut' }}
-          strokeLinecap="round"
-        />
-      </svg>
-      <div style={{ position: 'absolute', fontSize: '1.45rem', fontWeight: '800', color: '#fff', fontFamily: S }}>
-        {value}%
-      </div>
+    <div style={{ background: '#0a0c12', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '8px 12px', boxShadow: '0 12px 30px rgba(0,0,0,0.6)' }}>
+      <p style={{ margin: '0 0 4px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: S }}>{label}</p>
+      {payload.map((p, i) => (
+        <p key={i} style={{ margin: '2px 0', fontSize: '0.8rem', fontWeight: 700, color: p.color || p.stroke || '#fff', fontFamily: S }}>
+          {p.name}: {p.value}%
+        </p>
+      ))}
     </div>
   );
 }
 
-function SparkCard({ title, data, dataKey, color, stats, percentage, label, ribbonColor }) {
+/* ══════════════════════════════════════════════════════════════════
+   ULTRA-CLEAN REAL SAAS GRAPH CARD FOR PROGRESS DASHBOARD
+   ══════════════════════════════════════════════════════════════════ */
+function CleanSaaSProgressGraphCard({ title, subtitle, data, dataKey, color, stats, percentage, badgeText, badgeColor }) {
   return (
-    <Card glow={ribbonColor} style={{ display: 'flex', flexDirection: 'column', padding: '22px 24px', minHeight: '210px' }}>
-      {/* Title */}
-      <span style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.65)', fontWeight: '700', fontFamily: J }}>{title}</span>
-
-      {/* Main Content Area */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 1, marginTop: '10px' }}>
-        
-        {/* Sparkline Graph */}
-        <div style={{ width: '60%', height: '85px', marginLeft: '-20px', marginBottom: '-10px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
-              <defs>
-                <linearGradient id={`areaGrad-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={color} stopOpacity={0.35} />
-                  <stop offset="100%" stopColor={color} stopOpacity={0.0} />
-                </linearGradient>
-                <filter id={`glow-${dataKey}`} x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="3 3" />
-              <XAxis dataKey="w" hide />
-              <YAxis hide domain={['auto', 'auto']} />
-              <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={3} filter={`url(#glow-${dataKey})`} fill={`url(#areaGrad-${dataKey})`} isAnimationActive={true} />
-            </AreaChart>
-          </ResponsiveContainer>
+    <motion.div
+      whileHover={{ y: -4, borderColor: `${color}40`, boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+      style={{
+        position: 'relative',
+        background: '#0a0c12',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '22px',
+        padding: '22px 24px',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        justify: 'space-between',
+        minHeight: '220px',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+      }}
+    >
+      {/* Top Bar: Title + Change Tag */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+        <div>
+          <span style={{ fontSize: '0.94rem', color: '#f8fafc', fontWeight: '800', fontFamily: J, letterSpacing: '-0.3px' }}>{title}</span>
+          <p style={{ margin: '2px 0 0', fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontFamily: J }}>{subtitle}</p>
         </div>
 
-        {/* Numeric stats */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontFamily: S }}>{label}</span>
-            <span style={{ fontSize: '0.76rem', color: stats.startsWith('-') ? '#10b981' : '#f43f5e', fontWeight: '800', fontFamily: S }}>{stats}</span>
-          </div>
-          <p style={{ margin: '2px 0 0', fontSize: '2.4rem', fontWeight: '900', color: '#fff', fontFamily: S, lineHeight: '1.0', letterSpacing: '-0.5px' }}>{percentage}</p>
-        </div>
-
-      </div>
-
-      {/* Accent Ribbon Tag in Bottom-Left Corner (From photo) */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: '18px',
-        height: '18px',
-        background: ribbonColor,
-        clipPath: 'polygon(0 0, 0 100%, 100% 100%)',
-        boxShadow: `0 0 12px ${ribbonColor}`
-      }} />
-    </Card>
-  );
-}
-
-function ProgressCircleCard({ title, value, gradientId, colors, ribbonColor, subText }) {
-  return (
-    <Card glow={ribbonColor} style={{ display: 'flex', flexDirection: 'column', padding: '22px 24px', minHeight: '210px' }}>
-      {/* Title */}
-      <span style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.65)', fontWeight: '700', fontFamily: J }}>{title}</span>
-
-      {/* Center Circle */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, marginTop: '6px' }}>
-        <GradientRing value={value} gradientId={gradientId} colors={colors} />
-      </div>
-
-      {/* SubText */}
-      {subText && (
-        <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center', fontFamily: J, marginTop: '8px' }}>
-          {subText}
+        <span style={{ fontSize: '0.72rem', fontWeight: '800', color: badgeColor || color, background: `${badgeColor || color}15`, border: `1px solid ${badgeColor || color}25`, padding: '4px 10px', borderRadius: '14px', fontFamily: S }}>
+          {badgeText || stats}
         </span>
-      )}
+      </div>
 
-      {/* Accent Ribbon Tag in Bottom-Left Corner (From photo) */}
+      {/* Sparkline AreaChart */}
+      <div style={{ width: '100%', height: '90px', margin: '8px 0' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id={`saasGrad-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity={0.4} />
+                <stop offset="100%" stopColor={color} stopOpacity={0.0} />
+              </linearGradient>
+              <filter id={`saasGlow-${dataKey}`} x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} strokeDasharray="3 3" />
+            <XAxis dataKey="w" hide />
+            <YAxis hide domain={['auto', 'auto']} />
+            <Tooltip content={<ChartTip />} />
+            <Area
+              type="monotone"
+              dataKey={dataKey}
+              stroke={color}
+              strokeWidth={3}
+              filter={`url(#saasGlow-${dataKey})`}
+              fill={`url(#saasGrad-${dataKey})`}
+              isAnimationActive={true}
+              dot={{ r: 3, fill: color, stroke: '#0a0c12', strokeWidth: 2 }}
+              activeDot={{ r: 5, fill: '#fff', stroke: color, strokeWidth: 2 }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Footer Readout */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: '4px' }}>
+        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontFamily: S }}>
+          Current Level: <b style={{ color: '#fff' }}>{percentage}</b>
+        </div>
+        <div style={{ fontSize: '2.4rem', fontWeight: '900', color: '#ffffff', fontFamily: S, lineHeight: '1.0', letterSpacing: '-0.5px' }}>
+          {percentage}
+        </div>
+      </div>
+
+      {/* Bottom-Left Corner Accent Badge */}
       <div style={{
         position: 'absolute',
         bottom: 0,
         left: 0,
         width: '18px',
         height: '18px',
-        background: ribbonColor,
+        background: color,
         clipPath: 'polygon(0 0, 0 100%, 100% 100%)',
-        boxShadow: `0 0 12px ${ribbonColor}`
+        boxShadow: `0 0 10px ${color}`
       }} />
-    </Card>
+    </motion.div>
   );
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   PROGRESS DASHBOARD PAGE
+   ══════════════════════════════════════════════════════════════════ */
 export default function ProgressDashboard({ accent }) {
   const getDailyTasks = () => {
     const day = new Date().getDate();
@@ -234,72 +194,119 @@ export default function ProgressDashboard({ accent }) {
 
   return (
     <motion.div key="progress" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
-      style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 20px 32px' }}>
+      style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 26px 40px', background: '#06070a' }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.7rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>Your Progress</h2>
-        <p style={{ color:'rgba(255,255,255,0.35)', fontSize:'0.86rem', margin:0, fontFamily:J }}>6-week mental wellness journey analysis</p>
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.8rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>Mental Progress Analytics</h2>
+        <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.86rem', margin:0, fontFamily:J }}>Real-time 6-week cognitive recovery & emotional wellness tracking</p>
       </div>
 
-      {/* Main 2x2 Grid Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+      {/* ══ 2 CLEAN SAAS METRIC GRAPH CARDS ══ */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
         
-        {/* Card 1: Anxiety Levels */}
-        <SparkCard
-          title="Anxiety Levels"
+        {/* Graph 1: Anxiety Levels Drop */}
+        <CleanSaaSProgressGraphCard
+          title="Anxiety Level Reduction"
+          subtitle="6-Week Cortisol & Panic Index"
           data={TREND}
           dataKey="anxiety"
-          color="#eab308"
+          color="#38bdf8"
           stats="-48.5%"
-          percentage="35%"
-          label="anxiety rate"
-          ribbonColor="#eab308"
+          percentage="34%"
+          badgeText="📉 -48.5% Reduced"
+          badgeColor="#10b981"
         />
 
-        {/* Card 2: Stress Levels */}
-        <SparkCard
-          title="Stress Tracker"
+        {/* Graph 2: Stress Recovery Rise */}
+        <CleanSaaSProgressGraphCard
+          title="Stress Recovery Curve"
+          subtitle="Vagal Tone & Heart Rate Variability"
           data={TREND}
           dataKey="stress"
           color="#f43f5e"
           stats="-41.6%"
-          percentage="42%"
-          label="cortisol index"
-          ribbonColor="#f43f5e"
-        />
-
-        {/* Card 3: Mood Resonance */}
-        <ProgressCircleCard
-          title="Mood Resonance"
-          value={80}
-          gradientId="moodGrad"
-          colors={["#06b6d4", "#10b981"]}
-          ribbonColor="#10b981"
-          subText="Positive emotional resonance check"
-        />
-
-        {/* Card 4: Overall Wellness */}
-        <ProgressCircleCard
-          title="Overall Wellness"
-          value={78}
-          gradientId="wellnessGrad"
-          colors={["#8b5cf6", "#6366f1"]}
-          ribbonColor="#8b5cf6"
-          subText="Overall cognitive health tracking"
+          percentage="40%"
+          badgeText="🛡️ Cortisol -41%"
+          badgeColor="#38bdf8"
         />
 
       </div>
 
+      {/* ══ FULL-WIDTH COMPREHENSIVE 6-WEEK RECOVERY TREND CHART ══ */}
+      <div style={{
+        background: '#0a0c12',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '22px',
+        padding: '24px 26px',
+        marginBottom: '24px',
+        boxShadow: '0 12px 36px rgba(0,0,0,0.4)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+          <div>
+            <h3 style={{ margin: '0 0 3px', fontFamily: J, fontWeight: 800, fontSize: '1.1rem', color: '#fff' }}>
+              6-Week Multi-Parameter Wellness Waveform
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>
+              Comparing Calm Resilience, Stress Reduction, and Anxiety Modulation
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', fontFamily: S }}>
+              <span style={{ width: 12, height: 3, borderRadius: 2, background: '#10b981' }} /> Calm
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', fontFamily: S }}>
+              <span style={{ width: 12, height: 3, borderRadius: 2, background: '#38bdf8' }} /> Anxiety
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', fontFamily: S }}>
+              <span style={{ width: 12, height: 3, borderRadius: 2, background: '#f43f5e' }} /> Stress
+            </span>
+          </div>
+        </div>
+
+        <div style={{ width: '100%', height: '220px' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={TREND}>
+              <defs>
+                <linearGradient id="fullCalmGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0.0} />
+                </linearGradient>
+                <linearGradient id="fullAnxietyGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#38bdf8" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="w" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: S }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontFamily: S }} width={30} tickFormatter={v => `${v}%`} />
+              <Tooltip content={<ChartTip />} />
+              <Area type="monotone" dataKey="calm" name="Calm" stroke="#10b981" strokeWidth={3} fill="url(#fullCalmGrad)" />
+              <Area type="monotone" dataKey="anxiety" name="Anxiety" stroke="#38bdf8" strokeWidth={2.5} strokeDasharray="5 3" fill="url(#fullAnxietyGrad)" />
+              <Area type="monotone" dataKey="stress" name="Stress" stroke="#f43f5e" strokeWidth={2} strokeDasharray="3 3" fill="none" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       {/* Bottom Full-Width Daily Mental Health & Soft Skills Challenges */}
-      <Card glow={accent} style={{ padding: '20px 22px' }}>
+      <div style={{
+        background: '#0a0c12',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '22px',
+        padding: '24px 26px',
+        boxShadow: '0 12px 36px rgba(0,0,0,0.4)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:700, fontSize:'0.92rem', color:'#ededef', letterSpacing:'-0.2px' }}>
-              Daily Mind & Skill Challenges
+            <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:800, fontSize:'1.05rem', color:'#fff', letterSpacing:'-0.2px' }}>
+              Daily Mind & Soft Skill Tasks
             </p>
-            <p style={{ margin:0, fontSize:'0.72rem', color:'rgba(255,255,255,0.35)', fontFamily:J }}>
-              3 custom tasks generated daily to build emotional resilience and communication skills
+            <p style={{ margin:0, fontSize:'0.74rem', color:'rgba(255,255,255,0.4)', fontFamily:J }}>
+              3 custom tasks generated daily to build emotional resilience and soft skills
             </p>
           </div>
           <span style={{ fontSize:'0.74rem', color:accent, fontWeight:700, fontFamily:S, background: `${accent}15`, padding: '5px 12px', borderRadius: '10px', border: `1px solid ${accent}25` }}>
@@ -319,9 +326,9 @@ export default function ProgressDashboard({ accent }) {
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: 14, 
-                  padding: '12px 16px', 
+                  padding: '14px 16px', 
                   background: isDone ? 'rgba(255,255,255,0.01)' : 'rgba(255,255,255,0.02)', 
-                  border: isDone ? '1px solid rgba(255,255,255,0.02)' : '1px solid rgba(255,255,255,0.04)', 
+                  border: isDone ? '1px solid rgba(255,255,255,0.02)' : '1px solid rgba(255,255,255,0.06)', 
                   borderRadius: 16,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
@@ -335,7 +342,7 @@ export default function ProgressDashboard({ accent }) {
                   border: `2px solid ${isDone ? task.color : 'rgba(255,255,255,0.2)'}`, 
                   display: 'flex', 
                   alignItems: 'center', 
-                  justifyContent: 'center',
+                  justify: 'center',
                   background: isDone ? `${task.color}20` : 'transparent',
                   transition: 'all 0.2s ease',
                   flexShrink: 0
@@ -356,7 +363,7 @@ export default function ProgressDashboard({ accent }) {
                     {task.category}
                   </span>
                   <span style={{ 
-                    fontSize: '0.84rem', 
+                    fontSize: '0.86rem', 
                     color: isDone ? 'rgba(255,255,255,0.35)' : '#fff', 
                     fontFamily: J,
                     textDecoration: isDone ? 'line-through' : 'none',
@@ -381,7 +388,7 @@ export default function ProgressDashboard({ accent }) {
               style={{ height: '100%', background: `linear-gradient(90deg, ${accent}, #8b5cf6)`, borderRadius: '3px' }}
             />
           </div>
-          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', fontFamily: S, fontWeight: '700', minWidth: '95px', textAlign: 'right' }}>
+          <span style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.5)', fontFamily: S, fontWeight: '700', minWidth: '95px', textAlign: 'right' }}>
             {completedCount} of 3 completed
           </span>
         </div>
@@ -391,12 +398,13 @@ export default function ProgressDashboard({ accent }) {
           position: 'absolute',
           bottom: 0,
           left: 0,
-          width: '12px',
-          height: '12px',
+          width: '18px',
+          height: '18px',
           background: accent,
-          clipPath: 'polygon(0 0, 0 100%, 100% 100%)'
+          clipPath: 'polygon(0 0, 0 100%, 100% 100%)',
+          boxShadow: `0 0 10px ${accent}`
         }} />
-      </Card>
+      </div>
     </motion.div>
   );
 }
