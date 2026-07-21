@@ -261,107 +261,27 @@ function SymmetricResponseGraph({ chatSentimentIntensity = 0 }) {
         </svg>
       </div>
 
-      {/* Interactive Controls & Readouts */}
-      <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {/* 100% Automated Readout Footer */}
+      <div style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         
-        {/* Slider input */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.5)', fontFamily: S, fontWeight: 700, minWidth: '140px', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <FaSlidersH size={11} color={statusColor} /> Session Intensity:
+        {/* Automated System Status */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.45)', fontFamily: S, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <FaBot size={12} color="#38bdf8" /> Automated Response Engine:
           </span>
-
-          <input
-            type="range"
-            min="-100"
-            max="100"
-            value={intensity}
-            onChange={(e) => {
-              const val = parseFloat(e.target.value);
-              setIntensity(val);
-              try { localStorage.setItem('equilibrium_chat_intensity', val.toString()); } catch {}
-            }}
-            style={{
-              flex: 1,
-              minWidth: '180px',
-              height: '6px',
-              borderRadius: '3px',
-              accentColor: statusColor,
-              cursor: 'pointer',
-              background: 'rgba(255, 255, 255, 0.1)'
-            }}
-          />
-
-          <span style={{ fontSize: '0.95rem', fontWeight: 800, color: statusColor, fontFamily: S, minWidth: '60px', textAlign: 'right' }}>
-            {intensity > 0 ? `+${intensity}` : intensity}
+          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: statusColor, fontFamily: S }}>
+            {intensity > 0 ? `+${intensity} (Amplified Peak)` : intensity < 0 ? `${intensity} (Inverted Valley)` : '0 (Neutral Baseline)'}
           </span>
         </div>
 
-        {/* Quick Presets & Metrics */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          
-          {/* Preset Buttons */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {[
-              { label: '🌊 Stress / Anxiety (-70)', val: -70 },
-              { label: '⚖️ Baseline (0)', val: 0 },
-              { label: '🌸 Calm / Positive (+70)', val: 70 },
-            ].map((preset, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  setIntensity(preset.val);
-                  try { localStorage.setItem('equilibrium_chat_intensity', preset.val.toString()); } catch {}
-                }}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '10px',
-                  border: `1px solid ${intensity === preset.val ? statusColor : 'rgba(255, 255, 255, 0.08)'}`,
-                  background: intensity === preset.val ? `${statusColor}20` : 'rgba(255, 255, 255, 0.02)',
-                  color: intensity === preset.val ? '#fff' : 'rgba(255, 255, 255, 0.5)',
-                  fontSize: '0.74rem',
-                  fontWeight: 700,
-                  fontFamily: J,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {preset.label}
-              </button>
-            ))}
-
-            {chatSentimentIntensity !== 0 && (
-              <button
-                onClick={() => setIntensity(chatSentimentIntensity)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '10px',
-                  border: '1px solid #38bdf8',
-                  background: 'rgba(56, 189, 248, 0.15)',
-                  color: '#38bdf8',
-                  fontSize: '0.74rem',
-                  fontWeight: 700,
-                  fontFamily: J,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <FaSync size={10} /> Auto-Sync with Chat
-              </button>
-            )}
+        {/* Readout Metrics */}
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <div style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: S }}>
+            Peak Amplitude: <b style={{ color: '#fff' }}>{Math.abs(amplitude).toFixed(1)} px</b>
           </div>
-
-          {/* Metric Badges */}
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: S }}>
-              Magnitude: <b style={{ color: '#fff' }}>{Math.abs(amplitude).toFixed(1)} px</b>
-            </div>
-            <div style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: S }}>
-              Symmetry: <b style={{ color: '#10b981' }}>100% Perfect</b>
-            </div>
+          <div style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: S }}>
+            Mirror Symmetry: <b style={{ color: '#10b981' }}>100% Exact</b>
           </div>
-
         </div>
 
       </div>
