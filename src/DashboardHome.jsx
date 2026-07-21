@@ -181,6 +181,305 @@ function AICommandCard({ name, sub, desc, color, robotExpr, delay, onClick }) {
   );
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   EXACT REPLICA OF THE 4-CARD METRIC GRID FROM REFERENCE PHOTO
+   ══════════════════════════════════════════════════════════════════ */
+function MetricGraphGrid() {
+  const lineData1 = [
+    { d: '1', v: 45 }, { d: '2', v: 85 }, { d: '3', v: 55 }, { d: '4', v: 62 }, { d: '5', v: 40 }, { d: '6', v: 50 }
+  ];
+  const lineData2 = [
+    { d: '1', v: 60 }, { d: '2', v: 45 }, { d: '3', v: 75 }, { d: '4', v: 65 }, { d: '5', v: 80 }, { d: '6', v: 92 }
+  ];
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '22px' }}>
+      
+      {/* ── CARD 1: Hours worked (Line Graph + Green Triangle) ── */}
+      <motion.div 
+        whileHover={{ y: -4, borderColor: 'rgba(16, 185, 129, 0.3)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }}
+        style={{
+          position: 'relative',
+          background: 'linear-gradient(145deg, rgba(17, 24, 39, 0.85) 0%, rgba(11, 15, 25, 0.95) 100%)',
+          backdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '22px',
+          padding: '22px 24px',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justify: 'space-between',
+          minHeight: '210px',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        <span style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.65)', fontWeight: '700', fontFamily: J }}>
+          Hours worked
+        </span>
+
+        {/* Waveform Area */}
+        <div style={{ width: '100%', height: '85px', margin: '8px 0' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={lineData1}>
+              <defs>
+                <linearGradient id="gradHours" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="rgba(255,255,255,0.05)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="d" hide />
+              <YAxis hide domain={['auto', 'auto']} />
+              <Area 
+                type="monotone" 
+                dataKey="v" 
+                stroke="#10b981" 
+                strokeWidth={3} 
+                fill="url(#gradHours)"
+                dot={false}
+                activeDot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }}
+                style={{ filter: 'drop-shadow(0 4px 12px rgba(16, 185, 129, 0.6))' }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Stats */}
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontFamily: S }}>time</span>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontFamily: S }}>1680h</span>
+            <span style={{ fontSize: '0.78rem', fontWeight: '800', color: '#10b981', fontFamily: S }}>+4.33%</span>
+          </div>
+          <div style={{ fontSize: '2.4rem', fontWeight: '900', color: '#ffffff', fontFamily: S, lineHeight: '1.0', letterSpacing: '-0.5px' }}>
+            +269
+          </div>
+        </div>
+
+        {/* GREEN TRIANGLE TAG (Bottom-Left Corner) */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          width: '18px',
+          height: '18px',
+          background: '#10b981',
+          clipPath: 'polygon(0 0, 0 100%, 100% 100%)',
+          boxShadow: '0 0 12px rgba(16, 185, 129, 0.8)'
+        }} />
+      </motion.div>
+
+      {/* ── CARD 2: Facetalk Time (Line Graph + Red Triangle) ── */}
+      <motion.div 
+        whileHover={{ y: -4, borderColor: 'rgba(244, 63, 94, 0.3)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }}
+        style={{
+          position: 'relative',
+          background: 'linear-gradient(145deg, rgba(17, 24, 39, 0.85) 0%, rgba(11, 15, 25, 0.95) 100%)',
+          backdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '22px',
+          padding: '22px 24px',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justify: 'space-between',
+          minHeight: '210px',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        <span style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.65)', fontWeight: '700', fontFamily: J }}>
+          Facetalk Time
+        </span>
+
+        {/* Waveform Area */}
+        <div style={{ width: '100%', height: '85px', margin: '8px 0' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={lineData2}>
+              <defs>
+                <linearGradient id="gradFacetalk" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="rgba(255,255,255,0.05)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="d" hide />
+              <YAxis hide domain={['auto', 'auto']} />
+              <Area 
+                type="monotone" 
+                dataKey="v" 
+                stroke="#06b6d4" 
+                strokeWidth={3} 
+                fill="url(#gradFacetalk)"
+                dot={false}
+                activeDot={{ r: 5, fill: '#06b6d4', stroke: '#fff', strokeWidth: 2 }}
+                style={{ filter: 'drop-shadow(0 4px 12px rgba(6, 182, 212, 0.6))' }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Stats */}
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontFamily: S }}>time</span>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontFamily: S }}>320h</span>
+            <span style={{ fontSize: '0.78rem', fontWeight: '800', color: '#f43f5e', fontFamily: S }}>-2.73%</span>
+          </div>
+          <div style={{ fontSize: '2.4rem', fontWeight: '900', color: '#ffffff', fontFamily: S, lineHeight: '1.0', letterSpacing: '-0.5px' }}>
+            76%
+          </div>
+        </div>
+
+        {/* RED TRIANGLE TAG (Bottom-Left Corner) */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          width: '18px',
+          height: '18px',
+          background: '#f43f5e',
+          clipPath: 'polygon(0 0, 0 100%, 100% 100%)',
+          boxShadow: '0 0 12px rgba(244, 63, 94, 0.8)'
+        }} />
+      </motion.div>
+
+      {/* ── CARD 3: IBApps Website (Donut Ring + Green Triangle) ── */}
+      <motion.div 
+        whileHover={{ y: -4, borderColor: 'rgba(6, 182, 212, 0.3)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }}
+        style={{
+          position: 'relative',
+          background: 'linear-gradient(145deg, rgba(17, 24, 39, 0.85) 0%, rgba(11, 15, 25, 0.95) 100%)',
+          backdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '22px',
+          padding: '22px 24px',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justify: 'space-between',
+          minHeight: '210px',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        <span style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.65)', fontWeight: '700', fontFamily: J }}>
+          IBApps Website
+        </span>
+
+        {/* Circular Donut Area */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '10px 0' }}>
+          <div style={{ position: 'relative', width: '105px', height: '105px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="105" height="105" style={{ transform: 'rotate(-90deg)' }}>
+              <defs>
+                <linearGradient id="donutCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#06b6d4" />
+                  <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
+              </defs>
+              <circle cx="52.5" cy="52.5" r="42" fill="transparent" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+              <motion.circle 
+                cx="52.5" cy="52.5" r="42" 
+                fill="transparent" 
+                stroke="url(#donutCyan)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 42}
+                initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
+                animate={{ strokeDashoffset: (2 * Math.PI * 42) * (1 - 0.76) }}
+                transition={{ duration: 1.5, ease: 'easeOut' }}
+                style={{ filter: 'drop-shadow(0 0 10px rgba(6, 182, 212, 0.7))' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', fontSize: '1.6rem', fontWeight: '800', color: '#fff', fontFamily: S }}>
+              76%
+            </div>
+          </div>
+        </div>
+
+        {/* GREEN TRIANGLE TAG (Bottom-Left Corner) */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          width: '18px',
+          height: '18px',
+          background: '#10b981',
+          clipPath: 'polygon(0 0, 0 100%, 100% 100%)',
+          boxShadow: '0 0 12px rgba(16, 185, 129, 0.8)'
+        }} />
+      </motion.div>
+
+      {/* ── CARD 4: Exxon Mobile (Donut Ring + Red Triangle) ── */}
+      <motion.div 
+        whileHover={{ y: -4, borderColor: 'rgba(139, 92, 246, 0.3)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }}
+        style={{
+          position: 'relative',
+          background: 'linear-gradient(145deg, rgba(17, 24, 39, 0.85) 0%, rgba(11, 15, 25, 0.95) 100%)',
+          backdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '22px',
+          padding: '22px 24px',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justify: 'space-between',
+          minHeight: '210px',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        <span style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.65)', fontWeight: '700', fontFamily: J }}>
+          Exxon Mobile
+        </span>
+
+        {/* Circular Donut Area */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '10px 0' }}>
+          <div style={{ position: 'relative', width: '105px', height: '105px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="105" height="105" style={{ transform: 'rotate(-90deg)' }}>
+              <defs>
+                <linearGradient id="donutPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#8b5cf6" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+              </defs>
+              <circle cx="52.5" cy="52.5" r="42" fill="transparent" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+              <motion.circle 
+                cx="52.5" cy="52.5" r="42" 
+                fill="transparent" 
+                stroke="url(#donutPurple)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 42}
+                initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
+                animate={{ strokeDashoffset: (2 * Math.PI * 42) * (1 - 0.64) }}
+                transition={{ duration: 1.5, ease: 'easeOut' }}
+                style={{ filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.7))' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', fontSize: '1.6rem', fontWeight: '800', color: '#fff', fontFamily: S }}>
+              64%
+            </div>
+          </div>
+        </div>
+
+        {/* RED TRIANGLE TAG (Bottom-Left Corner) */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          width: '18px',
+          height: '18px',
+          background: '#f43f5e',
+          clipPath: 'polygon(0 0, 0 100%, 100% 100%)',
+          boxShadow: '0 0 12px rgba(244, 63, 94, 0.8)'
+        }} />
+      </motion.div>
+
+    </div>
+  );
+}
 
 /* ══════════════════════════════════════════════════════════════════
    DASHBOARD HOME — Redesigned Bento Grid
@@ -274,57 +573,11 @@ export default function DashboardHome({
           <InsightPill icon={<FaChartLine size={13} />} label="Journal" value={`${journalCount} logs`} color="#f43f5e" delay={0.30} />
         </div>
 
-        {/* ═══ ROW 3: Bento Grid — Charts + AI Cards ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 18, marginBottom: 20 }}>
+        {/* ═══ ROW 3: 4-CARD METRIC GRAPH GRID (EXACT DESIGN FROM USER'S PHOTO) ═══ */}
+        <MetricGraphGrid />
 
-          {/* ── Wellness Waveform Chart ── */}
-          <BentoCard delay={0.32} glow={accent} rowSpan={2} style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14, position: 'relative', zIndex: 2 }}>
-              <div>
-                <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1.05rem', color: '#f8fafc', letterSpacing: '-0.3px' }}>Wellness Overview</p>
-                <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontFamily: J }}>Mood & calm — last 7 days</p>
-              </div>
-              <div style={{ padding: '5px 12px', background: accentB, border: `1px solid ${accentBr}`, borderRadius: 24, display: 'flex', alignItems: 'center', gap: 5 }}>
-                <FaArrowUp size={8} color={accent} />
-                <span style={{ fontSize: '0.7rem', color: accent, fontWeight: 700, fontFamily: S }}>12% this week</span>
-              </div>
-            </div>
-            <div style={{ flex: 1, minHeight: 240, marginLeft: -14, position: 'relative', zIndex: 2 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={MOOD_TREND}>
-                  <defs>
-                    <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={accent} stopOpacity={0.5} />
-                      <stop offset="100%" stopColor={accent} stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="calmGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#6366f1" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.025)" vertical={false} />
-                  <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11, fontFamily: 'Space Grotesk' }} />
-                  <YAxis domain={[30, 100]} axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.25)', fontSize: 10 }} width={32} tickFormatter={v => `${v}%`} />
-                  <Tooltip content={<ChartTip />} />
-                  <Area type="monotone" dataKey="mood" name="Mood" stroke={accent} strokeWidth={2.5} fill="url(#moodGrad)"
-                    dot={{ r: 3.5, fill: accent, stroke: '#06080e', strokeWidth: 2 }} activeDot={{ r: 5, fill: accent, stroke: '#fff', strokeWidth: 2 }}
-                    isAnimationActive animationDuration={1600} />
-                  <Area type="monotone" dataKey="calm" name="Calm" stroke="#6366f1" strokeWidth={2} strokeDasharray="5 3" fill="url(#calmGrad)"
-                    dot={false} isAnimationActive animationDuration={1800} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ display: 'flex', gap: 20, marginTop: 8, paddingLeft: 14, position: 'relative', zIndex: 2 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', fontFamily: J }}>
-                <span style={{ width: 18, height: 3, borderRadius: 2, background: accent }} /> Mood
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', fontFamily: J }}>
-                <span style={{ width: 18, height: 3, borderRadius: 2, background: '#6366f1', backgroundImage: 'repeating-linear-gradient(90deg, #6366f1 0 5px, transparent 5px 8px)' }} /> Calm
-              </span>
-            </div>
-          </BentoCard>
-
-          {/* ── AI Command Cards ── */}
+        {/* ═══ ROW 4: AI Command Cards ═══ */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 20 }}>
           <AICommandCard name="Aura" sub="EMOTIONAL CORE" desc="Empathic reflections and emotional support." color="#ef4444" robotExpr="smile" delay={0.38}
             onClick={() => { setActiveAI('AURA'); setTab('chat'); }} />
 
@@ -332,7 +585,7 @@ export default function DashboardHome({
             onClick={() => { setActiveAI('MAX'); setTab('chat'); }} />
         </div>
 
-        {/* ═══ ROW 4: Activity + Emotion Mix + Brain Report CTA ═══ */}
+        {/* ═══ ROW 5: Activity + Emotion Mix + Brain Report CTA ═══ */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 18, marginBottom: 20 }}>
 
           {/* Weekly Activity */}
@@ -422,7 +675,7 @@ export default function DashboardHome({
           </BentoCard>
         </div>
 
-        {/* ═══ ROW 5: Experts + Recent Activity ═══ */}
+        {/* ═══ ROW 6: Experts + Recent Activity ═══ */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.7fr', gap: 18 }}>
 
           {/* Top Experts */}

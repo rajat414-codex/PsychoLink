@@ -95,56 +95,59 @@ function GradientRing({ value, gradientId, colors }) {
 
 function SparkCard({ title, data, dataKey, color, stats, percentage, label, ribbonColor }) {
   return (
-    <Card glow={ribbonColor} style={{ display: 'flex', flexDirection: 'column', padding: '20px 22px', minHeight: '190px' }}>
+    <Card glow={ribbonColor} style={{ display: 'flex', flexDirection: 'column', padding: '22px 24px', minHeight: '210px' }}>
       {/* Title */}
-      <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', fontWeight: '700', fontFamily: J }}>{title}</span>
+      <span style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.65)', fontWeight: '700', fontFamily: J }}>{title}</span>
 
       {/* Main Content Area */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 1, marginTop: '10px' }}>
         
         {/* Sparkline Graph */}
-        <div style={{ width: '60%', height: '80px', marginLeft: '-20px', marginBottom: '-10px' }}>
+        <div style={{ width: '60%', height: '85px', marginLeft: '-20px', marginBottom: '-10px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
               <defs>
                 <linearGradient id={`areaGrad-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={color} stopOpacity={0.25} />
+                  <stop offset="0%" stopColor={color} stopOpacity={0.35} />
                   <stop offset="100%" stopColor={color} stopOpacity={0.0} />
                 </linearGradient>
                 <filter id={`glow-${dataKey}`} x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="2.5" result="blur" />
+                  <feGaussianBlur stdDeviation="3" result="blur" />
                   <feMerge>
                     <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
               </defs>
-              <CartesianGrid stroke="rgba(255,255,255,0.03)" vertical={false} strokeDasharray="3 3" />
+              <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="w" hide />
               <YAxis hide domain={['auto', 'auto']} />
-              <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2.5} filter={`url(#glow-${dataKey})`} fill={`url(#areaGrad-${dataKey})`} isAnimationActive={true} />
+              <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={3} filter={`url(#glow-${dataKey})`} fill={`url(#areaGrad-${dataKey})`} isAnimationActive={true} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
         {/* Numeric stats */}
         <div style={{ textAlign: 'right' }}>
-          <span style={{ fontSize: '0.64rem', color: 'rgba(255,255,255,0.3)', fontFamily: S }}>{label}</span>
-          <p style={{ margin: 0, fontSize: '0.74rem', color: stats.startsWith('-') ? '#10b981' : '#f43f5e', fontWeight: '800', fontFamily: S }}>{stats}</p>
-          <p style={{ margin: '2px 0 0', fontSize: '2.2rem', fontWeight: '800', color: '#fff', fontFamily: S, lineHeight: '1.1' }}>{percentage}</p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontFamily: S }}>{label}</span>
+            <span style={{ fontSize: '0.76rem', color: stats.startsWith('-') ? '#10b981' : '#f43f5e', fontWeight: '800', fontFamily: S }}>{stats}</span>
+          </div>
+          <p style={{ margin: '2px 0 0', fontSize: '2.4rem', fontWeight: '900', color: '#fff', fontFamily: S, lineHeight: '1.0', letterSpacing: '-0.5px' }}>{percentage}</p>
         </div>
 
       </div>
 
-      {/* Accent Ribbon Tag in Bottom-Left Corner */}
+      {/* Accent Ribbon Tag in Bottom-Left Corner (From photo) */}
       <div style={{
         position: 'absolute',
         bottom: 0,
         left: 0,
-        width: '12px',
-        height: '12px',
+        width: '18px',
+        height: '18px',
         background: ribbonColor,
-        clipPath: 'polygon(0 0, 0 100%, 100% 100%)'
+        clipPath: 'polygon(0 0, 0 100%, 100% 100%)',
+        boxShadow: `0 0 12px ${ribbonColor}`
       }} />
     </Card>
   );
@@ -152,9 +155,9 @@ function SparkCard({ title, data, dataKey, color, stats, percentage, label, ribb
 
 function ProgressCircleCard({ title, value, gradientId, colors, ribbonColor, subText }) {
   return (
-    <Card glow={ribbonColor} style={{ display: 'flex', flexDirection: 'column', padding: '20px 22px', minHeight: '190px' }}>
+    <Card glow={ribbonColor} style={{ display: 'flex', flexDirection: 'column', padding: '22px 24px', minHeight: '210px' }}>
       {/* Title */}
-      <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', fontWeight: '700', fontFamily: J }}>{title}</span>
+      <span style={{ fontSize: '0.92rem', color: 'rgba(255,255,255,0.65)', fontWeight: '700', fontFamily: J }}>{title}</span>
 
       {/* Center Circle */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, marginTop: '6px' }}>
@@ -163,20 +166,21 @@ function ProgressCircleCard({ title, value, gradientId, colors, ribbonColor, sub
 
       {/* SubText */}
       {subText && (
-        <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', fontFamily: J, marginTop: '8px' }}>
+        <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center', fontFamily: J, marginTop: '8px' }}>
           {subText}
         </span>
       )}
 
-      {/* Accent Ribbon Tag in Bottom-Left Corner */}
+      {/* Accent Ribbon Tag in Bottom-Left Corner (From photo) */}
       <div style={{
         position: 'absolute',
         bottom: 0,
         left: 0,
-        width: '12px',
-        height: '12px',
+        width: '18px',
+        height: '18px',
         background: ribbonColor,
-        clipPath: 'polygon(0 0, 0 100%, 100% 100%)'
+        clipPath: 'polygon(0 0, 0 100%, 100% 100%)',
+        boxShadow: `0 0 12px ${ribbonColor}`
       }} />
     </Card>
   );
