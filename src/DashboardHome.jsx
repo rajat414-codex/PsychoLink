@@ -54,20 +54,22 @@ function Card({ children, style, delay=0, glow, onClick, hover }) {
     <motion.div
       initial={{ opacity:0, y:18 }} animate={{ opacity:1, y:0 }}
       transition={{ delay, duration:0.55, ease:[0.22,1,0.36,1] }}
-      whileHover={hover ? { y:-4, borderColor: glow ? `${glow}55` : 'var(--border-hover)', boxShadow: 'var(--shadow-premium)', transition:{ duration:0.25, ease:'easeOut' } } : undefined}
+      whileHover={hover ? { y:-5, borderColor: glow ? `${glow}66` : 'rgba(255,255,255,0.18)', boxShadow: glow ? `0 20px 45px -10px ${glow}25` : '0 25px 50px -12px rgba(0,0,0,0.7)', transition:{ duration:0.25, ease:'easeOut' } } : undefined}
       onClick={onClick}
       style={{
         position:'relative',
-        background:'var(--bg-card)',
-        border: glow ? `1px solid ${glow}22` : '1px solid var(--border-subtle)',
-        borderRadius:24, padding:20,
-        boxShadow: 'var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03)',
+        background: glow ? `linear-gradient(135deg, ${glow}0d 0%, rgba(255,255,255,0.02) 100%)` : 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+        backdropFilter: 'blur(28px)',
+        WebkitBackdropFilter: 'blur(28px)',
+        border: glow ? `1px solid ${glow}30` : '1px solid var(--border-subtle)',
+        borderRadius:24, padding:22,
+        boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255,255,255,0.06)',
         cursor: onClick ? 'pointer' : 'default',
         overflow:'hidden',
-        transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         ...style,
       }}>
-      <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent)', pointerEvents:'none' }}/>
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:1, background: glow ? `linear-gradient(90deg,transparent,${glow}40,transparent)` : 'linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)', pointerEvents:'none' }}/>
       {children}
     </motion.div>
   );
@@ -77,8 +79,8 @@ function CardTitle({ title, sub, right }) {
   return (
     <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:16, position:'relative', zIndex:2 }}>
       <div>
-        <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:700, fontSize:'0.95rem', color:'#ededef' }}>{title}</p>
-        {sub && <p style={{ margin:0, fontSize:'0.72rem', color:'rgba(255,255,255,0.32)', fontFamily:J }}>{sub}</p>}
+        <p style={{ margin:'0 0 2px', fontFamily:J, fontWeight:800, fontSize:'1rem', color:'#f8fafc', letterSpacing:'-0.3px' }}>{title}</p>
+        {sub && <p style={{ margin:0, fontSize:'0.74rem', color:'rgba(255,255,255,0.4)', fontFamily:J, fontWeight:500 }}>{sub}</p>}
       </div>
       {right}
     </div>
@@ -89,7 +91,7 @@ function Tip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
     <motion.div initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }}
-      style={{ background:'rgba(20,20,26,0.95)', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.14)', borderRadius:12, padding:'10px 14px', boxShadow:'0 12px 32px rgba(0,0,0,0.6)' }}>
+      style={{ background:'rgba(12,14,22,0.95)', backdropFilter:'blur(16px)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:14, padding:'10px 14px', boxShadow:'0 16px 40px rgba(0,0,0,0.7)' }}>
       <p style={{ margin:'0 0 4px', fontSize:'0.72rem', color:'rgba(255,255,255,0.5)', fontFamily:S }}>{label}</p>
       {payload.map((p,i) => {
         const isVal = p.name === 'moodVal' || p.name === 'calmVal';
@@ -122,17 +124,17 @@ function KpiCard({ k, i, inView }) {
   const animated = useCountUp(k.num, 1400, inView);
   const display = k.suffix === '%' ? `${animated.toFixed(0)}%` : Math.round(animated);
   return (
-    <Card delay={0.05+i*0.08} glow={k.color} hover style={{ padding:16 }}>
-      <motion.div animate={{ opacity:[0.4,0.7,0.4] }} transition={{ duration:3, repeat:Infinity, delay:i*0.3 }}
-        style={{ position:'absolute', top:-30, right:-30, width:80, height:80, borderRadius:'50%', background:`radial-gradient(circle,${k.color}18,transparent 70%)`, pointerEvents:'none' }}/>
-      <p style={{ margin:'0 0 8px', fontSize:'0.64rem', color:'rgba(255,255,255,0.4)', fontFamily:S, letterSpacing:'1px', fontWeight:700, textTransform:'uppercase', position:'relative', zIndex:2 }}>{k.label}</p>
-      <div style={{ display:'flex', alignItems:'baseline', gap:7, position:'relative', zIndex:2 }}>
-        <span style={{ fontSize:'1.75rem', fontWeight:800, color:'#fff', fontFamily:S, lineHeight:1, textShadow:'none' }}>{display}</span>
-        <span style={{ fontSize:'0.7rem', fontWeight:700, color:k.color, display:'flex', alignItems:'center', gap:3 }}>
-          {k.up ? <FaArrowUp size={8}/> : <FaArrowDown size={8}/>}{k.delta}
+    <Card delay={0.05+i*0.08} glow={k.color} hover style={{ padding:18 }}>
+      <motion.div animate={{ opacity:[0.3,0.6,0.3] }} transition={{ duration:3.5, repeat:Infinity, delay:i*0.3 }}
+        style={{ position:'absolute', top:-30, right:-30, width:90, height:90, borderRadius:'50%', background:`radial-gradient(circle,${k.color}25,transparent 70%)`, pointerEvents:'none' }}/>
+      <p style={{ margin:'0 0 8px', fontSize:'0.66rem', color:'rgba(255,255,255,0.45)', fontFamily:S, letterSpacing:'1.2px', fontWeight:800, textTransform:'uppercase', position:'relative', zIndex:2 }}>{k.label}</p>
+      <div style={{ display:'flex', alignItems:'baseline', gap:8, position:'relative', zIndex:2 }}>
+        <span style={{ fontSize:'1.9rem', fontWeight:800, color:'#ffffff', fontFamily:S, lineHeight:1, letterSpacing:'-0.5px' }}>{display}</span>
+        <span style={{ fontSize:'0.72rem', fontWeight:800, color:k.color, display:'flex', alignItems:'center', gap:3, background:`${k.color}15`, border:`1px solid ${k.color}30`, padding:'2px 6px', borderRadius:'6px' }}>
+          {k.up ? <FaArrowUp size={7}/> : <FaArrowDown size={7}/>}{k.delta}
         </span>
       </div>
-      <div style={{ height:36, marginTop:8, marginLeft:-4, marginRight:-4, position:'relative', zIndex:2 }}>
+      <div style={{ height:38, marginTop:10, marginLeft:-4, marginRight:-4, position:'relative', zIndex:2 }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={k.spark.map((v,x)=>({x,v}))}>
             <defs>
@@ -140,9 +142,8 @@ function KpiCard({ k, i, inView }) {
                 <stop offset="0%" stopColor={k.color} stopOpacity={0.6}/>
                 <stop offset="100%" stopColor={k.color} stopOpacity={0}/>
               </linearGradient>
-              <filter id={`sparkGlow${i}`}><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             </defs>
-            <Area type="monotone" dataKey="v" stroke={k.color} strokeWidth={2} fill={`url(#spark${i})`} dot={false}
+            <Area type="monotone" dataKey="v" stroke={k.color} strokeWidth={2.5} fill={`url(#spark${i})`} dot={false}
                isAnimationActive animationDuration={1400}/>
           </AreaChart>
         </ResponsiveContainer>

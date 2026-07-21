@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaUserPlus, FaCheckCircle, FaTimesCircle, FaClock, FaLock, FaSpinner, FaArrowLeft, FaTh, FaHeart, FaComment, FaCamera, FaUserCheck, FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaMusic } from 'react-icons/fa';
+import { FaTimes, FaUserPlus, FaCheckCircle, FaTimesCircle, FaClock, FaLock, FaSpinner, FaArrowLeft, FaTh, FaHeart, FaComment, FaCamera, FaUserCheck, FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaMusic, FaWallet } from 'react-icons/fa';
 
 const J = "'Plus Jakarta Sans', sans-serif";
 const G = "'Cormorant Garamond', serif";
@@ -473,9 +473,12 @@ const loadExternalScript = (src) => {
   });
 };
 
-export function PaymentModal({ consultant, onClose, onSuccess }) {
+export function PaymentModal({ consultant, userProfile, onClose, onSuccess }) {
   const [stage, setStage] = useState('review'); // review | processing | success
   const price = consultant?.price ?? 199;
+  
+  const clientEmail = userProfile?.email || 'seeker@psycholink.in';
+  const clientName = userProfile?.name || 'Mindfulness Seeker';
 
   const handlePayment = async () => {
     setStage('processing');
@@ -494,7 +497,10 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
         },
         body: JSON.stringify({
           amount: price,
-          consultantName: consultant?.name || 'PsychoLink Session'
+          consultantId: consultant?.id,
+          consultantName: consultant?.name || 'PsychoLink Session',
+          clientEmail,
+          clientName
         })
       });
 
@@ -525,14 +531,18 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
+                razorpay_signature: response.razorpay_signature,
+                consultantId: consultant?.id,
+                amount: price,
+                clientEmail,
+                clientName
               })
             });
 
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
               setStage('success');
-              setTimeout(() => { onSuccess?.(); }, 1200);
+              setTimeout(() => { onSuccess?.(consultant?.id); }, 1200);
             } else {
               alert("Payment verification failed.");
               setStage('review');
@@ -549,8 +559,8 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
           }
         },
         prefill: {
-          name: 'Mindfulness seeker',
-          email: 'seeker@psycholink.in',
+          name: clientName,
+          email: clientEmail,
           contact: '9999999999'
         }
       };
@@ -575,9 +585,33 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
         theme: {
           color: consultant?.color || '#ec4899'
         },
-        handler: function (response) {
-          setStage('success');
-          setTimeout(() => { onSuccess?.(); }, 1200);
+        handler: async function (response) {
+          try {
+            setStage('processing');
+            const simRes = await fetch(`${API_BASE}/api/payment/simulate-success`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                consultantId: consultant?.id,
+                amount: price,
+                clientEmail,
+                clientName
+              })
+            });
+            const simData = await simRes.json();
+            if (simData.success) {
+              setStage('success');
+              setTimeout(() => { onSuccess?.(consultant?.id); }, 1200);
+            } else {
+              throw new Error("Simulation sync failed");
+            }
+          } catch (err) {
+            console.error("Simulation sync error:", err);
+            setStage('success');
+            setTimeout(() => { onSuccess?.(consultant?.id); }, 1200);
+          }
         },
         modal: {
           ondismiss: function () {
@@ -592,11 +626,27 @@ export function PaymentModal({ consultant, onClose, onSuccess }) {
     }
   };
 
-  const runMockPayment = () => {
+  const runMockPayment = async () => {
     setStage('processing');
+    try {
+      await fetch(`${API_BASE}/api/payment/simulate-success`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          consultantId: consultant?.id,
+          amount: price,
+          clientEmail,
+          clientName
+        })
+      });
+    } catch (err) {
+      console.error("Mock sync failed:", err);
+    }
     setTimeout(() => {
       setStage('success');
-      setTimeout(() => { onSuccess?.(); }, 1200);
+      setTimeout(() => { onSuccess?.(consultant?.id); }, 1200);
     }, 1500);
   };
 
@@ -972,6 +1022,25 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
   const [activeTab, setActiveTab] = useState("posts");
   const [activeReelIndex, setActiveReelIndex] = useState(null);
   const [editingOpen, setEditingOpen] = useState(false);
+
+  const [transactions, setTransactions] = useState([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
+
+  useEffect(() => {
+    if (!consultant.isUser && activeTab === 'earnings') {
+      setLoadingTransactions(true);
+      fetch(`${API_BASE}/api/consultants/${consultant.id}/transactions`)
+        .then(r => r.json())
+        .then(data => {
+          setTransactions(data || []);
+          setLoadingTransactions(false);
+        })
+        .catch(err => {
+          console.error("Failed to fetch transactions:", err);
+          setLoadingTransactions(false);
+        });
+    }
+  }, [consultant.id, consultant.isUser, activeTab]);
 
   const handleFollowToggle = () => {
     const next = !isFollowing;
@@ -1384,7 +1453,7 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
       </div>
 
       {/* Grid Tabs */}
-      <div style={{ display: 'flex', justifyContent: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', gap: '50px', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', gap: '40px', marginBottom: '20px' }}>
         <span 
           onClick={() => setActiveTab("posts")}
           style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: '700', color: activeTab === 'posts' ? '#fff' : 'rgba(255,255,255,0.4)', borderTop: activeTab === 'posts' ? '1.5px solid #fff' : '1.5px solid transparent', paddingTop: '14px', cursor: 'pointer', letterSpacing: '1px', transition: 'all 0.2s' }}
@@ -1397,10 +1466,18 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
         >
           <FaPlay size={9}/> REELS
         </span>
+        {!consultant.isUser && (
+          <span 
+            onClick={() => setActiveTab("earnings")}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: '700', color: activeTab === 'earnings' ? '#fff' : 'rgba(255,255,255,0.4)', borderTop: activeTab === 'earnings' ? '1.5px solid #fff' : '1.5px solid transparent', paddingTop: '14px', cursor: 'pointer', letterSpacing: '1px', transition: 'all 0.2s' }}
+          >
+            <FaWallet size={10}/> EARNINGS & PAYOUTS
+          </span>
+        )}
       </div>
 
       {/* Tab Content Display */}
-      {activeTab === 'posts' ? (
+      {activeTab === 'posts' && (
         posts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)' }}>
             No posts uploaded yet.
@@ -1474,8 +1551,9 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
             ))}
           </div>
         )
-      ) : (
-        /* Reels Grid View */
+      )}
+
+      {activeTab === 'reels' && (
         reels.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)' }}>
             No reels uploaded yet.
@@ -1516,6 +1594,81 @@ export function ConsultantProfile({ consultant, onBack, accent, onUpdateProfile 
             ))}
           </div>
         )
+      )}
+
+      {activeTab === 'earnings' && (
+        <div style={{ padding: '0 10px 40px', fontFamily: J }}>
+          {/* Earnings summary row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '20px', textAlign: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)' }}>
+              <p style={{ margin: '0 0 6px', fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontWeight: '700', letterSpacing: '0.5px' }}>TOTAL EARNINGS</p>
+              <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#10b981', fontWeight: '800', fontFamily: S }}>₹{(consultant.earnings || 0).toLocaleString('en-IN')}</h3>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '20px', textAlign: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)' }}>
+              <p style={{ margin: '0 0 6px', fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontWeight: '700', letterSpacing: '0.5px' }}>PAID SESSIONS</p>
+              <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#fff', fontWeight: '800', fontFamily: S }}>{consultant.sessions || 0}</h3>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '20px', textAlign: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)' }}>
+              <p style={{ margin: '0 0 6px', fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontWeight: '700', letterSpacing: '0.5px' }}>PAYOUT ACCOUNT</p>
+              <h3 style={{ margin: 0, fontSize: '0.92rem', color: consultant.color || '#ec4899', fontWeight: '700', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', paddingTop: '10px' }}>
+                {consultant.bankUpi || `${consultant.name?.toLowerCase().replace(/\s+/g,'')}@okaxis`}
+              </h3>
+            </div>
+          </div>
+
+          {/* Bank Account Verification details */}
+          <div style={{ background: 'rgba(16,185,129,0.02)', border: '1px dashed rgba(16,185,129,0.2)', borderRadius: '16px', padding: '18px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <FaCheckCircle size={15} color="#10b981"/>
+              <span style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: '800', letterSpacing: '0.5px' }}>VERIFIED FOR DIRECT PAYOUTS</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.82rem' }}>
+              <div>
+                <span style={{ color: 'rgba(255,255,255,0.4)' }}>Bank Name:</span> <span style={{ color: '#fff', fontWeight: '600' }}>{consultant.bankName || 'State Bank of India'}</span>
+              </div>
+              <div>
+                <span style={{ color: 'rgba(255,255,255,0.4)' }}>Account Number:</span> <span style={{ color: '#fff', fontWeight: '600' }}>{consultant.bankAccount || 'XXXXXX8890'}</span>
+              </div>
+              <div>
+                <span style={{ color: 'rgba(255,255,255,0.4)' }}>IFSC Code:</span> <span style={{ color: '#fff', fontWeight: '600' }}>{consultant.bankIfsc || 'SBIN0001234'}</span>
+              </div>
+              <div>
+                <span style={{ color: 'rgba(255,255,255,0.4)' }}>UPI ID:</span> <span style={{ color: '#fff', fontWeight: '600', fontFamily: S }}>{consultant.bankUpi || `${consultant.name?.toLowerCase().replace(/\s+/g,'')}@okaxis`}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Transaction history list */}
+          <h4 style={{ fontSize: '0.92rem', fontWeight: '700', color: '#fff', margin: '0 0 14px' }}>Recent Payout History</h4>
+          {loadingTransactions ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.4)', padding: '20px 0' }}>
+              <FaSpinner className="spin" size={14}/> Loading payout history...
+            </div>
+          ) : transactions.length === 0 ? (
+            <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '16px', padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
+              No session payouts received yet. Once a client books a session, the transaction history will appear here.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {transactions.map(tx => (
+                <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '12px' }}>
+                  <div>
+                    <p style={{ margin: '0 0 2px', fontSize: '0.84rem', fontWeight: '700', color: '#fff' }}>Session Booking</p>
+                    <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>
+                      Client: {tx.clientName} ({tx.clientEmail}) · {new Date(tx.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}, {new Date(tx.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ margin: '0 0 2px', fontSize: '0.92rem', fontWeight: '800', color: '#10b981', fontFamily: S }}>+₹{tx.amount}</p>
+                    <span style={{ fontSize: '0.62rem', color: tx.status === 'simulated' ? '#f59e0b' : '#10b981', background: tx.status === 'simulated' ? 'rgba(245,158,11,0.08)' : 'rgba(16,185,129,0.08)', border: `1px solid ${tx.status === 'simulated' ? 'rgba(245,158,11,0.2)' : 'rgba(16,185,129,0.2)'}`, borderRadius: '4px', padding: '2px 6px', fontWeight: '700' }}>
+                      {tx.status === 'simulated' ? 'TEST PAY' : 'SETTLED'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Upload Post Modal */}

@@ -8,7 +8,12 @@
     "color": "#ec4899",
     "avail": true,
     "exp": "8 yrs",
-    "price": 199
+    "price": 199,
+    "earnings": 0,
+    "bankName": "SBI",
+    "bankAccount": "XXXXXX8890",
+    "bankIfsc": "SBIN0001234",
+    "bankUpi": "priyasharma@okaxis"
   },
   {
     "id": 2,
@@ -19,7 +24,12 @@
     "color": "#8b5cf6",
     "avail": true,
     "exp": "6 yrs",
-    "price": 199
+    "price": 199,
+    "earnings": 0,
+    "bankName": "HDFC",
+    "bankAccount": "XXXXXX3344",
+    "bankIfsc": "HDFC0000987",
+    "bankUpi": "arjunmehta@okhdfc"
   },
   {
     "id": 3,
@@ -30,7 +40,12 @@
     "color": "#2dd4bf",
     "avail": false,
     "exp": "12 yrs",
-    "price": 249
+    "price": 249,
+    "earnings": 0,
+    "bankName": "ICICI",
+    "bankAccount": "XXXXXX5522",
+    "bankIfsc": "ICIC0000456",
+    "bankUpi": "saraali@okicici"
   },
   {
     "id": 4,
@@ -41,7 +56,12 @@
     "color": "#f59e0b",
     "avail": true,
     "exp": "5 yrs",
-    "price": 199
+    "price": 199,
+    "earnings": 0,
+    "bankName": "Axis Bank",
+    "bankAccount": "XXXXXX9911",
+    "bankIfsc": "UTIB0000111",
+    "bankUpi": "ravinair@okaxis"
   },
   {
     "id": 5,
@@ -52,6 +72,11 @@
     "color": "#5eb8ad",
     "avail": true,
     "exp": "2 yrs",
-    "price": 199
+    "price": 199,
+    "earnings": 0,
+    "bankName": "SBI",
+    "bankAccount": "XXXXXX1212",
+    "bankIfsc": "SBIN0004567",
+    "bankUpi": "rajatkamal@okaxis"
   }
 ]

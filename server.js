@@ -34,8 +34,44 @@ const SEED_CONSULTANTS = [
 
 function ensureDataFiles() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  // Always reset consultants to the fixed list (clears any extra/test names)
-  fs.writeFileSync(CONSULTANTS_FILE, JSON.stringify(SEED_CONSULTANTS, null, 2));
+  
+  if (!fs.existsSync(CONSULTANTS_FILE)) {
+    const initialConsultants = SEED_CONSULTANTS.map(c => ({
+      ...c,
+      earnings: 0
+    }));
+    fs.writeFileSync(CONSULTANTS_FILE, JSON.stringify(initialConsultants, null, 2));
+  } else {
+    try {
+      const current = JSON.parse(fs.readFileSync(CONSULTANTS_FILE, 'utf-8'));
+      let modified = false;
+      const updated = current.map(c => {
+        if (c.earnings === undefined) {
+          c.earnings = 0;
+          modified = true;
+        }
+        // Also ensure bank fields exist
+        const seed = SEED_CONSULTANTS.find(s => s.id === c.id);
+        if (seed) {
+          if (!c.bankName) { c.bankName = seed.bankName; modified = true; }
+          if (!c.bankAccount) { c.bankAccount = seed.bankAccount; modified = true; }
+          if (!c.bankIfsc) { c.bankIfsc = seed.bankIfsc; modified = true; }
+          if (!c.bankUpi) { c.bankUpi = seed.bankUpi; modified = true; }
+        }
+        return c;
+      });
+      if (modified) {
+        fs.writeFileSync(CONSULTANTS_FILE, JSON.stringify(updated, null, 2));
+      }
+    } catch (e) {
+      const initialConsultants = SEED_CONSULTANTS.map(c => ({
+        ...c,
+        earnings: 0
+      }));
+      fs.writeFileSync(CONSULTANTS_FILE, JSON.stringify(initialConsultants, null, 2));
+    }
+  }
+
   if (!fs.existsSync(APPLICATIONS_FILE)) fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify([], null, 2));
 }
 ensureDataFiles();
@@ -567,16 +603,73 @@ const razorpay = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
   ? new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET })
   : null;
 
+const TRANSACTIONS_FILE = path.join(DATA_DIR, 'transactions.json');
+
+function recordTransaction({ paymentId, orderId, amount, consultantId, clientEmail, clientName, status }) {
+  let consultants = [];
+  try {
+    consultants = JSON.parse(fs.readFileSync(CONSULTANTS_FILE, 'utf-8'));
+  } catch (e) {
+    console.error("Error reading consultants file during transaction record:", e.message);
+    return null;
+  }
+
+  const cIdx = consultants.findIndex(c => c.id === Number(consultantId));
+  let consultantName = 'Unknown Consultant';
+  if (cIdx !== -1) {
+    consultants[cIdx].earnings = (consultants[cIdx].earnings || 0) + Number(amount);
+    consultants[cIdx].sessions = (consultants[cIdx].sessions || 0) + 1;
+    consultantName = consultants[cIdx].name;
+    fs.writeFileSync(CONSULTANTS_FILE, JSON.stringify(consultants, null, 2));
+    console.log(`📈 Credited ₹${amount} to ${consultantName} (ID: ${consultantId}). New earnings: ₹${consultants[cIdx].earnings}`);
+  } else {
+    console.warn(`⚠️ Consultant ID ${consultantId} not found in database!`);
+  }
+
+  let transactions = [];
+  if (fs.existsSync(TRANSACTIONS_FILE)) {
+    try {
+      transactions = JSON.parse(fs.readFileSync(TRANSACTIONS_FILE, 'utf-8'));
+    } catch (e) {
+      transactions = [];
+    }
+  }
+
+  const transaction = {
+    id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+    paymentId: paymentId || `sim_${Date.now()}`,
+    orderId: orderId || 'N/A',
+    amount: Number(amount),
+    consultantId: Number(consultantId),
+    consultantName,
+    clientEmail: clientEmail || 'seeker@psycholink.in',
+    clientName: clientName || 'Mindfulness Seeker',
+    date: new Date().toISOString(),
+    status: status || 'success'
+  };
+
+  transactions.unshift(transaction);
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(TRANSACTIONS_FILE, JSON.stringify(transactions, null, 2));
+  console.log(`[PAYMENT LOG] Client ${clientEmail} -> Consultant ${consultantName} (₹${amount})`);
+  return transaction;
+}
+
 // POST /api/payment/order — create Razorpay order
 app.post('/api/payment/order', async (req, res) => {
   if (!razorpay) return res.status(500).json({ error: 'Razorpay not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env' });
-  const { amount, consultantName } = req.body;
+  const { amount, consultantId, consultantName, clientEmail, clientName } = req.body;
   try {
     const order = await razorpay.orders.create({
       amount: (amount || 199) * 100, // paise
       currency: 'INR',
       receipt: `receipt_${Date.now()}`,
-      notes: { consultant: consultantName || 'PsychoLink Session' },
+      notes: { 
+        consultantId: String(consultantId || ''),
+        consultantName: consultantName || 'PsychoLink Session',
+        clientEmail: clientEmail || '',
+        clientName: clientName || ''
+      },
     });
     res.json({ order, key: process.env.RAZORPAY_KEY_ID });
   } catch (e) {
@@ -586,21 +679,88 @@ app.post('/api/payment/order', async (req, res) => {
 });
 
 // POST /api/payment/verify — verify payment signature
-app.post('/api/payment/verify', (req, res) => {
+app.post('/api/payment/verify', async (req, res) => {
   if (!process.env.RAZORPAY_KEY_SECRET) return res.status(500).json({ success: false });
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, consultantId: fallbackConsultantId, amount: fallbackAmount, clientEmail: fallbackClientEmail, clientName: fallbackClientName } = req.body;
   try {
     const sign     = razorpay_order_id + '|' + razorpay_payment_id;
     const expected = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(sign).digest('hex');
     if (expected === razorpay_signature) {
       console.log('💰 Payment verified:', razorpay_payment_id);
-      res.json({ success: true, paymentId: razorpay_payment_id });
+      
+      let consultantId = fallbackConsultantId;
+      let amountPaid = fallbackAmount || 199;
+      let clientEmail = fallbackClientEmail;
+      let clientName = fallbackClientName;
+
+      if (razorpay) {
+        try {
+          const orderDetails = await razorpay.orders.fetch(razorpay_order_id);
+          if (orderDetails && orderDetails.notes) {
+            if (orderDetails.notes.consultantId) consultantId = Number(orderDetails.notes.consultantId);
+            if (orderDetails.amount) amountPaid = orderDetails.amount / 100;
+            if (orderDetails.notes.clientEmail) clientEmail = orderDetails.notes.clientEmail;
+            if (orderDetails.notes.clientName) clientName = orderDetails.notes.clientName;
+          }
+        } catch (err) {
+          console.warn("Could not fetch order details from Razorpay, using fallback body:", err.message);
+        }
+      }
+
+      const tx = recordTransaction({
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        amount: amountPaid,
+        consultantId,
+        clientEmail,
+        clientName,
+        status: 'success'
+      });
+
+      res.json({ success: true, paymentId: razorpay_payment_id, transaction: tx });
     } else {
       res.status(400).json({ success: false, error: 'Invalid signature' });
     }
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
   }
+});
+
+// POST /api/payment/simulate-success — handle simulated checkout for testing/fallback
+app.post('/api/payment/simulate-success', (req, res) => {
+  const { consultantId, amount, clientEmail, clientName } = req.body;
+  if (!consultantId) {
+    return res.status(400).json({ error: 'consultantId is required' });
+  }
+  try {
+    const tx = recordTransaction({
+      paymentId: `sim_${Date.now()}`,
+      orderId: `order_sim_${Date.now()}`,
+      amount: amount || 199,
+      consultantId,
+      clientEmail,
+      clientName,
+      status: 'simulated'
+    });
+    res.json({ success: true, transaction: tx });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/consultants/:id/transactions — fetch transaction history for a consultant
+app.get('/api/consultants/:id/transactions', (req, res) => {
+  const consultantId = Number(req.params.id);
+  let transactions = [];
+  if (fs.existsSync(TRANSACTIONS_FILE)) {
+    try {
+      transactions = JSON.parse(fs.readFileSync(TRANSACTIONS_FILE, 'utf-8'));
+    } catch (e) {
+      transactions = [];
+    }
+  }
+  const filtered = transactions.filter(tx => tx.consultantId === consultantId);
+  res.json(filtered);
 });
 
 // Razorpay status

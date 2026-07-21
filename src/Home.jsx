@@ -884,6 +884,9 @@ export default function Home({ userProfile, onLogout }) {
   const [usedFree,       setUsedFree]       = useState(() => {
     try { return JSON.parse(localStorage.getItem('eq_used_free') || '{}'); } catch { return {}; }
   });
+  const [sessionBalance, setSessionBalance] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('eq_session_balance') || '{}'); } catch { return {}; }
+  });
   const [activeProfile, setActiveProfile]   = useState(null);
   const [myProfileData, setMyProfileData] = useState(() => {
     try {
@@ -970,10 +973,41 @@ export default function Home({ userProfile, onLogout }) {
       setPayConsultant(c);
     } else {
       setFreeConsultant(c);
-      const updated = { ...usedFree, [c.id]: true };
-      setUsedFree(updated);
-      localStorage.setItem('eq_used_free', JSON.stringify(updated));
+      const updatedFree = { ...usedFree, [c.id]: true };
+      setUsedFree(updatedFree);
+      localStorage.setItem('eq_used_free', JSON.stringify(updatedFree));
+
+      const updatedBalance = { ...sessionBalance, [c.id]: (sessionBalance[c.id] || 0) + 1 };
+      setSessionBalance(updatedBalance);
+      localStorage.setItem('eq_session_balance', JSON.stringify(updatedBalance));
     }
+  };
+
+  const handlePaymentSuccess = (consultantId) => {
+    const updatedBalance = { ...sessionBalance, [consultantId]: (sessionBalance[consultantId] || 0) + 1 };
+    setSessionBalance(updatedBalance);
+    localStorage.setItem('eq_session_balance', JSON.stringify(updatedBalance));
+    
+    // Refresh consultants list from backend to fetch updated earnings/sessions count
+    fetch(`${API_BASE}/api/consultants`)
+      .then(r => r.json())
+      .then(setConsultants)
+      .catch(() => {});
+  };
+
+  const handleStartCall = (c, audioOnly) => {
+    const currentBal = sessionBalance[c.id] || 0;
+    if (currentBal <= 0) {
+      alert("Please book a session before starting the call!");
+      setPayConsultant(c);
+      return;
+    }
+
+    const updatedBalance = { ...sessionBalance, [c.id]: currentBal - 1 };
+    setSessionBalance(updatedBalance);
+    localStorage.setItem('eq_session_balance', JSON.stringify(updatedBalance));
+
+    setCall({ consultant: c, audioOnly });
   };
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:'smooth' }); }, [messages, loading]);
@@ -1259,49 +1293,52 @@ export default function Home({ userProfile, onLogout }) {
         {sidebar && (
           <motion.aside initial={{ x:-270, opacity:0 }} animate={{ x:0, opacity:1 }} exit={{ x:-270, opacity:0 }}
             transition={{ type:'spring', stiffness:300, damping:30 }}
-            style={{ width:'255px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'var(--bg-sidebar)', backdropFilter:'blur(40px)', borderRight:'1px solid var(--border-subtle)', position:'relative', zIndex:20 }}>
+            style={{ width:'265px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'var(--bg-sidebar)', backdropFilter:'blur(40px)', borderRight:'1px solid var(--border-subtle)', position:'relative', zIndex:20, boxShadow:'10px 0 30px rgba(0,0,0,0.4)' }}>
 
-            {/* Brand */}
-            <div style={{ padding:'22px 16px 16px', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'9px', marginBottom:'20px', userSelect:'none' }}>
-                <motion.div animate={{ scale:[1,1.3,1], opacity:[0.6,1,0.6] }} transition={{ duration:2.5, repeat:Infinity }}
-                  style={{ width:'8px', height:'8px', borderRadius:'50%', background:accent, transition:'background 0.5s' }}/>
-                <span style={{ fontFamily: G, fontStyle: 'italic', fontWeight: '800', fontSize: '1.2rem', color: '#fff', letterSpacing: '-0.5px' }}>equilibrium</span>
-                <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.3)', fontFamily: S, letterSpacing: '1px', marginLeft: '2px', fontWeight:'700' }}>CORE</span>
+            {/* Brand Header */}
+            <div style={{ padding:'24px 20px 18px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'22px', userSelect:'none' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                  <motion.div animate={{ scale:[1,1.25,1], opacity:[0.7,1,0.7] }} transition={{ duration:2.5, repeat:Infinity }}
+                    style={{ width:'10px', height:'10px', borderRadius:'50%', background:accent, boxShadow:`0 0 12px ${accent}`, transition:'background 0.5s' }}/>
+                  <span style={{ fontFamily: G, fontStyle: 'italic', fontWeight: '800', fontSize: '1.35rem', color: '#fff', letterSpacing: '-0.5px' }}>equilibrium</span>
+                </div>
+                <span style={{ fontSize: '0.62rem', color: accent, background: `${accent}18`, border: `1px solid ${accent}35`, borderRadius:'8px', padding:'2px 7px', fontFamily: S, letterSpacing: '1.2px', fontWeight:'800' }}>AI CORE</span>
               </div>
-              {/* AI Toggle */}
-              <div style={{ display:'flex', background:'rgba(255,255,255,0.02)', borderRadius:'14px', padding:'4px', gap:'4px', border:'1px solid var(--border-subtle)' }}>
-                {[{ k:'AURA', g:'#f43f5e' }, { k:'MAX', g:'#14b8a6' }].map(ai => {
+              {/* AI Persona Toggle */}
+              <div style={{ display:'flex', background:'rgba(255,255,255,0.03)', borderRadius:'16px', padding:'4px', gap:'4px', border:'1px solid var(--border-subtle)', boxShadow:'inset 0 1px 3px rgba(0,0,0,0.5)' }}>
+                {[{ k:'AURA', g:'linear-gradient(135deg, #f43f5e, #e11d48)' }, { k:'MAX', g:'linear-gradient(135deg, #14b8a6, #0d9488)' }].map(ai => {
                   const isActive = activeAI === ai.k;
                   return (
                     <button key={ai.k} onClick={() => setActiveAI(ai.k)}
-                      style={{ flex:1, padding:'10px 0', border:'none', borderRadius:'10px', cursor:'pointer', fontSize:'0.75rem', fontWeight:'700', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s', background: isActive ? ai.g : 'transparent', color: isActive ? '#fff' : 'rgba(255,255,255,0.3)', boxShadow: isActive ? 'var(--shadow-premium)' : 'none', userSelect:'none' }}>
-                      {ai.k} Core
+                      style={{ flex:1, padding:'9px 0', border: isActive ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent', borderRadius:'12px', cursor:'pointer', fontSize:'0.75rem', fontWeight:'800', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', background: isActive ? ai.g : 'transparent', color: isActive ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: isActive ? '0 8px 20px rgba(0,0,0,0.5)' : 'none', userSelect:'none' }}>
+                      {ai.k} CORE
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Nav */}
-            <div style={{ padding:'12px 10px 6px' }}>
+            {/* Nav Menu */}
+            <div style={{ padding:'16px 12px 6px' }}>
               {navItems.map(item => {
                 const isActive = tab === item.id;
                 return (
-                  <motion.button key={item.id} whileHover={{ background:'rgba(255,255,255,0.04)' }} whileTap={{ scale:0.98 }}
+                  <motion.button key={item.id} whileHover={{ background:'rgba(255,255,255,0.05)', x:2 }} whileTap={{ scale:0.98 }}
                     onClick={() => setTab(item.id)}
                     style={{ 
-                      width:'100%', padding:'11px 14px', 
-                      background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent', 
-                      border: '1px solid transparent',
-                      borderLeft: isActive ? `3px solid ${accent}` : '3px solid transparent',
-                      borderRadius: isActive ? '0 12px 12px 0' : '12px', 
-                      color: isActive ? '#fff' : 'rgba(255,255,255,0.45)', 
-                      fontSize:'0.85rem', fontWeight: isActive ? '700' : '500', 
-                      cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'12px', 
-                      transition:'all 0.2s', marginBottom:'4px' 
+                      width:'100%', padding:'12px 16px', 
+                      background: isActive ? `linear-gradient(90deg, ${accent}22 0%, rgba(255,255,255,0.02) 100%)` : 'transparent', 
+                      border: isActive ? `1px solid ${accent}35` : '1px solid transparent',
+                      borderLeft: isActive ? `4px solid ${accent}` : '4px solid transparent',
+                      borderRadius: isActive ? '12px' : '12px', 
+                      color: isActive ? '#ffffff' : 'rgba(255,255,255,0.5)', 
+                      fontSize:'0.88rem', fontWeight: isActive ? '700' : '500', 
+                      cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'14px', 
+                      transition:'all 0.25s ease', marginBottom:'6px',
+                      boxShadow: isActive ? `0 4px 15px ${accent}15` : 'none'
                     }}>
-                    <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.25)', transition:'color 0.2s', display:'flex', alignItems:'center' }}>{item.icon}</span>
+                    <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)', transition:'color 0.2s', display:'flex', alignItems:'center', fontSize:'1rem' }}>{item.icon}</span>
                     {item.label}
                   </motion.button>
                 );
@@ -1835,22 +1872,82 @@ export default function Home({ userProfile, onLogout }) {
                               View Profile
                             </motion.button>
                             <motion.button whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }} onClick={() => c.avail && handleBookConsultant(c)}
-                              style={{ flex: 1.2, padding:'11px', background:c.avail?`linear-gradient(135deg,${c.color},${c.color}cc)`:'rgba(255,255,255,0.03)', border:`1px solid ${c.avail?c.color:'rgba(255,255,255,0.06)'}`, borderRadius:12, color:c.avail?'#fff':'rgba(255,255,255,0.22)', fontSize:'0.8rem', fontWeight:700, cursor:c.avail?'pointer':'not-allowed', fontFamily:J, transition:'all 0.2s', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-                              {!c.avail ? 'Busy' : usedFree[c.id] ? `Pay ₹${c.price||199}` : 'Book Free'}
+                              style={{ 
+                                flex: 1.2, 
+                                padding:'11px', 
+                                background: !c.avail 
+                                  ? 'rgba(255,255,255,0.03)' 
+                                  : (sessionBalance[c.id] || 0) > 0 
+                                    ? 'rgba(16,185,129,0.06)' 
+                                    : `linear-gradient(135deg,${c.color},${c.color}cc)`, 
+                                border:`1px solid ${!c.avail ? 'rgba(255,255,255,0.06)' : (sessionBalance[c.id] || 0) > 0 ? 'rgba(16,185,129,0.3)' : c.color}`, 
+                                borderRadius:12, 
+                                color: !c.avail 
+                                  ? 'rgba(255,255,255,0.22)' 
+                                  : (sessionBalance[c.id] || 0) > 0 
+                                    ? '#10b981' 
+                                    : '#fff', 
+                                fontSize:'0.8rem', 
+                                fontWeight:700, 
+                                cursor:c.avail?'pointer':'not-allowed', 
+                                fontFamily:J, 
+                                transition:'all 0.2s', 
+                                whiteSpace:'nowrap', 
+                                overflow:'hidden', 
+                                textOverflow:'ellipsis' 
+                              }}>
+                              {!c.avail 
+                                ? 'Busy' 
+                                : (sessionBalance[c.id] || 0) > 0 
+                                  ? `Booked (${sessionBalance[c.id]} Left) ✓` 
+                                  : usedFree[c.id] 
+                                    ? `Pay ₹${c.price||199}` 
+                                    : 'Book Free'}
                             </motion.button>
                           </div>
 
                           {/* In-app call buttons */}
                           {c.avail && (
                             <div style={{ display:'flex', gap:8 }}>
-                              <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
-                                onClick={() => setCall({ consultant:c, audioOnly:false })}
-                                style={{ flex:1, padding:'10px', background:'rgba(255,255,255,0.04)', border:`1px solid ${c.color}44`, borderRadius:12, color:c.color, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                              <motion.button whileHover={{ scale: (sessionBalance[c.id] || 0) > 0 ? 1.03 : 1 }} whileTap={{ scale: (sessionBalance[c.id] || 0) > 0 ? 0.97 : 1 }}
+                                onClick={() => handleStartCall(c, false)}
+                                style={{ 
+                                  flex:1, 
+                                  padding:'10px', 
+                                  background: (sessionBalance[c.id] || 0) > 0 ? `${c.color}15` : 'rgba(255,255,255,0.02)', 
+                                  border:`1px solid ${(sessionBalance[c.id] || 0) > 0 ? `${c.color}55` : 'rgba(255,255,255,0.05)'}`, 
+                                  borderRadius:12, 
+                                  color: (sessionBalance[c.id] || 0) > 0 ? c.color : 'rgba(255,255,255,0.25)', 
+                                  fontSize:'0.78rem', 
+                                  fontWeight:700, 
+                                  cursor:'pointer', 
+                                  fontFamily:J, 
+                                  display:'flex', 
+                                  alignItems:'center', 
+                                  justifyContent:'center', 
+                                  gap:6,
+                                  boxShadow: (sessionBalance[c.id] || 0) > 0 ? `0 0 10px ${c.color}18` : 'none'
+                                }}>
                                 <FaVideo size={12}/> Video
                               </motion.button>
-                              <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
-                                onClick={() => setCall({ consultant:c, audioOnly:true })}
-                                style={{ flex:1, padding:'10px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:12, color:'rgba(255,255,255,0.7)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                              <motion.button whileHover={{ scale: (sessionBalance[c.id] || 0) > 0 ? 1.03 : 1 }} whileTap={{ scale: (sessionBalance[c.id] || 0) > 0 ? 0.97 : 1 }}
+                                onClick={() => handleStartCall(c, true)}
+                                style={{ 
+                                  flex:1, 
+                                  padding:'10px', 
+                                  background: (sessionBalance[c.id] || 0) > 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)', 
+                                  border:`1px solid ${(sessionBalance[c.id] || 0) > 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)'}`, 
+                                  borderRadius:12, 
+                                  color: (sessionBalance[c.id] || 0) > 0 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.25)', 
+                                  fontSize:'0.78rem', 
+                                  fontWeight:700, 
+                                  cursor:'pointer', 
+                                  fontFamily:J, 
+                                  display:'flex', 
+                                  alignItems:'center', 
+                                  justifyContent:'center', 
+                                  gap:6 
+                                }}>
                                 <FaPhone size={11}/> Voice
                               </motion.button>
                             </div>
@@ -2029,8 +2126,8 @@ export default function Home({ userProfile, onLogout }) {
       {/* ── PAYMENT MODAL ── */}
       <AnimatePresence>
         {payConsultant && (
-          <PaymentModal consultant={payConsultant} onClose={() => setPayConsultant(null)}
-            onSuccess={() => { setPayConsultant(null); }}
+          <PaymentModal consultant={payConsultant} userProfile={userProfile} onClose={() => setPayConsultant(null)}
+            onSuccess={(cId) => { handlePaymentSuccess(cId); setPayConsultant(null); }}
           />
         )}
       </AnimatePresence>
