@@ -24,42 +24,48 @@ const ALL_TASKS = [
 ];
 
 /* ══════════════════════════════════════════════════════════════════
-   GALAXY GLOW TREND CHART (Matching exact Reference Image layout & glow)
-   - Left vertical tab strip (RECOVERY / STRESS)
-   - Deep indigo/violet background card
-   - High-glow multi-color neon line + frosted glass background wave
+   PSYCHOLOGY NEON GLOW TREND CHART (Pure Mental Health & Psychology Metrics)
+   - Left vertical tab strip (RECOVERY / ANXIETY / NEURAL)
+   - 100% Psychology metrics (Resonance, Cortisol Drop, Vagal Tone) - No Money/Dollars
+   - Hyper-glow multi-color neon line + frosted glass background wave
    - Top peak light beam & glowing threshold line
    ══════════════════════════════════════════════════════════════════ */
-function GalaxyGlowTrendChart() {
-  const [activeTab, setActiveTab] = useState('RECOVERY'); // RECOVERY or STRESS
+function GalaxyPsychologyTrendChart() {
+  const [activeTab, setActiveTab] = useState('RECOVERY'); // RECOVERY, ANXIETY, or NEURAL
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
   // Smooth Bezier Curve Path Data
-  // Recovery Mode: Smooth rising wave with high peak at Week 3
   const recoveryForegroundPath = "M 40,210 C 100,210 130,150 180,150 C 230,150 260,230 310,230 C 360,230 400,60 470,60 C 530,60 580,120 640,150";
   const recoveryGlassPath = "M 40,260 C 90,260 120,270 170,270 C 230,270 270,180 320,180 C 370,180 430,120 480,120 C 540,120 590,230 640,250 L 640,300 L 40,300 Z";
 
-  // Stress Mode: Inverse wave
-  const stressForegroundPath = "M 40,90 C 100,90 140,220 200,220 C 260,220 300,100 360,100 C 420,100 460,240 520,240 C 580,240 610,180 640,180";
-  const stressGlassPath = "M 40,140 C 90,140 130,110 180,110 C 240,110 280,220 340,220 C 400,220 450,160 500,160 C 550,160 590,120 640,120 L 640,300 L 40,300 Z";
+  const anxietyForegroundPath = "M 40,90 C 100,90 140,220 200,220 C 260,220 300,100 360,100 C 420,100 460,240 520,240 C 580,240 610,180 640,180";
+  const anxietyGlassPath = "M 40,140 C 90,140 130,110 180,110 C 240,110 280,220 340,220 C 400,220 450,160 500,160 C 550,160 590,120 640,120 L 640,300 L 40,300 Z";
 
-  const isRecovery = activeTab === 'RECOVERY';
-  const mainPath = isRecovery ? recoveryForegroundPath : stressForegroundPath;
-  const glassPath = isRecovery ? recoveryGlassPath : stressGlassPath;
+  const neuralForegroundPath = "M 40,180 C 100,180 150,110 210,110 C 270,110 320,190 380,190 C 440,190 480,70 540,70 C 590,70 620,130 640,130";
+  const neuralGlassPath = "M 40,220 C 90,220 140,150 200,150 C 260,150 300,220 360,220 C 420,220 470,110 520,110 C 570,110 610,170 640,170 L 640,300 L 40,300 Z";
 
-  // Interactive Data Points
-  const points = isRecovery ? [
-    { x: 40, y: 210, label: '1-7 (Week 1)', val: '$2,800 / 42% Calm' },
-    { x: 180, y: 150, label: 'Mid-W1', val: '$4,400 / 58% Calm' },
-    { x: 310, y: 230, label: '7-14 (Week 2)', val: '$2,100 / 35% Dip' },
-    { x: 470, y: 60, label: '14-21 (Week 3 Peak)', val: '$7,000 / 94% Peak' },
-    { x: 640, y: 150, label: '21-28 (Week 4)', val: '$4,500 / 76% Steady' },
+  const mainPath = activeTab === 'RECOVERY' ? recoveryForegroundPath : activeTab === 'ANXIETY' ? anxietyForegroundPath : neuralForegroundPath;
+  const glassPath = activeTab === 'RECOVERY' ? recoveryGlassPath : activeTab === 'ANXIETY' ? anxietyGlassPath : neuralGlassPath;
+
+  // Psychology Interactive Data Points
+  const points = activeTab === 'RECOVERY' ? [
+    { x: 40, y: 210, label: 'Week 1 (Days 1-7)', val: '42% Calm Baseline' },
+    { x: 180, y: 150, label: 'Mid-W1', val: '58% Cognitive Balance' },
+    { x: 310, y: 230, label: 'Week 2 (Days 7-14)', val: '35% Mild Stress Dip' },
+    { x: 470, y: 60, label: 'Week 3 Peak', val: '94% Emotional Resilience Peak' },
+    { x: 640, y: 150, label: 'Week 4 (Days 21-28)', val: '78% Sustained Mindfulness' },
+  ] : activeTab === 'ANXIETY' ? [
+    { x: 40, y: 90, label: 'Week 1', val: '85% Initial Anxiety Level' },
+    { x: 200, y: 220, label: 'Week 2', val: '38% Cortisol Reduction' },
+    { x: 360, y: 100, label: 'Week 3', val: '72% Temporary Trigger Spike' },
+    { x: 520, y: 240, label: 'Week 4', val: '24% Optimal Vagal Tone' },
+    { x: 640, y: 180, label: 'End Month', val: '40% Balanced State' },
   ] : [
-    { x: 40, y: 90, label: '1-7 (Week 1)', val: 'High Cortisol 85%' },
-    { x: 200, y: 220, label: '7-14 (Week 2)', val: 'Stress Dropped 38%' },
-    { x: 360, y: 100, label: '14-21 (Week 3)', val: 'Temporary Spike 72%' },
-    { x: 520, y: 240, label: '21-28 (Week 4)', val: 'Optimal Calm 24%' },
-    { x: 640, y: 180, label: 'End Month', val: 'Balanced 40%' },
+    { x: 40, y: 180, label: 'Week 1', val: '52 Focus Score' },
+    { x: 210, y: 110, label: 'Week 2', val: '78 Neuroplasticity Index' },
+    { x: 380, y: 190, label: 'Week 3', val: '45 Fatigue Dip' },
+    { x: 540, y: 70, label: 'Week 4 Peak', val: '92 Mind Clarity Peak' },
+    { x: 640, y: 130, label: 'End Month', val: '84 Cognitive Reserve' },
   ];
 
   return (
@@ -75,7 +81,7 @@ function GalaxyGlowTrendChart() {
     }}>
       {/* ══ LEFT VERTICAL TAB STRIP (Matching Reference Image) ══ */}
       <div style={{
-        width: '125px',
+        width: '130px',
         background: 'rgba(12, 5, 26, 0.75)',
         borderRight: '1px solid rgba(255, 255, 255, 0.08)',
         display: 'flex',
@@ -84,12 +90,12 @@ function GalaxyGlowTrendChart() {
         paddingTop: '0px',
         flexShrink: 0
       }}>
-        {/* Tab 1: REVENUE / RECOVERY */}
+        {/* Tab 1: RECOVERY */}
         <button
           onClick={() => setActiveTab('RECOVERY')}
           style={{
             width: '100%',
-            padding: '24px 12px 20px',
+            padding: '22px 12px 18px',
             background: activeTab === 'RECOVERY'
               ? 'linear-gradient(180deg, #c084fc 0%, #9333ea 100%)'
               : 'transparent',
@@ -100,14 +106,13 @@ function GalaxyGlowTrendChart() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
+            gap: '3px',
             transition: 'all 0.25s'
           }}
         >
-          <span style={{ fontSize: '0.78rem', fontWeight: 800, fontFamily: S, letterSpacing: '1.2px' }}>RECOVERY</span>
-          <span style={{ fontSize: '0.6rem', opacity: 0.8, fontFamily: J }}>Calm Index</span>
+          <span style={{ fontSize: '0.78rem', fontWeight: 800, fontFamily: S, letterSpacing: '1px' }}>RECOVERY</span>
+          <span style={{ fontSize: '0.58rem', opacity: 0.85, fontFamily: J }}>Calm Index</span>
 
-          {/* Right Arrow Notch if Active */}
           {activeTab === 'RECOVERY' && (
             <div style={{
               position: 'absolute',
@@ -123,31 +128,68 @@ function GalaxyGlowTrendChart() {
           )}
         </button>
 
-        {/* Tab 2: STRESS / UNITS */}
+        {/* Tab 2: ANXIETY */}
         <button
-          onClick={() => setActiveTab('STRESS')}
+          onClick={() => setActiveTab('ANXIETY')}
           style={{
             width: '100%',
             padding: '20px 12px',
-            background: activeTab === 'STRESS'
+            background: activeTab === 'ANXIETY'
               ? 'linear-gradient(180deg, #f43f5e 0%, #be123c 100%)'
               : 'transparent',
             border: 'none',
-            color: activeTab === 'STRESS' ? '#ffffff' : 'rgba(255, 255, 255, 0.4)',
+            color: activeTab === 'ANXIETY' ? '#ffffff' : 'rgba(255, 255, 255, 0.4)',
             cursor: 'pointer',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
+            gap: '3px',
             transition: 'all 0.25s'
           }}
         >
-          <span style={{ fontSize: '0.78rem', fontWeight: 800, fontFamily: S, letterSpacing: '1.2px' }}>STRESS</span>
-          <span style={{ fontSize: '0.6rem', opacity: 0.8, fontFamily: J }}>Cortisol Drop</span>
+          <span style={{ fontSize: '0.78rem', fontWeight: 800, fontFamily: S, letterSpacing: '1px' }}>ANXIETY</span>
+          <span style={{ fontSize: '0.58rem', opacity: 0.85, fontFamily: J }}>Cortisol Drop</span>
 
-          {/* Right Arrow Notch if Active */}
-          {activeTab === 'STRESS' && (
+          {activeTab === 'ANXIETY' && (
+            <div style={{
+              position: 'absolute',
+              right: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: 0,
+              height: 0,
+              borderTop: '6px solid transparent',
+              borderBottom: '6px solid transparent',
+              borderRight: '6px solid #1d0c36'
+            }} />
+          )}
+        </button>
+
+        {/* Tab 3: NEURAL */}
+        <button
+          onClick={() => setActiveTab('NEURAL')}
+          style={{
+            width: '100%',
+            padding: '20px 12px',
+            background: activeTab === 'NEURAL'
+              ? 'linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)'
+              : 'transparent',
+            border: 'none',
+            color: activeTab === 'NEURAL' ? '#ffffff' : 'rgba(255, 255, 255, 0.4)',
+            cursor: 'pointer',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '3px',
+            transition: 'all 0.25s'
+          }}
+        >
+          <span style={{ fontSize: '0.78rem', fontWeight: 800, fontFamily: S, letterSpacing: '1px' }}>NEURAL</span>
+          <span style={{ fontSize: '0.58rem', opacity: 0.85, fontFamily: J }}>Focus Score</span>
+
+          {activeTab === 'NEURAL' && (
             <div style={{
               position: 'absolute',
               right: 0,
@@ -170,20 +212,20 @@ function GalaxyGlowTrendChart() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h3 style={{ margin: 0, fontFamily: J, fontWeight: 900, fontSize: '1.4rem', color: '#ffffff', letterSpacing: '-0.4px' }}>
-              Mental Health Recovery
+              Psychological Recovery Trend
             </h3>
             <p style={{ margin: '3px 0 0', fontSize: '0.72rem', color: '#f97316', fontWeight: 800, fontFamily: S, letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-              {activeTab} TREND CHART
+              {activeTab} COGNITIVE WAVEFORM
             </p>
           </div>
 
           {/* Top Right Filters */}
           <div style={{ display: 'flex', gap: '10px' }}>
             <span style={{ padding: '5px 12px', borderRadius: '14px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.72rem', fontFamily: S, cursor: 'pointer' }}>
-              ALL INDICATORS ▾
+              ALL PSYCH METRICS ▾
             </span>
             <span style={{ padding: '5px 12px', borderRadius: '14px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.72rem', fontFamily: S, cursor: 'pointer' }}>
-              AUGUST 2026 ▾
+              MONTHLY ANALYSIS ▾
             </span>
           </div>
         </div>
@@ -207,6 +249,13 @@ function GalaxyGlowTrendChart() {
                 <stop offset="100%" stopColor="#a855f7" />
               </linearGradient>
 
+              {/* Neural Mode Line Gradient */}
+              <linearGradient id="neuralCurveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#38bdf8" />
+                <stop offset="50%" stopColor="#8b5cf6" />
+                <stop offset="100%" stopColor="#10b981" />
+              </linearGradient>
+
               {/* Super Neon Glow Filter */}
               <filter id="superGlow" x="-30%" y="-30%" width="160%" height="160%">
                 <feGaussianBlur stdDeviation="6" result="blur1" />
@@ -226,18 +275,18 @@ function GalaxyGlowTrendChart() {
               </radialGradient>
             </defs>
 
-            {/* Y-Axis Value Grid Lines & Labels */}
+            {/* Y-Axis Psychology Labels (Percentage % & Cognitive Level) */}
             {[
-              { y: 60, val: '$7,000 / 95%' },
-              { y: 110, val: '$6,000 / 80%' },
-              { y: 160, val: '$5,000 / 65%' },
-              { y: 210, val: '$4,000 / 50%' },
-              { y: 260, val: '$3,000 / 35%' },
+              { y: 60, val: '100% Peak' },
+              { y: 110, val: '80% High' },
+              { y: 160, val: '60% Moderate' },
+              { y: 210, val: '40% Mild' },
+              { y: 260, val: '20% Low' },
             ].map((grid, idx) => (
               <g key={`y-grid-${idx}`}>
-                <line x1="40" y1={grid.y} x2="640" y2={grid.y} stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" />
-                <text x="35" y={grid.y + 4} fill="rgba(255, 255, 255, 0.3)" fontSize="9" fontFamily={S} textAnchor="end">
-                  {grid.val.split(' ')[0]}
+                <line x1="60" y1={grid.y} x2="640" y2={grid.y} stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" />
+                <text x="55" y={grid.y + 4} fill="rgba(255, 255, 255, 0.35)" fontSize="9" fontFamily={S} textAnchor="end">
+                  {grid.val}
                 </text>
               </g>
             ))}
@@ -250,8 +299,8 @@ function GalaxyGlowTrendChart() {
             {/* 1. Translucent Frosted Secondary Background Wave */}
             <motion.path
               d={glassPath}
-              fill={isRecovery ? "rgba(147, 51, 234, 0.18)" : "rgba(244, 63, 94, 0.15)"}
-              stroke={isRecovery ? "rgba(192, 132, 252, 0.35)" : "rgba(251, 146, 60, 0.35)"}
+              fill={activeTab === 'RECOVERY' ? "rgba(147, 51, 234, 0.18)" : activeTab === 'ANXIETY' ? "rgba(244, 63, 94, 0.15)" : "rgba(56, 189, 248, 0.15)"}
+              stroke={activeTab === 'RECOVERY' ? "rgba(192, 132, 252, 0.35)" : activeTab === 'ANXIETY' ? "rgba(251, 146, 60, 0.35)" : "rgba(56, 189, 248, 0.35)"}
               strokeWidth="1.5"
               initial={false}
               animate={{ d: glassPath }}
@@ -259,17 +308,17 @@ function GalaxyGlowTrendChart() {
             />
 
             {/* 2. Horizontal Peak Threshold Glowing Line */}
-            <line x1="40" y1={isRecovery ? 60 : 90} x2="640" y2={isRecovery ? 60 : 90} stroke="rgba(251, 146, 60, 0.6)" strokeWidth="1" strokeDasharray="3 3" />
+            <line x1="60" y1={activeTab === 'RECOVERY' ? 60 : activeTab === 'NEURAL' ? 70 : 90} x2="640" y2={activeTab === 'RECOVERY' ? 60 : activeTab === 'NEURAL' ? 70 : 90} stroke="rgba(251, 146, 60, 0.6)" strokeWidth="1" strokeDasharray="3 3" />
 
             {/* Intersection Dots along Peak Line */}
-            <circle cx="470" cy={isRecovery ? 60 : 90} r="3" fill="#ffffff" style={{ filter: 'drop-shadow(0 0 6px #ff5500)' }} />
-            <circle cx="640" cy={isRecovery ? 60 : 90} r="3" fill="#ffffff" style={{ filter: 'drop-shadow(0 0 6px #ff5500)' }} />
+            <circle cx="470" cy={activeTab === 'RECOVERY' ? 60 : activeTab === 'NEURAL' ? 70 : 90} r="3" fill="#ffffff" style={{ filter: 'drop-shadow(0 0 6px #ff5500)' }} />
+            <circle cx="640" cy={activeTab === 'RECOVERY' ? 60 : activeTab === 'NEURAL' ? 70 : 90} r="3" fill="#ffffff" style={{ filter: 'drop-shadow(0 0 6px #ff5500)' }} />
 
             {/* 3. Foreground Hyper-Glowing Neon Curve Line */}
             <motion.path
               d={mainPath}
               fill="none"
-              stroke={isRecovery ? "url(#galaxyCurveGrad)" : "url(#stressCurveGrad)"}
+              stroke={activeTab === 'RECOVERY' ? "url(#galaxyCurveGrad)" : activeTab === 'ANXIETY' ? "url(#stressCurveGrad)" : "url(#neuralCurveGrad)"}
               strokeWidth="5"
               strokeLinecap="round"
               filter="url(#superGlow)"
@@ -279,7 +328,7 @@ function GalaxyGlowTrendChart() {
             />
 
             {/* 4. Peak Flare Light Beam Burst (Top Peak Highlight) */}
-            {isRecovery && (
+            {activeTab === 'RECOVERY' && (
               <g transform="translate(470, 60)">
                 {/* Vertical Light Pillar Beam */}
                 <line x1="0" y1="-30" x2="0" y2="20" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="2" filter="drop-shadow(0 0 10px #ff7700)" />
@@ -301,15 +350,15 @@ function GalaxyGlowTrendChart() {
                 style={{ cursor: 'pointer' }}
               >
                 <circle cx={pt.x} cy={pt.y} r="8" fill="transparent" />
-                <circle cx={pt.x} cy={pt.y} r="4" fill="#ffffff" stroke={isRecovery ? "#c084fc" : "#f43f5e"} strokeWidth="2" style={{ filter: 'drop-shadow(0 0 6px #ffffff)' }} />
+                <circle cx={pt.x} cy={pt.y} r="4" fill="#ffffff" stroke={activeTab === 'RECOVERY' ? "#c084fc" : activeTab === 'ANXIETY' ? "#f43f5e" : "#38bdf8"} strokeWidth="2" style={{ filter: 'drop-shadow(0 0 6px #ffffff)' }} />
               </g>
             ))}
 
             {/* X-Axis Segment Labels at Bottom */}
-            <text x="110" y="290" fill="rgba(255, 255, 255, 0.35)" fontSize="10" fontFamily={S} textAnchor="middle">1-7</text>
-            <text x="245" y="290" fill="rgba(255, 255, 255, 0.35)" fontSize="10" fontFamily={S} textAnchor="middle">7-14</text>
-            <text x="390" y="290" fill="rgba(255, 255, 255, 0.35)" fontSize="10" fontFamily={S} textAnchor="middle">14-21</text>
-            <text x="555" y="290" fill="rgba(255, 255, 255, 0.35)" fontSize="10" fontFamily={S} textAnchor="middle">21-28</text>
+            <text x="110" y="290" fill="rgba(255, 255, 255, 0.35)" fontSize="10" fontFamily={S} textAnchor="middle">Week 1 (1-7)</text>
+            <text x="245" y="290" fill="rgba(255, 255, 255, 0.35)" fontSize="10" fontFamily={S} textAnchor="middle">Week 2 (7-14)</text>
+            <text x="390" y="290" fill="rgba(255, 255, 255, 0.35)" fontSize="10" fontFamily={S} textAnchor="middle">Week 3 (14-21)</text>
+            <text x="555" y="290" fill="rgba(255, 255, 255, 0.35)" fontSize="10" fontFamily={S} textAnchor="middle">Week 4 (21-28)</text>
           </svg>
 
           {/* Floating Hover Tooltip */}
@@ -401,12 +450,12 @@ export default function ProgressDashboard({ accent }) {
 
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.8rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>Mental Health Analytics</h2>
-        <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.86rem', margin:0, fontFamily:J }}>Futuristic cognitive trend analysis & emotional recovery tracking</p>
+        <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.8rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>Psychological Recovery Analytics</h2>
+        <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.86rem', margin:0, fontFamily:J }}>Real-time 6-week cognitive recovery, cortisol reduction & emotional wellness tracking</p>
       </div>
 
-      {/* ══ FEATURED: GALAXY GLOW TREND CHART (Matching exact Reference Photo) ══ */}
-      <GalaxyGlowTrendChart />
+      {/* ══ FEATURED: GALAXY PSYCHOLOGY TREND CHART ══ */}
+      <GalaxyPsychologyTrendChart />
 
       {/* Bottom Full-Width Daily Mental Health & Soft Skills Challenges */}
       <div style={{
