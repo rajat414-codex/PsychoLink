@@ -711,6 +711,54 @@ function ProfileCreationScreen({ userProfile, onSave, accent }) {
 
 
 
+// ─────────────────────────────────────────────────────────────────
+// Helper — Real-time Chat Sentiment Analyzer
+// Evaluates active AI session messages to scale graph response
+// ─────────────────────────────────────────────────────────────────
+function analyzeSentimentIntensity(messages) {
+  if (!messages || messages.length === 0) return 0;
+  
+  const text = messages.map(m => m.content || '').join(' ').toLowerCase();
+  
+  const stressTerms = [
+    'stress', 'anxious', 'anxiety', 'depressed', 'sad', 'overwhelmed', 'scared', 'fail', 
+    'pain', 'lonely', 'help', 'panic', 'tired', 'hopeless', 'worried', 'fear', 'dark',
+    'tension', 'dar', 'dukhi', 'pareshan', 'ro', 'bura', 'darr', 'breakup', 'crying',
+    'loss', 'alone', 'hurt', 'anger', 'angry', 'hate', 'exhausted', 'ruined'
+  ];
+  
+  const calmTerms = [
+    'calm', 'happy', 'relaxed', 'peace', 'peaceful', 'better', 'great', 'thank', 
+    'good', 'mindful', 'joy', 'smile', 'hope', 'positive', 'healed', 'soothing',
+    'achha', 'sukoon', 'pyar', 'khush', 'shanti', 'relieved', 'grateful', 'love', 'blessed'
+  ];
+  
+  let stressCount = 0;
+  let calmCount = 0;
+  
+  stressTerms.forEach(term => {
+    const matches = (text.match(new RegExp(`\\b${term}`, 'gi')) || []).length;
+    stressCount += matches;
+  });
+  
+  calmTerms.forEach(term => {
+    const matches = (text.match(new RegExp(`\\b${term}`, 'gi')) || []).length;
+    calmCount += matches;
+  });
+  
+  if (stressCount === 0 && calmCount === 0) return 0;
+  
+  if (stressCount > calmCount) {
+    // Negative intensity (-35 to -90) -> Downward valley _\|/_
+    return Math.max(-90, -35 - (stressCount - calmCount) * 15);
+  } else if (calmCount > stressCount) {
+    // Positive intensity (+35 to +90) -> Upward peak _/|\_
+    return Math.min(90, 35 + (calmCount - stressCount) * 15);
+  }
+  
+  return 0;
+}
+
 export default function Home({ userProfile, onLogout }) {
   const [tab,       setTab]       = useState('home');
   const [activeAI,  setActiveAI]  = useState('AURA');
@@ -1449,6 +1497,7 @@ export default function Home({ userProfile, onLogout }) {
                 consultants={consultants}
                 journalCount={journalEntries.length}
                 sessionCount={sessions[activeAI].length}
+                chatSentimentIntensity={analyzeSentimentIntensity(messages)}
               />
             )}
 

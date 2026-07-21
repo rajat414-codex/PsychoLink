@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaArrowUp, FaArrowDown, FaBrain, FaArrowRight, FaWind, FaRobot,
-  FaBolt, FaHeart, FaFire, FaSmile, FaChartLine, FaPlay, FaSlidersH, FaSync
+  FaBolt, FaHeart, FaFire, FaSmile, FaChartLine, FaPlay, FaSlidersH, FaSync, FaRobot as FaBot
 } from 'react-icons/fa';
 import RobotAvatar from './RobotAvatar';
 
@@ -12,16 +12,33 @@ const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoj
 const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
 /* ══════════════════════════════════════════════════════════════════
-   DYNAMIC SYMMETRIC RESPONSE GRAPH (Clean Real SaaS Aesthetic)
-   - X-axis: Stimulus / Intensity
-   - Y-axis: Response / Resonance
-   - Positive input -> Upward mountain peak _/|\_ (Constructive Amplification)
-   - Negative input -> Downward valley _\|/_ (Destructive Inversion)
-   - Zero input -> Flat baseline
-   - Dotted tick marks on axes & perfect mirror symmetry about vertical axis
+   AUTOMATED SYMMETRIC RESPONSE GRAPH
+   - Auto-syncs with AI Chat sentiment (stress/negativity -> downward valley, calm/positivity -> upward peak)
+   - X-axis: Stimulus Intensity | Y-axis: Resonance Response
+   - Mirror symmetry about Y-axis (x = 0)
    ══════════════════════════════════════════════════════════════════ */
-function SymmetricResponseGraph() {
-  const [intensity, setIntensity] = useState(70); // Default positive peak
+function SymmetricResponseGraph({ chatSentimentIntensity = 0 }) {
+  // Use chat sentiment intensity if available, or fallback to saved / default
+  const [intensity, setIntensity] = useState(() => {
+    if (chatSentimentIntensity !== 0) return chatSentimentIntensity;
+    try {
+      const saved = localStorage.getItem('equilibrium_chat_intensity');
+      return saved ? parseFloat(saved) : 70;
+    } catch {
+      return 70;
+    }
+  });
+
+  // Auto-update intensity when chat sentiment changes
+  useEffect(() => {
+    if (chatSentimentIntensity !== 0) {
+      setIntensity(chatSentimentIntensity);
+      try {
+        localStorage.setItem('equilibrium_chat_intensity', chatSentimentIntensity.toString());
+      } catch {}
+    }
+  }, [chatSentimentIntensity]);
+
   const width = 640;
   const height = 260;
   const cx = width / 2; // 320 (X=0 origin)
@@ -77,7 +94,7 @@ function SymmetricResponseGraph() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: statusColor, boxShadow: `0 0 10px ${statusColor}` }} />
             <h3 style={{ margin: 0, fontFamily: J, fontWeight: 800, fontSize: '1.1rem', color: '#f8fafc', letterSpacing: '-0.3px' }}>
-              Symmetric Response Function
+              Automated Session Response Function
             </h3>
           </div>
           <p style={{ margin: 0, fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: J }}>
@@ -85,22 +102,42 @@ function SymmetricResponseGraph() {
           </p>
         </div>
 
-        {/* Status Badge */}
-        <div style={{
-          padding: '6px 14px',
-          borderRadius: '20px',
-          background: `${statusColor}12`,
-          border: `1px solid ${statusColor}30`,
-          color: statusColor,
-          fontSize: '0.75rem',
-          fontWeight: 700,
-          fontFamily: S,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px'
-        }}>
-          {isPositive ? '▲ ' : isNegative ? '▼ ' : '● '}
-          {statusLabel}
+        {/* Real-time AI Sentiment Sync Tag */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {chatSentimentIntensity !== 0 && (
+            <div style={{
+              padding: '4px 10px',
+              borderRadius: '12px',
+              background: 'rgba(56, 189, 248, 0.1)',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
+              color: '#38bdf8',
+              fontSize: '0.68rem',
+              fontWeight: 800,
+              fontFamily: S,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              <FaBot size={10} /> Live Chat Sentiment Sync
+            </div>
+          )}
+
+          <div style={{
+            padding: '6px 14px',
+            borderRadius: '20px',
+            background: `${statusColor}12`,
+            border: `1px solid ${statusColor}30`,
+            color: statusColor,
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            fontFamily: S,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            {isPositive ? '▲ ' : isNegative ? '▼ ' : '● '}
+            {statusLabel}
+          </div>
         </div>
       </div>
 
@@ -191,7 +228,7 @@ function SymmetricResponseGraph() {
             fill="url(#symmetricGrad)"
             initial={false}
             animate={{ d: areaD }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
           />
 
           {/* Main Curve Stroke */}
@@ -205,7 +242,7 @@ function SymmetricResponseGraph() {
             filter="url(#crispGlow)"
             initial={false}
             animate={{ d: lineD }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
           />
 
           {/* Center Peak Highlight Dot */}
@@ -218,7 +255,7 @@ function SymmetricResponseGraph() {
             strokeWidth="2.5"
             initial={false}
             animate={{ cy: cy - amplitude }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             style={{ filter: `drop-shadow(0 0 8px ${statusColor})` }}
           />
         </svg>
@@ -229,8 +266,8 @@ function SymmetricResponseGraph() {
         
         {/* Slider input */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.5)', fontFamily: S, fontWeight: 700, minWidth: '130px', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <FaSlidersH size={11} color={statusColor} /> Stimulus Input:
+          <span style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.5)', fontFamily: S, fontWeight: 700, minWidth: '140px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <FaSlidersH size={11} color={statusColor} /> Session Intensity:
           </span>
 
           <input
@@ -238,7 +275,11 @@ function SymmetricResponseGraph() {
             min="-100"
             max="100"
             value={intensity}
-            onChange={(e) => setIntensity(parseFloat(e.target.value))}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value);
+              setIntensity(val);
+              try { localStorage.setItem('equilibrium_chat_intensity', val.toString()); } catch {}
+            }}
             style={{
               flex: 1,
               minWidth: '180px',
@@ -259,15 +300,18 @@ function SymmetricResponseGraph() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           
           {/* Preset Buttons */}
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {[
-              { label: '⛰️ High Peak (+85)', val: 85 },
+              { label: '🌊 Stress / Anxiety (-70)', val: -70 },
               { label: '⚖️ Baseline (0)', val: 0 },
-              { label: '🌊 Inverted (-75)', val: -75 },
+              { label: '🌸 Calm / Positive (+70)', val: 70 },
             ].map((preset, i) => (
               <button
                 key={i}
-                onClick={() => setIntensity(preset.val)}
+                onClick={() => {
+                  setIntensity(preset.val);
+                  try { localStorage.setItem('equilibrium_chat_intensity', preset.val.toString()); } catch {}
+                }}
                 style={{
                   padding: '6px 12px',
                   borderRadius: '10px',
@@ -284,15 +328,37 @@ function SymmetricResponseGraph() {
                 {preset.label}
               </button>
             ))}
+
+            {chatSentimentIntensity !== 0 && (
+              <button
+                onClick={() => setIntensity(chatSentimentIntensity)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  border: '1px solid #38bdf8',
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  color: '#38bdf8',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  fontFamily: J,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <FaSync size={10} /> Auto-Sync with Chat
+              </button>
+            )}
           </div>
 
           {/* Metric Badges */}
           <div style={{ display: 'flex', gap: '16px' }}>
             <div style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: S }}>
-              Peak Magnitude: <b style={{ color: '#fff' }}>{Math.abs(amplitude).toFixed(1)} px</b>
+              Magnitude: <b style={{ color: '#fff' }}>{Math.abs(amplitude).toFixed(1)} px</b>
             </div>
             <div style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: S }}>
-              Mirror Symmetry: <b style={{ color: '#10b981' }}>100% Perfect</b>
+              Symmetry: <b style={{ color: '#10b981' }}>100% Perfect</b>
             </div>
           </div>
 
@@ -355,9 +421,10 @@ export default function DashboardHome({
   moodToday, setMoodToday, MOODS,
   setShowBreath, setTab, setActiveAI, consultants,
   journalCount = 0, sessionCount = 12,
+  chatSentimentIntensity = 0,
 }) {
   const hour = new Date().getHours();
-  const timeEmoji = hour < 12 ? '🌅' : hour < 17 ? '☀️' : hour < 21 ? '🌆' : '🌙';
+  const timeEmoji = hour < 12 ? '🌅' : hour < 17 ? '☀️' : hour < 21 ? '<ctrl42>' : '🌙';
 
   return (
     <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, y: -12 }}
@@ -418,19 +485,19 @@ export default function DashboardHome({
         </div>
       </div>
 
-      {/* ══ FEATURED: CUSTOM SYMMETRIC RESPONSE GRAPH ══ */}
-      <SymmetricResponseGraph />
+      {/* ══ FEATURED: AUTOMATED SYMMETRIC RESPONSE GRAPH ══ */}
+      <SymmetricResponseGraph chatSentimentIntensity={chatSentimentIntensity} />
 
       {/* ══ CLEAN SAAS METRICS GRID ══ */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '24px' }}>
-        <CleanSaaSMetricCard title="Emotional Resonance" value="84%" subtext="Constructive peak" tag="+12%" tagColor="#10b981" icon={<FaHeart color="#10b981" />} />
+        <CleanSaaSMetricCard title="Emotional Resonance" value={chatSentimentIntensity !== 0 ? `${chatSentimentIntensity > 0 ? '+' : ''}${chatSentimentIntensity}` : "84%"} subtext={chatSentimentIntensity < 0 ? "Down Inversion" : "Constructive peak"} tag={chatSentimentIntensity < 0 ? "Stress Detected" : "Calm Synced"} tagColor={chatSentimentIntensity < 0 ? "#f43f5e" : "#10b981"} icon={<FaHeart color={chatSentimentIntensity < 0 ? "#f43f5e" : "#10b981"} />} />
         <CleanSaaSMetricCard title="Active Day Streak" value="7 Days" subtext="Consistent check-ins" tag="Active" tagColor="#f59e0b" icon={<FaFire color="#f59e0b" />} />
         <CleanSaaSMetricCard title="AI Therapy Sessions" value={sessionCount} subtext="Aura & Max engine" tag="Completed" tagColor="#6366f1" icon={<FaSmile color="#6366f1" />} />
         <CleanSaaSMetricCard title="Mindfulness Logs" value={journalCount} subtext="Reflections stored" tag="Saved" tagColor="#00e5ff" icon={<FaChartLine color="#00e5ff" />} />
       </div>
 
       {/* ══ AI ENGINE QUICK LAUNCH & EXPERTS ══ */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '18px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '18px' }}>
         
         {/* AI Co-Pilots */}
         <div style={{ background: '#0a0c12', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '20px', padding: '22px' }}>
