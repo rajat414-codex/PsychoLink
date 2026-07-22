@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ConsultationAnalytics from './ConsultationAnalytics';
 
 const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
 const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
@@ -453,6 +454,9 @@ export default function ProgressDashboard({ accent }) {
         <h2 style={{ fontFamily:J, fontWeight:800, fontSize:'1.8rem', letterSpacing:'-0.5px', color:'#fff', margin:'0 0 4px' }}>Psychological Recovery Analytics</h2>
         <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.86rem', margin:0, fontFamily:J }}>Real-time 6-week cognitive recovery, cortisol reduction & emotional wellness tracking</p>
       </div>
+
+      {/* ══ FEATURED: GLASSMORPHIC CONSULTATION ANALYTICS ══ */}
+      <ConsultationAnalytics />
 
       {/* ══ FEATURED: GALAXY PSYCHOLOGY TREND CHART ══ */}
       <GalaxyPsychologyTrendChart />
