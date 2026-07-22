@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaArrowUp, FaArrowDown, FaBrain, FaArrowRight, FaWind, FaRobot,
-  FaBolt, FaHeart, FaFire, FaSmile, FaChartLine, FaPlay, FaSlidersH, FaSync, FaRobot as FaBot
+  FaBolt, FaHeart, FaFire, FaSmile, FaChartLine, FaPlay, FaChevronDown, FaRobot as FaBot
 } from 'react-icons/fa';
 import RobotAvatar from './RobotAvatar';
 
@@ -12,148 +12,121 @@ const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoj
 const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
 /* ══════════════════════════════════════════════════════════════════
-   AUTOMATED SYMMETRIC RESPONSE GRAPH
-   - Auto-syncs with AI Chat sentiment (stress/negativity -> downward valley, calm/positivity -> upward peak)
-   - X-axis: Stimulus Intensity | Y-axis: Resonance Response
-   - Mirror symmetry about Y-axis (x = 0)
+   LUXURY GLASSMORPHISM TRACKING GRAPH (Matching Image Aesthetic)
+   - Deep dark translucent glass panel with electric bottom neon glow
+   - High-contrast smooth vector curve with white glowing nodes
+   - Vertical guideline drop-lines
+   - Large centered metric overlay (e.g., 78%)
+   - Sleek dropdown controls
    ══════════════════════════════════════════════════════════════════ */
-function SymmetricResponseGraph({ chatSentimentIntensity = 0 }) {
-  // Use chat sentiment intensity if available, or fallback to saved / default
-  const [intensity, setIntensity] = useState(() => {
-    if (chatSentimentIntensity !== 0) return chatSentimentIntensity;
-    try {
-      const saved = localStorage.getItem('equilibrium_chat_intensity');
-      return saved ? parseFloat(saved) : 70;
-    } catch {
-      return 70;
-    }
+function TrackDownGraphCard({
+  title,
+  subtext,
+  valueText,
+  valueLabel,
+  description,
+  accentColor = '#0088ff',
+  glowColor = 'rgba(0, 140, 255, 0.4)',
+  pointsData = [25, 52, 42, 78, 92],
+  timeframe = 'Month',
+  onTimeframeChange,
+  liveSync = false
+}) {
+  const [selectedFrame, setSelectedFrame] = useState(timeframe);
+
+  // Generate SVG cubic bezier path for smooth curve
+  const width = 500;
+  const height = 220;
+  const paddingX = 30;
+  const paddingY = 40;
+
+  const minVal = Math.min(...pointsData) - 10;
+  const maxVal = Math.max(...pointsData) + 10;
+
+  const pts = pointsData.map((val, idx) => {
+    const x = paddingX + (idx / (pointsData.length - 1)) * (width - 2 * paddingX);
+    const y = height - paddingY - ((val - minVal) / (maxVal - minVal)) * (height - 2 * paddingY);
+    return { x, y, val };
   });
 
-  // Auto-update intensity when chat sentiment changes
-  useEffect(() => {
-    if (chatSentimentIntensity !== 0) {
-      setIntensity(chatSentimentIntensity);
-      try {
-        localStorage.setItem('equilibrium_chat_intensity', chatSentimentIntensity.toString());
-      } catch {}
-    }
-  }, [chatSentimentIntensity]);
-
-  const width = 640;
-  const height = 260;
-  const cx = width / 2; // 320 (X=0 origin)
-  const cy = height / 2; // 130 (Y=0 origin)
-  const xSpan = 240; // X axis length on each side
-
-  // Calculate SVG Path for symmetric Gaussian response curve
-  // y(x) = cy - A * exp(-(x / sigma)^2)
-  const amplitude = (intensity / 100) * 85; // Scale height/depth to max 85px
-  const sigma = 70; // Width of the response bell
-
-  const points = [];
-  const numSteps = 120;
-  for (let i = 0; i <= numSteps; i++) {
-    const xRel = -xSpan + (i / numSteps) * (2 * xSpan); // x from -240 to +240
-    const yRel = amplitude * Math.exp(-Math.pow(xRel / sigma, 2));
-    const svgX = cx + xRel;
-    const svgY = cy - yRel; // SVG Y goes downward, so subtract peak
-    points.push({ x: svgX, y: svgY });
+  // Calculate smooth cubic bezier path
+  let pathD = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const curr = pts[i];
+    const next = pts[i + 1];
+    const cp1x = curr.x + (next.x - curr.x) / 2;
+    const cp1y = curr.y;
+    const cp2x = curr.x + (next.x - curr.x) / 2;
+    const cp2y = next.y;
+    pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${next.x} ${next.y}`;
   }
 
-  // Build line path string
-  const lineD = points.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`, '');
-
-  // Build closed area path string for gradient fill
-  const areaD = `${lineD} L ${cx + xSpan} ${cy} L ${cx - xSpan} ${cy} Z`;
-
-  // Curve Status Labels
-  const isPositive = intensity > 5;
-  const isNegative = intensity < -5;
-  const statusLabel = isPositive
-    ? 'Constructive Amplification (+ Peak)'
-    : isNegative
-    ? 'Destructive Inversion (- Valley)'
-    : 'Equilibrium Baseline (Flat)';
-
-  const statusColor = isPositive ? '#00e5ff' : isNegative ? '#f43f5e' : '#a855f7';
+  // Area under curve
+  const areaD = `${pathD} L ${pts[pts.length - 1].x} ${height} L ${pts[0].x} ${height} Z`;
 
   return (
     <div style={{
-      background: '#0a0c12',
-      border: '1px solid rgba(255, 255, 255, 0.08)',
-      borderRadius: '24px',
-      padding: '24px 26px',
-      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
-      marginBottom: '24px',
       position: 'relative',
-      overflow: 'hidden'
+      background: 'linear-gradient(180deg, rgba(12, 16, 26, 0.75) 0%, rgba(6, 9, 16, 0.95) 100%)',
+      backdropFilter: 'blur(32px)',
+      WebkitBackdropFilter: 'blur(32px)',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+      borderBottom: `2px solid ${accentColor}`,
+      borderRadius: '28px',
+      padding: '24px 28px',
+      boxShadow: `0 24px 60px -10px rgba(0, 0, 0, 0.8), 0 15px 30px -10px ${glowColor}, inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      overflow: 'hidden',
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
-      {/* Card Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 2, marginBottom: '12px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: statusColor, boxShadow: `0 0 10px ${statusColor}` }} />
-            <h3 style={{ margin: 0, fontFamily: J, fontWeight: 800, fontSize: '1.1rem', color: '#f8fafc', letterSpacing: '-0.3px' }}>
-              Automated Session Response Function
-            </h3>
-          </div>
-          <p style={{ margin: 0, fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: J }}>
-            Horizontal Axis (X): Stimulus Intensity &nbsp;|&nbsp; Vertical Axis (Y): Resonance Response
-          </p>
+          <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.55)', fontWeight: '600', fontFamily: J }}>
+            {title}
+          </span>
+          {liveSync && (
+            <span style={{ marginLeft: '10px', padding: '3px 8px', borderRadius: '10px', background: `${accentColor}18`, border: `1px solid ${accentColor}40`, color: accentColor, fontSize: '0.65rem', fontWeight: 800, fontFamily: S }}>
+              ● LIVE SYNC
+            </span>
+          )}
         </div>
 
-        {/* Real-time AI Sentiment Sync Tag */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {chatSentimentIntensity !== 0 && (
-            <div style={{
-              padding: '4px 10px',
-              borderRadius: '12px',
-              background: 'rgba(56, 189, 248, 0.1)',
-              border: '1px solid rgba(56, 189, 248, 0.25)',
-              color: '#38bdf8',
-              fontSize: '0.68rem',
-              fontWeight: 800,
-              fontFamily: S,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}>
-              <FaBot size={10} /> Live Chat Sentiment Sync
-            </div>
-          )}
-
-          <div style={{
-            padding: '6px 14px',
-            borderRadius: '20px',
-            background: `${statusColor}12`,
-            border: `1px solid ${statusColor}30`,
-            color: statusColor,
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            fontFamily: S,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            {isPositive ? '▲ ' : isNegative ? '▼ ' : '● '}
-            {statusLabel}
-          </div>
+        {/* Sleek Pill Dropdown */}
+        <div style={{
+          padding: '6px 14px',
+          borderRadius: '20px',
+          background: 'rgba(255, 255, 255, 0.04)',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+          color: 'rgba(255, 255, 255, 0.8)',
+          fontSize: '0.74rem',
+          fontFamily: J,
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          cursor: 'pointer'
+        }}>
+          {selectedFrame} <FaChevronDown size={9} color="rgba(255,255,255,0.5)" />
         </div>
       </div>
 
-      {/* SVG Canvas for Axes & Curve */}
-      <div style={{ width: '100%', overflowX: 'auto', display: 'flex', justifyContent: 'center', position: 'relative' }}>
-        <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ overflow: 'visible' }}>
+      {/* Main Vector Graph Canvas */}
+      <div style={{ position: 'relative', width: '100%', height: '220px', margin: '10px 0' }}>
+        <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
           <defs>
-            {/* Fill Gradient */}
-            <linearGradient id="symmetricGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={statusColor} stopOpacity={0.35} />
-              <stop offset="100%" stopColor={statusColor} stopOpacity={0.0} />
+            {/* Soft Ambient Fill Gradient under line */}
+            <linearGradient id={`areaGrad-${title.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={accentColor} stopOpacity={0.18} />
+              <stop offset="100%" stopColor={accentColor} stopOpacity={0.0} />
             </linearGradient>
 
-            {/* Crisp glow filter */}
-            <filter id="crispGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="2.5" result="blur" />
+            {/* White Glow Filter for Nodes */}
+            <filter id="whiteGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
@@ -161,148 +134,97 @@ function SymmetricResponseGraph({ chatSentimentIntensity = 0 }) {
             </filter>
           </defs>
 
-          {/* Dotted Grid Background */}
-          <pattern id="dotGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <circle cx="10" cy="10" r="1" fill="rgba(255, 255, 255, 0.05)" />
-          </pattern>
-          <rect width={width} height={height} fill="url(#dotGrid)" />
+          {/* Vertical Drop-lines from points down to baseline */}
+          {pts.map((pt, i) => (
+            <line
+              key={`drop-${i}`}
+              x1={pt.x}
+              y1={pt.y}
+              x2={pt.x}
+              y2={height - 10}
+              stroke="rgba(255, 255, 255, 0.12)"
+              strokeWidth="1.2"
+              strokeDasharray="3 3"
+            />
+          ))}
 
-          {/* X Axis (Horizontal) */}
-          <line x1={40} y1={cy} x2={width - 40} y2={cy} stroke="rgba(255, 255, 255, 0.3)" strokeWidth="1.5" />
-          {/* X Axis Arrow Head */}
-          <polygon points={`${width - 35},${cy} ${width - 43},${cy - 4} ${width - 43},${cy + 4}`} fill="rgba(255, 255, 255, 0.5)" />
+          {/* Area Fill */}
+          <path d={areaD} fill={`url(#areaGrad-${title.replace(/\s+/g, '')})`} />
 
-          {/* Y Axis (Vertical - Mirror Symmetry Line) */}
-          <line x1={cx} y1={height - 20} x2={cx} y2={20} stroke="rgba(255, 255, 255, 0.3)" strokeWidth="1.5" strokeDasharray="4 3" />
-          {/* Y Axis Arrow Head */}
-          <polygon points={`${cx},15 ${cx - 4},23 ${cx + 4},23`} fill="rgba(255, 255, 255, 0.5)" />
-
-          {/* X Axis Dotted Ticks & Labels */}
-          {[-200, -150, -100, -50, 0, 50, 100, 150, 200].map((val) => {
-            const xPos = cx + val;
-            return (
-              <g key={`x-tick-${val}`}>
-                <line x1={xPos} y1={cy - 4} x2={xPos} y2={cy + 4} stroke="rgba(255, 255, 255, 0.3)" strokeWidth="1" />
-                <text x={xPos} y={cy + 16} fill="rgba(255, 255, 255, 0.35)" fontSize="9" fontFamily={S} textAnchor="middle">
-                  {val > 0 ? `+${val}` : val}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* Y Axis Dotted Ticks & Labels */}
-          {[-80, -40, 40, 80].map((val) => {
-            const yPos = cy - val;
-            return (
-              <g key={`y-tick-${val}`}>
-                <line x1={cx - 4} y1={yPos} x2={cx + 4} y2={yPos} stroke="rgba(255, 255, 255, 0.3)" strokeWidth="1" />
-                <text x={cx - 10} y={yPos + 3} fill="rgba(255, 255, 255, 0.35)" fontSize="9" fontFamily={S} textAnchor="end">
-                  {val > 0 ? `+${val}` : val}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* Origin Label (0, 0) */}
-          <text x={cx + 10} y={cy - 8} fill="rgba(255, 255, 255, 0.4)" fontSize="10" fontFamily={S} fontWeight="700">
-            (0,0)
-          </text>
-
-          {/* Axis Title Labels */}
-          <text x={width - 40} y={cy - 10} fill="rgba(255, 255, 255, 0.6)" fontSize="10" fontFamily={S} fontWeight="700" textAnchor="end">
-            +X Stimulus
-          </text>
-          <text x={40} y={cy - 10} fill="rgba(255, 255, 255, 0.6)" fontSize="10" fontFamily={S} fontWeight="700" textAnchor="start">
-            -X Stimulus
-          </text>
-          <text x={cx + 10} y={30} fill="rgba(255, 255, 255, 0.6)" fontSize="10" fontFamily={S} fontWeight="700">
-            +Y Amplification
-          </text>
-          <text x={cx + 10} y={height - 10} fill="rgba(255, 255, 255, 0.6)" fontSize="10" fontFamily={S} fontWeight="700">
-            -Y Inversion
-          </text>
-
-          {/* Filled Area Under Curve */}
-          <motion.path
-            d={areaD}
-            fill="url(#symmetricGrad)"
-            initial={false}
-            animate={{ d: areaD }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-          />
-
-          {/* Main Curve Stroke */}
-          <motion.path
-            d={lineD}
+          {/* Crisp White Curve Line (Matching Image) */}
+          <path
+            d={pathD}
             fill="none"
-            stroke={statusColor}
-            strokeWidth="3"
+            stroke="#ffffff"
+            strokeWidth="3.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            filter="url(#crispGlow)"
-            initial={false}
-            animate={{ d: lineD }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
+            style={{ filter: 'drop-shadow(0 2px 8px rgba(255,255,255,0.3))' }}
           />
 
-          {/* Center Peak Highlight Dot */}
-          <motion.circle
-            cx={cx}
-            cy={cy - amplitude}
-            r="5"
-            fill="#ffffff"
-            stroke={statusColor}
-            strokeWidth="2.5"
-            initial={false}
-            animate={{ cy: cy - amplitude }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            style={{ filter: `drop-shadow(0 0 8px ${statusColor})` }}
-          />
+          {/* White Glowing Node Dots */}
+          {pts.map((pt, i) => (
+            <circle
+              key={`node-${i}`}
+              cx={pt.x}
+              cy={pt.y}
+              r="4.5"
+              fill="#ffffff"
+              stroke={accentColor}
+              strokeWidth="2"
+              filter="url(#whiteGlow)"
+            />
+          ))}
         </svg>
-      </div>
 
-      {/* 100% Automated Readout Footer */}
-      <div style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-        
-        {/* Automated System Status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.45)', fontFamily: S, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <FaBot size={12} color="#38bdf8" /> Automated Response Engine:
-          </span>
-          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: statusColor, fontFamily: S }}>
-            {intensity > 0 ? `+${intensity} (Amplified Peak)` : intensity < 0 ? `${intensity} (Inverted Valley)` : '0 (Neutral Baseline)'}
-          </span>
-        </div>
-
-        {/* Readout Metrics */}
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <div style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: S }}>
-            Peak Amplitude: <b style={{ color: '#fff' }}>{Math.abs(amplitude).toFixed(1)} px</b>
+        {/* Center Overlaid Metric Percentage Display */}
+        <div style={{
+          position: 'absolute',
+          bottom: '22px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          textAlign: 'center',
+          pointerEvents: 'none',
+          zIndex: 5
+        }}>
+          <div style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.55)', fontFamily: J, fontWeight: 600, marginBottom: '2px' }}>
+            {valueLabel}
           </div>
-          <div style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: S }}>
-            Mirror Symmetry: <b style={{ color: '#10b981' }}>100% Exact</b>
+          <div style={{
+            fontSize: '3.2rem',
+            fontWeight: '800',
+            color: '#ffffff',
+            fontFamily: S,
+            lineHeight: 1,
+            letterSpacing: '-1px',
+            textShadow: '0 4px 20px rgba(0,0,0,0.8)'
+          }}>
+            {valueText}
+          </div>
+          <div style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.4)', fontFamily: J, marginTop: '6px', maxWidth: '280px' }}>
+            {description}
           </div>
         </div>
-
       </div>
     </div>
   );
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   MINIMALIST CLEAN SAAS METRIC CARD (Clean SaaS Aesthetic from Photo 2)
+   MINIMALIST CLEAN SAAS METRIC CARD
    ══════════════════════════════════════════════════════════════════ */
 function CleanSaaSMetricCard({ title, value, subtext, tag, tagColor, icon }) {
   return (
     <div style={{
-      background: '#0a0c12',
+      background: 'rgba(10, 12, 18, 0.8)',
+      backdropFilter: 'blur(20px)',
       border: '1px solid rgba(255, 255, 255, 0.08)',
-      borderRadius: '20px',
+      borderRadius: '22px',
       padding: '20px 22px',
-      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+      boxShadow: '0 12px 32px rgba(0, 0, 0, 0.45)',
       display: 'flex',
       flexDirection: 'column',
-      justify: 'space-between',
+      justifyContent: 'space-between',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -310,13 +232,13 @@ function CleanSaaSMetricCard({ title, value, subtext, tag, tagColor, icon }) {
         <span style={{ fontSize: '0.82rem', color: 'rgba(255, 255, 255, 0.45)', fontWeight: '600', fontFamily: J }}>
           {title}
         </span>
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem' }}>
+        <div style={{ width: 34, height: 34, borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem' }}>
           {icon}
         </div>
       </div>
 
       <div style={{ margin: '8px 0' }}>
-        <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#ffffff', fontFamily: S, lineHeight: 1 }}>
+        <div style={{ fontSize: '2.1rem', fontWeight: '800', color: '#ffffff', fontFamily: S, lineHeight: 1 }}>
           {value}
         </div>
       </div>
@@ -334,7 +256,7 @@ function CleanSaaSMetricCard({ title, value, subtext, tag, tagColor, icon }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   DASHBOARD HOME — Ultra-Clean Real SaaS Aesthetic
+   DASHBOARD HOME — Redesigned Panel Layout
    ══════════════════════════════════════════════════════════════════ */
 export default function DashboardHome({
   firstName, greeting, accent,
@@ -344,12 +266,17 @@ export default function DashboardHome({
   chatSentimentIntensity = 0,
 }) {
   const hour = new Date().getHours();
-  const timeEmoji = hour < 12 ? '🌅' : hour < 17 ? '☀️' : hour < 21 ? '<ctrl42>' : '🌙';
+  const timeEmoji = hour < 12 ? '🌅' : hour < 17 ? '☀️' : hour < 21 ? '🌆' : '🌙';
+
+  const sentimentVal = chatSentimentIntensity !== 0 ? chatSentimentIntensity : 78;
+  const sentimentGraphData = chatSentimentIntensity < 0
+    ? [60, 45, 30, 20, Math.max(10, 50 + chatSentimentIntensity)]
+    : [35, 50, 45, 68, Math.min(95, 60 + (sentimentVal * 0.35))];
 
   return (
     <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, y: -12 }}
       transition={{ duration: 0.35 }}
-      style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden', padding: '22px 26px 40px', background: '#06070a' }}>
+      style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden', padding: '22px 28px 45px', background: '#05070c' }}>
 
       {/* ══ Header Row ══ */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
@@ -367,12 +294,12 @@ export default function DashboardHome({
           <button
             onClick={() => setShowBreath(true)}
             style={{
-              padding: '9px 16px',
-              borderRadius: '12px',
+              padding: '10px 18px',
+              borderRadius: '14px',
               background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
               color: '#fff',
-              fontSize: '0.8rem',
+              fontSize: '0.82rem',
               fontWeight: 700,
               fontFamily: J,
               cursor: 'pointer',
@@ -381,110 +308,142 @@ export default function DashboardHome({
               gap: '6px'
             }}
           >
-            <FaWind size={11} color={accent} /> Breath Session
+            <FaWind size={12} color={accent} /> Breath Session
           </button>
           <button
             onClick={() => setTab('chat')}
             style={{
-              padding: '9px 18px',
-              borderRadius: '12px',
+              padding: '10px 20px',
+              borderRadius: '14px',
               background: `linear-gradient(135deg, ${accent}, #8b5cf6)`,
               border: 'none',
               color: '#fff',
-              fontSize: '0.8rem',
+              fontSize: '0.82rem',
               fontWeight: 800,
               fontFamily: J,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '6px',
+              boxShadow: '0 8px 20px rgba(139, 92, 246, 0.3)'
             }}
           >
-            <FaRobot size={12} /> Talk to AI
+            <FaRobot size={13} /> Talk to AI
           </button>
         </div>
       </div>
 
-      {/* ══ FEATURED: AUTOMATED SYMMETRIC RESPONSE GRAPH ══ */}
-      <SymmetricResponseGraph chatSentimentIntensity={chatSentimentIntensity} />
+      {/* ══ 2 TRACKING GRAPHS PANEL (Full Width Screen Ratio) ══ */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '24px',
+        marginBottom: '26px',
+        width: '100%'
+      }}>
+        {/* Graph 1: Emotional Resonance & Live Sentiment Track */}
+        <TrackDownGraphCard
+          title="Emotional Resonance Track"
+          valueLabel="Resonance Score"
+          valueText={`${sentimentVal > 0 ? '+' : ''}${sentimentVal}%`}
+          description="Real-time sentiment progression tracked via AI consultation"
+          accentColor="#0088ff"
+          glowColor="rgba(0, 136, 255, 0.35)"
+          pointsData={sentimentGraphData}
+          timeframe="Month"
+          liveSync={chatSentimentIntensity !== 0}
+        />
+
+        {/* Graph 2: Cognitive Stability & Calm Index Track */}
+        <TrackDownGraphCard
+          title="Cognitive Calm Index"
+          valueLabel="Stability Index"
+          valueText="92%"
+          description="Continuous neurological stability & stress reduction curve"
+          accentColor="#7c3aed"
+          glowColor="rgba(124, 58, 237, 0.35)"
+          pointsData={[30, 48, 62, 75, 92]}
+          timeframe="Weekly"
+        />
+      </div>
 
       {/* ══ CLEAN SAAS METRICS GRID ══ */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '24px' }}>
-        <CleanSaaSMetricCard title="Emotional Resonance" value={chatSentimentIntensity !== 0 ? `${chatSentimentIntensity > 0 ? '+' : ''}${chatSentimentIntensity}` : "84%"} subtext={chatSentimentIntensity < 0 ? "Down Inversion" : "Constructive peak"} tag={chatSentimentIntensity < 0 ? "Stress Detected" : "Calm Synced"} tagColor={chatSentimentIntensity < 0 ? "#f43f5e" : "#10b981"} icon={<FaHeart color={chatSentimentIntensity < 0 ? "#f43f5e" : "#10b981"} />} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '26px' }}>
+        <CleanSaaSMetricCard title="Emotional Resonance" value={`${sentimentVal > 0 ? '+' : ''}${sentimentVal}%`} subtext={sentimentVal < 0 ? "Stress Inversion" : "Constructive Peak"} tag={sentimentVal < 0 ? "Stress Alert" : "Calm Synced"} tagColor={sentimentVal < 0 ? "#f43f5e" : "#10b981"} icon={<FaHeart color={sentimentVal < 0 ? "#f43f5e" : "#10b981"} />} />
         <CleanSaaSMetricCard title="Active Day Streak" value="7 Days" subtext="Consistent check-ins" tag="Active" tagColor="#f59e0b" icon={<FaFire color="#f59e0b" />} />
-        <CleanSaaSMetricCard title="AI Therapy Sessions" value={sessionCount} subtext="Aura & Max engine" tag="Completed" tagColor="#6366f1" icon={<FaSmile color="#6366f1" />} />
+        <CleanSaaSMetricCard title="AI Therapy Sessions" value={sessionCount} subtext="Aura & Max engines" tag="Completed" tagColor="#6366f1" icon={<FaSmile color="#6366f1" />} />
         <CleanSaaSMetricCard title="Mindfulness Logs" value={journalCount} subtext="Reflections stored" tag="Saved" tagColor="#00e5ff" icon={<FaChartLine color="#00e5ff" />} />
       </div>
 
       {/* ══ AI ENGINE QUICK LAUNCH & EXPERTS ══ */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '18px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '20px' }}>
         
         {/* AI Co-Pilots */}
-        <div style={{ background: '#0a0c12', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '20px', padding: '22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-            <h4 style={{ margin: 0, fontFamily: J, fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>AI Co-Pilots</h4>
-            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontFamily: S }}>2 Engines Active</span>
+        <div style={{ background: 'rgba(10, 12, 18, 0.8)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '24px', padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+            <h4 style={{ margin: 0, fontFamily: J, fontWeight: 800, fontSize: '0.98rem', color: '#fff' }}>AI Co-Pilots</h4>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: S }}>2 Engines Active</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div
               onClick={() => { setActiveAI('AURA'); setTab('chat'); }}
               style={{
-                padding: '16px',
-                borderRadius: '16px',
+                padding: '18px',
+                borderRadius: '18px',
                 background: 'rgba(239, 68, 68, 0.04)',
-                border: '1px solid rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.18)',
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.25s'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <RobotAvatar expression="smile" size="xs" glowColor="#ef4444" />
                 <span style={{ fontSize: '0.62rem', color: '#ef4444', fontWeight: 800, fontFamily: S }}>EMOTIONAL CORE</span>
               </div>
-              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Aura AI</p>
-              <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Empathic reflections & support</p>
+              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1.05rem', color: '#fff' }}>Aura AI</p>
+              <p style={{ margin: 0, fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Empathic reflections & support</p>
             </div>
 
             <div
               onClick={() => { setActiveAI('MAX'); setTab('chat'); }}
               style={{
-                padding: '16px',
-                borderRadius: '16px',
+                padding: '18px',
+                borderRadius: '18px',
                 background: 'rgba(34, 197, 94, 0.04)',
-                border: '1px solid rgba(34, 197, 94, 0.15)',
+                border: '1px solid rgba(34, 197, 94, 0.18)',
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.25s'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <RobotAvatar expression="neutral" size="xs" glowColor="#22c55e" />
                 <span style={{ fontSize: '0.62rem', color: '#22c55e', fontWeight: 800, fontFamily: S }}>COGNITIVE ENGINE</span>
               </div>
-              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Max AI</p>
-              <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Structured cognitive analysis</p>
+              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1.05rem', color: '#fff' }}>Max AI</p>
+              <p style={{ margin: 0, fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Structured cognitive analysis</p>
             </div>
           </div>
         </div>
 
         {/* Recommended Experts */}
-        <div style={{ background: '#0a0c12', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '20px', padding: '22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-            <h4 style={{ margin: 0, fontFamily: J, fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>Top Therapists</h4>
-            <span onClick={() => setTab('consult')} style={{ fontSize: '0.7rem', color: accent, fontWeight: 700, fontFamily: S, cursor: 'pointer' }}>View All →</span>
+        <div style={{ background: 'rgba(10, 12, 18, 0.8)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '24px', padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h4 style={{ margin: 0, fontFamily: J, fontWeight: 800, fontSize: '0.98rem', color: '#fff' }}>Top Therapists</h4>
+            <span onClick={() => setTab('consult')} style={{ fontSize: '0.72rem', color: accent, fontWeight: 700, fontFamily: S, cursor: 'pointer' }}>View All →</span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
             {(consultants || []).slice(0, 3).map((c, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)' }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: `${c.color}20`, border: `1px solid ${c.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.7rem', color: c.color }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)' }}>
+                <div style={{ width: 34, height: 34, borderRadius: '50%', background: `${c.color}20`, border: `1px solid ${c.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.72rem', color: c.color }}>
                   {(c.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</p>
-                  <p style={{ margin: 0, fontSize: '0.64rem', color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.spec}</p>
+                  <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</p>
+                  <p style={{ margin: 0, fontSize: '0.66rem', color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.spec}</p>
                 </div>
-                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#f59e0b' }}>★{c.rating}</span>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#f59e0b' }}>★{c.rating}</span>
               </div>
             ))}
           </div>
