@@ -458,9 +458,6 @@ export default function ProgressDashboard({ accent }) {
       {/* ══ FEATURED: GLASSMORPHIC CONSULTATION ANALYTICS ══ */}
       <ConsultationAnalytics />
 
-      {/* ══ FEATURED: GALAXY PSYCHOLOGY TREND CHART ══ */}
-      <GalaxyPsychologyTrendChart />
-
       {/* Bottom Full-Width Daily Mental Health & Soft Skills Challenges */}
       <div style={{
         background: '#0a0c12',
