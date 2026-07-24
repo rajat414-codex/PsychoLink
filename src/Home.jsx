@@ -780,7 +780,7 @@ function analyzeSentimentIntensity(messages) {
 export default function Home({ userProfile, onLogout }) {
   const [tab,       setTab]       = useState('home');
   const [activeAI,  setActiveAI]  = useState('AURA');
-  const [chatMenuOpen, setChatMenuOpen] = useState(false);
+  const [chatMenuOpen, setChatMenuOpen] = useState(true);
   const [sessions,  setSessions]  = useState({
     AURA:    [{ id:1, title:'New conversation', messages:[], active:true }],
     MAX:     [{ id:1, title:'New conversation', messages:[], active:true }],
@@ -1404,12 +1404,8 @@ export default function Home({ userProfile, onLogout }) {
 
                 const handleNavClick = () => {
                   if (isChat) {
-                    if (tab === 'chat') {
-                      setChatMenuOpen(!chatMenuOpen);
-                    } else {
-                      setTab('chat');
-                      setChatMenuOpen(true);
-                    }
+                    setTab('chat');
+                    setChatMenuOpen(true);
                   } else {
                     setTab(item.id);
                   }
