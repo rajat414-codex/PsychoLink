@@ -1395,31 +1395,74 @@ export default function Home({ userProfile, onLogout }) {
               </div>
             </div>
 
-            {/* Nav Menu */}
-            <div style={{ padding:'16px 12px 6px' }}>
               {navItems.map(item => {
                 const isActive = tab === item.id;
+                const isChat = item.id === 'chat';
+
                 return (
-                  <motion.button key={item.id} whileHover={{ background:'rgba(255,255,255,0.05)', x:2 }} whileTap={{ scale:0.98 }}
-                    onClick={() => setTab(item.id)}
-                    style={{ 
-                      width:'100%', padding:'12px 16px', 
-                      background: isActive ? `linear-gradient(90deg, ${accent}22 0%, rgba(255,255,255,0.02) 100%)` : 'transparent', 
-                      border: isActive ? `1px solid ${accent}35` : '1px solid transparent',
-                      borderLeft: isActive ? `4px solid ${accent}` : '4px solid transparent',
-                      borderRadius: isActive ? '12px' : '12px', 
-                      color: isActive ? '#ffffff' : 'rgba(255,255,255,0.5)', 
-                      fontSize:'0.88rem', fontWeight: isActive ? '700' : '500', 
-                      cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'14px', 
-                      transition:'all 0.25s ease', marginBottom:'6px',
-                      boxShadow: isActive ? `0 4px 15px ${accent}15` : 'none'
-                    }}>
-                    <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)', transition:'color 0.2s', display:'flex', alignItems:'center', fontSize:'1rem' }}>{item.icon}</span>
-                    {item.label}
-                  </motion.button>
+                  <React.Fragment key={item.id}>
+                    <motion.button whileHover={{ background:'rgba(255,255,255,0.05)', x:2 }} whileTap={{ scale:0.98 }}
+                      onClick={() => setTab(item.id)}
+                      style={{ 
+                        width:'100%', padding:'11px 16px', 
+                        background: isActive ? `linear-gradient(90deg, ${accent}22 0%, rgba(255,255,255,0.02) 100%)` : 'transparent', 
+                        border: isActive ? `1px solid ${accent}35` : '1px solid transparent',
+                        borderLeft: isActive ? `4px solid ${accent}` : '4px solid transparent',
+                        borderRadius: '12px', 
+                        color: isActive ? '#ffffff' : 'rgba(255,255,255,0.5)', 
+                        fontSize:'0.88rem', fontWeight: isActive ? '700' : '500', 
+                        cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'14px', 
+                        transition:'all 0.25s ease', marginBottom: isChat ? '4px' : '6px',
+                        boxShadow: isActive ? `0 4px 15px ${accent}15` : 'none'
+                      }}>
+                      <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)', transition:'color 0.2s', display:'flex', alignItems:'center', fontSize:'1rem' }}>{item.icon}</span>
+                      {item.label}
+                    </motion.button>
+
+                    {/* Hand-drawn Diagram Style Wiring Branch under AI Chat */}
+                    {isChat && (
+                      <div style={{ paddingLeft: '28px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '3px', position: 'relative' }}>
+                        {[
+                          { k: 'AURA', label: 'Aura', color: '#ef4444', icon: '🌸' },
+                          { k: 'MAX', label: 'Max', color: '#22c55e', icon: '⚡' },
+                          { k: 'SYNAPSE', label: 'Synapse', color: '#06b6d4', icon: '💻' },
+                          { k: 'LEX', label: 'Lex', color: '#a855f7', icon: '⚖️' },
+                        ].map((ai, idx, arr) => {
+                          const isSubActive = tab === 'chat' && activeAI === ai.k;
+                          const isLast = idx === arr.length - 1;
+
+                          return (
+                            <div
+                              key={ai.k}
+                              onClick={() => { setTab('chat'); setActiveAI(ai.k); }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '5px 10px',
+                                borderRadius: '10px',
+                                cursor: 'pointer',
+                                background: isSubActive ? `${ai.color}18` : 'transparent',
+                                border: isSubActive ? `1px solid ${ai.color}40` : '1px solid transparent',
+                                transition: 'all 0.2s ease',
+                                position: 'relative',
+                              }}
+                            >
+                              <span style={{ fontFamily: S, fontSize: '0.74rem', color: isSubActive ? ai.color : 'rgba(255,255,255,0.3)', fontWeight: '700' }}>
+                                {isLast ? '└─' : '├─'}
+                              </span>
+                              <span style={{ fontSize: '0.78rem' }}>{ai.icon}</span>
+                              <span style={{ fontSize: '0.78rem', fontFamily: S, fontWeight: isSubActive ? '800' : '600', color: isSubActive ? '#fff' : 'rgba(255,255,255,0.45)' }}>
+                                {ai.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </React.Fragment>
                 );
               })}
-            </div>
 
             {/* Chat history */}
             {tab === 'chat' && (
@@ -1542,7 +1585,7 @@ export default function Home({ userProfile, onLogout }) {
 
                 {/* ── HIGH-TECH 4-AI CO-PILOT WIRING SELECTOR PANEL ── */}
                 <div style={{ flexShrink: 0, padding: '14px 20px 6px', zIndex: 10, position: 'relative' }}>
-                  <div style={{ maxWidth: '820px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                  <div style={{ maxWidth: '760px', width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                     {[
                       { id: 'AURA', name: 'AURA', tag: 'EMOTIONAL CORE', icon: '🌸', color: '#ef4444', border: 'rgba(239, 68, 68, 0.4)', bg: 'rgba(239, 68, 68, 0.14)' },
                       { id: 'MAX', name: 'MAX', tag: 'COGNITIVE ENGINE', icon: '⚡', color: '#22c55e', border: 'rgba(34, 197, 94, 0.4)', bg: 'rgba(34, 197, 94, 0.14)' },

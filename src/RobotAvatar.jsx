@@ -3,15 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * Clean Premium 3D AI Bubble Avatar
- * - No borders anywhere
- * - Crystal clear white eyes with zero border artifacts
- * - Smooth seamless sphere with no protruding edges
- * - Aura = Red ring, Max = Green ring
+ * Dynamic eye visor covering layer & glow colors for AURA (Red), MAX (Green), SYNAPSE (Cyan), LEX (Purple)
  */
 export default function RobotAvatar({
   expression = 'smile',
   size = 'md',
-  glowColor = '#ff3b30',
+  glowColor = '#ef4444',
   isTyping = false,
   className = '',
   style = {}
@@ -20,16 +17,24 @@ export default function RobotAvatar({
   const d = sizeMap[size] || sizeMap.md;
   const s = d / 220;
 
-  const isMax = glowColor.toLowerCase() === '#34c759' || glowColor.toLowerCase() === '#22c55e' || glowColor.toLowerCase() === '#10b981';
+  const colorLower = (glowColor || '#ef4444').toLowerCase();
+  const isGreen = colorLower === '#34c759' || colorLower === '#22c55e' || colorLower === '#10b981';
+  const isCyan = colorLower === '#06b6d4' || colorLower === '#38bdf8' || colorLower === '#0284c7';
+  const isPurple = colorLower === '#a855f7' || colorLower === '#c084fc' || colorLower === '#9333ea' || colorLower === '#7e22ce';
+
   const isHappy = expression === 'happy' || expression === 'smile' || expression === 'laughing';
 
-  const ringGrad = isMax
-    ? 'linear-gradient(135deg, #6ee7b7, #10b981, #059669, #06b6d4)'
-    : 'linear-gradient(135deg, #fca5a5, #ef4444, #dc2626, #e11d48)';
+  const ringGrad = isGreen
+    ? 'linear-gradient(135deg, #6ee7b7, #10b981, #059669)'
+    : isCyan
+    ? 'linear-gradient(135deg, #67e8f9, #06b6d4, #0284c7)'
+    : isPurple
+    ? 'linear-gradient(135deg, #e9d5ff, #a855f7, #7e22ce)'
+    : 'linear-gradient(135deg, #fca5a5, #ef4444, #dc2626)';
 
-  const softGlow = isMax
-    ? `0 0 ${25 * s}px rgba(16,185,129,0.4), 0 0 ${60 * s}px rgba(16,185,129,0.1)`
-    : `0 0 ${25 * s}px rgba(239,68,68,0.4), 0 0 ${60 * s}px rgba(239,68,68,0.1)`;
+  const activeColor = isGreen ? '#10b981' : isCyan ? '#06b6d4' : isPurple ? '#a855f7' : '#ef4444';
+
+  const softGlow = `0 0 ${25 * s}px ${activeColor}88, 0 0 ${60 * s}px ${activeColor}33`;
 
   return (
     <motion.div
@@ -43,9 +48,7 @@ export default function RobotAvatar({
         position: 'absolute',
         width: d * 1.2, height: d * 1.2,
         borderRadius: '50%',
-        background: isMax
-          ? 'radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 65%)'
-          : 'radial-gradient(circle, rgba(239,68,68,0.06) 0%, transparent 65%)',
+        background: `radial-gradient(circle, ${activeColor}20 0%, transparent 65%)`,
         filter: `blur(${15 * s}px)`,
         zIndex: 0, pointerEvents: 'none'
       }} />
@@ -114,7 +117,7 @@ export default function RobotAvatar({
           }}
         />
 
-        {/* VISOR — seamless gradient ring, NO border */}
+        {/* VISOR COVERING LAYER — seamless gradient ring in persona color */}
         <div style={{
           width: `${148 * s}px`, height: `${98 * s}px`,
           borderRadius: `${49 * s}px`,
@@ -200,7 +203,7 @@ export default function RobotAvatar({
                         opacity: [0.6, 1, 0.6],
                         boxShadow: [
                           `0 0 ${4*s}px #ffffff`,
-                          `0 0 ${12*s}px ${glowColor}`,
+                          `0 0 ${12*s}px ${activeColor}`,
                           `0 0 ${4*s}px #ffffff`
                         ]
                       }}
@@ -215,7 +218,7 @@ export default function RobotAvatar({
                         height: `${5 * s}px`,
                         borderRadius: `${2.5 * s}px`,
                         backgroundColor: '#ffffff',
-                        boxShadow: `0 0 ${6 * s}px ${glowColor}`
+                        boxShadow: `0 0 ${6 * s}px ${activeColor}`
                       }}
                     />
                   ))}
