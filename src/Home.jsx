@@ -1470,26 +1470,30 @@ export default function Home({ userProfile, onLogout }) {
             </div>
 
 
-            {/* User + Logout */}
-            <div style={{ padding:'12px 14px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 12px', borderRadius:'14px', background:'rgba(255,255,255,0.01)', border:'1px solid var(--border-subtle)' }}>
-                {renderAvatar(
-                  myProfileData ? myProfileData.pfp : userProfile?.picture,
-                  myProfileData ? myProfileData.name : (userProfile?.name || 'User'),
-                  myProfileData?.color || '#ec4899',
-                  32,
-                  '0.8rem'
-                )}
-                <div style={{ flex:1, overflow:'hidden', minWidth:0 }}>
-                  <p style={{ margin:0, fontSize:'0.8rem', fontWeight:'600', color:'rgba(255,255,255,0.85)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{myProfileData ? myProfileData.name : (userProfile?.name || 'User')}</p>
-                  <p style={{ margin:0, fontSize:'0.64rem', color:'rgba(255,255,255,0.3)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{myProfileData ? `@${myProfileData.username}` : (userProfile?.email || '')}</p>
+              {/* User Profile Tag directly below sections with white faded line */}
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 12px', borderRadius:'14px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', boxShadow: '0 4px 14px rgba(0,0,0,0.3)' }}>
+                  {renderAvatar(
+                    myProfileData ? myProfileData.pfp : userProfile?.picture,
+                    myProfileData ? myProfileData.name : (userProfile?.name || 'User'),
+                    myProfileData?.color || '#ec4899',
+                    32,
+                    '0.8rem'
+                  )}
+                  <div style={{ flex:1, overflow:'hidden', minWidth:0 }}>
+                    <p style={{ margin:0, fontSize:'0.8rem', fontWeight:'700', color:'rgba(255,255,255,0.9)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily: J }}>
+                      {myProfileData ? myProfileData.name : (userProfile?.name || 'User')}
+                    </p>
+                    <p style={{ margin:0, fontSize:'0.64rem', color:'rgba(255,255,255,0.4)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily: S }}>
+                      {myProfileData ? `@${myProfileData.username}` : (userProfile?.email || '@user')}
+                    </p>
+                  </div>
+                  <motion.button whileHover={{ color:'#f43f5e', background: 'rgba(244,63,94,0.1)' }} whileTap={{ scale:0.9 }} onClick={onLogout} title="Logout"
+                    style={{ background:'none', border:'none', color:'rgba(255,255,255,0.35)', cursor:'pointer', padding:'6px', borderRadius:'8px', transition:'all 0.2s', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <FaSignOutAlt size={12}/>
+                  </motion.button>
                 </div>
-                <motion.button whileHover={{ color:'#f43f5e', background: 'rgba(244,63,94,0.05)' }} whileTap={{ scale:0.9 }} onClick={onLogout}
-                  style={{ background:'none', border:'none', color:'rgba(255,255,255,0.25)', cursor:'pointer', padding:'6px', borderRadius:'8px', transition:'all 0.2s', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <FaSignOutAlt size={12}/>
-                </motion.button>
               </div>
-            </div>
           </motion.aside>
         )}
       </AnimatePresence>
