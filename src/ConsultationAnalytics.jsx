@@ -104,9 +104,9 @@ export default function ConsultationAnalytics() {
     return () => clearInterval(interval);
   }, []);
 
-  // SVG Donut Calculations
-  const radius = 82;
-  const strokeWidth = 18;
+  // SVG Donut Calculations (170px hole diameter)
+  const radius = 96;
+  const strokeWidth = 22;
   const circumference = 2 * Math.PI * radius;
 
   let accumulatedAngle = 0;
@@ -203,11 +203,11 @@ export default function ConsultationAnalytics() {
       </div>
 
       {/* ── Main Panel Content ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '32px', alignItems: 'center', position: 'relative', zIndex: 2, marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1.7fr', gap: '32px', alignItems: 'center', position: 'relative', zIndex: 2, marginBottom: '24px' }}>
         
         {/* LEFT: ULTRA-STYLISH CIRCLE / DONUT CHART */}
-        <div style={{ position: 'relative', height: '260px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ position: 'relative', width: '250px', height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'relative', height: '290px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'relative', width: '280px', height: '280px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             
             {/* Outer Rotating Dashed Orbital Ring 1 */}
             <motion.div
@@ -237,8 +237,8 @@ export default function ConsultationAnalytics() {
               }}
             />
 
-            {/* SVG Donut */}
-            <svg width="250" height="250" viewBox="0 0 240 240" style={{ transform: 'rotate(-90deg)', overflow: 'visible', zIndex: 2 }}>
+            {/* SVG Donut Canvas */}
+            <svg width="280" height="280" viewBox="0 0 280 280" style={{ transform: 'rotate(-90deg)', overflow: 'visible', zIndex: 2 }}>
               <defs>
                 {categories.map((c) => (
                   <linearGradient key={`grad-${c.id}`} id={`grad-${c.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -249,7 +249,7 @@ export default function ConsultationAnalytics() {
               </defs>
 
               {/* Dark Track Background Circle */}
-              <circle cx="120" cy="120" r={radius} fill="none" stroke="rgba(255, 255, 255, 0.05)" strokeWidth={strokeWidth} />
+              <circle cx="140" cy="140" r={radius} fill="none" stroke="rgba(255, 255, 255, 0.05)" strokeWidth={strokeWidth} />
 
               {/* Segment Arcs */}
               {categories.map((cat) => {
@@ -263,8 +263,8 @@ export default function ConsultationAnalytics() {
                 return (
                   <motion.circle
                     key={cat.id}
-                    cx="120"
-                    cy="120"
+                    cx="140"
+                    cy="140"
                     r={radius}
                     fill="transparent"
                     stroke={`url(#grad-${cat.id})`}
@@ -284,15 +284,15 @@ export default function ConsultationAnalytics() {
               })}
             </svg>
 
-            {/* Inner Translucent Glass Core Display (Centered perfectly inside Donut Hole) */}
+            {/* Inner Translucent Glass Core Display (Centered perfectly inside 170px Donut Hole) */}
             <div
               style={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '136px',
-                height: '136px',
+                width: '150px',
+                height: '150px',
                 borderRadius: '50%',
                 background: 'rgba(255, 255, 255, 0.03)',
                 backdropFilter: 'blur(12px)',
@@ -306,11 +306,11 @@ export default function ConsultationAnalytics() {
                 pointerEvents: 'none',
                 textAlign: 'center',
                 zIndex: 5,
-                padding: '8px',
+                padding: '12px',
                 boxSizing: 'border-box',
               }}
             >
-              <span style={{ fontSize: '0.62rem', color: hoveredCat ? hoveredCat.color : '#38bdf8', fontFamily: S, fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', lineHeight: 1.1 }}>
+              <span style={{ fontSize: '0.66rem', color: hoveredCat ? hoveredCat.color : '#38bdf8', fontFamily: S, fontWeight: 800, letterSpacing: '1.1px', textTransform: 'uppercase', lineHeight: 1.1 }}>
                 {hoveredCat ? hoveredCat.agent : 'TOTAL SESSIONS'}
               </span>
               <motion.span
@@ -319,18 +319,18 @@ export default function ConsultationAnalytics() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2 }}
                 style={{
-                  fontSize: '2.2rem',
+                  fontSize: '2.4rem',
                   fontWeight: 800,
                   color: '#ffffff',
                   fontFamily: S,
                   lineHeight: 1,
-                  margin: '3px 0',
-                  textShadow: hoveredCat ? `0 0 16px ${hoveredCat.color}` : '0 0 16px rgba(0,136,255,0.5)',
+                  margin: '4px 0',
+                  textShadow: hoveredCat ? `0 0 18px ${hoveredCat.color}` : '0 0 18px rgba(0,136,255,0.5)',
                 }}
               >
                 {hoveredCat ? `${Math.round((hoveredCat.count / totalSessions) * 100)}%` : totalSessions}
               </motion.span>
-              <span style={{ fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: J, fontWeight: 600, lineHeight: 1.1 }}>
+              <span style={{ fontSize: '0.64rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: J, fontWeight: 600, lineHeight: 1.1 }}>
                 {hoveredCat ? `${hoveredCat.count} Sessions` : 'Telemetry Streamed'}
               </span>
             </div>
