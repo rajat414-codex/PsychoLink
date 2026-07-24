@@ -1000,8 +1000,8 @@ export default function Home({ userProfile, onLogout }) {
   ];
 
   const navItems = [
-    { id:'home',       icon:<FaHome size={15}/>,        label:'Home'         },
     { id:'chat',       icon:<FaComments size={15}/>,     label:'AI Chat'      },
+    { id:'home',       icon:<FaHome size={15}/>,        label:'Home'         },
     { id:'report',     icon:<FaBrain size={15}/>,        label:'Brain Report' },
     { id:'consult',    icon:<FaUserMd size={15}/>,       label:'Consultants'  },
     { id:'progress',   icon:<FaChartLine size={15}/>,    label:'Progress'     },
@@ -1368,8 +1368,8 @@ export default function Home({ userProfile, onLogout }) {
             style={{ width:'275px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'rgba(8, 12, 22, 0.65)', backdropFilter:'blur(36px)', WebkitBackdropFilter:'blur(36px)', borderRight:'1.5px solid rgba(255,255,255,0.15)', position:'relative', zIndex:20, boxShadow:'12px 0 35px rgba(0,0,0,0.6)' }}>
 
             {/* Brand Header */}
-            <div style={{ padding:'24px 20px 18px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'22px', userSelect:'none' }}>
+            <div style={{ padding:'22px 18px 16px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px', userSelect:'none' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                   <motion.div animate={{ scale:[1,1.25,1], opacity:[0.7,1,0.7] }} transition={{ duration:2.5, repeat:Infinity }}
                     style={{ width:'10px', height:'10px', borderRadius:'50%', background:accent, boxShadow:`0 0 12px ${accent}`, transition:'background 0.5s' }}/>
@@ -1377,19 +1377,20 @@ export default function Home({ userProfile, onLogout }) {
                 </div>
                 <span style={{ fontSize: '0.62rem', color: accent, background: `${accent}18`, border: `1px solid ${accent}35`, borderRadius:'8px', padding:'2px 7px', fontFamily: S, letterSpacing: '1.2px', fontWeight:'800' }}>AI CORE</span>
               </div>
-              {/* AI Persona Selector (4 Co-Pilots Grid) */}
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px', background:'rgba(255,255,255,0.03)', borderRadius:'16px', padding:'6px', border:'1px solid var(--border-subtle)', boxShadow:'inset 0 1px 3px rgba(0,0,0,0.5)' }}>
+              {/* AI Persona Selector Dashboard (Stable Fit 4 Co-Pilots Grid) */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px', background:'rgba(255,255,255,0.025)', backdropFilter:'blur(16px)', borderRadius:'16px', padding:'6px', border:'1px solid rgba(255,255,255,0.08)', boxShadow:'inset 0 1px 3px rgba(0,0,0,0.5)' }}>
                 {[
-                  { k:'AURA', c:'#ef4444', g:'linear-gradient(135deg, #f43f5e, #e11d48)' },
-                  { k:'MAX', c:'#22c55e', g:'linear-gradient(135deg, #10b981, #059669)' },
-                  { k:'SYNAPSE', c:'#06b6d4', g:'linear-gradient(135deg, #06b6d4, #0284c7)' },
-                  { k:'LEX', c:'#a855f7', g:'linear-gradient(135deg, #a855f7, #7e22ce)' }
+                  { k:'AURA', label:'AURA', c:'#ef4444', g:'linear-gradient(135deg, #f43f5e, #e11d48)' },
+                  { k:'MAX', label:'MAX', c:'#22c55e', g:'linear-gradient(135deg, #10b981, #059669)' },
+                  { k:'SYNAPSE', label:'SYNAPSE', c:'#06b6d4', g:'linear-gradient(135deg, #06b6d4, #0284c7)' },
+                  { k:'LEX', label:'LEX', c:'#a855f7', g:'linear-gradient(135deg, #a855f7, #7e22ce)' }
                 ].map(ai => {
                   const isActive = activeAI === ai.k;
                   return (
-                    <button key={ai.k} onClick={() => setActiveAI(ai.k)}
-                      style={{ padding:'7px 0', border: isActive ? `1px solid ${ai.c}` : '1px solid transparent', borderRadius:'10px', cursor:'pointer', fontSize:'0.68rem', fontWeight:'800', fontFamily:S, letterSpacing:'0.8px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.02)', color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', boxShadow: isActive ? `0 4px 14px ${ai.c}40` : 'none', userSelect:'none' }}>
-                      {ai.k}
+                    <button key={ai.k} onClick={() => { setActiveAI(ai.k); setTab('chat'); setChatMenuOpen(true); }}
+                      style={{ padding:'8px 0', border: isActive ? `1.5px solid ${ai.c}` : '1px solid transparent', borderRadius:'11px', cursor:'pointer', fontSize:'0.7rem', fontWeight:'800', fontFamily:S, letterSpacing:'0.8px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.03)', color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', boxShadow: isActive ? `0 4px 14px ${ai.c}40` : 'none', userSelect:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
+                      <FaStar size={8} color={isActive ? '#fff' : ai.c} />
+                      {ai.label}
                     </button>
                   );
                 })}
