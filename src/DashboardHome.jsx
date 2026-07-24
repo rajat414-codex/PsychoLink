@@ -83,9 +83,9 @@ function SymmetricResponseGraph({ chatSentimentIntensity = 0 }) {
   return (
     <div style={{
       position: 'relative',
-      background: 'linear-gradient(180deg, rgba(12, 18, 30, 0.32) 0%, rgba(5, 9, 16, 0.42) 100%)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
+      background: 'rgba(255, 255, 255, 0.025)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
       border: '1px solid rgba(255, 255, 255, 0.12)',
       borderBottom: `2px solid ${statusColor}`,
       borderRadius: '28px',

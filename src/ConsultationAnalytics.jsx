@@ -13,7 +13,7 @@ const INITIAL_CATEGORIES = [
     color: '#ef4444',
     gradStart: '#ff6b6b',
     gradEnd: '#dc2626',
-    bg: 'rgba(239, 68, 68, 0.05)',
+    bg: 'rgba(239, 68, 68, 0.04)',
     border: 'rgba(239, 68, 68, 0.28)',
     status: 'ACTIVE AGENT',
     active: true,
@@ -27,7 +27,7 @@ const INITIAL_CATEGORIES = [
     color: '#22c55e',
     gradStart: '#4ade80',
     gradEnd: '#16a34a',
-    bg: 'rgba(34, 197, 94, 0.05)',
+    bg: 'rgba(34, 197, 94, 0.04)',
     border: 'rgba(34, 197, 94, 0.28)',
     status: 'ACTIVE AGENT',
     active: true,
@@ -41,7 +41,7 @@ const INITIAL_CATEGORIES = [
     color: '#06b6d4',
     gradStart: '#38bdf8',
     gradEnd: '#0284c7',
-    bg: 'rgba(6, 182, 212, 0.05)',
+    bg: 'rgba(6, 182, 212, 0.04)',
     border: 'rgba(6, 182, 212, 0.28)',
     status: 'AUTO-PREVIEW 🔒',
     active: false,
@@ -55,7 +55,7 @@ const INITIAL_CATEGORIES = [
     color: '#a855f7',
     gradStart: '#c084fc',
     gradEnd: '#9333ea',
-    bg: 'rgba(168, 85, 247, 0.05)',
+    bg: 'rgba(168, 85, 247, 0.04)',
     border: 'rgba(168, 85, 247, 0.28)',
     status: 'AUTO-PREVIEW 🔒',
     active: false,
@@ -115,14 +115,14 @@ export default function ConsultationAnalytics() {
     <div
       style={{
         position: 'relative',
-        background: 'linear-gradient(180deg, rgba(12, 18, 30, 0.32) 0%, rgba(5, 9, 16, 0.42) 100%)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: 'rgba(255, 255, 255, 0.025)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         border: '1px solid rgba(255, 255, 255, 0.12)',
         borderBottom: '2.5px solid #0088ff',
         borderRadius: '30px',
         padding: '28px 32px',
-        boxShadow: '0 28px 65px -10px rgba(0, 0, 0, 0.5), 0 16px 40px -10px rgba(0, 136, 255, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
+        boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.4), 0 16px 40px -10px rgba(0, 136, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
         marginBottom: '28px',
         overflow: 'hidden',
         width: '100%',
@@ -147,7 +147,7 @@ export default function ConsultationAnalytics() {
             left: '25%',
             width: '50%',
             height: '140px',
-            background: 'radial-gradient(ellipse, rgba(0, 136, 255, 0.22) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse, rgba(0, 136, 255, 0.18) 0%, transparent 70%)',
             filter: 'blur(50px)',
           }}
         />
@@ -284,21 +284,21 @@ export default function ConsultationAnalytics() {
               })}
             </svg>
 
-            {/* Inner Glowing Glass Core Display (Centered perfectly inside Donut Hole) */}
+            {/* Inner Translucent Glass Core Display (Centered perfectly inside Donut Hole) */}
             <div
               style={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '132px',
-                height: '132px',
+                width: '136px',
+                height: '136px',
                 borderRadius: '50%',
-                background: 'rgba(8, 12, 22, 0.55)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
+                background: 'rgba(255, 255, 255, 0.03)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
                 border: '1.5px solid rgba(255, 255, 255, 0.14)',
-                boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.5)',
+                boxShadow: 'inset 0 1px 6px rgba(255,255,255,0.08), 0 8px 24px rgba(0,0,0,0.3)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -306,9 +306,11 @@ export default function ConsultationAnalytics() {
                 pointerEvents: 'none',
                 textAlign: 'center',
                 zIndex: 5,
+                padding: '8px',
+                boxSizing: 'border-box',
               }}
             >
-              <span style={{ fontSize: '0.62rem', color: hoveredCat ? hoveredCat.color : '#38bdf8', fontFamily: S, fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: '0.62rem', color: hoveredCat ? hoveredCat.color : '#38bdf8', fontFamily: S, fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', lineHeight: 1.1 }}>
                 {hoveredCat ? hoveredCat.agent : 'TOTAL SESSIONS'}
               </span>
               <motion.span
@@ -317,18 +319,18 @@ export default function ConsultationAnalytics() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2 }}
                 style={{
-                  fontSize: '2.1rem',
+                  fontSize: '2.2rem',
                   fontWeight: 800,
                   color: '#ffffff',
                   fontFamily: S,
                   lineHeight: 1,
-                  margin: '2px 0',
-                  textShadow: hoveredCat ? `0 0 16px ${hoveredCat.color}` : '0 0 16px rgba(0,136,255,0.4)',
+                  margin: '3px 0',
+                  textShadow: hoveredCat ? `0 0 16px ${hoveredCat.color}` : '0 0 16px rgba(0,136,255,0.5)',
                 }}
               >
                 {hoveredCat ? `${Math.round((hoveredCat.count / totalSessions) * 100)}%` : totalSessions}
               </motion.span>
-              <span style={{ fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.5)', fontFamily: J, fontWeight: 600 }}>
+              <span style={{ fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: J, fontWeight: 600, lineHeight: 1.1 }}>
                 {hoveredCat ? `${hoveredCat.count} Sessions` : 'Telemetry Streamed'}
               </span>
             </div>
@@ -418,18 +420,20 @@ export default function ConsultationAnalytics() {
         style={{
           padding: '12px 20px',
           borderRadius: '18px',
-          background: 'rgba(0, 0, 0, 0.35)',
-          backdropFilter: 'blur(16px)',
+          background: 'rgba(255, 255, 255, 0.03)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           display: 'flex',
           alignItems: 'center',
           justify: 'space-between',
+          gap: '16px',
           position: 'relative',
           zIndex: 2,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
-          <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.4)', fontFamily: S, fontWeight: 800, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', flex: 1 }}>
+          <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.45)', fontFamily: S, fontWeight: 800, flexShrink: 0 }}>
             LIVE TELEMETRY:
           </span>
           <AnimatePresence mode="wait">
@@ -438,14 +442,22 @@ export default function ConsultationAnalytics() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              style={{ fontSize: '0.76rem', color: tickerLogs[0]?.color || '#fff', fontFamily: J, fontWeight: 600, whiteSpace: 'nowrap' }}
+              style={{
+                fontSize: '0.76rem',
+                color: tickerLogs[0]?.color || '#fff',
+                fontFamily: J,
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
             >
               ● {tickerLogs[0]?.text}
             </motion.span>
           </AnimatePresence>
         </div>
 
-        <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', fontFamily: S, flexShrink: 0 }}>
+        <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.4)', fontFamily: S, flexShrink: 0 }}>
           Auto-Accumulating Stream
         </span>
       </div>
