@@ -1394,6 +1394,8 @@ export default function Home({ userProfile, onLogout }) {
                   );
                 })}
               </div>
+            </div>
+
             {/* Smooth Scrollable Nav Menu Container */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {navItems.map(item => {
@@ -1498,7 +1500,6 @@ export default function Home({ userProfile, onLogout }) {
                   </React.Fragment>
                 );
               })}
-            </div>
 
             {/* Chat history */}
             {tab === 'chat' && (
@@ -1519,7 +1520,7 @@ export default function Home({ userProfile, onLogout }) {
                 </div>
               </div>
             )}
-            {tab !== 'chat' && <div style={{ flex:1 }}/>}
+            </div>
 
 
             {/* User + Logout */}
