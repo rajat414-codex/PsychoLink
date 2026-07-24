@@ -1440,7 +1440,7 @@ export default function Home({ userProfile, onLogout }) {
                       )}
                     </motion.button>
 
-                    {/* Collapsible Wiring Branch Tree (Only opens when user taps AI Chat) */}
+                    {/* Collapsible Sub-Menu (Only opens when user taps AI Chat) */}
                     {isChat && (
                       <AnimatePresence>
                         {chatMenuOpen && (
@@ -1448,47 +1448,46 @@ export default function Home({ userProfile, onLogout }) {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.28, ease: 'easeInOut' }}
-                            style={{ paddingLeft: '28px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '4px', overflow: 'hidden', position: 'relative' }}
+                            transition={{ duration: 0.25, ease: 'easeInOut' }}
+                            style={{ padding: '4px 6px 4px 14px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '4px', overflow: 'hidden', position: 'relative' }}
                           >
                             {[
                               { k: 'AURA', label: 'Aura AI', color: '#ef4444', icon: '🌸' },
                               { k: 'MAX', label: 'Max AI', color: '#22c55e', icon: '⚡' },
                               { k: 'SYNAPSE', label: 'Synapse AI', color: '#06b6d4', icon: '💻' },
                               { k: 'LEX', label: 'Lex AI', color: '#a855f7', icon: '⚖️' },
-                            ].map((ai, idx, arr) => {
+                            ].map((ai) => {
                               const isSubActive = tab === 'chat' && activeAI === ai.k;
-                              const isLast = idx === arr.length - 1;
 
                               return (
                                 <motion.div
                                   key={ai.k}
-                                  whileHover={{ x: 3, background: 'rgba(255,255,255,0.04)' }}
+                                  whileHover={{ x: 2, background: 'rgba(255,255,255,0.04)' }}
                                   onClick={() => { setTab('chat'); setActiveAI(ai.k); }}
                                   style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justify: 'space-between',
-                                    padding: '6px 10px',
+                                    gap: '9px',
+                                    padding: '7px 12px',
                                     borderRadius: '10px',
                                     cursor: 'pointer',
-                                    background: isSubActive ? `${ai.color}18` : 'transparent',
-                                    border: isSubActive ? `1px solid ${ai.color}40` : '1px solid transparent',
+                                    background: isSubActive ? `${ai.color}18` : 'rgba(255,255,255,0.02)',
+                                    border: isSubActive ? `1px solid ${ai.color}45` : '1px solid rgba(255,255,255,0.04)',
+                                    boxShadow: isSubActive ? `0 4px 12px ${ai.color}25` : 'none',
                                     transition: 'all 0.2s ease',
-                                    position: 'relative',
+                                    boxSizing: 'border-box',
+                                    width: '100%',
                                   }}
                                 >
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span style={{ fontFamily: S, fontSize: '0.74rem', color: isSubActive ? ai.color : 'rgba(255,255,255,0.3)', fontWeight: '700' }}>
-                                      {isLast ? '└─' : '├─'}
-                                    </span>
-                                    <span style={{ fontSize: '0.78rem' }}>{ai.icon}</span>
-                                    <span style={{ fontSize: '0.78rem', fontFamily: S, fontWeight: isSubActive ? '800' : '600', color: isSubActive ? '#fff' : 'rgba(255,255,255,0.5)' }}>
-                                      {ai.label}
-                                    </span>
-                                  </div>
-                                  {/* Star Logo on all 4 AI personas */}
-                                  <FaStar size={10} color={ai.color} style={{ filter: `drop-shadow(0 0 6px ${ai.color})` }} />
+                                  {/* Star Logo on the LEFT replacing stick lines */}
+                                  <FaStar size={11} color={ai.color} style={{ filter: `drop-shadow(0 0 6px ${ai.color})`, flexShrink: 0 }} />
+                                  <span style={{ fontSize: '0.82rem' }}>{ai.icon}</span>
+                                  <span style={{ fontSize: '0.8rem', fontFamily: S, fontWeight: isSubActive ? '800' : '600', color: isSubActive ? '#ffffff' : 'rgba(255,255,255,0.55)', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {ai.label}
+                                  </span>
+                                  {isSubActive && (
+                                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: ai.color, boxShadow: `0 0 8px ${ai.color}` }} />
+                                  )}
                                 </motion.div>
                               );
                             })}
