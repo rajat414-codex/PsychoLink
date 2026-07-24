@@ -184,7 +184,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'fixed', top: 0, left: 0, background: 'var(--bg-app)', backgroundImage: 'radial-gradient(circle at 50% 50%, var(--accent-purple-dim) 0%, var(--accent-max-dim) 50%, transparent 80%)' }}>
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'fixed', top: 0, left: 0, background: 'transparent' }}>
       <AppleEmoji/>
       <AnimatePresence mode="wait">
 

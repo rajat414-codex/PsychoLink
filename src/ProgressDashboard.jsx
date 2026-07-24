@@ -447,7 +447,7 @@ export default function ProgressDashboard({ accent }) {
 
   return (
     <motion.div key="progress" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0, y:-12 }} transition={{ duration:0.35 }}
-      style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 26px 40px', background: '#06070a' }}>
+      style={{ position:'absolute', inset:0, overflowY:'auto', padding:'22px 26px 40px', background: 'transparent' }}>
 
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
@@ -460,11 +460,13 @@ export default function ProgressDashboard({ accent }) {
 
       {/* Bottom Full-Width Daily Mental Health & Soft Skills Challenges */}
       <div style={{
-        background: '#0a0c12',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        background: 'rgba(10, 14, 24, 0.65)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         borderRadius: '22px',
         padding: '24px 26px',
-        boxShadow: '0 12px 36px rgba(0,0,0,0.4)',
+        boxShadow: '0 12px 36px rgba(0,0,0,0.5)',
         position: 'relative',
         overflow: 'hidden'
       }}>

@@ -32,8 +32,8 @@ function SpaceBg({ activeAI }) {
 function OceanBg({ opacity=0.88 }) {
   return (
     <div style={{ position:'absolute', inset:0, overflow:'hidden', zIndex:0 }}>
-      <div style={{ position:'absolute', inset:0, background:'var(--bg-app)' }}/>
-      {[{c:'rgba(99,102,241,0.06)',x:'10%',y:'10%',d:14},{c:'rgba(20,184,166,0.04)',x:'65%',y:'55%',d:18}].map((g,i)=>(
+      <div style={{ position:'absolute', inset:0, background:'rgba(5, 8, 15, 0.45)' }}/>
+      {[{c:'rgba(99,102,241,0.08)',x:'10%',y:'10%',d:14},{c:'rgba(20,184,166,0.06)',x:'65%',y:'55%',d:18}].map((g,i)=>(
         <motion.div key={i} animate={{ scale:[1,1.15,1], x:[0,20,-10,0], y:[0,-20,10,0] }} transition={{ duration:g.d, repeat:Infinity, ease:'easeInOut', delay:i*2 }}
           style={{ position:'absolute', left:g.x, top:g.y, width:'500px', height:'500px', borderRadius:'50%', background:`radial-gradient(circle,${g.c},transparent 70%)`, filter:'blur(85px)', pointerEvents:'none' }}/>
       ))}

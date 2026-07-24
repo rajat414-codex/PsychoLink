@@ -115,10 +115,10 @@ export default function ConsultationAnalytics() {
     <div
       style={{
         position: 'relative',
-        background: 'linear-gradient(180deg, rgba(13, 17, 28, 0.92) 0%, rgba(6, 9, 16, 0.98) 100%)',
+        background: 'linear-gradient(180deg, rgba(13, 18, 30, 0.72) 0%, rgba(6, 10, 18, 0.85) 100%)',
         backdropFilter: 'blur(36px)',
         WebkitBackdropFilter: 'blur(36px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         borderBottom: '2.5px solid #0088ff',
         borderRadius: '30px',
         padding: '28px 32px',

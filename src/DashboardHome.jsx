@@ -361,7 +361,7 @@ export default function DashboardHome({
   return (
     <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, y: -12 }}
       transition={{ duration: 0.35 }}
-      style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden', padding: '22px 28px 45px', background: '#05070c' }}>
+      style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden', padding: '22px 28px 45px', background: 'transparent' }}>
 
       {/* ══ Header Row ══ */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>

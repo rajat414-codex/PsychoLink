@@ -1316,7 +1316,7 @@ export default function Home({ userProfile, onLogout }) {
   };
 
   return (
-    <div style={{ width:'100vw', height:'100vh', display:'flex', background:'var(--bg-app)', fontFamily:J, overflow:'hidden', position:'relative' }}>
+    <div style={{ width:'100vw', height:'100vh', display:'flex', background:'transparent', fontFamily:J, overflow:'hidden', position:'relative' }}>
 
       {/* ── GLOBAL BG ──────────────────────────────────────────── */}
       <div style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none', overflow:'hidden' }}>
@@ -1341,7 +1341,7 @@ export default function Home({ userProfile, onLogout }) {
         {sidebar && (
           <motion.aside initial={{ x:-270, opacity:0 }} animate={{ x:0, opacity:1 }} exit={{ x:-270, opacity:0 }}
             transition={{ type:'spring', stiffness:300, damping:30 }}
-            style={{ width:'265px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'var(--bg-sidebar)', backdropFilter:'blur(40px)', borderRight:'1px solid var(--border-subtle)', position:'relative', zIndex:20, boxShadow:'10px 0 30px rgba(0,0,0,0.4)' }}>
+            style={{ width:'265px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'rgba(8, 12, 22, 0.65)', backdropFilter:'blur(36px)', WebkitBackdropFilter:'blur(36px)', borderRight:'1px solid rgba(255,255,255,0.12)', position:'relative', zIndex:20, boxShadow:'10px 0 30px rgba(0,0,0,0.5)' }}>
 
             {/* Brand Header */}
             <div style={{ padding:'24px 20px 18px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
