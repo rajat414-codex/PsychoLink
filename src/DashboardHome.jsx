@@ -83,10 +83,10 @@ function SymmetricResponseGraph({ chatSentimentIntensity = 0 }) {
   return (
     <div style={{
       position: 'relative',
-      background: 'linear-gradient(180deg, rgba(12, 16, 26, 0.85) 0%, rgba(6, 9, 16, 0.98) 100%)',
-      backdropFilter: 'blur(32px)',
-      WebkitBackdropFilter: 'blur(32px)',
-      border: '1px solid rgba(255, 255, 255, 0.08)',
+      background: 'linear-gradient(180deg, rgba(12, 18, 30, 0.32) 0%, rgba(5, 9, 16, 0.42) 100%)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
       borderBottom: `2px solid ${statusColor}`,
       borderRadius: '28px',
       padding: '26px 30px',
@@ -304,12 +304,13 @@ function SymmetricResponseGraph({ chatSentimentIntensity = 0 }) {
 function CleanSaaSMetricCard({ title, value, subtext, tag, tagColor, icon }) {
   return (
     <div style={{
-      background: 'rgba(10, 12, 18, 0.85)',
-      backdropFilter: 'blur(24px)',
-      border: '1px solid rgba(255, 255, 255, 0.08)',
+      background: 'rgba(255, 255, 255, 0.03)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
       borderRadius: '22px',
       padding: '20px 22px',
-      boxShadow: '0 14px 34px rgba(0, 0, 0, 0.45)',
+      boxShadow: '0 12px 32px rgba(0, 0, 0, 0.35)',
       display: 'flex',
       flexDirection: 'column',
       justify: 'space-between',
@@ -433,7 +434,7 @@ export default function DashboardHome({
       <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '20px' }}>
         
         {/* AI Co-Pilots */}
-        <div style={{ background: 'rgba(10, 12, 18, 0.85)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '24px', padding: '24px' }}>
+        <div style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '24px', padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
             <h4 style={{ margin: 0, fontFamily: J, fontWeight: 800, fontSize: '0.98rem', color: '#fff' }}>AI Co-Pilots</h4>
             <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: S }}>2 Engines Active</span>
@@ -481,7 +482,7 @@ export default function DashboardHome({
         </div>
 
         {/* Recommended Experts */}
-        <div style={{ background: 'rgba(10, 12, 18, 0.85)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '24px', padding: '24px' }}>
+        <div style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '24px', padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h4 style={{ margin: 0, fontFamily: J, fontWeight: 800, fontSize: '0.98rem', color: '#fff' }}>Top Therapists</h4>
             <span onClick={() => setTab('consult')} style={{ fontSize: '0.72rem', color: accent, fontWeight: 700, fontFamily: S, cursor: 'pointer' }}>View All →</span>

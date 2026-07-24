@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaBroadcastTower, FaChartPie } from 'react-icons/fa';
+import { FaBroadcastTower } from 'react-icons/fa';
 
 const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
 const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
@@ -13,7 +13,7 @@ const INITIAL_CATEGORIES = [
     color: '#ef4444',
     gradStart: '#ff6b6b',
     gradEnd: '#dc2626',
-    bg: 'rgba(239, 68, 68, 0.04)',
+    bg: 'rgba(239, 68, 68, 0.05)',
     border: 'rgba(239, 68, 68, 0.28)',
     status: 'ACTIVE AGENT',
     active: true,
@@ -27,7 +27,7 @@ const INITIAL_CATEGORIES = [
     color: '#22c55e',
     gradStart: '#4ade80',
     gradEnd: '#16a34a',
-    bg: 'rgba(34, 197, 94, 0.04)',
+    bg: 'rgba(34, 197, 94, 0.05)',
     border: 'rgba(34, 197, 94, 0.28)',
     status: 'ACTIVE AGENT',
     active: true,
@@ -41,7 +41,7 @@ const INITIAL_CATEGORIES = [
     color: '#06b6d4',
     gradStart: '#38bdf8',
     gradEnd: '#0284c7',
-    bg: 'rgba(6, 182, 212, 0.04)',
+    bg: 'rgba(6, 182, 212, 0.05)',
     border: 'rgba(6, 182, 212, 0.28)',
     status: 'AUTO-PREVIEW 🔒',
     active: false,
@@ -55,7 +55,7 @@ const INITIAL_CATEGORIES = [
     color: '#a855f7',
     gradStart: '#c084fc',
     gradEnd: '#9333ea',
-    bg: 'rgba(168, 85, 247, 0.04)',
+    bg: 'rgba(168, 85, 247, 0.05)',
     border: 'rgba(168, 85, 247, 0.28)',
     status: 'AUTO-PREVIEW 🔒',
     active: false,
@@ -105,8 +105,8 @@ export default function ConsultationAnalytics() {
   }, []);
 
   // SVG Donut Calculations
-  const radius = 90;
-  const strokeWidth = 20;
+  const radius = 82;
+  const strokeWidth = 18;
   const circumference = 2 * Math.PI * radius;
 
   let accumulatedAngle = 0;
@@ -115,14 +115,14 @@ export default function ConsultationAnalytics() {
     <div
       style={{
         position: 'relative',
-        background: 'linear-gradient(180deg, rgba(12, 18, 30, 0.35) 0%, rgba(5, 9, 16, 0.45) 100%)',
+        background: 'linear-gradient(180deg, rgba(12, 18, 30, 0.32) 0%, rgba(5, 9, 16, 0.42) 100%)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         border: '1px solid rgba(255, 255, 255, 0.12)',
         borderBottom: '2.5px solid #0088ff',
         borderRadius: '30px',
         padding: '28px 32px',
-        boxShadow: '0 28px 65px -10px rgba(0, 0, 0, 0.6), 0 16px 40px -10px rgba(0, 136, 255, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
+        boxShadow: '0 28px 65px -10px rgba(0, 0, 0, 0.5), 0 16px 40px -10px rgba(0, 136, 255, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
         marginBottom: '28px',
         overflow: 'hidden',
         width: '100%',
@@ -149,18 +149,6 @@ export default function ConsultationAnalytics() {
             height: '140px',
             background: 'radial-gradient(ellipse, rgba(0, 136, 255, 0.22) 0%, transparent 70%)',
             filter: 'blur(50px)',
-          }}
-        />
-        {/* Purple Right Accent Glow */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '15%',
-            right: '-20px',
-            width: '260px',
-            height: '260px',
-            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 70%)',
-            filter: 'blur(55px)',
           }}
         />
       </div>
@@ -195,7 +183,7 @@ export default function ConsultationAnalytics() {
           style={{
             padding: '7px 16px',
             borderRadius: '20px',
-            background: 'rgba(0, 136, 255, 0.12)',
+            background: 'rgba(0, 136, 255, 0.14)',
             border: '1px solid rgba(0, 136, 255, 0.35)',
             color: '#38bdf8',
             fontSize: '0.74rem',
@@ -215,11 +203,11 @@ export default function ConsultationAnalytics() {
       </div>
 
       {/* ── Main Panel Content ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1.7fr', gap: '32px', alignItems: 'center', position: 'relative', zIndex: 2, marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '32px', alignItems: 'center', position: 'relative', zIndex: 2, marginBottom: '24px' }}>
         
         {/* LEFT: ULTRA-STYLISH CIRCLE / DONUT CHART */}
-        <div style={{ position: 'relative', height: '280px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ position: 'relative', width: '270px', height: '270px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'relative', height: '260px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'relative', width: '250px', height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             
             {/* Outer Rotating Dashed Orbital Ring 1 */}
             <motion.div
@@ -227,23 +215,9 @@ export default function ConsultationAnalytics() {
               transition={{ duration: 32, repeat: Infinity, ease: 'linear' }}
               style={{
                 position: 'absolute',
-                inset: -12,
+                inset: -8,
                 borderRadius: '50%',
-                border: '1.5px dashed rgba(255, 255, 255, 0.14)',
-                pointerEvents: 'none',
-              }}
-            />
-
-            {/* Inner Rotating Dashed Orbital Ring 2 (Counter-Clockwise) */}
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
-              style={{
-                position: 'absolute',
-                inset: -4,
-                borderRadius: '50%',
-                border: '1px stroke rgba(0, 136, 255, 0.25)',
-                strokeDasharray: '4 8',
+                border: '1.5px dashed rgba(255, 255, 255, 0.16)',
                 pointerEvents: 'none',
               }}
             />
@@ -252,19 +226,19 @@ export default function ConsultationAnalytics() {
             <div
               style={{
                 position: 'absolute',
-                inset: 12,
+                inset: 10,
                 borderRadius: '50%',
                 background: hoveredCat
-                  ? `radial-gradient(circle, ${hoveredCat.color}30 0%, transparent 70%)`
-                  : 'radial-gradient(circle, rgba(0, 136, 255, 0.18) 0%, transparent 70%)',
-                filter: 'blur(22px)',
+                  ? `radial-gradient(circle, ${hoveredCat.color}35 0%, transparent 70%)`
+                  : 'radial-gradient(circle, rgba(0, 136, 255, 0.2) 0%, transparent 70%)',
+                filter: 'blur(20px)',
                 transition: 'all 0.4s ease',
                 pointerEvents: 'none',
               }}
             />
 
             {/* SVG Donut */}
-            <svg width="270" height="270" viewBox="0 0 260 260" style={{ transform: 'rotate(-90deg)', overflow: 'visible', zIndex: 2 }}>
+            <svg width="250" height="250" viewBox="0 0 240 240" style={{ transform: 'rotate(-90deg)', overflow: 'visible', zIndex: 2 }}>
               <defs>
                 {categories.map((c) => (
                   <linearGradient key={`grad-${c.id}`} id={`grad-${c.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -275,7 +249,7 @@ export default function ConsultationAnalytics() {
               </defs>
 
               {/* Dark Track Background Circle */}
-              <circle cx="130" cy="130" r={radius} fill="none" stroke="rgba(255, 255, 255, 0.04)" strokeWidth={strokeWidth} />
+              <circle cx="120" cy="120" r={radius} fill="none" stroke="rgba(255, 255, 255, 0.05)" strokeWidth={strokeWidth} />
 
               {/* Segment Arcs */}
               {categories.map((cat) => {
@@ -289,8 +263,8 @@ export default function ConsultationAnalytics() {
                 return (
                   <motion.circle
                     key={cat.id}
-                    cx="130"
-                    cy="130"
+                    cx="120"
+                    cy="120"
                     r={radius}
                     fill="transparent"
                     stroke={`url(#grad-${cat.id})`}
@@ -303,23 +277,28 @@ export default function ConsultationAnalytics() {
                     style={{
                       transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
                       cursor: 'pointer',
-                      filter: isHovered ? `drop-shadow(0 0 18px ${cat.color})` : `drop-shadow(0 0 6px ${cat.color}88)`,
+                      filter: isHovered ? `drop-shadow(0 0 16px ${cat.color})` : `drop-shadow(0 0 6px ${cat.color}88)`,
                     }}
                   />
                 );
               })}
             </svg>
 
-            {/* Inner Glowing Glass Core Display */}
+            {/* Inner Glowing Glass Core Display (Centered perfectly inside Donut Hole) */}
             <div
               style={{
                 position: 'absolute',
-                inset: 46,
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '132px',
+                height: '132px',
                 borderRadius: '50%',
-                background: 'rgba(8, 11, 20, 0.94)',
-                backdropFilter: 'blur(24px)',
-                border: '1.5px solid rgba(255, 255, 255, 0.12)',
-                boxShadow: 'inset 0 2px 14px rgba(0,0,0,0.85), 0 12px 30px rgba(0,0,0,0.6)',
+                background: 'rgba(8, 12, 22, 0.55)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1.5px solid rgba(255, 255, 255, 0.14)',
+                boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.5)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -329,27 +308,27 @@ export default function ConsultationAnalytics() {
                 zIndex: 5,
               }}
             >
-              <span style={{ fontSize: '0.66rem', color: hoveredCat ? hoveredCat.color : '#38bdf8', fontFamily: S, fontWeight: 800, letterSpacing: '1.2px' }}>
+              <span style={{ fontSize: '0.62rem', color: hoveredCat ? hoveredCat.color : '#38bdf8', fontFamily: S, fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
                 {hoveredCat ? hoveredCat.agent : 'TOTAL SESSIONS'}
               </span>
               <motion.span
                 key={hoveredCat ? hoveredCat.id : totalSessions}
-                initial={{ scale: 0.82, opacity: 0 }}
+                initial={{ scale: 0.85, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.2 }}
                 style={{
-                  fontSize: '2.5rem',
+                  fontSize: '2.1rem',
                   fontWeight: 800,
                   color: '#ffffff',
                   fontFamily: S,
                   lineHeight: 1,
-                  margin: '3px 0',
-                  textShadow: hoveredCat ? `0 0 18px ${hoveredCat.color}` : '0 0 18px rgba(0,136,255,0.4)',
+                  margin: '2px 0',
+                  textShadow: hoveredCat ? `0 0 16px ${hoveredCat.color}` : '0 0 16px rgba(0,136,255,0.4)',
                 }}
               >
                 {hoveredCat ? `${Math.round((hoveredCat.count / totalSessions) * 100)}%` : totalSessions}
               </motion.span>
-              <span style={{ fontSize: '0.65rem', color: 'rgba(255, 255, 255, 0.45)', fontFamily: J, fontWeight: 600 }}>
+              <span style={{ fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.5)', fontFamily: J, fontWeight: 600 }}>
                 {hoveredCat ? `${hoveredCat.count} Sessions` : 'Telemetry Streamed'}
               </span>
             </div>
@@ -367,9 +346,11 @@ export default function ConsultationAnalytics() {
                 key={cat.id}
                 onMouseEnter={() => setHoveredCat(cat)}
                 onMouseLeave={() => setHoveredCat(null)}
-                whileHover={{ y: -4, borderColor: cat.color }}
+                whileHover={{ y: -3, borderColor: cat.color }}
                 style={{
-                  background: cat.bg,
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
                   border: isHovered ? `1px solid ${cat.color}` : `1px solid ${cat.border}`,
                   borderRadius: '22px',
                   padding: '18px 20px',
@@ -437,7 +418,8 @@ export default function ConsultationAnalytics() {
         style={{
           padding: '12px 20px',
           borderRadius: '18px',
-          background: 'rgba(0, 0, 0, 0.45)',
+          background: 'rgba(0, 0, 0, 0.35)',
+          backdropFilter: 'blur(16px)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           display: 'flex',
           alignItems: 'center',
