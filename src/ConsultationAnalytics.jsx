@@ -43,8 +43,8 @@ const INITIAL_CATEGORIES = [
     gradEnd: '#0284c7',
     bg: 'rgba(6, 182, 212, 0.04)',
     border: 'rgba(6, 182, 212, 0.28)',
-    status: 'AUTO-PREVIEW 🔒',
-    active: false,
+    status: 'ACTIVE AGENT',
+    active: true,
     count: 80,
     icon: '💻',
   },
@@ -57,8 +57,8 @@ const INITIAL_CATEGORIES = [
     gradEnd: '#9333ea',
     bg: 'rgba(168, 85, 247, 0.04)',
     border: 'rgba(168, 85, 247, 0.28)',
-    status: 'AUTO-PREVIEW 🔒',
-    active: false,
+    status: 'ACTIVE AGENT',
+    active: true,
     count: 50,
     icon: '⚖️',
   },
@@ -282,58 +282,59 @@ export default function ConsultationAnalytics() {
                   />
                 );
               })}
-            </svg>
 
-            {/* Inner Translucent Glass Core Display (Centered perfectly inside 170px Donut Hole) */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '150px',
-                height: '150px',
-                borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 0.03)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                border: '1.5px solid rgba(255, 255, 255, 0.14)',
-                boxShadow: 'inset 0 1px 6px rgba(255,255,255,0.08), 0 8px 24px rgba(0,0,0,0.3)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justify: 'center',
-                pointerEvents: 'none',
-                textAlign: 'center',
-                zIndex: 5,
-                padding: '12px',
-                boxSizing: 'border-box',
-              }}
-            >
-              <span style={{ fontSize: '0.66rem', color: hoveredCat ? hoveredCat.color : '#38bdf8', fontFamily: S, fontWeight: 800, letterSpacing: '1.1px', textTransform: 'uppercase', lineHeight: 1.1 }}>
-                {hoveredCat ? hoveredCat.agent : 'TOTAL SESSIONS'}
-              </span>
-              <motion.span
-                key={hoveredCat ? hoveredCat.id : totalSessions}
-                initial={{ scale: 0.85, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.2 }}
-                style={{
-                  fontSize: '2.4rem',
-                  fontWeight: 800,
-                  color: '#ffffff',
-                  fontFamily: S,
-                  lineHeight: 1,
-                  margin: '4px 0',
-                  textShadow: hoveredCat ? `0 0 18px ${hoveredCat.color}` : '0 0 18px rgba(0,136,255,0.5)',
-                }}
-              >
-                {hoveredCat ? `${Math.round((hoveredCat.count / totalSessions) * 100)}%` : totalSessions}
-              </motion.span>
-              <span style={{ fontSize: '0.64rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: J, fontWeight: 600, lineHeight: 1.1 }}>
-                {hoveredCat ? `${hoveredCat.count} Sessions` : 'Telemetry Streamed'}
-              </span>
-            </div>
+              {/* Translucent Glass Center Core Ring Circle inside SVG */}
+              <circle
+                cx="140"
+                cy="140"
+                r="74"
+                fill="rgba(255, 255, 255, 0.03)"
+                stroke="rgba(255, 255, 255, 0.14)"
+                strokeWidth="1.5"
+                style={{ filter: 'backdrop-filter(blur(12px))' }}
+              />
+
+              {/* Perfectly Centered SVG Text Readout (Rotated back +90deg so text is horizontal) */}
+              <g transform="rotate(90 140 140)" style={{ pointerEvents: 'none' }}>
+                <text
+                  x="140"
+                  y="118"
+                  textAnchor="middle"
+                  fill={hoveredCat ? hoveredCat.color : '#38bdf8'}
+                  fontSize="10.5"
+                  fontFamily={S}
+                  fontWeight="800"
+                  letterSpacing="1.2"
+                >
+                  {hoveredCat ? hoveredCat.agent : 'TOTAL SESSIONS'}
+                </text>
+                <text
+                  x="140"
+                  y="146"
+                  textAnchor="middle"
+                  fill="#ffffff"
+                  fontSize="32"
+                  fontFamily={S}
+                  fontWeight="800"
+                  style={{
+                    filter: hoveredCat ? `drop-shadow(0 0 12px ${hoveredCat.color})` : 'drop-shadow(0 0 12px rgba(0,136,255,0.6))',
+                  }}
+                >
+                  {hoveredCat ? `${Math.round((hoveredCat.count / totalSessions) * 100)}%` : totalSessions}
+                </text>
+                <text
+                  x="140"
+                  y="166"
+                  textAnchor="middle"
+                  fill="rgba(255, 255, 255, 0.65)"
+                  fontSize="10"
+                  fontFamily={J}
+                  fontWeight="600"
+                >
+                  {hoveredCat ? `${hoveredCat.count} Sessions` : 'Telemetry Streamed'}
+                </text>
+              </g>
+            </svg>
           </div>
         </div>
 

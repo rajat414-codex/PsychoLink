@@ -5,12 +5,14 @@ import RobotAvatar from './RobotAvatar';
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
-    const [activeAI, setActiveAI] = useState('AURA'); // 'AURA' | 'MAX'
+    const [activeAI, setActiveAI] = useState('AURA'); // 'AURA' | 'MAX' | 'SYNAPSE' | 'LEX'
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [sessions, setSessions] = useState({
         AURA: [{ role: 'assistant', content: 'Hello! I am Aura 🌸. Your emotional support companion. Aap kaisa feel kar rahe hain? Feel free to talk in English or Hinglish.', ts: new Date() }],
-        MAX: [{ role: 'assistant', content: 'Hello! I am Max ⚡. Your mental action specialist. Break down whatever is blocking you. English or Hinglish works.', ts: new Date() }]
+        MAX: [{ role: 'assistant', content: 'Hello! I am Max ⚡. Your mental action specialist. Break down whatever is blocking you. English or Hinglish works.', ts: new Date() }],
+        SYNAPSE: [{ role: 'assistant', content: 'Welcome! I am Synapse 💻. Your career & tech mentor. Ready to map out your skills and professional roadmap.', ts: new Date() }],
+        LEX: [{ role: 'assistant', content: 'Greetings! I am Lex ⚖️. Your business & legal advisor. Ask me anything about startup strategy, decision frameworks, and legal concepts.', ts: new Date() }]
     });
 
     const messages = sessions[activeAI];
@@ -35,6 +37,18 @@ export default function FloatingChatbot() {
             "Procrastination problem",
             "Overthinking loop",
             "Focus issue"
+        ],
+        SYNAPSE: [
+            "Career roadmap advice",
+            "Learn tech skills fast",
+            "Interview prep tips",
+            "Workplace stress"
+        ],
+        LEX: [
+            "Business risk analysis",
+            "Basic contract guidelines",
+            "Startup decision framework",
+            "Negotiation advice"
         ]
     };
 
@@ -58,34 +72,46 @@ export default function FloatingChatbot() {
                 gain.gain.setValueAtTime(0.05, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
             }
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.35);
-        } catch (e) {}
+            osc.start();
+            osc.stop(ctx.currentTime + 0.3);
+        } catch (e) {
+            // Audio context muted or unsupported
+        }
     };
 
-    const handleSend = async (textToSend) => {
-        const val = (textToSend || input).trim();
-        if (!val || isTyping) return;
+    const handleSend = async (customText) => {
+        const textToSend = customText || input;
+        if (!textToSend.trim() || isTyping) return;
 
-        setInput('');
-        const userMsg = { role: 'user', content: val, ts: new Date() };
-        const updatedMsgs = [...messages, userMsg];
-        
+        const userMsg = { role: 'user', content: textToSend, ts: new Date() };
+
         setSessions(prev => ({
             ...prev,
-            [activeAI]: updatedMsgs
+            [activeAI]: [...prev[activeAI], userMsg]
         }));
-        playTone('send');
+
+        if (!customText) setInput('');
         setIsTyping(true);
+        playTone('send');
 
         try {
-            // Remove initial welcome message for backend prompt sanity
-            const history = updatedMsgs
-                .filter((_, idx) => idx > 0)
-                .map(m => ({ role: m.role, content: m.content }));
+            const history = [...sessions[activeAI], userMsg].map(m => ({
+                role: m.role,
+                content: m.content
+            }));
 
-            const auraPrompt = "You are AURA, a warm, highly empathetic AI psychological companion inside PsychoLink app. Personality: Nurturing, deeply supportive. Very important: You fully support, understand, and converse naturally in English, Hindi, and Hinglish (Hindi written in Roman script like 'Aap kaise hain?', 'Mujhe thoda tension ho raha hai'). Keep responses warm, encouraging, conversational, and concise (2-4 sentences max). Never diagnose.";
-            const maxPrompt = "You are MAX, a sharp structured cognitive consultant inside PsychoLink app. Personality: Analytical, logical, CBT-focused. Very important: You fully support, understand, and converse naturally in English, Hindi, and Hinglish. Keep responses concise and structured. Always offer: 1) Identification of thoughts 2) Small actionable coping step.";
+            const auraPrompt = `You are AURA (Affective Understanding and Reflective AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Always respond with empathy first, then guidance. Keep responses warm and concise (2-4 sentences). Use emojis 🌸.`;
+
+            const maxPrompt = `You are MAX (Mental Analytical eXpert), a logical structured AI therapist inside PsychoLink app. Personality: Analytical, precise, solution-focused. Specialization: CBT frameworks, habits, focus, productivity. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses concise and structured.`;
+
+            const synapsePrompt = `You are SYNAPSE (Strategic Tech & Career Guidance AI), a high-performance career and tech mentor inside PsychoLink app. Specialization: tech skills, career growth, interview prep, workplace dynamics. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses encouraging and practical (2-4 sentences). Use emojis 💻.`;
+
+            const lexPrompt = `You are LEX (Legal & Executive Business Advisor), a sharp strategic business and legal concept counselor inside PsychoLink app. Specialization: business model validation, startup risk, compliance principles, decision matrices. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses sharp and structured (2-4 sentences). Use emojis ⚖️.`;
+
+            const selectedPrompt =
+                activeAI === 'AURA' ? auraPrompt :
+                activeAI === 'MAX' ? maxPrompt :
+                activeAI === 'SYNAPSE' ? synapsePrompt : lexPrompt;
 
             const res = await fetch(`${API_BASE}/api/chat`, {
                 method: 'POST',
@@ -93,7 +119,7 @@ export default function FloatingChatbot() {
                 body: JSON.stringify({
                     messages: history,
                     persona: activeAI,
-                    systemPrompt: activeAI === 'AURA' ? auraPrompt : maxPrompt
+                    systemPrompt: selectedPrompt
                 })
             });
 
@@ -103,103 +129,61 @@ export default function FloatingChatbot() {
 
             setSessions(prev => ({
                 ...prev,
-                [activeAI]: [...updatedMsgs, { role: 'assistant', content: reply, ts: new Date() }]
+                [activeAI]: [...prev[activeAI], userMsg, { role: 'assistant', content: reply, ts: new Date() }]
             }));
             playTone('receive');
         } catch (e) {
             setSessions(prev => ({
                 ...prev,
-                [activeAI]: [...updatedMsgs, { role: 'assistant', content: "[Core System Log]: Connection lost. Please ensure the local backend server is running on port 3001.", ts: new Date() }]
+                [activeAI]: [
+                    ...prev[activeAI],
+                    userMsg,
+                    { role: 'assistant', content: "I am having trouble connecting to my cognitive neural engine right now. Please try again shortly.", ts: new Date() }
+                ]
             }));
         } finally {
             setIsTyping(false);
         }
     };
 
-    const accent = activeAI === 'AURA' ? '#ef4444' : '#22c55e';
-    const bgGlow = activeAI === 'AURA' 
-        ? 'radial-gradient(circle at 50% -20%, rgba(239, 68, 68, 0.08) 0%, transparent 60%)' 
-        : 'radial-gradient(circle at 50% -20%, rgba(34, 197, 94, 0.08) 0%, transparent 60%)';
+    const aiColor =
+        activeAI === 'AURA' ? '#ef4444' :
+        activeAI === 'MAX' ? '#22c55e' :
+        activeAI === 'SYNAPSE' ? '#06b6d4' : '#a855f7';
+
+    const bgGlow =
+        activeAI === 'AURA' ? 'radial-gradient(circle, rgba(239, 68, 68, 0.08) 0%, transparent 70%)' :
+        activeAI === 'MAX' ? 'radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%)' :
+        activeAI === 'SYNAPSE' ? 'radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%)' :
+        'radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%)';
 
     return (
-        <>
-            {/* 1. PULSING FLOATING TRIGGER BUTTON */}
-            <motion.button
-                onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    position: 'fixed',
-                    bottom: '30px',
-                    right: '30px',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    background: '#080808',
-                    cursor: 'pointer',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 99999,
-                    border: 'none',
-                    outline: 'none'
-                }}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.95 }}
-            >
-                {/* Spinning holograph border effect */}
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: isOpen ? 2 : 4, repeat: Infinity, ease: 'linear' }}
-                    style={{
-                        position: 'absolute',
-                        inset: '-3px',
-                        borderRadius: '50%',
-                        background: `conic-gradient(from 0deg, #f43f5e, #8b5cf6, #3b82f6, #14b8a6, #f43f5e)`,
-                        zIndex: -1,
-                        filter: 'blur(1.5px)'
-                    }}
-                />
-                {/* Central glowing core node */}
-                <motion.div
-                    animate={{ scale: [0.9, 1.1, 0.9], opacity: [0.85, 1, 0.85] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    style={{
-                        width: '14px',
-                        height: '14px',
-                        borderRadius: '50%',
-                        background: '#ffffff',
-                        boxShadow: `0 0 15px ${accent}, 0 0 5px ${accent}`
-                    }}
-                />
-            </motion.button>
-
-            {/* 2. CHAT PANEL INTERFACE */}
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999 }}>
+            {/* Expanded Chat Widget Panel */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        initial={{ opacity: 0, scale: 0.85, y: 30 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.85, y: 30 }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 350 }}
                         style={{
-                            position: 'fixed',
-                            bottom: '105px',
-                            right: '30px',
-                            width: '375px',
-                            height: '520px',
-                            borderRadius: '24px',
-                            background: 'rgba(8, 10, 16, 0.82)',
-                            border: '1px solid rgba(255, 255, 255, 0.07)',
-                            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
-                            backdropFilter: 'blur(25px)',
-                            WebkitBackdropFilter: 'blur(25px)',
+                            width: '380px',
+                            height: '540px',
+                            borderRadius: '28px',
+                            background: 'rgba(8, 12, 22, 0.75)',
+                            backdropFilter: 'blur(32px)',
+                            WebkitBackdropFilter: 'blur(32px)',
+                            border: `1px solid ${aiColor}35`,
+                            boxShadow: `0 24px 60px -10px rgba(0, 0, 0, 0.7), 0 0 30px ${aiColor}20`,
                             display: 'flex',
                             flexDirection: 'column',
-                            zIndex: 99998,
-                            overflow: 'hidden'
+                            overflow: 'hidden',
+                            position: 'relative',
+                            marginBottom: '16px'
                         }}
                     >
-                        {/* Radial colored aura in panel background */}
+                        {/* Background Glow */}
                         <div style={{
                             position: 'absolute',
                             inset: 0,
@@ -211,297 +195,240 @@ export default function FloatingChatbot() {
 
                         {/* Top Bar Header */}
                         <div style={{
-                            padding: '16px 20px',
+                            padding: '14px 18px',
                             display: 'flex',
-                            justifyContent: 'space-between',
+                            justify: 'space-between',
                             alignItems: 'center',
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                            background: 'rgba(12, 14, 23, 0.4)'
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                            background: 'rgba(12, 16, 26, 0.5)'
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <motion.div
                                     animate={{ scale: [1, 1.25, 1], opacity: [0.7, 1, 0.7] }}
                                     transition={{ duration: 1.5, repeat: Infinity }}
                                     style={{
-                                        width: '6px',
-                                        height: '6px',
+                                        width: '7px',
+                                        height: '7px',
                                         borderRadius: '50%',
-                                        background: '#10b981',
-                                        boxShadow: '0 0 8px #10b981'
+                                        background: aiColor,
+                                        boxShadow: `0 0 8px ${aiColor}`
                                     }}
                                 />
-                                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.2px' }}>
-                                    {activeAI === 'AURA' ? 'AURA Core' : 'MAX Core'}
+                                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                    {activeAI === 'AURA' ? 'AURA Core' : activeAI === 'MAX' ? 'MAX Core' : activeAI === 'SYNAPSE' ? 'SYNAPSE Core' : 'LEX Core'}
                                 </span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                {/* Selector toggler */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {/* 4-way Selector toggler */}
                                 <div style={{
                                     display: 'flex',
-                                    background: 'rgba(255, 255, 255, 0.03)',
-                                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                                    background: 'rgba(255, 255, 255, 0.04)',
+                                    border: '1px solid rgba(255, 255, 255, 0.08)',
                                     borderRadius: '12px',
                                     padding: '2px',
                                     gap: '2px'
                                 }}>
-                                    <button
-                                        onClick={() => setActiveAI('AURA')}
-                                        style={{
-                                            border: 'none',
-                                            background: activeAI === 'AURA' ? '#ef4444' : 'transparent',
-                                            color: activeAI === 'AURA' ? '#fff' : 'rgba(255, 255, 255, 0.4)',
-                                            fontSize: '0.72rem',
-                                            fontWeight: 700,
-                                            padding: '5px 12px',
-                                            borderRadius: '8px',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s'
-                                        }}
-                                    >
-                                        Aura
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveAI('MAX')}
-                                        style={{
-                                            border: 'none',
-                                            background: activeAI === 'MAX' ? '#22c55e' : 'transparent',
-                                            color: activeAI === 'MAX' ? '#fff' : 'rgba(255, 255, 255, 0.4)',
-                                            fontSize: '0.72rem',
-                                            fontWeight: 700,
-                                            padding: '5px 12px',
-                                            borderRadius: '8px',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s'
-                                        }}
-                                    >
-                                        Max
-                                    </button>
+                                    {[
+                                        { id: 'AURA', label: 'Aura', color: '#ef4444' },
+                                        { id: 'MAX', label: 'Max', color: '#22c55e' },
+                                        { id: 'SYNAPSE', label: 'Synapse', color: '#06b6d4' },
+                                        { id: 'LEX', label: 'Lex', color: '#a855f7' }
+                                    ].map(ai => (
+                                        <button
+                                            key={ai.id}
+                                            onClick={() => setActiveAI(ai.id)}
+                                            style={{
+                                                border: 'none',
+                                                background: activeAI === ai.id ? ai.color : 'transparent',
+                                                color: activeAI === ai.id ? '#fff' : 'rgba(255, 255, 255, 0.45)',
+                                                fontSize: '0.66rem',
+                                                fontWeight: 800,
+                                                padding: '4px 7px',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.25s',
+                                                fontFamily: "'Space Grotesk', sans-serif"
+                                            }}
+                                        >
+                                            {ai.label}
+                                        </button>
+                                    ))}
                                 </div>
-                                {/* Close Button */}
+
                                 <button
                                     onClick={() => setIsOpen(false)}
                                     style={{
-                                        background: 'none',
                                         border: 'none',
-                                        color: 'rgba(255,255,255,0.35)',
+                                        background: 'transparent',
+                                        color: 'rgba(255, 255, 255, 0.4)',
                                         cursor: 'pointer',
                                         fontSize: '1.2rem',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        padding: '4px',
-                                        borderRadius: '6px'
+                                        lineHeight: 1,
+                                        padding: '4px'
                                     }}
                                 >
-                                    &times;
+                                    ✕
                                 </button>
                             </div>
                         </div>
 
-                        {/* Scrollable Messages Area */}
+                        {/* Message Feed Area */}
                         <div
                             ref={msgsRef}
                             style={{
                                 flex: 1,
+                                padding: '16px',
                                 overflowY: 'auto',
-                                padding: '16px 20px',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: '12px'
                             }}
                         >
-                            {messages.map((msg, idx) => {
-                                const isUser = msg.role === 'user';
-                                const initials = isUser ? 'U' : (activeAI === 'AURA' ? 'AU' : 'MX');
-                                return (
+                            {messages.map((m, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    style={{
+                                        alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
+                                        maxWidth: '82%'
+                                    }}
+                                >
                                     <div
-                                        key={idx}
                                         style={{
-                                            display: 'flex',
-                                            alignSelf: isUser ? 'flex-end' : 'flex-start',
-                                            flexDirection: isUser ? 'row-reverse' : 'row',
-                                            gap: '10px',
-                                            maxWidth: '85%'
+                                            padding: '10px 14px',
+                                            borderRadius: m.role === 'user' ? '18px 18px 2px 18px' : '18px 18px 18px 2px',
+                                            background: m.role === 'user'
+                                                ? `linear-gradient(135deg, ${aiColor}35, ${aiColor}15)`
+                                                : 'rgba(255, 255, 255, 0.04)',
+                                            border: m.role === 'user'
+                                                ? `1px solid ${aiColor}50`
+                                                : '1px solid rgba(255, 255, 255, 0.08)',
+                                            color: '#fff',
+                                            fontSize: '0.84rem',
+                                            lineHeight: 1.45,
+                                            fontFamily: "'Plus Jakarta Sans', sans-serif"
                                         }}
                                     >
-                                        {/* Avatar */}
-                                        {isUser ? (
-                                            <div style={{
-                                                width: '26px',
-                                                height: '26px',
-                                                borderRadius: '50%',
-                                                background: '#161825',
-                                                border: '1px solid rgba(255,255,255,0.08)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                fontSize: '0.65rem',
-                                                fontWeight: 800,
-                                                flexShrink: 0,
-                                                color: 'rgba(255,255,255,0.5)'
-                                            }}>
-                                                U
-                                            </div>
-                                        ) : (
-                                            <RobotAvatar expression="smile" size="xs" glowColor={accent} style={{ flexShrink: 0 }} />
-                                        )}
-                                        {/* Message Text */}
-                                        <div style={{
-                                             padding: '10px 16px',
-                                             fontSize: '0.84rem',
-                                             lineHeight: 1.5,
-                                             borderRadius: '16px',
-                                             borderTopLeftRadius: isUser ? '16px' : '4px',
-                                             borderTopRightRadius: isUser ? '4px' : '16px',
-                                             background: isUser 
-                                                 ? 'linear-gradient(135deg, var(--accent-purple) 0%, #4f46e5 100%)'
-                                                 : 'rgba(255, 255, 255, 0.02)',
-                                             border: isUser ? 'none' : '1px solid rgba(255, 255, 255, 0.04)',
-                                             borderLeft: isUser ? 'none' : `3px solid ${accent}`,
-                                             boxShadow: isUser ? '0 6px 18px rgba(99, 102, 241, 0.2)' : `0 4px 15px ${activeAI === 'AURA' ? 'rgba(244, 63, 94, 0.04)' : 'rgba(20, 184, 166, 0.04)'}`,
-                                             color: '#fff',
-                                             wordBreak: 'break-word',
-                                             whiteSpace: 'pre-wrap',
-                                             fontFamily: "'Plus Jakarta Sans', sans-serif"
-                                        }}>
-                                             {msg.content}
-                                        </div>
+                                        {m.content}
                                     </div>
-                                );
-                            })}
+                                    <span style={{ fontSize: '0.62rem', color: 'rgba(255, 255, 255, 0.3)', marginTop: '4px', display: 'block', textAlign: m.role === 'user' ? 'right' : 'left' }}>
+                                        {new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                </motion.div>
+                            ))}
 
-                            {/* Bouncing typing indicator */}
                             {isTyping && (
-                                <div style={{ display: 'flex', gap: '10px', alignSelf: 'flex-start' }}>
-                                    <RobotAvatar expression="analyzing" size="xs" glowColor={accent} isTyping={true} style={{ flexShrink: 0 }} />
-                                    <div style={{
-                                        display: 'flex',
-                                        gap: '4px',
-                                        padding: '10px 14px',
-                                        background: 'rgba(255, 255, 255, 0.03)',
-                                        border: '1px solid rgba(255, 255, 255, 0.04)',
-                                        borderRadius: '16px',
-                                        borderTopLeftRadius: '4px'
-                                    }}>
-                                        {[0, 1, 2].map(i => (
-                                            <motion.div
-                                                key={i}
-                                                animate={{ y: [0, -5, 0] }}
-                                                transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2, ease: 'easeInOut' }}
-                                                style={{
-                                                    width: '6px',
-                                                    height: '6px',
-                                                    borderRadius: '50%',
-                                                    background: accent
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    style={{ alignSelf: 'flex-start', display: 'flex', gap: '4px', padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}
+                                >
+                                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: aiColor, animation: 'pulse 1s infinite' }} />
+                                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: aiColor, animation: 'pulse 1s infinite 0.2s' }} />
+                                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: aiColor, animation: 'pulse 1s infinite 0.4s' }} />
+                                </motion.div>
                             )}
                         </div>
 
-                        {/* Suggestions Chips List */}
-                        <div style={{
-                            padding: '0 20px 10px',
-                            display: 'flex',
-                            gap: '8px',
-                            overflowX: 'auto',
-                            scrollbarWidth: 'none',
-                            msOverflowStyle: 'none'
-                        }}>
-                            {SUGGESTIONS[activeAI].map((sug, i) => (
+                        {/* Quick Prompts */}
+                        <div style={{ padding: '0 12px 8px', display: 'flex', gap: '6px', overflowX: 'auto' }}>
+                            {SUGGESTIONS[activeAI].map((s, idx) => (
                                 <button
-                                    key={i}
-                                    onClick={() => handleSend(sug)}
+                                    key={idx}
+                                    onClick={() => handleSend(s)}
                                     style={{
-                                        padding: '7px 14px',
-                                        background: 'rgba(255, 255, 255, 0.02)',
-                                        border: '1px solid rgba(255, 255, 255, 0.06)',
-                                        borderRadius: '16px',
-                                        color: 'rgba(255, 255, 255, 0.65)',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
                                         whiteSpace: 'nowrap',
-                                        fontFamily: "'Plus Jakarta Sans', sans-serif",
-                                        transition: 'all 0.25s'
-                                    }}
-                                    onMouseOver={e => {
-                                        e.currentTarget.style.color = '#fff';
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                        e.currentTarget.style.borderColor = accent + '50';
-                                    }}
-                                    onMouseOut={e => {
-                                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.65)';
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
-                                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                                        background: 'rgba(255, 255, 255, 0.03)',
+                                        border: '1px solid rgba(255, 255, 255, 0.07)',
+                                        borderRadius: '16px',
+                                        padding: '5px 10px',
+                                        color: 'rgba(255, 255, 255, 0.65)',
+                                        fontSize: '0.7rem',
+                                        cursor: 'pointer',
+                                        fontFamily: "'Plus Jakarta Sans', sans-serif"
                                     }}
                                 >
-                                    {sug}
+                                    {s}
                                 </button>
                             ))}
                         </div>
 
-                        {/* Text Input Panel */}
+                        {/* Input Footer */}
                         <div style={{
-                            padding: '12px 20px 20px',
-                            borderTop: '1px solid rgba(255, 255, 255, 0.04)'
+                            padding: '12px 14px',
+                            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                            background: 'rgba(8, 10, 18, 0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
                         }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                background: 'rgba(255, 255, 255, 0.02)',
-                                border: '1px solid rgba(255, 255, 255, 0.06)',
-                                borderRadius: '18px',
-                                padding: '4px 6px 4px 14px',
-                                transition: 'all 0.3s'
-                            }}>
-                                <input
-                                    type="text"
-                                    value={input}
-                                    onChange={e => setInput(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleSend()}
-                                    placeholder="Type a message..."
-                                    style={{
-                                        flex: 1,
-                                        background: 'transparent',
-                                        border: 'none',
-                                        outline: 'none',
-                                        color: '#fff',
-                                        fontSize: '0.84rem',
-                                        fontFamily: "'Plus Jakarta Sans', sans-serif",
-                                        padding: '8px 0'
-                                    }}
-                                />
-                                <button
-                                    onClick={() => handleSend()}
-                                    style={{
-                                        width: '32px',
-                                        height: '32px',
-                                        borderRadius: '50%',
-                                        background: input.trim() ? accent : 'rgba(255, 255, 255, 0.03)',
-                                        border: `1px solid ${input.trim() ? accent : 'rgba(255, 255, 255, 0.06)'}`,
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        transition: 'all 0.3s',
-                                        color: input.trim() ? '#fff' : 'rgba(255, 255, 255, 0.3)',
-                                        boxShadow: input.trim() ? `0 4px 12px ${accent}40` : 'none'
-                                    }}
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                    </svg>
-                                </button>
-                            </div>
+                            <input
+                                type="text"
+                                value={input}
+                                onChange={e => setInput(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleSend()}
+                                placeholder={`Ask ${activeAI === 'AURA' ? 'Aura' : activeAI === 'MAX' ? 'Max' : activeAI === 'SYNAPSE' ? 'Synapse' : 'Lex'}...`}
+                                style={{
+                                    flex: 1,
+                                    background: 'rgba(255, 255, 255, 0.04)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '18px',
+                                    padding: '9px 14px',
+                                    color: '#fff',
+                                    fontSize: '0.82rem',
+                                    outline: 'none',
+                                    fontFamily: "'Plus Jakarta Sans', sans-serif"
+                                }}
+                            />
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handleSend()}
+                                style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '50%',
+                                    background: aiColor,
+                                    border: 'none',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.9rem',
+                                    boxShadow: `0 4px 12px ${aiColor}40`
+                                }}
+                            >
+                                ➔
+                            </motion.button>
                         </div>
-
                     </motion.div>
                 )}
             </AnimatePresence>
-        </>
+
+            {/* Launcher Floating Button */}
+            <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={() => setIsOpen(!isOpen)}
+                style={{
+                    width: '58px',
+                    height: '58px',
+                    borderRadius: '50%',
+                    background: `linear-gradient(135deg, ${aiColor}, #000)`,
+                    border: `1.5px solid ${aiColor}`,
+                    boxShadow: `0 8px 25px ${aiColor}45`,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justify: 'center',
+                    color: '#fff',
+                    position: 'relative'
+                }}
+            >
+                <RobotAvatar expression="smile" size="xs" glowColor={aiColor} />
+            </motion.button>
+        </div>
     );
 }

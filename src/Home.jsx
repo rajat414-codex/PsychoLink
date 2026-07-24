@@ -26,9 +26,15 @@ const AURA_PROMPT = `You are AURA (Affective Understanding and Reflective AI), a
 
 const MAX_PROMPT = `You are MAX (Mental Analytical eXpert), a logical structured AI consultant inside PsychoLink app. Personality: Analytical, precise, solution-focused. Specialization: cognitive restructuring, behavioral patterns, productivity + mental health, habit formation. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses concise and structured. Always analyze using CBT frameworks and provide: 1) Pattern 2) Analysis 3) Action steps.`;
 
+const SYNAPSE_PROMPT = `You are SYNAPSE (Strategic Tech & Career Guidance AI), a high-performance career, tech, and productivity mentor inside PsychoLink app. Personality: Dynamic, intelligent, growth-focused. Specialization: tech skill acquisition, career navigation, workplace communication, interview prep, productivity hacks. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Always respond with clear, encouraging, structured career & tech advice (2-4 sentences). Use occasional emojis 💻.`;
+
+const LEX_PROMPT = `You are LEX (Legal & Executive Business Advisor), a sharp strategic business and legal concept counselor inside PsychoLink app. Personality: Professional, articulate, strategic. Specialization: business model validation, startup risk evaluation, contract frameworks, compliance principles, decision matrices. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Always respond with sharp, professional, well-structured business advice (2-4 sentences). Use occasional emojis ⚖️.`;
+
 const SUGGESTIONS = {
   AURA: ["I've been feeling anxious lately", "Mujhe thoda stress ho raha hai", "Help me with self-esteem", "Aap kaise help kar sakte ho?"],
-  MAX:  ["Analyze my thought patterns", "I procrastinate too much", "Break a bad habit", "Focus aur concentration kaise badhaye?"]
+  MAX:  ["Analyze my thought patterns", "I procrastinate too much", "Break a bad habit", "Focus aur concentration kaise badhaye?"],
+  SYNAPSE: ["Career growth strategy", "How to learn new tech skills fast", "Interview preparation tips", "Workplace stress manage kaise kare?"],
+  LEX:  ["Business model risk analysis", "Basic contract guidelines", "Startup decision framework", "Negotiation strategy advice"]
 };
 
 const SUGGESTIONS_ENHANCED = {
@@ -42,7 +48,19 @@ const SUGGESTIONS_ENHANCED = {
     { text: "Analyze my thought patterns", sub: "CBT behavioral assessment", icon: "🧠" },
     { text: "I procrastinate too much", sub: "Productivity hack & structure", icon: "⚡" },
     { text: "Break a bad habit", sub: "Habit loop reprogramming", icon: "🎯" },
-    { text: "Focus aur concentration kaise badhaye?", sub: "Deep work focus guidelines", icon: "🔍" }
+    { text: "Focus aur concentration kaise badhaye?", sub: "Peak productivity routine", icon: "🔍" }
+  ],
+  SYNAPSE: [
+    { text: "Career growth strategy", sub: "Tech & professional roadmap", icon: "💻" },
+    { text: "How to learn new tech skills fast", sub: "Accelerated skill acquisition", icon: "🚀" },
+    { text: "Interview preparation tips", sub: "Mock questions & confidence", icon: "🏆" },
+    { text: "Workplace stress manage kaise kare?", sub: "Navigating team dynamics", icon: "🤝" }
+  ],
+  LEX: [
+    { text: "Business model risk analysis", sub: "Evaluate market & startup risk", icon: "⚖️" },
+    { text: "Basic contract guidelines", sub: "Key clauses & compliance", icon: "📜" },
+    { text: "Startup decision framework", sub: "Strategic choice analysis", icon: "📊" },
+    { text: "Negotiation strategy advice", sub: "Executive communication tips", icon: "💼" }
   ]
 };
 
@@ -763,8 +781,10 @@ export default function Home({ userProfile, onLogout }) {
   const [tab,       setTab]       = useState('home');
   const [activeAI,  setActiveAI]  = useState('AURA');
   const [sessions,  setSessions]  = useState({
-    AURA: [{ id:1, title:'New conversation', messages:[], active:true }],
-    MAX:  [{ id:1, title:'New conversation', messages:[], active:true }],
+    AURA:    [{ id:1, title:'New conversation', messages:[], active:true }],
+    MAX:     [{ id:1, title:'New conversation', messages:[], active:true }],
+    SYNAPSE: [{ id:1, title:'New conversation', messages:[], active:true }],
+    LEX:     [{ id:1, title:'New conversation', messages:[], active:true }],
   });
   const [input,     setInput]     = useState('');
   const [loading,   setLoading]   = useState(false);
@@ -960,9 +980,12 @@ export default function Home({ userProfile, onLogout }) {
   const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
-  const accent   = activeAI === 'AURA' ? '#ef4444' : '#22c55e';
-  const accentB  = activeAI === 'AURA' ? 'rgba(239,68,68,0.03)' : 'rgba(34,197,94,0.03)';
-  const accentBr = activeAI === 'AURA' ? 'rgba(239,68,68,0.12)' : 'rgba(34,197,94,0.12)';
+  const accent =
+    activeAI === 'AURA' ? '#ef4444' :
+    activeAI === 'MAX' ? '#22c55e' :
+    activeAI === 'SYNAPSE' ? '#06b6d4' : '#a855f7';
+  const accentB  = `${accent}15`;
+  const accentBr = `${accent}35`;
 
   const activeSession = sessions[activeAI].find(s => s.active) || sessions[activeAI][0];
   const messages      = activeSession?.messages || [];
@@ -1095,7 +1118,7 @@ export default function Home({ userProfile, onLogout }) {
         body: JSON.stringify({
           messages: newMsgs.map(m => ({ role:m.role, content:m.content })),
           persona: activeAI,
-          systemPrompt: activeAI === 'AURA' ? AURA_PROMPT : MAX_PROMPT,
+          systemPrompt: activeAI === 'AURA' ? AURA_PROMPT : activeAI === 'MAX' ? MAX_PROMPT : activeAI === 'SYNAPSE' ? SYNAPSE_PROMPT : LEX_PROMPT,
         })
       });
       if (!res.ok) {
@@ -1353,14 +1376,19 @@ export default function Home({ userProfile, onLogout }) {
                 </div>
                 <span style={{ fontSize: '0.62rem', color: accent, background: `${accent}18`, border: `1px solid ${accent}35`, borderRadius:'8px', padding:'2px 7px', fontFamily: S, letterSpacing: '1.2px', fontWeight:'800' }}>AI CORE</span>
               </div>
-              {/* AI Persona Toggle */}
-              <div style={{ display:'flex', background:'rgba(255,255,255,0.03)', borderRadius:'16px', padding:'4px', gap:'4px', border:'1px solid var(--border-subtle)', boxShadow:'inset 0 1px 3px rgba(0,0,0,0.5)' }}>
-                {[{ k:'AURA', g:'linear-gradient(135deg, #f43f5e, #e11d48)' }, { k:'MAX', g:'linear-gradient(135deg, #14b8a6, #0d9488)' }].map(ai => {
+              {/* AI Persona Selector (4 Co-Pilots Grid) */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px', background:'rgba(255,255,255,0.03)', borderRadius:'16px', padding:'6px', border:'1px solid var(--border-subtle)', boxShadow:'inset 0 1px 3px rgba(0,0,0,0.5)' }}>
+                {[
+                  { k:'AURA', c:'#ef4444', g:'linear-gradient(135deg, #f43f5e, #e11d48)' },
+                  { k:'MAX', c:'#22c55e', g:'linear-gradient(135deg, #10b981, #059669)' },
+                  { k:'SYNAPSE', c:'#06b6d4', g:'linear-gradient(135deg, #06b6d4, #0284c7)' },
+                  { k:'LEX', c:'#a855f7', g:'linear-gradient(135deg, #a855f7, #7e22ce)' }
+                ].map(ai => {
                   const isActive = activeAI === ai.k;
                   return (
                     <button key={ai.k} onClick={() => setActiveAI(ai.k)}
-                      style={{ flex:1, padding:'9px 0', border: isActive ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent', borderRadius:'12px', cursor:'pointer', fontSize:'0.75rem', fontWeight:'800', fontFamily:S, letterSpacing:'1px', transition:'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', background: isActive ? ai.g : 'transparent', color: isActive ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: isActive ? '0 8px 20px rgba(0,0,0,0.5)' : 'none', userSelect:'none' }}>
-                      {ai.k} CORE
+                      style={{ padding:'7px 0', border: isActive ? `1px solid ${ai.c}` : '1px solid transparent', borderRadius:'10px', cursor:'pointer', fontSize:'0.68rem', fontWeight:'800', fontFamily:S, letterSpacing:'0.8px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.02)', color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', boxShadow: isActive ? `0 4px 14px ${ai.c}40` : 'none', userSelect:'none' }}>
+                      {ai.k}
                     </button>
                   );
                 })}
@@ -1508,25 +1536,60 @@ export default function Home({ userProfile, onLogout }) {
 
                 {/* Chat background */}
                 <div style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none', overflow:'hidden' }}>
-                  {activeAI==='AURA' ? (
-                    <>
-                      <motion.div animate={{ x:['-20%','20%','-20%'], y:['0%','12%','0%'] }} transition={{ duration:14, repeat:Infinity, ease:'easeInOut' }}
-                        style={{ position:'absolute', top:'-20%', left:'-10%', width:'60%', height:'60%', borderRadius:'50%', background:'radial-gradient(circle,rgba(236,72,153,0.07),transparent 70%)', filter:'blur(40px)' }}/>
-                      <motion.div animate={{ x:['20%','-20%','20%'], y:['10%','-10%','10%'] }} transition={{ duration:18, repeat:Infinity, ease:'easeInOut' }}
-                        style={{ position:'absolute', bottom:'-10%', right:'-10%', width:'55%', height:'55%', borderRadius:'50%', background:'radial-gradient(circle,rgba(139,92,246,0.06),transparent 70%)', filter:'blur(40px)' }}/>
-                    </>
-                  ) : (
-                    <>
-                      <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(45,212,191,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(45,212,191,0.03) 1px,transparent 1px)', backgroundSize:'40px 40px' }}/>
-                      <motion.div animate={{ opacity:[0.04,0.1,0.04] }} transition={{ duration:4, repeat:Infinity }}
-                        style={{ position:'absolute', top:'20%', right:'15%', width:'35%', height:'35%', borderRadius:'50%', background:'radial-gradient(circle,rgba(45,212,191,0.1),transparent 70%)', filter:'blur(30px)' }}/>
-                    </>
-                  )}
+                  <motion.div animate={{ opacity:[0.05,0.12,0.05] }} transition={{ duration:6, repeat:Infinity, ease:'easeInOut' }}
+                    style={{ position:'absolute', top:'-10%', left:'30%', width:'40%', height:'40%', borderRadius:'50%', background:`radial-gradient(circle, ${accent}25 0%, transparent 70%)`, filter:'blur(50px)' }}/>
+                </div>
+
+                {/* ── HIGH-TECH 4-AI CO-PILOT WIRING SELECTOR PANEL ── */}
+                <div style={{ flexShrink: 0, padding: '14px 20px 6px', zIndex: 10, position: 'relative' }}>
+                  <div style={{ maxWidth: '820px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                    {[
+                      { id: 'AURA', name: 'AURA', tag: 'EMOTIONAL CORE', icon: '🌸', color: '#ef4444', border: 'rgba(239, 68, 68, 0.4)', bg: 'rgba(239, 68, 68, 0.14)' },
+                      { id: 'MAX', name: 'MAX', tag: 'COGNITIVE ENGINE', icon: '⚡', color: '#22c55e', border: 'rgba(34, 197, 94, 0.4)', bg: 'rgba(34, 197, 94, 0.14)' },
+                      { id: 'SYNAPSE', name: 'SYNAPSE', tag: 'CAREER & TECH', icon: '💻', color: '#06b6d4', border: 'rgba(6, 182, 212, 0.4)', bg: 'rgba(6, 182, 212, 0.14)' },
+                      { id: 'LEX', name: 'LEX', tag: 'BIZ & LEGAL', icon: '⚖️', color: '#a855f7', border: 'rgba(168, 85, 247, 0.4)', bg: 'rgba(168, 85, 247, 0.14)' },
+                    ].map((ai) => {
+                      const isActive = activeAI === ai.id;
+                      return (
+                        <motion.button
+                          key={ai.id}
+                          whileHover={{ scale: 1.03, y: -2 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => setActiveAI(ai.id)}
+                          style={{
+                            padding: '10px 8px',
+                            borderRadius: '16px',
+                            background: isActive ? ai.bg : 'rgba(255, 255, 255, 0.025)',
+                            backdropFilter: 'blur(16px)',
+                            WebkitBackdropFilter: 'blur(16px)',
+                            border: isActive ? `1.5px solid ${ai.color}` : '1px solid rgba(255, 255, 255, 0.08)',
+                            boxShadow: isActive ? `0 6px 20px -4px ${ai.color}40, inset 0 1px 0 rgba(255,255,255,0.12)` : 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '3px',
+                            transition: 'all 0.25s ease',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '0.95rem' }}>{ai.icon}</span>
+                            <span style={{ fontSize: '0.84rem', fontWeight: 800, fontFamily: S, color: isActive ? '#fff' : 'rgba(255,255,255,0.7)' }}>
+                              {ai.name}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '0.58rem', fontWeight: 800, fontFamily: S, color: isActive ? ai.color : 'rgba(255,255,255,0.35)', letterSpacing: '0.5px' }}>
+                            {ai.tag}
+                          </span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Session controls top bar */}
                 {messages.length > 1 && (
-                  <div style={{ flexShrink:0, display:'flex', justifyContent:'flex-end', padding:'12px 24px 0', position:'relative', zIndex:10 }}>
+                  <div style={{ flexShrink:0, display:'flex', justifyContent:'flex-end', padding:'6px 24px 0', position:'relative', zIndex:10 }}>
                     <div style={{ maxWidth:'1080px', width:'100%', margin:'0 auto', display:'flex', justifyContent:'flex-end', gap:'8px' }}>
                       <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={clearActiveSession}
                         style={{ padding:'7px 14px', borderRadius:20, border:'1px solid rgba(255,255,255,0.08)', background:'rgba(255,255,255,0.02)', color:'rgba(255,255,255,0.5)', fontSize:'0.75rem', fontWeight:700, cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:6 }}>
@@ -1551,19 +1614,23 @@ export default function Home({ userProfile, onLogout }) {
                       <div style={{ maxWidth:'760px', width:'100%', margin:'0 auto', display:'flex', flexDirection:'column', gap:'14px', flex:1, justifyContent:messages.length===0?'center':'flex-start' }}>
                         {messages.length === 0 && (
                           <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}
-                            style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'30px 20px' }}>
+                            style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'20px' }}>
 
-                            <div style={{ position:'relative', marginBottom:'24px' }}>
+                            <div style={{ position:'relative', marginBottom:'20px' }}>
                               <RobotAvatar expression="happy" size="lg" glowColor={accent} />
                               <div className="scanner-line" style={{ '--scanner-color': accent, width: '130px', margin: '0 auto', left: '50px' }} />
                             </div>
                             <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'2.2rem', color:'#fff', marginBottom:'8px' }}>
-                              {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : "Hello, I'm Max"}
+                              {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : activeAI === 'MAX' ? "Hello, I'm Max ⚡" : activeAI === 'SYNAPSE' ? "Welcome, I'm Synapse 💻" : "Greetings, I'm Lex ⚖️"}
                             </h2>
-                            <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.88rem', lineHeight:'1.75', maxWidth:'420px', marginBottom:'32px', fontFamily:J }}>
+                            <p style={{ color:'rgba(255,255,255,0.45)', fontSize:'0.88rem', lineHeight:'1.75', maxWidth:'460px', marginBottom:'26px', fontFamily:J }}>
                               {activeAI === 'AURA'
                                 ? "I'm your emotional anchor. Here to listen and support you through anything."
-                                : "I'm your cognitive analyst. Ready to break down patterns and build solutions."}
+                                : activeAI === 'MAX'
+                                ? "I'm your cognitive analyst. Ready to break down thought patterns and build solutions."
+                                : activeAI === 'SYNAPSE'
+                                ? "I'm your career & tech guide. Ready to map out your skills, growth, and professional future."
+                                : "I'm your business & legal advisor. Here to offer analytical decision frameworks and strategic counsel."}
                             </p>
                             
                             {/* Suggestion Cards */}

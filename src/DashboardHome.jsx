@@ -437,14 +437,14 @@ export default function DashboardHome({
         <div style={{ background: 'rgba(255, 255, 255, 0.03)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '24px', padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
             <h4 style={{ margin: 0, fontFamily: J, fontWeight: 800, fontSize: '0.98rem', color: '#fff' }}>AI Co-Pilots</h4>
-            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: S }}>2 Engines Active</span>
+            <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 800, fontFamily: S }}>4 Engines Active</span>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div
               onClick={() => { setActiveAI('AURA'); setTab('chat'); }}
               style={{
-                padding: '18px',
+                padding: '16px',
                 borderRadius: '18px',
                 background: 'rgba(239, 68, 68, 0.04)',
                 border: '1px solid rgba(239, 68, 68, 0.18)',
@@ -452,18 +452,18 @@ export default function DashboardHome({
                 transition: 'all 0.25s'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <RobotAvatar expression="smile" size="xs" glowColor="#ef4444" />
-                <span style={{ fontSize: '0.62rem', color: '#ef4444', fontWeight: 800, fontFamily: S }}>EMOTIONAL CORE</span>
+                <span style={{ fontSize: '0.6rem', color: '#ef4444', fontWeight: 800, fontFamily: S }}>EMOTIONAL</span>
               </div>
-              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1.05rem', color: '#fff' }}>Aura AI</p>
-              <p style={{ margin: 0, fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Empathic reflections & support</p>
+              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Aura AI</p>
+              <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Empathic reflections & support</p>
             </div>
 
             <div
               onClick={() => { setActiveAI('MAX'); setTab('chat'); }}
               style={{
-                padding: '18px',
+                padding: '16px',
                 borderRadius: '18px',
                 background: 'rgba(34, 197, 94, 0.04)',
                 border: '1px solid rgba(34, 197, 94, 0.18)',
@@ -471,12 +471,50 @@ export default function DashboardHome({
                 transition: 'all 0.25s'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <RobotAvatar expression="neutral" size="xs" glowColor="#22c55e" />
-                <span style={{ fontSize: '0.62rem', color: '#22c55e', fontWeight: 800, fontFamily: S }}>COGNITIVE ENGINE</span>
+                <span style={{ fontSize: '0.6rem', color: '#22c55e', fontWeight: 800, fontFamily: S }}>COGNITIVE</span>
               </div>
-              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1.05rem', color: '#fff' }}>Max AI</p>
-              <p style={{ margin: 0, fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Structured cognitive analysis</p>
+              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Max AI</p>
+              <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Structured cognitive analysis</p>
+            </div>
+
+            <div
+              onClick={() => { setActiveAI('SYNAPSE'); setTab('chat'); }}
+              style={{
+                padding: '16px',
+                borderRadius: '18px',
+                background: 'rgba(6, 182, 212, 0.04)',
+                border: '1px solid rgba(6, 182, 212, 0.18)',
+                cursor: 'pointer',
+                transition: 'all 0.25s'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <RobotAvatar expression="happy" size="xs" glowColor="#06b6d4" />
+                <span style={{ fontSize: '0.6rem', color: '#06b6d4', fontWeight: 800, fontFamily: S }}>CAREER & TECH</span>
+              </div>
+              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Synapse AI</p>
+              <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Tech skills & career roadmap</p>
+            </div>
+
+            <div
+              onClick={() => { setActiveAI('LEX'); setTab('chat'); }}
+              style={{
+                padding: '16px',
+                borderRadius: '18px',
+                background: 'rgba(168, 85, 247, 0.04)',
+                border: '1px solid rgba(168, 85, 247, 0.18)',
+                cursor: 'pointer',
+                transition: 'all 0.25s'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <RobotAvatar expression="neutral" size="xs" glowColor="#a855f7" />
+                <span style={{ fontSize: '0.6rem', color: '#a855f7', fontWeight: 800, fontFamily: S }}>BIZ & LEGAL</span>
+              </div>
+              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Lex AI</p>
+              <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Business strategy & counsel</p>
             </div>
           </div>
         </div>
