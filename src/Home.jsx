@@ -1363,9 +1363,9 @@ export default function Home({ userProfile, onLogout }) {
       {/* ══ SIDEBAR ════════════════════════════════════════════════ */}
       <AnimatePresence>
         {sidebar && (
-          <motion.aside initial={{ x:-270, opacity:0 }} animate={{ x:0, opacity:1 }} exit={{ x:-270, opacity:0 }}
+          <motion.aside initial={{ x:-280, opacity:0 }} animate={{ x:0, opacity:1 }} exit={{ x:-280, opacity:0 }}
             transition={{ type:'spring', stiffness:300, damping:30 }}
-            style={{ width:'265px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'rgba(8, 12, 22, 0.65)', backdropFilter:'blur(36px)', WebkitBackdropFilter:'blur(36px)', borderRight:'1px solid rgba(255,255,255,0.12)', position:'relative', zIndex:20, boxShadow:'10px 0 30px rgba(0,0,0,0.5)' }}>
+            style={{ width:'275px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'rgba(8, 12, 22, 0.65)', backdropFilter:'blur(36px)', WebkitBackdropFilter:'blur(36px)', borderRight:'1.5px solid rgba(255,255,255,0.15)', position:'relative', zIndex:20, boxShadow:'12px 0 35px rgba(0,0,0,0.6)' }}>
 
             {/* Brand Header */}
             <div style={{ padding:'24px 20px 18px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
@@ -1394,8 +1394,8 @@ export default function Home({ userProfile, onLogout }) {
                   );
                 })}
               </div>
-            </div>
-
+            {/* Smooth Scrollable Nav Menu Container */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {navItems.map(item => {
                 const isActive = tab === item.id;
                 const isChat = item.id === 'chat';
@@ -1498,6 +1498,7 @@ export default function Home({ userProfile, onLogout }) {
                   </React.Fragment>
                 );
               })}
+            </div>
 
             {/* Chat history */}
             {tab === 'chat' && (
