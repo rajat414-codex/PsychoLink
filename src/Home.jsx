@@ -6,7 +6,7 @@ import {
   FaPaperPlane, FaMicrophone, FaStop, FaVolumeUp,
   FaHome, FaComments, FaUserMd, FaChartLine, FaBell, FaUser,
   FaHeart, FaFire, FaSmile, FaArrowRight, FaLeaf, FaBolt,
-  FaBook, FaWind, FaCloudSun, FaCopy, FaCheck
+  FaBook, FaWind, FaCloudSun, FaCopy, FaCheck, FaStar, FaChevronDown, FaChevronRight
 } from 'react-icons/fa';
 import BrainReport from './NeurologicalReport';
 import BreathingModal from './BreathingModal';
@@ -780,6 +780,7 @@ function analyzeSentimentIntensity(messages) {
 export default function Home({ userProfile, onLogout }) {
   const [tab,       setTab]       = useState('home');
   const [activeAI,  setActiveAI]  = useState('AURA');
+  const [chatMenuOpen, setChatMenuOpen] = useState(false);
   const [sessions,  setSessions]  = useState({
     AURA:    [{ id:1, title:'New conversation', messages:[], active:true }],
     MAX:     [{ id:1, title:'New conversation', messages:[], active:true }],
@@ -1399,10 +1400,23 @@ export default function Home({ userProfile, onLogout }) {
                 const isActive = tab === item.id;
                 const isChat = item.id === 'chat';
 
+                const handleNavClick = () => {
+                  if (isChat) {
+                    if (tab === 'chat') {
+                      setChatMenuOpen(!chatMenuOpen);
+                    } else {
+                      setTab('chat');
+                      setChatMenuOpen(true);
+                    }
+                  } else {
+                    setTab(item.id);
+                  }
+                };
+
                 return (
                   <React.Fragment key={item.id}>
                     <motion.button whileHover={{ background:'rgba(255,255,255,0.05)', x:2 }} whileTap={{ scale:0.98 }}
-                      onClick={() => setTab(item.id)}
+                      onClick={handleNavClick}
                       style={{ 
                         width:'100%', padding:'11px 16px', 
                         background: isActive ? `linear-gradient(90deg, ${accent}22 0%, rgba(255,255,255,0.02) 100%)` : 'transparent', 
@@ -1411,54 +1425,76 @@ export default function Home({ userProfile, onLogout }) {
                         borderRadius: '12px', 
                         color: isActive ? '#ffffff' : 'rgba(255,255,255,0.5)', 
                         fontSize:'0.88rem', fontWeight: isActive ? '700' : '500', 
-                        cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'14px', 
+                        cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'space-between', 
                         transition:'all 0.25s ease', marginBottom: isChat ? '4px' : '6px',
                         boxShadow: isActive ? `0 4px 15px ${accent}15` : 'none'
                       }}>
-                      <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)', transition:'color 0.2s', display:'flex', alignItems:'center', fontSize:'1rem' }}>{item.icon}</span>
-                      {item.label}
+                      <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
+                        <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)', transition:'color 0.2s', display:'flex', alignItems:'center', fontSize:'1rem' }}>{item.icon}</span>
+                        {item.label}
+                      </div>
+                      {isChat && (
+                        <span style={{ fontSize:'0.7rem', color: isChat && isActive ? accent : 'rgba(255,255,255,0.3)', display:'flex', alignItems:'center' }}>
+                          {chatMenuOpen ? <FaChevronDown size={10} /> : <FaChevronRight size={10} />}
+                        </span>
+                      )}
                     </motion.button>
 
-                    {/* Hand-drawn Diagram Style Wiring Branch under AI Chat */}
+                    {/* Collapsible Wiring Branch Tree (Only opens when user taps AI Chat) */}
                     {isChat && (
-                      <div style={{ paddingLeft: '28px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '3px', position: 'relative' }}>
-                        {[
-                          { k: 'AURA', label: 'Aura', color: '#ef4444', icon: '🌸' },
-                          { k: 'MAX', label: 'Max', color: '#22c55e', icon: '⚡' },
-                          { k: 'SYNAPSE', label: 'Synapse', color: '#06b6d4', icon: '💻' },
-                          { k: 'LEX', label: 'Lex', color: '#a855f7', icon: '⚖️' },
-                        ].map((ai, idx, arr) => {
-                          const isSubActive = tab === 'chat' && activeAI === ai.k;
-                          const isLast = idx === arr.length - 1;
+                      <AnimatePresence>
+                        {chatMenuOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.28, ease: 'easeInOut' }}
+                            style={{ paddingLeft: '28px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '4px', overflow: 'hidden', position: 'relative' }}
+                          >
+                            {[
+                              { k: 'AURA', label: 'Aura AI', color: '#ef4444', icon: '🌸' },
+                              { k: 'MAX', label: 'Max AI', color: '#22c55e', icon: '⚡' },
+                              { k: 'SYNAPSE', label: 'Synapse AI', color: '#06b6d4', icon: '💻' },
+                              { k: 'LEX', label: 'Lex AI', color: '#a855f7', icon: '⚖️' },
+                            ].map((ai, idx, arr) => {
+                              const isSubActive = tab === 'chat' && activeAI === ai.k;
+                              const isLast = idx === arr.length - 1;
 
-                          return (
-                            <div
-                              key={ai.k}
-                              onClick={() => { setTab('chat'); setActiveAI(ai.k); }}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                padding: '5px 10px',
-                                borderRadius: '10px',
-                                cursor: 'pointer',
-                                background: isSubActive ? `${ai.color}18` : 'transparent',
-                                border: isSubActive ? `1px solid ${ai.color}40` : '1px solid transparent',
-                                transition: 'all 0.2s ease',
-                                position: 'relative',
-                              }}
-                            >
-                              <span style={{ fontFamily: S, fontSize: '0.74rem', color: isSubActive ? ai.color : 'rgba(255,255,255,0.3)', fontWeight: '700' }}>
-                                {isLast ? '└─' : '├─'}
-                              </span>
-                              <span style={{ fontSize: '0.78rem' }}>{ai.icon}</span>
-                              <span style={{ fontSize: '0.78rem', fontFamily: S, fontWeight: isSubActive ? '800' : '600', color: isSubActive ? '#fff' : 'rgba(255,255,255,0.45)' }}>
-                                {ai.label}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
+                              return (
+                                <motion.div
+                                  key={ai.k}
+                                  whileHover={{ x: 3, background: 'rgba(255,255,255,0.04)' }}
+                                  onClick={() => { setTab('chat'); setActiveAI(ai.k); }}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justify: 'space-between',
+                                    padding: '6px 10px',
+                                    borderRadius: '10px',
+                                    cursor: 'pointer',
+                                    background: isSubActive ? `${ai.color}18` : 'transparent',
+                                    border: isSubActive ? `1px solid ${ai.color}40` : '1px solid transparent',
+                                    transition: 'all 0.2s ease',
+                                    position: 'relative',
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontFamily: S, fontSize: '0.74rem', color: isSubActive ? ai.color : 'rgba(255,255,255,0.3)', fontWeight: '700' }}>
+                                      {isLast ? '└─' : '├─'}
+                                    </span>
+                                    <span style={{ fontSize: '0.78rem' }}>{ai.icon}</span>
+                                    <span style={{ fontSize: '0.78rem', fontFamily: S, fontWeight: isSubActive ? '800' : '600', color: isSubActive ? '#fff' : 'rgba(255,255,255,0.5)' }}>
+                                      {ai.label}
+                                    </span>
+                                  </div>
+                                  {/* Star Logo on all 4 AI personas */}
+                                  <FaStar size={10} color={ai.color} style={{ filter: `drop-shadow(0 0 6px ${ai.color})` }} />
+                                </motion.div>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     )}
                   </React.Fragment>
                 );
@@ -1616,7 +1652,7 @@ export default function Home({ userProfile, onLogout }) {
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '0.95rem' }}>{ai.icon}</span>
+                            <FaStar size={11} color={ai.color} style={{ filter: `drop-shadow(0 0 6px ${ai.color})` }} />
                             <span style={{ fontSize: '0.84rem', fontWeight: 800, fontFamily: S, color: isActive ? '#fff' : 'rgba(255,255,255,0.7)' }}>
                               {ai.name}
                             </span>
