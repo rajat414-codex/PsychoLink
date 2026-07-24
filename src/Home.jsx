@@ -1000,7 +1000,6 @@ export default function Home({ userProfile, onLogout }) {
   ];
 
   const navItems = [
-    { id:'chat',       icon:<FaComments size={15}/>,     label:'AI Chat'      },
     { id:'home',       icon:<FaHome size={15}/>,        label:'Home'         },
     { id:'report',     icon:<FaBrain size={15}/>,        label:'Brain Report' },
     { id:'consult',    icon:<FaUserMd size={15}/>,       label:'Consultants'  },
@@ -1368,8 +1367,8 @@ export default function Home({ userProfile, onLogout }) {
             style={{ width:'275px', height:'100vh', flexShrink:0, display:'flex', flexDirection:'column', background:'rgba(8, 12, 22, 0.65)', backdropFilter:'blur(36px)', WebkitBackdropFilter:'blur(36px)', borderRight:'1.5px solid rgba(255,255,255,0.15)', position:'relative', zIndex:20, boxShadow:'12px 0 35px rgba(0,0,0,0.6)' }}>
 
             {/* Brand Header */}
-            <div style={{ padding:'22px 18px 16px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px', userSelect:'none' }}>
+            <div style={{ padding:'20px 18px 14px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'14px', userSelect:'none' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                   <motion.div animate={{ scale:[1,1.25,1], opacity:[0.7,1,0.7] }} transition={{ duration:2.5, repeat:Infinity }}
                     style={{ width:'10px', height:'10px', borderRadius:'50%', background:accent, boxShadow:`0 0 12px ${accent}`, transition:'background 0.5s' }}/>
@@ -1377,133 +1376,75 @@ export default function Home({ userProfile, onLogout }) {
                 </div>
                 <span style={{ fontSize: '0.62rem', color: accent, background: `${accent}18`, border: `1px solid ${accent}35`, borderRadius:'8px', padding:'2px 7px', fontFamily: S, letterSpacing: '1.2px', fontWeight:'800' }}>AI CORE</span>
               </div>
-              {/* AI Persona Selector Dashboard (Stable Fit 4 Co-Pilots Grid) */}
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px', background:'rgba(255,255,255,0.025)', backdropFilter:'blur(16px)', borderRadius:'16px', padding:'6px', border:'1px solid rgba(255,255,255,0.08)', boxShadow:'inset 0 1px 3px rgba(0,0,0,0.5)' }}>
-                {[
-                  { k:'AURA', label:'AURA', c:'#ef4444', g:'linear-gradient(135deg, #f43f5e, #e11d48)' },
-                  { k:'MAX', label:'MAX', c:'#22c55e', g:'linear-gradient(135deg, #10b981, #059669)' },
-                  { k:'SYNAPSE', label:'SYNAPSE', c:'#06b6d4', g:'linear-gradient(135deg, #06b6d4, #0284c7)' },
-                  { k:'LEX', label:'LEX', c:'#a855f7', g:'linear-gradient(135deg, #a855f7, #7e22ce)' }
-                ].map(ai => {
-                  const isActive = activeAI === ai.k;
-                  return (
-                    <button key={ai.k} onClick={() => { setActiveAI(ai.k); setTab('chat'); setChatMenuOpen(true); }}
-                      style={{ padding:'8px 0', border: isActive ? `1.5px solid ${ai.c}` : '1px solid transparent', borderRadius:'11px', cursor:'pointer', fontSize:'0.7rem', fontWeight:'800', fontFamily:S, letterSpacing:'0.8px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.03)', color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', boxShadow: isActive ? `0 4px 14px ${ai.c}40` : 'none', userSelect:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
-                      <FaStar size={8} color={isActive ? '#fff' : ai.c} />
-                      {ai.label}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
-            {/* Smooth Scrollable Nav Menu Container */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {/* Smooth Scrollable Sidebar Content */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              
+              {/* Top Priority Section: AI Chat & Dashboard */}
+              <div style={{ background: 'rgba(255,255,255,0.025)', borderRadius: '16px', padding: '12px 10px', border: tab === 'chat' ? `1px solid ${accent}40` : '1px solid rgba(255,255,255,0.06)', boxShadow: tab === 'chat' ? `0 4px 18px ${accent}15` : 'none', transition: 'all 0.25s' }}>
+                <div 
+                  onClick={() => setTab('chat')}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', marginBottom: '10px', padding: '0 4px' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <FaComments size={14} color={accent} />
+                    <span style={{ fontSize: '0.88rem', fontWeight: '800', fontFamily: S, color: '#fff', letterSpacing: '0.3px' }}>AI Chat</span>
+                  </div>
+                  <span style={{ fontSize: '0.6rem', color: accent, background: `${accent}18`, borderRadius: '6px', padding: '2px 6px', fontFamily: S, fontWeight: '800' }}>
+                    DASHBOARD
+                  </span>
+                </div>
+
+                {/* 4 AI Co-Pilots 2x2 Grid */}
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px' }}>
+                  {[
+                    { k:'AURA', label:'AURA', c:'#ef4444', g:'linear-gradient(135deg, #f43f5e, #e11d48)' },
+                    { k:'MAX', label:'MAX', c:'#22c55e', g:'linear-gradient(135deg, #10b981, #059669)' },
+                    { k:'SYNAPSE', label:'SYNAPSE', c:'#06b6d4', g:'linear-gradient(135deg, #06b6d4, #0284c7)' },
+                    { k:'LEX', label:'LEX', c:'#a855f7', g:'linear-gradient(135deg, #a855f7, #7e22ce)' }
+                  ].map(ai => {
+                    const isActive = activeAI === ai.k && tab === 'chat';
+                    return (
+                      <button key={ai.k} onClick={() => { setActiveAI(ai.k); setTab('chat'); }}
+                        style={{ padding:'8px 0', border: isActive ? `1.5px solid ${ai.c}` : '1px solid transparent', borderRadius:'10px', cursor:'pointer', fontSize:'0.68rem', fontWeight:'800', fontFamily:S, letterSpacing:'0.6px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.03)', color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', boxShadow: isActive ? `0 4px 14px ${ai.c}40` : 'none', userSelect:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px' }}>
+                        <FaStar size={8} color={isActive ? '#fff' : ai.c} />
+                        {ai.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Visual Section Divider matching handwritten diagram */}
+              <div style={{ padding: '10px 10px 4px', marginTop: '6px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.35)', fontFamily: S, letterSpacing: '1.5px', fontWeight: '800', margin: 0, textTransform: 'uppercase' }}>
+                  OTHER SECTIONS
+                </p>
+              </div>
+
+              {/* Other Navigation Sections List */}
               {navItems.map(item => {
                 const isActive = tab === item.id;
-                const isChat = item.id === 'chat';
-
-                const handleNavClick = () => {
-                  if (isChat) {
-                    setTab('chat');
-                    setChatMenuOpen(true);
-                  } else {
-                    setTab(item.id);
-                  }
-                };
 
                 return (
-                  <React.Fragment key={item.id}>
-                    {/* Visual Section Divider matching handwritten diagram */}
-                    {item.id === 'home' && (
-                      <div style={{ padding: '14px 10px 6px', marginTop: '6px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                        <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.35)', fontFamily: S, letterSpacing: '1.5px', fontWeight: '800', margin: 0, textTransform: 'uppercase' }}>
-                          OTHER SECTIONS
-                        </p>
-                      </div>
-                    )}
-
-                    <motion.button whileHover={{ background:'rgba(255,255,255,0.05)', x:2 }} whileTap={{ scale:0.98 }}
-                      onClick={handleNavClick}
-                      style={{ 
-                        width:'100%', padding:'11px 16px', 
-                        background: isActive ? `linear-gradient(90deg, ${accent}22 0%, rgba(255,255,255,0.02) 100%)` : 'transparent', 
-                        border: isActive ? `1px solid ${accent}35` : '1px solid transparent',
-                        borderLeft: isActive ? `4px solid ${accent}` : '4px solid transparent',
-                        borderRadius: '12px', 
-                        color: isActive ? '#ffffff' : 'rgba(255,255,255,0.5)', 
-                        fontSize:'0.88rem', fontWeight: isActive ? '700' : '500', 
-                        cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', justifyContent:'space-between', 
-                        transition:'all 0.25s ease', marginBottom: isChat ? '4px' : '6px',
-                        boxShadow: isActive ? `0 4px 15px ${accent}15` : 'none'
-                      }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-                        <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)', transition:'color 0.2s', display:'flex', alignItems:'center', fontSize:'1rem' }}>{item.icon}</span>
-                        {item.label}
-                      </div>
-                      {isChat && (
-                        <span style={{ fontSize:'0.7rem', color: isChat && isActive ? accent : 'rgba(255,255,255,0.3)', display:'flex', alignItems:'center' }}>
-                          {chatMenuOpen ? <FaChevronDown size={10} /> : <FaChevronRight size={10} />}
-                        </span>
-                      )}
-                    </motion.button>
-
-                    {/* Collapsible Sub-Menu (Only opens when user taps AI Chat) */}
-                    {isChat && (
-                      <AnimatePresence>
-                        {chatMenuOpen && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.25, ease: 'easeInOut' }}
-                            style={{ padding: '4px 6px 4px 14px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '4px', overflow: 'hidden', position: 'relative' }}
-                          >
-                            {[
-                              { k: 'AURA', label: 'Aura AI', color: '#ef4444', icon: '🌸' },
-                              { k: 'MAX', label: 'Max AI', color: '#22c55e', icon: '⚡' },
-                              { k: 'SYNAPSE', label: 'Synapse AI', color: '#06b6d4', icon: '💻' },
-                              { k: 'LEX', label: 'Lex AI', color: '#a855f7', icon: '⚖️' },
-                            ].map((ai) => {
-                              const isSubActive = tab === 'chat' && activeAI === ai.k;
-
-                              return (
-                                <motion.div
-                                  key={ai.k}
-                                  whileHover={{ x: 2, background: 'rgba(255,255,255,0.04)' }}
-                                  onClick={() => { setTab('chat'); setActiveAI(ai.k); }}
-                                  style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '9px',
-                                    padding: '7px 12px',
-                                    borderRadius: '10px',
-                                    cursor: 'pointer',
-                                    background: isSubActive ? `${ai.color}18` : 'rgba(255,255,255,0.02)',
-                                    border: isSubActive ? `1px solid ${ai.color}45` : '1px solid rgba(255,255,255,0.04)',
-                                    boxShadow: isSubActive ? `0 4px 12px ${ai.color}25` : 'none',
-                                    transition: 'all 0.2s ease',
-                                    boxSizing: 'border-box',
-                                    width: '100%',
-                                  }}
-                                >
-                                  {/* Star Logo on the LEFT replacing stick lines */}
-                                  <FaStar size={11} color={ai.color} style={{ filter: `drop-shadow(0 0 6px ${ai.color})`, flexShrink: 0 }} />
-                                  <span style={{ fontSize: '0.82rem' }}>{ai.icon}</span>
-                                  <span style={{ fontSize: '0.8rem', fontFamily: S, fontWeight: isSubActive ? '800' : '600', color: isSubActive ? '#ffffff' : 'rgba(255,255,255,0.55)', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {ai.label}
-                                  </span>
-                                  {isSubActive && (
-                                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: ai.color, boxShadow: `0 0 8px ${ai.color}` }} />
-                                  )}
-                                </motion.div>
-                              );
-                            })}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    )}
-                  </React.Fragment>
+                  <motion.button key={item.id} whileHover={{ background:'rgba(255,255,255,0.05)', x:2 }} whileTap={{ scale:0.98 }}
+                    onClick={() => setTab(item.id)}
+                    style={{ 
+                      width:'100%', padding:'10px 14px', 
+                      background: isActive ? `linear-gradient(90deg, ${accent}22 0%, rgba(255,255,255,0.02) 100%)` : 'transparent', 
+                      border: isActive ? `1px solid ${accent}35` : '1px solid transparent',
+                      borderLeft: isActive ? `4px solid ${accent}` : '4px solid transparent',
+                      borderRadius: '12px', 
+                      color: isActive ? '#ffffff' : 'rgba(255,255,255,0.5)', 
+                      fontSize:'0.86rem', fontWeight: isActive ? '700' : '500', 
+                      cursor:'pointer', fontFamily:J, display:'flex', alignItems:'center', gap:'12px', 
+                      transition:'all 0.25s ease', marginBottom: '2px',
+                      boxShadow: isActive ? `0 4px 15px ${accent}15` : 'none'
+                    }}>
+                    <span style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)', transition:'color 0.2s', display:'flex', alignItems:'center', fontSize:'0.95rem' }}>{item.icon}</span>
+                    {item.label}
+                  </motion.button>
                 );
               })}
 
