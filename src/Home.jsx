@@ -778,7 +778,7 @@ function analyzeSentimentIntensity(messages) {
 }
 
 export default function Home({ userProfile, onLogout }) {
-  const [tab,       setTab]       = useState('home');
+  const [tab,       setTab]       = useState('chat');
   const [activeAI,  setActiveAI]  = useState('AURA');
   const [chatMenuOpen, setChatMenuOpen] = useState(true);
   const [sessions,  setSessions]  = useState({
@@ -1414,6 +1414,15 @@ export default function Home({ userProfile, onLogout }) {
 
                 return (
                   <React.Fragment key={item.id}>
+                    {/* Visual Section Divider matching handwritten diagram */}
+                    {item.id === 'home' && (
+                      <div style={{ padding: '14px 10px 6px', marginTop: '6px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                        <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.35)', fontFamily: S, letterSpacing: '1.5px', fontWeight: '800', margin: 0, textTransform: 'uppercase' }}>
+                          OTHER SECTIONS
+                        </p>
+                      </div>
+                    )}
+
                     <motion.button whileHover={{ background:'rgba(255,255,255,0.05)', x:2 }} whileTap={{ scale:0.98 }}
                       onClick={handleNavClick}
                       style={{ 
