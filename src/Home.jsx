@@ -977,11 +977,9 @@ export default function Home({ userProfile, onLogout }) {
   const textareaRef = useRef(null);
   const srRef       = useRef(null);
 
-  const O  = "'Outfit','Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
-  const SY = "'Syne','Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
-  const J  = "'Outfit','Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
-  const S  = "'Syne','Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
-  const G  = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
+  const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
+  const S = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
+  const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
   const accent =
     activeAI === 'AURA' ? '#ef4444' :
@@ -1391,9 +1389,9 @@ export default function Home({ userProfile, onLogout }) {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <FaComments size={15} color={accent} style={{ filter: `drop-shadow(0 0 6px ${accent}aa)` }} />
-                    <span style={{ fontSize: '0.94rem', fontWeight: '800', fontFamily: O, color: '#fff', letterSpacing: '-0.3px' }}>AI Chat</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: '800', fontFamily: J, color: '#fff', letterSpacing: '-0.2px' }}>AI Chat</span>
                   </div>
-                  <span style={{ fontSize: '0.62rem', color: accent, background: `${accent}18`, border: `1px solid ${accent}30`, borderRadius: '8px', padding: '3px 8px', fontFamily: SY, fontWeight: '800', letterSpacing: '1px' }}>
+                  <span style={{ fontSize: '0.62rem', color: accent, background: `${accent}18`, border: `1px solid ${accent}30`, borderRadius: '8px', padding: '3px 8px', fontFamily: J, fontWeight: '800', letterSpacing: '0.8px' }}>
                     DASHBOARD
                   </span>
                 </div>
@@ -1409,7 +1407,7 @@ export default function Home({ userProfile, onLogout }) {
                     const isActive = activeAI === ai.k && tab === 'chat';
                     return (
                       <button key={ai.k} onClick={() => { setActiveAI(ai.k); setTab('chat'); }}
-                        style={{ padding:'9px 0', border: isActive ? `1.5px solid ${ai.c}` : '1px solid rgba(255,255,255,0.06)', borderRadius:'12px', cursor:'pointer', fontSize:'0.72rem', fontWeight:'800', fontFamily:SY, letterSpacing:'1px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.035)', color: isActive ? '#fff' : 'rgba(255,255,255,0.6)', boxShadow: isActive ? `0 6px 18px ${ai.c}45` : 'none', userSelect:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
+                        style={{ padding:'9px 0', border: isActive ? `1.5px solid ${ai.c}` : '1px solid rgba(255,255,255,0.06)', borderRadius:'12px', cursor:'pointer', fontSize:'0.72rem', fontWeight:'800', fontFamily:J, letterSpacing:'0.8px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.035)', color: isActive ? '#fff' : 'rgba(255,255,255,0.6)', boxShadow: isActive ? `0 6px 18px ${ai.c}45` : 'none', userSelect:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
                         <FaStar size={8} color={isActive ? '#fff' : ai.c} style={{ filter: `drop-shadow(0 0 5px ${ai.c})` }} />
                         {ai.label}
                       </button>
@@ -1420,7 +1418,7 @@ export default function Home({ userProfile, onLogout }) {
 
               {/* Visual Section Divider matching handwritten diagram */}
               <div style={{ padding: '10px 10px 4px', marginTop: '6px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.35)', fontFamily: S, letterSpacing: '1.5px', fontWeight: '800', margin: 0, textTransform: 'uppercase' }}>
+                <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.35)', fontFamily: J, letterSpacing: '1.5px', fontWeight: '800', margin: 0, textTransform: 'uppercase' }}>
                   OTHER SECTIONS
                 </p>
               </div>
