@@ -442,7 +442,7 @@ export default function DashboardHome({
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div
-              onClick={() => { setActiveAI('AURA'); setTab('chat'); }}
+              onClick={() => { setActiveAI('IRIS'); setTab('chat'); }}
               style={{
                 padding: '16px',
                 borderRadius: '18px',
@@ -456,12 +456,12 @@ export default function DashboardHome({
                 <RobotAvatar expression="smile" size="xs" glowColor="#ef4444" />
                 <span style={{ fontSize: '0.6rem', color: '#ef4444', fontWeight: 800, fontFamily: S }}>EMOTIONAL</span>
               </div>
-              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Aura AI</p>
+              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Iris AI</p>
               <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Empathic reflections & support</p>
             </div>
 
             <div
-              onClick={() => { setActiveAI('MAX'); setTab('chat'); }}
+              onClick={() => { setActiveAI('ZENITH'); setTab('chat'); }}
               style={{
                 padding: '16px',
                 borderRadius: '18px',
@@ -475,7 +475,7 @@ export default function DashboardHome({
                 <RobotAvatar expression="neutral" size="xs" glowColor="#22c55e" />
                 <span style={{ fontSize: '0.6rem', color: '#22c55e', fontWeight: 800, fontFamily: S }}>COGNITIVE</span>
               </div>
-              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Max AI</p>
+              <p style={{ margin: '0 0 2px', fontFamily: J, fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Zenith AI</p>
               <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: J }}>Structured cognitive analysis</p>
             </div>
 

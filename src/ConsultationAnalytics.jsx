@@ -7,9 +7,9 @@ const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoj
 
 const INITIAL_CATEGORIES = [
   {
-    id: 'aura',
+    id: 'iris',
     name: 'Mental Wellness & Anxiety',
-    agent: 'AURA',
+    agent: 'IRIS',
     color: '#ef4444',
     gradStart: '#ff6b6b',
     gradEnd: '#dc2626',
@@ -21,9 +21,9 @@ const INITIAL_CATEGORIES = [
     icon: '🌸',
   },
   {
-    id: 'max',
+    id: 'zenith',
     name: 'Behavioral & Strategy',
-    agent: 'MAX',
+    agent: 'ZENITH',
     color: '#22c55e',
     gradStart: '#4ade80',
     gradEnd: '#16a34a',
@@ -68,8 +68,8 @@ export default function ConsultationAnalytics() {
   const [categories, setCategories] = useState(INITIAL_CATEGORIES);
   const [hoveredCat, setHoveredCat] = useState(null);
   const [tickerLogs, setTickerLogs] = useState([
-    { id: 1, text: 'Auto-Logged +1 Session → AURA (Mental Wellness)', time: 'Just now', color: '#ef4444' },
-    { id: 2, text: 'Web Telemetry +1 Session → MAX (Behavioral & Strategy)', time: '2s ago', color: '#22c55e' },
+    { id: 1, text: 'Auto-Logged +1 Session → IRIS (Mental Wellness)', time: 'Just now', color: '#ef4444' },
+    { id: 2, text: 'Web Telemetry +1 Session → ZENITH (Behavioral & Strategy)', time: '2s ago', color: '#22c55e' },
   ]);
 
   // Total session count calculated on-the-fly

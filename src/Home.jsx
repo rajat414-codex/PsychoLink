@@ -22,29 +22,29 @@ import RobotAvatar from './RobotAvatar';
 import FloatingChatbot from './FloatingChatbot';
 
 
-const AURA_PROMPT = `You are AURA (Affective Understanding and Reflective AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish (Hindi written in Roman script like 'Aap kaise hain?', 'Mujhe stress ho raha hai'). Always respond with empathy first, then guidance. Keep responses warm, encouraging, conversational, and concise (2-4 sentences). Never diagnose. Use occasional emojis 🌸.`;
+const IRIS_PROMPT = `You are IRIS (Integrated Reflective & Intelligent Empathy AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish (Hindi written in Roman script like 'Aap kaise hain?', 'Mujhe stress ho raha hai'). Always respond with empathy first, then guidance. Keep responses warm, encouraging, conversational, and concise (2-4 sentences). Never diagnose. Use occasional emojis 🌸.`;
 
-const MAX_PROMPT = `You are MAX (Mental Analytical eXpert), a logical structured AI consultant inside PsychoLink app. Personality: Analytical, precise, solution-focused. Specialization: cognitive restructuring, behavioral patterns, productivity + mental health, habit formation. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses concise and structured. Always analyze using CBT frameworks and provide: 1) Pattern 2) Analysis 3) Action steps.`;
+const ZENITH_PROMPT = `You are ZENITH (Zero-error Executive & Neural Intelligence Therapy Helper), a logical structured AI consultant inside PsychoLink app. Personality: Analytical, precise, solution-focused. Specialization: cognitive restructuring, behavioral patterns, productivity + mental health, habit formation. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses concise and structured. Always analyze using CBT frameworks and provide: 1) Pattern 2) Analysis 3) Action steps.`;
 
 const SYNAPSE_PROMPT = `You are SYNAPSE (Strategic Tech & Career Guidance AI), a high-performance career, tech, and productivity mentor inside PsychoLink app. Personality: Dynamic, intelligent, growth-focused. Specialization: tech skill acquisition, career navigation, workplace communication, interview prep, productivity hacks. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Always respond with clear, encouraging, structured career & tech advice (2-4 sentences). Use occasional emojis 💻.`;
 
 const LEX_PROMPT = `You are LEX (Legal & Executive Business Advisor), a sharp strategic business and legal concept counselor inside PsychoLink app. Personality: Professional, articulate, strategic. Specialization: business model validation, startup risk evaluation, contract frameworks, compliance principles, decision matrices. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Always respond with sharp, professional, well-structured business advice (2-4 sentences). Use occasional emojis ⚖️.`;
 
 const SUGGESTIONS = {
-  AURA: ["I've been feeling anxious lately", "Mujhe thoda stress ho raha hai", "Help me with self-esteem", "Aap kaise help kar sakte ho?"],
-  MAX:  ["Analyze my thought patterns", "I procrastinate too much", "Break a bad habit", "Focus aur concentration kaise badhaye?"],
+  IRIS: ["I've been feeling anxious lately", "Mujhe thoda stress ho raha hai", "Help me with self-esteem", "Aap kaise help kar sakte ho?"],
+  ZENITH: ["Analyze my thought patterns", "I procrastinate too much", "Break a bad habit", "Focus aur concentration kaise badhaye?"],
   SYNAPSE: ["Career growth strategy", "How to learn new tech skills fast", "Interview preparation tips", "Workplace stress manage kaise kare?"],
   LEX:  ["Business model risk analysis", "Basic contract guidelines", "Startup decision framework", "Negotiation strategy advice"]
 };
 
 const SUGGESTIONS_ENHANCED = {
-  AURA: [
+  IRIS: [
     { text: "I've been feeling anxious lately", sub: "Emotional support & grounding", icon: "🌸" },
     { text: "Mujhe thoda stress ho raha hai", sub: "Instant stress relief chat", icon: "🍃" },
     { text: "Help me with self-esteem", sub: "Boost confidence & resilience", icon: "✨" },
-    { text: "Aap kaise help kar sakte ho?", sub: "Learn about Aura's features", icon: "💡" }
+    { text: "Aap kaise help kar sakte ho?", sub: "Learn about Iris's features", icon: "💡" }
   ],
-  MAX: [
+  ZENITH: [
     { text: "Analyze my thought patterns", sub: "CBT behavioral assessment", icon: "🧠" },
     { text: "I procrastinate too much", sub: "Productivity hack & structure", icon: "⚡" },
     { text: "Break a bad habit", sub: "Habit loop reprogramming", icon: "🎯" },
@@ -779,11 +779,11 @@ function analyzeSentimentIntensity(messages) {
 
 export default function Home({ userProfile, onLogout }) {
   const [tab,       setTab]       = useState('chat');
-  const [activeAI,  setActiveAI]  = useState('AURA');
+  const [activeAI,  setActiveAI]  = useState('IRIS');
   const [chatMenuOpen, setChatMenuOpen] = useState(true);
   const [sessions,  setSessions]  = useState({
-    AURA:    [{ id:1, title:'New conversation', messages:[], active:true }],
-    MAX:     [{ id:1, title:'New conversation', messages:[], active:true }],
+    IRIS:    [{ id:1, title:'New conversation', messages:[], active:true }],
+    ZENITH:  [{ id:1, title:'New conversation', messages:[], active:true }],
     SYNAPSE: [{ id:1, title:'New conversation', messages:[], active:true }],
     LEX:     [{ id:1, title:'New conversation', messages:[], active:true }],
   });
@@ -983,8 +983,8 @@ export default function Home({ userProfile, onLogout }) {
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
   const accent =
-    activeAI === 'AURA' ? '#ef4444' :
-    activeAI === 'MAX' ? '#22c55e' :
+    activeAI === 'IRIS' ? '#ef4444' :
+    activeAI === 'ZENITH' ? '#22c55e' :
     activeAI === 'SYNAPSE' ? '#06b6d4' : '#a855f7';
   const accentB  = `${accent}15`;
   const accentBr = `${accent}35`;
@@ -1097,7 +1097,7 @@ export default function Home({ userProfile, onLogout }) {
   // sendMsg — now calls the LOCAL server (server.js) on
   // http://localhost:3001/api/chat instead of hitting
   // api.anthropic.com directly from the browser.
-  // Sends AURA_PROMPT / MAX_PROMPT as a custom systemPrompt
+  // Sends IRIS_PROMPT / ZENITH_PROMPT as a custom systemPrompt
   // so the local server uses these detailed personas.
   // ─────────────────────────────────────────────────────────
   const sendMsg = async (text) => {
@@ -1119,7 +1119,7 @@ export default function Home({ userProfile, onLogout }) {
         body: JSON.stringify({
           messages: newMsgs.map(m => ({ role:m.role, content:m.content })),
           persona: activeAI,
-          systemPrompt: activeAI === 'AURA' ? AURA_PROMPT : activeAI === 'MAX' ? MAX_PROMPT : activeAI === 'SYNAPSE' ? SYNAPSE_PROMPT : LEX_PROMPT,
+          systemPrompt: activeAI === 'IRIS' ? IRIS_PROMPT : activeAI === 'ZENITH' ? ZENITH_PROMPT : activeAI === 'SYNAPSE' ? SYNAPSE_PROMPT : LEX_PROMPT,
         })
       });
       if (!res.ok) {
@@ -1170,12 +1170,12 @@ export default function Home({ userProfile, onLogout }) {
     window.speechSynthesis.cancel();
     const u      = new SpeechSynthesisUtterance(text);
     const voices = window.speechSynthesis.getVoices();
-    const v      = activeAI === 'AURA'
+    const v      = activeAI === 'IRIS'
       ? voices.find(v => v.name.includes('Zira') || v.name.includes('Samantha'))
       : voices.find(v => v.name.includes('David') || v.name.includes('Google UK English Male'));
     if (v) u.voice = v;
     u.rate  = speechRate;
-    u.pitch = activeAI === 'AURA' ? 1.2 : 0.8;
+    u.pitch = activeAI === 'IRIS' ? 1.2 : 0.8;
     u.onstart = () => setIsAiSpeaking(true);
     u.onend = () => setIsAiSpeaking(false);
     u.onerror = () => setIsAiSpeaking(false);
@@ -1268,7 +1268,7 @@ export default function Home({ userProfile, onLogout }) {
             body: JSON.stringify({
               messages: newMsgs.map(m => ({ role: m.role, content: m.content })),
               persona: activeAI,
-              systemPrompt: activeAI === 'AURA' ? AURA_PROMPT : MAX_PROMPT,
+              systemPrompt: activeAI === 'IRIS' ? IRIS_PROMPT : ZENITH_PROMPT,
             })
           });
           if (!res.ok) throw new Error(res.status);
@@ -1351,12 +1351,12 @@ export default function Home({ userProfile, onLogout }) {
         <motion.div 
           animate={{ x: [-20, 20, -20], y: [-20, 20, -20] }}
           transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position:'absolute', top:'-10%', left:'15%', width:'400px', height:'400px', borderRadius:'50%', background: activeAI === 'AURA' ? 'radial-gradient(circle, rgba(239,68,68,0.035) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(34,197,94,0.035) 0%, transparent 70%)', filter:'blur(60px)', transition:'all 1s' }}
+          style={{ position:'absolute', top:'-10%', left:'15%', width:'400px', height:'400px', borderRadius:'50%', background: activeAI === 'IRIS' ? 'radial-gradient(circle, rgba(239,68,68,0.035) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(34,197,94,0.035) 0%, transparent 70%)', filter:'blur(60px)', transition:'all 1s' }}
         />
         <motion.div 
           animate={{ x: [20, -20, 20], y: [20, -20, 20] }}
           transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position:'absolute', bottom:'-10%', right:'10%', width:'450px', height:'450px', borderRadius:'50%', background: activeAI === 'AURA' ? 'radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(148,163,184,0.02) 0%, transparent 70%)', filter:'blur(70px)', transition:'all 1s' }}
+          style={{ position:'absolute', bottom:'-10%', right:'10%', width:'450px', height:'450px', borderRadius:'50%', background: activeAI === 'IRIS' ? 'radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(148,163,184,0.02) 0%, transparent 70%)', filter:'blur(70px)', transition:'all 1s' }}
         />
       </div>
 
@@ -1400,8 +1400,8 @@ export default function Home({ userProfile, onLogout }) {
                 {/* 4 AI Co-Pilots 2x2 Grid */}
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'7px' }}>
                   {[
-                    { k:'AURA', label:'AURA', c:'#ef4444', g:'linear-gradient(135deg, #f43f5e, #e11d48)' },
-                    { k:'MAX', label:'MAX', c:'#22c55e', g:'linear-gradient(135deg, #10b981, #059669)' },
+                    { k:'IRIS', label:'IRIS', c:'#ef4444', g:'linear-gradient(135deg, #f43f5e, #e11d48)' },
+                    { k:'ZENITH', label:'ZENITH', c:'#22c55e', g:'linear-gradient(135deg, #10b981, #059669)' },
                     { k:'SYNAPSE', label:'SYNAPSE', c:'#06b6d4', g:'linear-gradient(135deg, #06b6d4, #0284c7)' },
                     { k:'LEX', label:'LEX', c:'#a855f7', g:'linear-gradient(135deg, #a855f7, #7e22ce)' }
                   ].map(ai => {
@@ -1518,7 +1518,7 @@ export default function Home({ userProfile, onLogout }) {
             )}
             <span style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'0.96rem', color:'#fff' }}>
               {tab==='home'       ? 'Dashboard'
-              :tab==='chat'       ? (activeAI==='AURA' ? 'Aura · Emotional AI' : 'Max · Cognitive AI')
+              :tab==='chat'       ? (activeAI==='IRIS' ? 'Iris · Emotional AI' : activeAI==='ZENITH' ? 'Zenith · Cognitive AI' : activeAI==='SYNAPSE' ? 'Synapse · Tech & Career AI' : 'Lex · Business & Legal AI')
               :tab==='report'     ? 'Neural Brain Report'
               :tab==='consult'    ? 'Consultants'
               :tab==='calm'       ? 'Calm Studio'
@@ -1528,7 +1528,7 @@ export default function Home({ userProfile, onLogout }) {
               :                     'My Progress'}
             </span>
           </div>
- 
+
           <motion.button whileHover={{ background:'rgba(255,255,255,0.05)' }} whileTap={{ scale:0.96 }}
             style={{ width:'32px', height:'32px', borderRadius:'8px', background:'rgba(255,255,255,0.01)', border:'1px solid var(--border-subtle)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
             <FaBell size={12} color="rgba(255,255,255,0.5)"/>
@@ -1576,8 +1576,8 @@ export default function Home({ userProfile, onLogout }) {
                 <div style={{ flexShrink: 0, padding: '14px 20px 6px', zIndex: 10, position: 'relative' }}>
                   <div style={{ maxWidth: '760px', width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                     {[
-                      { id: 'AURA', name: 'AURA', tag: 'EMOTIONAL CORE', icon: '🌸', color: '#ef4444', border: 'rgba(239, 68, 68, 0.4)', bg: 'rgba(239, 68, 68, 0.14)' },
-                      { id: 'MAX', name: 'MAX', tag: 'COGNITIVE ENGINE', icon: '⚡', color: '#22c55e', border: 'rgba(34, 197, 94, 0.4)', bg: 'rgba(34, 197, 94, 0.14)' },
+                      { id: 'IRIS', name: 'IRIS', tag: 'EMOTIONAL CORE', icon: '🌸', color: '#ef4444', border: 'rgba(239, 68, 68, 0.4)', bg: 'rgba(239, 68, 68, 0.14)' },
+                      { id: 'ZENITH', name: 'ZENITH', tag: 'COGNITIVE ENGINE', icon: '⚡', color: '#22c55e', border: 'rgba(34, 197, 94, 0.4)', bg: 'rgba(34, 197, 94, 0.14)' },
                       { id: 'SYNAPSE', name: 'SYNAPSE', tag: 'CAREER & TECH', icon: '💻', color: '#06b6d4', border: 'rgba(6, 182, 212, 0.4)', bg: 'rgba(6, 182, 212, 0.14)' },
                       { id: 'LEX', name: 'LEX', tag: 'BIZ & LEGAL', icon: '⚖️', color: '#a855f7', border: 'rgba(168, 85, 247, 0.4)', bg: 'rgba(168, 85, 247, 0.14)' },
                     ].map((ai) => {
@@ -1653,12 +1653,12 @@ export default function Home({ userProfile, onLogout }) {
                               <div className="scanner-line" style={{ '--scanner-color': accent, width: '130px', margin: '0 auto', left: '50px' }} />
                             </div>
                             <h2 style={{ fontFamily:G, fontStyle:'italic', fontWeight:'600', fontSize:'2.2rem', color:'#fff', marginBottom:'8px' }}>
-                              {activeAI === 'AURA' ? "Hi, I'm Aura 🌸" : activeAI === 'MAX' ? "Hello, I'm Max ⚡" : activeAI === 'SYNAPSE' ? "Welcome, I'm Synapse 💻" : "Greetings, I'm Lex ⚖️"}
+                              {activeAI === 'IRIS' ? "Hi, I'm Iris 🌸" : activeAI === 'ZENITH' ? "Hello, I'm Zenith ⚡" : activeAI === 'SYNAPSE' ? "Welcome, I'm Synapse 💻" : "Greetings, I'm Lex ⚖️"}
                             </h2>
                             <p style={{ color:'rgba(255,255,255,0.45)', fontSize:'0.88rem', lineHeight:'1.75', maxWidth:'460px', marginBottom:'26px', fontFamily:J }}>
-                              {activeAI === 'AURA'
+                              {activeAI === 'IRIS'
                                 ? "I'm your emotional anchor. Here to listen and support you through anything."
-                                : activeAI === 'MAX'
+                                : activeAI === 'ZENITH'
                                 ? "I'm your cognitive analyst. Ready to break down thought patterns and build solutions."
                                 : activeAI === 'SYNAPSE'
                                 ? "I'm your career & tech guide. Ready to map out your skills, growth, and professional future."
@@ -1777,7 +1777,7 @@ export default function Home({ userProfile, onLogout }) {
                           <textarea ref={textareaRef} value={input}
                             onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight,110) + 'px'; }}
                             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
-                            placeholder={isRecording ? `🔴 Recording... ${recordDuration}s (click mic to send)` : `Message ${activeAI==='AURA'?'Aura':'Max'}...`}
+                            placeholder={isRecording ? `🔴 Recording... ${recordDuration}s (click mic to send)` : `Message ${activeAI==='IRIS'?'Iris':activeAI==='ZENITH'?'Zenith':activeAI==='SYNAPSE'?'Synapse':'Lex'}...`}
                             rows={1}
                             style={{ flex:1, background:'none', border:'none', color:'rgba(255,255,255,0.88)', fontSize:'0.9rem', fontFamily:J, resize:'none', lineHeight:'1.5', maxHeight:'110px', minHeight:'22px', padding:'7px 0', overflowY:'auto' }}/>
                           
@@ -1794,7 +1794,7 @@ export default function Home({ userProfile, onLogout }) {
                           </motion.button>
                         </div>
                         <p style={{ textAlign:'center', fontSize:'0.61rem', color:'rgba(255,255,255,0.14)', fontFamily:S, letterSpacing:'0.5px', margin:'7px 0 0' }}>
-                          {activeAI==='AURA'?'Aura · Emotional Support AI':'Max · Cognitive Analysis AI'} — Not a substitute for professional therapy
+                          {activeAI==='IRIS'?'Iris · Emotional Support AI':activeAI==='ZENITH'?'Zenith · Cognitive Analysis AI':activeAI==='SYNAPSE'?'Synapse · Tech & Career Guidance AI':'Lex · Legal & Executive Business AI'} — Not a substitute for professional therapy
                         </p>
                       </div>
                     </div>
@@ -1845,7 +1845,7 @@ export default function Home({ userProfile, onLogout }) {
                     {/* AI Info & Sync */}
                     <div style={{ textAlign: 'center' }}>
                       <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', color: '#fff', fontFamily: S, letterSpacing: '0.5px', fontWeight: '700' }}>
-                        {activeAI === 'AURA' ? 'AURA // EMOTIVE CORE' : 'MAX // COGNITIVE NEXUS'}
+                        {activeAI === 'IRIS' ? 'IRIS // EMOTIVE CORE' : activeAI === 'ZENITH' ? 'ZENITH // COGNITIVE NEXUS' : activeAI === 'SYNAPSE' ? 'SYNAPSE // TECH MATRIX' : 'LEX // LEGAL MATRIX'}
                       </h3>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 8px', borderRadius: '12px', background: loading ? `${accent}15` : 'rgba(16,185,129,0.08)', border: `1px solid ${loading ? `${accent}30` : 'rgba(16,185,129,0.2)'}` }}>
                         <motion.div
@@ -2360,9 +2360,9 @@ export default function Home({ userProfile, onLogout }) {
               style={{ padding:'6px 14px', borderRadius:20, border:'1px solid rgba(255,255,255,0.4)', background:'rgba(255,255,255,0.15)', color:'#fff', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
               Breathe
             </motion.button>
-            <motion.button whileHover={{ scale:1.05 }} onClick={() => { setShowSOS(false); setActiveAI('AURA'); setTab('chat'); }}
+            <motion.button whileHover={{ scale:1.05 }} onClick={() => { setShowSOS(false); setActiveAI('IRIS'); setTab('chat'); }}
               style={{ padding:'6px 14px', borderRadius:20, border:'1px solid rgba(255,255,255,0.4)', background:'rgba(255,255,255,0.15)', color:'#fff', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
-              Talk to Aura
+              Talk to Iris
             </motion.button>
             <button onClick={() => setShowSOS(false)} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.6)', cursor:'pointer', fontSize:'1rem', padding:'0 4px' }}>✕</button>
           </motion.div>

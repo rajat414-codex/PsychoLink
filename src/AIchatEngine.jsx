@@ -7,8 +7,8 @@ function AIChatEngine({ user, setUser }) {
   // Check identity to deploy specific core
   const isFemale = user.gender === 'female';
   const ai = isFemale
-    ? { name: 'AURA', color: '#ff3b30', glow: 'rgba(255, 59, 48, 0.05)', welcome: `AURA core online. Welcome back, ${user.name}. Ready to analyze your psychological waves.` }
-    : { name: 'MAX', color: '#34c759', glow: 'rgba(52, 199, 89, 0.05)', welcome: `MAX nexus initiated. System active for user ${user.name}. Let's process the feed.` };
+    ? { name: 'IRIS', color: '#ff3b30', glow: 'rgba(255, 59, 48, 0.05)', welcome: `IRIS core online. Welcome back, ${user.name}. Ready to analyze your psychological waves.` }
+    : { name: 'ZENITH', color: '#34c759', glow: 'rgba(52, 199, 89, 0.05)', welcome: `ZENITH nexus initiated. System active for user ${user.name}. Let's process the feed.` };
 
   const [messages, setMessages] = useState([{ role: 'ai', text: ai.welcome }]);
   const [input, setInput] = useState('');

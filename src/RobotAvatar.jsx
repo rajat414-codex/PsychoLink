@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * Clean Premium 3D AI Bubble Avatar
- * Dynamic eye visor covering layer & glow colors for AURA (Red), MAX (Green), SYNAPSE (Cyan), LEX (Purple)
+ * Dynamic eye visor covering layer & glow colors for IRIS (Red), ZENITH (Green), SYNAPSE (Cyan), LEX (Purple)
  */
 export default function RobotAvatar({
   expression = 'smile',

@@ -5,12 +5,12 @@ import RobotAvatar from './RobotAvatar';
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
-    const [activeAI, setActiveAI] = useState('AURA'); // 'AURA' | 'MAX' | 'SYNAPSE' | 'LEX'
+    const [activeAI, setActiveAI] = useState('IRIS'); // 'IRIS' | 'ZENITH' | 'SYNAPSE' | 'LEX'
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [sessions, setSessions] = useState({
-        AURA: [{ role: 'assistant', content: 'Hello! I am Aura 🌸. Your emotional support companion. Aap kaisa feel kar rahe hain? Feel free to talk in English or Hinglish.', ts: new Date() }],
-        MAX: [{ role: 'assistant', content: 'Hello! I am Max ⚡. Your mental action specialist. Break down whatever is blocking you. English or Hinglish works.', ts: new Date() }],
+        IRIS: [{ role: 'assistant', content: 'Hello! I am Iris 🌸. Your emotional support companion. Aap kaisa feel kar rahe hain? Feel free to talk in English or Hinglish.', ts: new Date() }],
+        ZENITH: [{ role: 'assistant', content: 'Hello! I am Zenith ⚡. Your mental action specialist. Break down whatever is blocking you. English or Hinglish works.', ts: new Date() }],
         SYNAPSE: [{ role: 'assistant', content: 'Welcome! I am Synapse 💻. Your career & tech mentor. Ready to map out your skills and professional roadmap.', ts: new Date() }],
         LEX: [{ role: 'assistant', content: 'Greetings! I am Lex ⚖️. Your business & legal advisor. Ask me anything about startup strategy, decision frameworks, and legal concepts.', ts: new Date() }]
     });
@@ -26,13 +26,13 @@ export default function FloatingChatbot() {
     }, [messages, isTyping, isOpen]);
 
     const SUGGESTIONS = {
-        AURA: [
+        IRIS: [
             "I feel anxious today",
             "Mujhe thoda stress ho raha hai",
             "Help me calm down",
             "Feel lonely"
         ],
-        MAX: [
+        ZENITH: [
             "Analyze my habits",
             "Procrastination problem",
             "Overthinking loop",
@@ -100,17 +100,17 @@ export default function FloatingChatbot() {
                 content: m.content
             }));
 
-            const auraPrompt = `You are AURA (Affective Understanding and Reflective AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Always respond with empathy first, then guidance. Keep responses warm and concise (2-4 sentences). Use emojis 🌸.`;
+            const irisPrompt = `You are IRIS (Integrated Reflective & Intelligent Empathy AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Always respond with empathy first, then guidance. Keep responses warm and concise (2-4 sentences). Use emojis 🌸.`;
 
-            const maxPrompt = `You are MAX (Mental Analytical eXpert), a logical structured AI therapist inside PsychoLink app. Personality: Analytical, precise, solution-focused. Specialization: CBT frameworks, habits, focus, productivity. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses concise and structured.`;
+            const zenithPrompt = `You are ZENITH (Zero-error Executive & Neural Intelligence Therapy Helper), a logical structured AI therapist inside PsychoLink app. Personality: Analytical, precise, solution-focused. Specialization: CBT frameworks, habits, focus, productivity. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses concise and structured.`;
 
             const synapsePrompt = `You are SYNAPSE (Strategic Tech & Career Guidance AI), a high-performance career and tech mentor inside PsychoLink app. Specialization: tech skills, career growth, interview prep, workplace dynamics. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses encouraging and practical (2-4 sentences). Use emojis 💻.`;
 
             const lexPrompt = `You are LEX (Legal & Executive Business Advisor), a sharp strategic business and legal concept counselor inside PsychoLink app. Specialization: business model validation, startup risk, compliance principles, decision matrices. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses sharp and structured (2-4 sentences). Use emojis ⚖️.`;
 
             const selectedPrompt =
-                activeAI === 'AURA' ? auraPrompt :
-                activeAI === 'MAX' ? maxPrompt :
+                activeAI === 'IRIS' ? irisPrompt :
+                activeAI === 'ZENITH' ? zenithPrompt :
                 activeAI === 'SYNAPSE' ? synapsePrompt : lexPrompt;
 
             const res = await fetch(`${API_BASE}/api/chat`, {
@@ -147,13 +147,13 @@ export default function FloatingChatbot() {
     };
 
     const aiColor =
-        activeAI === 'AURA' ? '#ef4444' :
-        activeAI === 'MAX' ? '#22c55e' :
+        activeAI === 'IRIS' ? '#ef4444' :
+        activeAI === 'ZENITH' ? '#22c55e' :
         activeAI === 'SYNAPSE' ? '#06b6d4' : '#a855f7';
 
     const bgGlow =
-        activeAI === 'AURA' ? 'radial-gradient(circle, rgba(239, 68, 68, 0.08) 0%, transparent 70%)' :
-        activeAI === 'MAX' ? 'radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%)' :
+        activeAI === 'IRIS' ? 'radial-gradient(circle, rgba(239, 68, 68, 0.08) 0%, transparent 70%)' :
+        activeAI === 'ZENITH' ? 'radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%)' :
         activeAI === 'SYNAPSE' ? 'radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%)' :
         'radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%)';
 
@@ -215,7 +215,7 @@ export default function FloatingChatbot() {
                                     }}
                                 />
                                 <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                                    {activeAI === 'AURA' ? 'AURA Core' : activeAI === 'MAX' ? 'MAX Core' : activeAI === 'SYNAPSE' ? 'SYNAPSE Core' : 'LEX Core'}
+                                    {activeAI === 'IRIS' ? 'IRIS Core' : activeAI === 'ZENITH' ? 'ZENITH Core' : activeAI === 'SYNAPSE' ? 'SYNAPSE Core' : 'LEX Core'}
                                 </span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -229,8 +229,8 @@ export default function FloatingChatbot() {
                                     gap: '2px'
                                 }}>
                                     {[
-                                        { id: 'AURA', label: 'Aura', color: '#ef4444' },
-                                        { id: 'MAX', label: 'Max', color: '#22c55e' },
+                                        { id: 'IRIS', label: 'Iris', color: '#ef4444' },
+                                        { id: 'ZENITH', label: 'Zenith', color: '#22c55e' },
                                         { id: 'SYNAPSE', label: 'Synapse', color: '#06b6d4' },
                                         { id: 'LEX', label: 'Lex', color: '#a855f7' }
                                     ].map(ai => (
@@ -368,7 +368,7 @@ export default function FloatingChatbot() {
                                 value={input}
                                 onChange={e => setInput(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && handleSend()}
-                                placeholder={`Ask ${activeAI === 'AURA' ? 'Aura' : activeAI === 'MAX' ? 'Max' : activeAI === 'SYNAPSE' ? 'Synapse' : 'Lex'}...`}
+                                placeholder={`Ask ${activeAI === 'IRIS' ? 'Iris' : activeAI === 'ZENITH' ? 'Zenith' : activeAI === 'SYNAPSE' ? 'Synapse' : 'Lex'}...`}
                                 style={{
                                     flex: 1,
                                     background: 'rgba(255, 255, 255, 0.04)',

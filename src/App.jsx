@@ -10,7 +10,7 @@ import FloatingChatbot from './FloatingChatbot';
 
 // ── TRANSITION SCREEN ────────────────────────────────────
 // ── TRANSITION SCREEN ────────────────────────────────────
-function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
+function TransitionScreen({ profile, activeAI = 'IRIS', onDone }) {
   const name = (profile?.name || 'User').split(' ')[0];
 
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
@@ -169,7 +169,7 @@ function TransitionScreen({ profile, activeAI = 'AURA', onDone }) {
 export default function App() {
   const [screen, setScreen]         = useState('splash');
   const [userProfile, setUserProfile] = useState(null);
-  const [selectedAI, setSelectedAI]  = useState('AURA');
+  const [selectedAI, setSelectedAI]  = useState('IRIS');
 
   useEffect(() => {
     const link = document.createElement('link');

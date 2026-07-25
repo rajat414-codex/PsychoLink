@@ -16,7 +16,7 @@ const Spinner = ({ color='#8b87f5', size=22 }) => (
 
 // ── SPACE BACKGROUND (AI Hub) ────────────────────────────
 function SpaceBg({ activeAI }) {
-  const accent = activeAI==='AURA' ? 'var(--accent-aura)' : 'var(--accent-max)';
+  const accent = activeAI==='IRIS' ? 'var(--accent-aura)' : 'var(--accent-max)';
   return (
     <div style={{ position:'absolute', inset:0, overflow:'hidden', zIndex:0, pointerEvents:'none' }}>
       <div style={{ position:'absolute', inset:0, background:'var(--bg-app)' }}/>
@@ -234,7 +234,7 @@ function GlowingSoul() {
 export default function Auth({ onComplete }) {
   const [screen, setScreen] = useState('landing');
   const [selectedProfile, setSelectedProfile] = useState(null);
-  const [activeAI, setActiveAI] = useState('AURA');
+  const [activeAI, setActiveAI] = useState('IRIS');
   const [dialogue, setDialogue] = useState('Neural synchronization complete. Standing by for your session...');
   const [eyes, setEyes] = useState('laughing');
   const [emailInput, setEmailInput] = useState('');
@@ -500,11 +500,11 @@ export default function Auth({ onComplete }) {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       const voices = window.speechSynthesis.getVoices();
-      const v = core==='AURA'
+      const v = core==='IRIS'
         ? voices.find(v=>v.name.includes('Zira')||v.name.includes('Samantha')||v.name.includes('Google US English'))
         : voices.find(v=>v.name.includes('David')||v.name.includes('Google UK English Male'));
       if(v) u.voice=v;
-      u.rate=0.92; u.pitch=core==='AURA'?1.3:0.78; u.volume=1;
+      u.rate=0.92; u.pitch=core==='IRIS'?1.3:0.78; u.volume=1;
       const wordCount = text.split(' ').length;
       const estimatedDuration = wordCount * 480; 
       const happyDelay = Math.max(1000, estimatedDuration - 1500);
@@ -525,15 +525,15 @@ export default function Auth({ onComplete }) {
   const goAIHub = (profile) => {
     setSelectedProfile(profile);
     setScreen('aiHub');
-    setTimeout(()=>speak('AURA',"Welcome to your safe space. I am Aura, your emotional anchor. Let's look into your thought architectures.",profile),900);
+    setTimeout(()=>speak('IRIS',"Welcome to your safe space. I am Iris, your emotional anchor. Let's look into your thought architectures.",profile),900);
   };
 
   const toggleAI = (target) => {
     setActiveAI(target);
     speak(target,
-      target==='AURA'
-        ? "Welcome to your safe space. I am Aura, your emotional anchor. Let's look into your thought architectures."
-        : "Max cognitive grid initialized. Ready to break down behavioral loops and construct logical resolutions.",
+      target==='IRIS'
+        ? "Welcome to your safe space. I am Iris, your emotional anchor. Let's look into your thought architectures."
+        : "Zenith cognitive grid initialized. Ready to break down behavioral loops and construct logical resolutions.",
       selectedProfile
     );
   };
@@ -652,7 +652,7 @@ export default function Auth({ onComplete }) {
   };
 
   const suDone = suMobOk && suEmOk && su.fullName && su.nickname;
-  const accent = activeAI==='AURA' ? '#e0524d' : '#5eb8ad';
+  const accent = activeAI==='IRIS' ? '#e0524d' : '#5eb8ad';
 
   return (
     <div style={{ minHeight:'100vh', width:'100vw', backgroundColor:'#020308', color:'#fff', fontFamily:J, overflow:'hidden', position:'relative', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -1469,7 +1469,7 @@ export default function Auth({ onComplete }) {
             {/* Toggle Switch */}
             <div style={{ position:'relative', zIndex:20, marginTop:'16px', marginBottom:'16px' }}>
               <div style={{ background:'rgba(255,255,255,0.04)', backdropFilter:'blur(30px)', padding:'5px', borderRadius:'40px', border:'1px solid rgba(255,255,255,0.08)', display:'flex', gap:'4px', boxShadow:'0 16px 40px rgba(0,0,0,0.5)' }}>
-                {[{k:'AURA',l:'Feminine Core · Aura',g:'linear-gradient(135deg,#ef4444,#991b1b)',sh:'0 4px 12px rgba(239,68,68,0.35)'},{k:'MAX',l:'Analytic Engine · Max',g:'linear-gradient(135deg,#22c55e,#166534)',sh:'0 8px 20px rgba(34,197,94,0.35)'}].map(ai=>(
+                {[{k:'IRIS',l:'Feminine Core · Iris',g:'linear-gradient(135deg,#ef4444,#991b1b)',sh:'0 4px 12px rgba(239,68,68,0.35)'},{k:'ZENITH',l:'Analytic Engine · Zenith',g:'linear-gradient(135deg,#22c55e,#166534)',sh:'0 8px 20px rgba(34,197,94,0.35)'}].map(ai=>(
                   <button key={ai.k} onClick={()=>toggleAI(ai.k)}
                     style={{ padding:'10px 26px', border:'none', borderRadius:'30px', cursor:'pointer', fontSize:'0.88rem', fontWeight:'600', fontFamily:G, fontStyle:'italic', letterSpacing:'0.5px', transition:'all 0.4s', background:activeAI===ai.k?ai.g:'transparent', color:activeAI===ai.k?'#fff':'rgba(255,255,255,0.35)', boxShadow:activeAI===ai.k?ai.sh:'none', userSelect:'none' }}>
                     {ai.l}
@@ -1484,7 +1484,7 @@ export default function Auth({ onComplete }) {
               <RobotAvatar
                 expression={eyes === 'laughing' ? 'happy' : 'smile'}
                 size="lg"
-                glowColor={activeAI === 'AURA' ? '#ff3b30' : '#22c55e'}
+                glowColor={activeAI === 'IRIS' ? '#ff3b30' : '#22c55e'}
                 isTyping={eyes === 'normal'}
               />
             </motion.div>
@@ -1520,9 +1520,9 @@ export default function Auth({ onComplete }) {
 
             {/* Status node labels */}
             <div style={{ display:'flex', gap:'20px', zIndex:20, position:'relative', marginBottom:'8px' }}>
-              <span style={{ fontFamily:S, fontSize:'0.7rem', fontWeight:'700', letterSpacing:'1px', color:activeAI==='AURA'?'#ef4444':'rgba(255,255,255,0.2)', transition:'all 0.4s' }}>AURA: {activeAI==='AURA'?'ACTIVE':'STANDBY'}</span>
+              <span style={{ fontFamily:S, fontSize:'0.7rem', fontWeight:'700', letterSpacing:'1px', color:activeAI==='IRIS'?'#ef4444':'rgba(255,255,255,0.2)', transition:'all 0.4s' }}>IRIS: {activeAI==='IRIS'?'ACTIVE':'STANDBY'}</span>
               <span style={{ color:'rgba(255,255,255,0.12)' }}>·</span>
-              <span style={{ fontFamily:S, fontSize:'0.7rem', fontWeight:'700', letterSpacing:'1px', color:activeAI==='MAX'?'#22c55e':'rgba(255,255,255,0.2)', transition:'all 0.4s' }}>MAX: {activeAI==='MAX'?'ACTIVE':'STANDBY'}</span>
+              <span style={{ fontFamily:S, fontSize:'0.7rem', fontWeight:'700', letterSpacing:'1px', color:activeAI==='ZENITH'?'#22c55e':'rgba(255,255,255,0.2)', transition:'all 0.4s' }}>ZENITH: {activeAI==='ZENITH'?'ACTIVE':'STANDBY'}</span>
             </div>
           </motion.div>
         )}

@@ -11,13 +11,13 @@ const userGoogleEmails = [
 export default function HypnoticJoyfulAIVision() {
   const [currentScreen, setCurrentScreen] = useState('landing'); 
   const [selectedProfile, setSelectedProfile] = useState(null);
-  const [activeAI, setActiveAI] = useState('AURA');
+  const [activeAI, setActiveAI] = useState('IRIS');
   const [aiDialogue, setAiDialogue] = useState('Hello beautiful soul! Your neural synchronization is complete. Let’s light up your day together!');
   const [eyeExpression, setEyeExpression] = useState('laughing'); // Default to joyful expression to set the happy tone
 
   useEffect(() => {
     const fontLink = document.createElement('link');
-    fontLink.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght=0,400;0,600;1,400;1,700&family=Space+Grotesk:wght@400;500;700&display=swap';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,700&family=Space+Grotesk:wght@400;500;700&display=swap';
     document.head.appendChild(fontLink);
     return () => document.head.removeChild(fontLink);
   }, []);
@@ -30,7 +30,7 @@ export default function HypnoticJoyfulAIVision() {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(statement);
       utterance.rate = 1.05; // Slightly faster for a cheerful, energetic tone
-      utterance.pitch = aiCore === 'AURA' ? 1.45 : 0.85;
+      utterance.pitch = aiCore === 'IRIS' ? 1.45 : 0.85;
       window.speechSynthesis.speak(utterance);
     }
 
@@ -44,17 +44,17 @@ export default function HypnoticJoyfulAIVision() {
     setSelectedProfile(profile);
     setCurrentScreen('aiHub');
     setTimeout(() => {
-      triggerVoiceAndJoy('AURA', "Welcome to your ultimate sanctuary! I am Aura, your source of absolute positivity. Let's melt away any stress and bring a massive smile to your face today!");
+      triggerVoiceAndJoy('IRIS', "Welcome to your ultimate sanctuary! I am Iris, your source of absolute positivity. Let's melt away any stress and bring a massive smile to your face today!");
     }, 900);
   };
 
   const toggleAISystem = (targetCore) => {
     setActiveAI(targetCore);
-    const joyfulQuote = targetCore === 'AURA' 
-      ? "You look wonderful today! I am unlocking your inner peace matrix. Let's focus on beautiful thoughts and create a space of pure bliss."
-      : "Max cognitive happiness grid active! Scanning for stress particles and replacing them with premium dopamine currents. You are doing fantastic!";
+    const joyfulQuote = targetCore === 'IRIS' 
+      ? "You look wonderful today! I am Iris, unlocking your inner peace matrix. Let's focus on beautiful thoughts and create a space of pure bliss."
+      : "Zenith cognitive happiness grid active! I am Zenith, scanning for stress particles and replacing them with premium dopamine currents. You are doing fantastic!";
     triggerVoiceAndJoy(targetCore, joyfulQuote);
-  };
+  };};
 
   return (
     <div style={{
@@ -86,7 +86,7 @@ export default function HypnoticJoyfulAIVision() {
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
           style={{
             position: 'absolute', bottom: '-5%', right: '10%', width: '65%', height: '65%',
-            background: activeAI === 'AURA' ? 'radial-gradient(circle, rgba(139,135,245,0.15) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(94,184,173,0.15) 0%, transparent 70%)',
+            background: activeAI === 'IRIS' ? 'radial-gradient(circle, rgba(139,135,245,0.15) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(94,184,173,0.15) 0%, transparent 70%)',
             filter: 'blur(110px)', transition: 'all 1s ease'
           }} 
         />
@@ -216,7 +216,7 @@ export default function HypnoticJoyfulAIVision() {
             <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
               <div style={{ 
                 position: 'absolute', inset: 0, 
-                background: activeAI === 'AURA' 
+                background: activeAI === 'IRIS' 
                   ? 'radial-gradient(circle at 50% 45%, rgba(139,135,245,0.14) 0%, rgba(99,102,241,0.04) 50%, transparent 75%)'
                   : 'radial-gradient(circle at 50% 45%, rgba(94,184,173,0.14) 0%, rgba(13,148,136,0.04) 50%, transparent 75%)',
                 transition: 'all 1.2s ease', filter: 'blur(70px)'
@@ -232,8 +232,8 @@ export default function HypnoticJoyfulAIVision() {
             {/* EXECUTIVE SYSTEM CONTROLLER TABS */}
             <div style={{ position: 'absolute', top: '40px', zIndex: 10 }}>
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '6px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '8px', backdropFilter: 'blur(30px)', boxShadow: 'var(--shadow-premium)' }}>
-                <button onClick={() => toggleAISystem('AURA')} style={{ padding: '14px 34px', border: 'none', borderRadius: '30px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2.5px', fontFamily: "'Space Grotesk', sans-serif", transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)', background: activeAI === 'AURA' ? 'var(--accent-aura)' : 'transparent', color: activeAI === 'AURA' ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: activeAI === 'AURA' ? 'var(--shadow-premium)' : 'none' }}>ANGELIC AURA</button>
-                <button onClick={() => toggleAISystem('MAX')} style={{ padding: '14px 34px', border: 'none', borderRadius: '30px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2.5px', fontFamily: "'Space Grotesk', sans-serif", transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)', background: activeAI === 'MAX' ? 'var(--accent-max)' : 'transparent', color: activeAI === 'MAX' ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: activeAI === 'MAX' ? 'var(--shadow-premium)' : 'none' }}>MAX COGNITION</button>
+                <button onClick={() => toggleAISystem('IRIS')} style={{ padding: '14px 34px', border: 'none', borderRadius: '30px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2.5px', fontFamily: "'Space Grotesk', sans-serif", transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)', background: activeAI === 'IRIS' ? 'var(--accent-aura)' : 'transparent', color: activeAI === 'IRIS' ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: activeAI === 'IRIS' ? 'var(--shadow-premium)' : 'none' }}>ANGELIC IRIS</button>
+                <button onClick={() => toggleAISystem('ZENITH')} style={{ padding: '14px 34px', border: 'none', borderRadius: '30px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2.5px', fontFamily: "'Space Grotesk', sans-serif", transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)', background: activeAI === 'ZENITH' ? 'var(--accent-max)' : 'transparent', color: activeAI === 'ZENITH' ? '#fff' : 'rgba(255,255,255,0.4)', boxShadow: activeAI === 'ZENITH' ? 'var(--shadow-premium)' : 'none' }}>ZENITH COGNITION</button>
               </div>
             </div>
 
@@ -257,12 +257,12 @@ export default function HypnoticJoyfulAIVision() {
                     width: '38px', height: '38px', borderRadius: '50%',
                     background: 'radial-gradient(circle at 35% 35%, #ffffff 0%, #f8fafc 45%, #cbd5e1 100%)',
                     boxShadow: 'inset -2px -2px 10px rgba(0,0,0,0.2)',
-                    filter: activeAI === 'AURA' ? 'drop-shadow(0 4px 10px rgba(244,63,94,0.3))' : 'drop-shadow(0 4px 10px rgba(20,184,166,0.3))'
+                    filter: activeAI === 'IRIS' ? 'drop-shadow(0 4px 10px rgba(244,63,94,0.3))' : 'drop-shadow(0 4px 10px rgba(20,184,166,0.3))'
                   }}
                 />
                 <div style={{
                   width: '14px', height: '24px', marginTop: '-6px',
-                  background: activeAI === 'AURA' ? 'linear-gradient(to bottom, #ffffff, var(--accent-aura-border))' : 'linear-gradient(to bottom, #ffffff, var(--accent-max-border))',
+                  background: activeAI === 'IRIS' ? 'linear-gradient(to bottom, #ffffff, var(--accent-aura-border))' : 'linear-gradient(to bottom, #ffffff, var(--accent-max-border))',
                   borderRadius: '4px 4px 0 0', opacity: 0.95, transition: 'all 0.5s'
                 }} />
               </div>
@@ -279,12 +279,12 @@ export default function HypnoticJoyfulAIVision() {
                 {/* AMBIENT SIDE CAPSULES (Ear Translucency) */}
                 <div style={{
                   position: 'absolute', left: '-18px', width: '42px', height: '72px', borderRadius: '50% 30% 30% 50% / 50% 40% 40% 50%',
-                  background: activeAI === 'AURA' ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-aura) 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-max) 100%)',
+                  background: activeAI === 'IRIS' ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-aura) 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-max) 100%)',
                   boxShadow: '-4px 4px 10px rgba(0,0,0,0.15)', transition: 'all 0.5s'
                 }} />
                 <div style={{
                   position: 'absolute', right: '-18px', width: '42px', height: '72px', borderRadius: '30% 50% 50% 30% / 40% 50% 50% 40%',
-                  background: activeAI === 'AURA' ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-aura) 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-max) 100%)',
+                  background: activeAI === 'IRIS' ? 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-aura) 100%)' : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, var(--accent-max) 100%)',
                   boxShadow: '4px 4px 10px rgba(0,0,0,0.15)', transition: 'all 0.5s'
                 }} />
 
@@ -371,7 +371,7 @@ export default function HypnoticJoyfulAIVision() {
                 }}>
                   {/* Blinking Positivity Core Diode */}
                   <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ffffff', border: '1px solid #cbd5e1', boxShadow: '0 4px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: activeAI === 'AURA' ? 'var(--accent-aura)' : 'var(--accent-max)', transition: 'all 0.5s' }} />
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: activeAI === 'IRIS' ? 'var(--accent-aura)' : 'var(--accent-max)', transition: 'all 0.5s' }} />
                   </div>
 
                   {/* Calibration Grid Nodes */}
@@ -395,7 +395,7 @@ export default function HypnoticJoyfulAIVision() {
               }}
             >
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: '900', letterSpacing: '5px', fontFamily: "'Space Grotesk', sans-serif", color: activeAI === 'AURA' ? '#8b87f5' : '#5eb8ad', transition: 'all 0.5s' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '900', letterSpacing: '5px', fontFamily: "'Space Grotesk', sans-serif", color: activeAI === 'IRIS' ? '#8b87f5' : '#5eb8ad', transition: 'all 0.5s' }}>
                   {activeAI} IMMERSIVE TELEMETRY
                 </span>
               </div>
