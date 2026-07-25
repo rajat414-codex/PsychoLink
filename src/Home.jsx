@@ -977,6 +977,7 @@ export default function Home({ userProfile, onLogout }) {
   const textareaRef = useRef(null);
   const srRef       = useRef(null);
 
+  const M = "'Manrope','Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const S = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
   const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
@@ -1012,7 +1013,7 @@ export default function Home({ userProfile, onLogout }) {
 
   useEffect(() => {
     const l = document.createElement('link');
-    l.href = 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;1,600;1,700&display=swap';
+    l.href = 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;1,600;1,700&display=swap';
     document.head.appendChild(l);
     const s = document.createElement('style');
     s.innerHTML = '*{-webkit-font-smoothing:antialiased;box-sizing:border-box;}textarea,input{outline:none;}textarea::placeholder,input::placeholder{color:rgba(255,255,255,0.2);}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}';
@@ -1389,9 +1390,9 @@ export default function Home({ userProfile, onLogout }) {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <FaComments size={15} color={accent} style={{ filter: `drop-shadow(0 0 6px ${accent}aa)` }} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: '800', fontFamily: J, color: '#fff', letterSpacing: '-0.2px' }}>AI Chat</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: '600', fontFamily: M, color: '#fff', letterSpacing: '-0.2px' }}>AI Chat</span>
                   </div>
-                  <span style={{ fontSize: '0.62rem', color: accent, background: `${accent}18`, border: `1px solid ${accent}30`, borderRadius: '8px', padding: '3px 8px', fontFamily: J, fontWeight: '800', letterSpacing: '0.8px' }}>
+                  <span style={{ fontSize: '0.62rem', color: accent, background: `${accent}18`, border: `1px solid ${accent}30`, borderRadius: '8px', padding: '3px 8px', fontFamily: M, fontWeight: '600', letterSpacing: '0.8px' }}>
                     DASHBOARD
                   </span>
                 </div>
@@ -1407,7 +1408,7 @@ export default function Home({ userProfile, onLogout }) {
                     const isActive = activeAI === ai.k && tab === 'chat';
                     return (
                       <button key={ai.k} onClick={() => { setActiveAI(ai.k); setTab('chat'); }}
-                        style={{ padding:'9px 0', border: isActive ? `1.5px solid ${ai.c}` : '1px solid rgba(255,255,255,0.06)', borderRadius:'12px', cursor:'pointer', fontSize:'0.72rem', fontWeight:'800', fontFamily:J, letterSpacing:'0.8px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.035)', color: isActive ? '#fff' : 'rgba(255,255,255,0.6)', boxShadow: isActive ? `0 6px 18px ${ai.c}45` : 'none', userSelect:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
+                        style={{ padding:'9px 0', border: isActive ? `1.5px solid ${ai.c}` : '1px solid rgba(255,255,255,0.06)', borderRadius:'12px', cursor:'pointer', fontSize:'0.72rem', fontWeight:'600', fontFamily:M, letterSpacing:'0.8px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.035)', color: isActive ? '#fff' : 'rgba(255,255,255,0.7)', boxShadow: isActive ? `0 6px 18px ${ai.c}45` : 'none', userSelect:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
                         <FaStar size={8} color={isActive ? '#fff' : ai.c} style={{ filter: `drop-shadow(0 0 5px ${ai.c})` }} />
                         {ai.label}
                       </button>
