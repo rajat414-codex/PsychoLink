@@ -977,9 +977,11 @@ export default function Home({ userProfile, onLogout }) {
   const textareaRef = useRef(null);
   const srRef       = useRef(null);
 
-  const J = "'Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
-  const S = "'Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
-  const G = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
+  const O  = "'Outfit','Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
+  const SY = "'Syne','Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
+  const J  = "'Outfit','Plus Jakarta Sans','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
+  const S  = "'Syne','Space Grotesk','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',sans-serif";
+  const G  = "'Cormorant Garamond','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','NotoEmojiFallback',serif";
 
   const accent =
     activeAI === 'AURA' ? '#ef4444' :
@@ -1012,7 +1014,7 @@ export default function Home({ userProfile, onLogout }) {
 
   useEffect(() => {
     const l = document.createElement('link');
-    l.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;1,600;1,700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap';
+    l.href = 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;1,600;1,700&display=swap';
     document.head.appendChild(l);
     const s = document.createElement('style');
     s.innerHTML = '*{-webkit-font-smoothing:antialiased;box-sizing:border-box;}textarea,input{outline:none;}textarea::placeholder,input::placeholder{color:rgba(255,255,255,0.2);}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}';
@@ -1382,22 +1384,22 @@ export default function Home({ userProfile, onLogout }) {
             <div style={{ flex: 1, overflowY: 'auto', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               
               {/* Top Priority Section: AI Chat & Dashboard */}
-              <div style={{ background: 'rgba(255,255,255,0.025)', borderRadius: '16px', padding: '12px 10px', border: tab === 'chat' ? `1px solid ${accent}40` : '1px solid rgba(255,255,255,0.06)', boxShadow: tab === 'chat' ? `0 4px 18px ${accent}15` : 'none', transition: 'all 0.25s' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '18px', padding: '14px 12px', border: tab === 'chat' ? `1.5px solid ${accent}45` : '1px solid rgba(255,255,255,0.07)', boxShadow: tab === 'chat' ? `0 6px 20px -4px ${accent}25` : '0 4px 12px rgba(0,0,0,0.2)', transition: 'all 0.25s' }}>
                 <div 
                   onClick={() => setTab('chat')}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', marginBottom: '10px', padding: '0 4px' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', marginBottom: '12px', padding: '0 2px' }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <FaComments size={14} color={accent} />
-                    <span style={{ fontSize: '0.88rem', fontWeight: '800', fontFamily: S, color: '#fff', letterSpacing: '0.3px' }}>AI Chat</span>
+                    <FaComments size={15} color={accent} style={{ filter: `drop-shadow(0 0 6px ${accent}aa)` }} />
+                    <span style={{ fontSize: '0.94rem', fontWeight: '800', fontFamily: O, color: '#fff', letterSpacing: '-0.3px' }}>AI Chat</span>
                   </div>
-                  <span style={{ fontSize: '0.6rem', color: accent, background: `${accent}18`, borderRadius: '6px', padding: '2px 6px', fontFamily: S, fontWeight: '800' }}>
+                  <span style={{ fontSize: '0.62rem', color: accent, background: `${accent}18`, border: `1px solid ${accent}30`, borderRadius: '8px', padding: '3px 8px', fontFamily: SY, fontWeight: '800', letterSpacing: '1px' }}>
                     DASHBOARD
                   </span>
                 </div>
 
                 {/* 4 AI Co-Pilots 2x2 Grid */}
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px' }}>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'7px' }}>
                   {[
                     { k:'AURA', label:'AURA', c:'#ef4444', g:'linear-gradient(135deg, #f43f5e, #e11d48)' },
                     { k:'MAX', label:'MAX', c:'#22c55e', g:'linear-gradient(135deg, #10b981, #059669)' },
@@ -1407,8 +1409,8 @@ export default function Home({ userProfile, onLogout }) {
                     const isActive = activeAI === ai.k && tab === 'chat';
                     return (
                       <button key={ai.k} onClick={() => { setActiveAI(ai.k); setTab('chat'); }}
-                        style={{ padding:'8px 0', border: isActive ? `1.5px solid ${ai.c}` : '1px solid transparent', borderRadius:'10px', cursor:'pointer', fontSize:'0.68rem', fontWeight:'800', fontFamily:S, letterSpacing:'0.6px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.03)', color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', boxShadow: isActive ? `0 4px 14px ${ai.c}40` : 'none', userSelect:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'4px' }}>
-                        <FaStar size={8} color={isActive ? '#fff' : ai.c} />
+                        style={{ padding:'9px 0', border: isActive ? `1.5px solid ${ai.c}` : '1px solid rgba(255,255,255,0.06)', borderRadius:'12px', cursor:'pointer', fontSize:'0.72rem', fontWeight:'800', fontFamily:SY, letterSpacing:'1px', transition:'all 0.25s', background: isActive ? ai.g : 'rgba(255,255,255,0.035)', color: isActive ? '#fff' : 'rgba(255,255,255,0.6)', boxShadow: isActive ? `0 6px 18px ${ai.c}45` : 'none', userSelect:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
+                        <FaStar size={8} color={isActive ? '#fff' : ai.c} style={{ filter: `drop-shadow(0 0 5px ${ai.c})` }} />
                         {ai.label}
                       </button>
                     );
