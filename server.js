@@ -176,16 +176,16 @@ app.post('/api/consultants/apply', async (req, res) => {
             <tr><td style="padding:10px 0;color:#6b7280;font-size:0.85rem;">Multilingual/Aggressive</td><td style="padding:10px 0;color:#1a1a2e;">${multilingualAggressive||'—'}</td></tr>
           </table>
           <div style="margin-top:28px;display:flex;gap:14px;justify-content:center;">
-            <a href="http://localhost:3001/api/admin/applications/${application.id}/interview"
-              style="padding:16px 32px;background:linear-gradient(135deg,#7c3aed,#be185d);color:#fff;text-decoration:none;border-radius:14px;font-weight:700;font-size:1rem;display:inline-block;">
-              🎯 Send Interview Invite
+            <a href="${process.env.BASE_URL || 'http://localhost:3001'}/api/admin/applications/${application.id}/approve"
+              style="padding:16px 28px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;text-decoration:none;border-radius:14px;font-weight:700;font-size:1rem;display:inline-block;">
+              ✅ Approve Consultant
             </a>
-            <a href="http://localhost:3001/api/admin/applications/${application.id}/reject"
-              style="padding:16px 24px;background:#f1f5f9;color:#64748b;text-decoration:none;border-radius:14px;font-weight:600;font-size:0.9rem;display:inline-block;border:1px solid #e2e8f0;">
-              ✕ Not a Fit
+            <a href="${process.env.BASE_URL || 'http://localhost:3001'}/api/admin/applications/${application.id}/reject"
+              style="padding:16px 24px;background:#f1f5f9;color:#ef4444;text-decoration:none;border-radius:14px;font-weight:600;font-size:0.9rem;display:inline-block;border:1px solid #fee2e2;">
+              ✕ Reject Application
             </a>
           </div>
-          <p style="text-align:center;color:#9ca3af;font-size:0.75rem;margin-top:10px;">One click — no login needed</p>
+          <p style="text-align:center;color:#9ca3af;font-size:0.75rem;margin-top:10px;">Clicking Approve will instantly activate the consultant on PsychoLink and email them confirmation.</p>
         </div>
         <div style="padding:16px 28px;background:#f1f5f9;text-align:center;">
           <p style="margin:0;color:#94a3b8;font-size:0.75rem;">PsychoLink · Cognitive Social Consultation Platform</p>
@@ -316,13 +316,22 @@ app.get('/api/admin/applications/:id/approve', async (req, res) => {
   const application = applications[idx];
   const consultants  = readJSON(CONSULTANTS_FILE);
   const newConsultant = {
-    id: Date.now(), name: application.fullName,
+    id: Date.now(),
+    name: application.fullName,
     spec: application.skills || 'General Counseling',
-    rating: 5.0, sessions: 0,
+    rating: 5.0,
+    sessions: 0,
     color: CONSULTANT_COLORS[consultants.length % CONSULTANT_COLORS.length],
-    avail: true, exp: 'New', price: 199,
-    qualifications: application.qualifications,
+    avail: true,
+    exp: 'New',
+    price: 199,
+    qualifications:  application.qualifications,
     therapyApproach: application.therapyApproach,
+    bankName:        application.bankName || '',
+    bankAccount:     application.bankAccount || '',
+    bankIfsc:        application.bankIfsc || '',
+    bankUpi:         application.bankUpi || '',
+    earnings:        0,
   };
   consultants.push(newConsultant);
   writeJSON(CONSULTANTS_FILE, consultants);

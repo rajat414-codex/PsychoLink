@@ -17,7 +17,7 @@ import VideoCall from './VideoCall';
 import { FaVideo, FaPhone } from 'react-icons/fa';
 import ProgressDashboard from './ProgressDashboard';
 import { FaSpa, FaCrown } from 'react-icons/fa';
-import { JoinConsultantModal, ApplicationsPanel, PaymentModal, FreeSessionToast, ConsultantProfile, ReelsViewerModal, PRESET_AVATARS, parsePresetAvatar, renderAvatar, compressImage, VIDEO_PRESETS, saveVideoBlob, useVideoUrl } from './ConsultantHub';
+import { JoinConsultantModal, PaymentModal, FreeSessionToast, ConsultantProfile, ReelsViewerModal, PRESET_AVATARS, parsePresetAvatar, renderAvatar, compressImage, VIDEO_PRESETS, saveVideoBlob, useVideoUrl } from './ConsultantHub';
 import RobotAvatar from './RobotAvatar';
 import FloatingChatbot from './FloatingChatbot';
 
@@ -1948,11 +1948,6 @@ export default function Home({ userProfile, onLogout }) {
                         <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.86rem', margin:0, fontFamily:J }}>First session free · ₹199/session thereafter</p>
                       </div>
                       <div style={{ display:'flex', gap:10 }}>
-                        <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
-                          onClick={() => { setShowApps(true); fetchApplications(); }}
-                          style={{ padding:'9px 16px', borderRadius:12, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.55)', fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
-                          ⚙️ Applications
-                        </motion.button>
                         <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }} onClick={() => setShowJoin(true)}
                           style={{ padding:'9px 16px', borderRadius:12, border:`1px solid ${accentBr}`, background:accentB, color:accent, fontSize:'0.78rem', fontWeight:700, cursor:'pointer', fontFamily:J }}>
                           + Join as Consultant
@@ -2237,33 +2232,6 @@ export default function Home({ userProfile, onLogout }) {
       {/* ── JOIN MODAL ── */}
       <AnimatePresence>
         {showJoin && <JoinConsultantModal onClose={() => setShowJoin(false)} accent={accent}/>}
-      </AnimatePresence>
-
-      {/* ── APPLICATIONS PANEL MODAL ── */}
-      <AnimatePresence>
-        {showApps && (
-          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} onClick={() => setShowApps(false)}
-            style={{ position:'fixed', inset:0, background:'rgba(9,10,15,0.82)', backdropFilter:'blur(10px)', zIndex:150, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'20px', overflowY:'auto' }}>
-            <motion.div initial={{ scale:0.94, y:20 }} animate={{ scale:1, y:0 }} exit={{ scale:0.94, y:20 }}
-              onClick={e => e.stopPropagation()}
-              style={{ width:'100%', maxWidth:560, background:'var(--bg-card)', border:'1px solid var(--border-subtle)', borderRadius:28, padding:28, marginTop:20, boxShadow:'var(--shadow-card)' }}>
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
-                <div>
-                  <h3 style={{ fontFamily:G, fontStyle:'italic', fontWeight:600, fontSize:'1.4rem', color:'#fff', margin:'0 0 3px' }}>Pending Applications</h3>
-                  <p style={{ margin:0, fontSize:'0.78rem', color:'rgba(255,255,255,0.3)', fontFamily:J }}>Approve to add consultant to live list</p>
-                </div>
-                <button onClick={() => setShowApps(false)}
-                  style={{ width:32, height:32, borderRadius:10, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.5)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700 }}>✕</button>
-              </div>
-              <ApplicationsPanel applications={applications} accent={accent}
-                onRefresh={() => {
-                  fetchApplications();
-                  fetch(`${API_BASE}/api/consultants`).then(r=>r.json()).then(setConsultants).catch(()=>{});
-                }}
-              />
-            </motion.div>
-          </motion.div>
-        )}
       </AnimatePresence>
 
       {/* ── FREE SESSION TOAST ── */}
