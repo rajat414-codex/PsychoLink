@@ -9,17 +9,18 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <!-- ════════════════════════════════════════════════════════
-         BACKEND (Railway) — permanent live backend
+         BACKEND (Render) — permanent live backend
          ════════════════════════════════════════════════════════ -->
     <script>
-      // 👇 Railway backend URL (permanent)
-      window.API_BASE = "https://psycholink-production.up.railway.app";
+      // 👇 Render backend URL (permanent)
+      window.API_BASE = "https://psycholink.onrender.com";
 
       // Auto-rewrite: saari localhost:3001 calls ko Railway backend pe bhejta hai (bypass if local=true in URL or use_local=true in localStorage)
       (function () {
         var _fetch = window.fetch;
         window.fetch = function (url, opts) {
-          if (localStorage.getItem('use_local') === 'true' || window.location.search.includes('local=true')) {
+          var isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '';
+          if (isLocalHost || localStorage.getItem('use_local') === 'true' || window.location.search.includes('local=true')) {
             return _fetch(url, opts);
           }
           if (window.API_BASE && typeof url === 'string' && url.indexOf('localhost:3001') !== -1) {

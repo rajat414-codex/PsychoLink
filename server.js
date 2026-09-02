@@ -13,7 +13,7 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 const API_KEY = process.env.NVIDIA_API_KEY;
-const MODEL = 'meta/llama-3.1-8b-instruct';
+const MODEL = 'nvidia/nemotron-3.5-lightning-30b-a3b';
 
 // ─────────────────────────────────────────────────────────
 // CONSULTANT SYSTEM — simple JSON-file storage (no DB needed)
