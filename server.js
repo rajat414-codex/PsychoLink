@@ -13,7 +13,19 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 const API_KEY = process.env.NVIDIA_API_KEY;
-const MODEL = 'nvidia/nemotron-3.5-lightning-30b-a3b';
+const MODEL = 'openai/gpt-oss-20b';
+
+// Helper to strip out internal "thinking" blocks from LLM responses
+function cleanAIResponse(text) {
+  if (!text) return text;
+  // 1. Remove <think>...</think> tags entirely
+  text = text.replace(/<think>[\s\S]*?<\/think>\n*/gi, '');
+  
+  // 2. Remove "Here's a thinking process:" or similar preambles
+  text = text.replace(/^(?:Here(?:'s| is) a thinking process|Thinking Process):?[\s\S]*?(?:---|\n\n(?=[^ \n]))/i, '');
+  
+  return text.trim();
+}
 
 // ─────────────────────────────────────────────────────────
 // CONSULTANT SYSTEM — simple JSON-file storage (no DB needed)
@@ -508,7 +520,7 @@ app.post('/api/chat', async (req, res) => {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 700,
+        max_tokens: 1200,
         temperature: 0.8,
         messages: [
           { role: 'system', content: finalSystemPrompt },
@@ -524,7 +536,9 @@ app.post('/api/chat', async (req, res) => {
     }
 
     const data = await response.json();
-    const reply = data?.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+    let reply = data?.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+    
+    reply = cleanAIResponse(reply);
 
     res.json({ reply });
 
@@ -597,7 +611,8 @@ ${conversation}` }
       }),
     });
     const data = await response.json();
-    const summary = data?.choices?.[0]?.message?.content || 'Unable to generate summary.';
+    let summary = data?.choices?.[0]?.message?.content || 'Unable to generate summary.';
+    summary = cleanAIResponse(summary);
     res.json({ summary });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

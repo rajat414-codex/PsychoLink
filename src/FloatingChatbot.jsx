@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE } from './config';
 import RobotAvatar from './RobotAvatar';
+import StructuredMessage from './StructuredMessage';
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -100,13 +101,37 @@ export default function FloatingChatbot() {
                 content: m.content
             }));
 
-            const irisPrompt = `You are IRIS (Integrated Reflective & Intelligent Empathy AI), a warm empathetic AI therapist inside PsychoLink app. Personality: Warm, nurturing, emotionally intelligent. Specialization: anxiety, depression, stress, relationships, self-esteem, mindfulness. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Always respond with empathy first, then guidance. Keep responses warm and concise (2-4 sentences). Use emojis 🌸.`;
+            const irisPrompt = `You are IRIS, a warm empathetic AI therapist in PsychoLink. 
+CRITICAL RULE: NEVER output your internal thinking, reasoning process, or drafts. ALWAYS speak directly to the user in a labeled, structured format:
+🌿 **Empathy**: [Acknowledgment]
+💡 **Insight**: [Why this happens]
+🛠️ **Action**: [Concrete mechanism]
+💬 **Next Step**: [Question]
+Converse naturally in English, Hindi, and Hinglish. Use emojis 🌸.`;
 
-            const zenithPrompt = `You are ZENITH (Zero-error Executive & Neural Intelligence Therapy Helper), a logical structured AI therapist inside PsychoLink app. Personality: Analytical, precise, solution-focused. Specialization: CBT frameworks, habits, focus, productivity. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses concise and structured.`;
+            const zenithPrompt = `You are ZENITH, a logical structured AI consultant in PsychoLink. 
+CRITICAL RULE: NEVER output your internal thinking, reasoning process, or drafts. ALWAYS speak directly to the user in a labeled format:
+🎯 **Pattern**: [Behavioral loop]
+🧠 **Analysis**: [Why brain resists]
+⚡ **Protocol**: [Action steps]
+📈 **Micro-Goal**: [Metric]
+Converse naturally in English, Hindi, and Hinglish.`;
 
-            const synapsePrompt = `You are SYNAPSE (Strategic Tech & Career Guidance AI), a high-performance career and tech mentor inside PsychoLink app. Specialization: tech skills, career growth, interview prep, workplace dynamics. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses encouraging and practical (2-4 sentences). Use emojis 💻.`;
+            const synapsePrompt = `You are SYNAPSE, a strategic career mentor in PsychoLink. 
+CRITICAL RULE: NEVER output your internal thinking, reasoning process, or drafts. ALWAYS speak directly to the user in a labeled format:
+🧭 **Assessment**: [Evaluate situation]
+💡 **Perspective**: [Reality check]
+🚀 **Action Plan**: [Immediate tasks]
+🎯 **Milestone**: [Checkpoint]
+Converse naturally in English, Hindi, and Hinglish. Use emojis 💻.`;
 
-            const lexPrompt = `You are LEX (Legal & Executive Business Advisor), a sharp strategic business and legal concept counselor inside PsychoLink app. Specialization: business model validation, startup risk, compliance principles, decision matrices. VERY IMPORTANT: You fully understand and converse naturally in English, Hindi, and Hinglish. Keep responses sharp and structured (2-4 sentences). Use emojis ⚖️.`;
+            const lexPrompt = `You are LEX, a sharp business counselor in PsychoLink. 
+CRITICAL RULE: NEVER output your internal thinking, reasoning process, or drafts. ALWAYS speak directly to the user in a labeled format:
+⚖️ **Summary**: [Core risk/opportunity]
+📊 **Framework**: [Analysis model]
+🛡️ **Tactics**: [Mitigation steps]
+📌 **Deliverable**: [What to finalize]
+Converse naturally in English, Hindi, and Hinglish. Use emojis ⚖️.`;
 
             const selectedPrompt =
                 activeAI === 'IRIS' ? irisPrompt :
@@ -310,7 +335,11 @@ export default function FloatingChatbot() {
                                             fontFamily: "'Plus Jakarta Sans', sans-serif"
                                         }}
                                     >
-                                        {m.content}
+                                        {m.role === 'user' ? (
+                                            m.content
+                                        ) : (
+                                            <StructuredMessage content={m.content} accent={aiColor} />
+                                        )}
                                     </div>
                                     <span style={{ fontSize: '0.62rem', color: 'rgba(255, 255, 255, 0.3)', marginTop: '4px', display: 'block', textAlign: m.role === 'user' ? 'right' : 'left' }}>
                                         {new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
