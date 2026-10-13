@@ -175,9 +175,17 @@ function TransitionScreen({ profile, activeAI = 'IRIS', onDone }) {
 // APP ROOT
 // ══════════════════════════════════════════════════════════
 export default function App() {
-  const [screen, setScreen]         = useState('splash');
-  const [userProfile, setUserProfile] = useState(null);
-  const [selectedAI, setSelectedAI]  = useState('IRIS');
+  const [screen, setScreen] = useState('splash');
+  const [userProfile, setUserProfile] = useState(() => {
+    try {
+      const email = localStorage.getItem('user_email') || 'visitor@equilibrium.com';
+      const name = localStorage.getItem('user_name') || 'Guest Visitor';
+      const nickname = localStorage.getItem('user_nickname') || 'Guest';
+      return { email, name, nickname, initial: (name[0] || 'G').toUpperCase() };
+    } catch {
+      return { email: 'visitor@equilibrium.com', name: 'Guest Visitor', nickname: 'Guest', initial: 'G' };
+    }
+  });
 
   useEffect(() => {
     const link = document.createElement('link');
@@ -186,35 +194,13 @@ export default function App() {
     return () => { try { document.head.removeChild(link); } catch(e){} }
   }, []);
 
-  const handleAuthDone = (profile) => {
-    setUserProfile(profile);
-    setScreen('transition');
-  };
-
   return (
     <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'fixed', top: 0, left: 0, background: 'transparent' }}>
       <AppleEmoji/>
       <AnimatePresence mode="wait">
 
         {screen === 'splash' && (
-          <SplashScreen key="splash" onComplete={() => setScreen('auth')} />
-        )}
-
-        {screen === 'auth' && (
-          <motion.div key="auth"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ position: 'absolute', inset: 0 }}>
-            <Auth onComplete={(profile) => handleAuthDone(profile)} />
-          </motion.div>
-        )}
-
-        {screen === 'transition' && (
-          <TransitionScreen
-            key="transition"
-            profile={userProfile}
-            activeAI={selectedAI}
-            onDone={() => setScreen('home')}
-          />
+          <SplashScreen key="splash" onComplete={() => setScreen('home')} />
         )}
 
         {screen === 'home' && (
@@ -226,7 +212,7 @@ export default function App() {
             style={{ position: 'absolute', inset: 0 }}>
             <Home
               userProfile={userProfile}
-              onLogout={() => { setUserProfile(null); setScreen('auth'); }}
+              onLogout={() => { setScreen('home'); }}
             />
           </motion.div>
         )}

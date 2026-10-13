@@ -22,11 +22,11 @@ export default function SplashScreen({ onComplete }) {
 
   useEffect(() => {
     const ts = [
-      setTimeout(() => setPhase(1), 300),
-      setTimeout(() => setPhase(2), 900),
-      setTimeout(() => setPhase(3), 1800),
-      setTimeout(() => setPhase(4), 3200),
-      setTimeout(() => { if (onComplete) onComplete(); }, 4000),
+      setTimeout(() => setPhase(1), 200),
+      setTimeout(() => setPhase(2), 600),
+      setTimeout(() => setPhase(3), 1200),
+      setTimeout(() => setPhase(4), 2000),
+      setTimeout(() => { if (onComplete) onComplete(); }, 2500),
     ];
     return () => ts.forEach(clearTimeout);
   }, [onComplete]);
@@ -36,11 +36,14 @@ export default function SplashScreen({ onComplete }) {
       {phase < 4 && (
         <motion.div
           exit={{ opacity: 0, scale: 1.06 }}
-          transition={{ duration: 0.85, ease: [0.4, 0, 0.2, 1] }}
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+          onClick={() => { if (onComplete) onComplete(); }}
+          title="Click to enter app"
           style={{
             position: 'fixed', inset: 0, zIndex: 1000, overflow: 'hidden',
             background: 'var(--bg-app)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer'
           }}
         >
           {/* ── Aurora orbs ─────────────────────────── */}
