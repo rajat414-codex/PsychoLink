@@ -41,11 +41,17 @@ export default function SplashScreen({ onComplete }) {
           title="Click to enter app"
           style={{
             position: 'fixed', inset: 0, zIndex: 1000, overflow: 'hidden',
-            background: 'var(--bg-app)',
+            backgroundImage: "url('/app_bg.jpg')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer'
           }}
         >
+          {/* Backdrop vignette overlay */}
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(5, 7, 18, 0.45)', backdropFilter: 'blur(3px)', pointerEvents: 'none' }} />
+
           {/* ── Aurora orbs ─────────────────────────── */}
           {ORBS.map((o, i) => (
             <motion.div key={i}

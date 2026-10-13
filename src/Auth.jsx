@@ -50,7 +50,21 @@ async function hashPasswordBrowser(password) {
 function AmbientCosmicBg() {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0, pointerEvents: 'none' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 0%, #121026 0%, #06070d 100%)' }} />
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: "url('/app_bg.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }} />
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'rgba(5, 7, 18, 0.45)',
+        backdropFilter: 'blur(3px)'
+      }} />
       
       {/* Background Star Dots Grid */}
       <div style={{
@@ -518,7 +532,7 @@ export default function Auth({ onComplete }) {
       height: '100vh',
       overflow: 'hidden',
       position: 'relative',
-      background: '#06070d',
+      background: 'transparent',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
