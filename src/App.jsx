@@ -28,15 +28,22 @@ function TransitionScreen({ profile, activeAI = 'IRIS', onDone }) {
         inset: 0,
         background: 'var(--bg-app)',
         color: 'var(--text-primary)',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        WebkitOverflowScrolling: 'touch'
+      }}
+    >
+      <div style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
         padding: '36px 60px 48px',
-        overflowY: 'auto',
-        overflowX: 'hidden'
-      }}
-    >
+        minHeight: 'max-content',
+        position: 'relative',
+        zIndex: 2,
+        width: '100%'
+      }}>
       {/* Background noise grid and grain overlay */}
       <div style={{
         position: 'absolute',
@@ -158,6 +165,7 @@ function TransitionScreen({ profile, activeAI = 'IRIS', onDone }) {
             <path d="M2.5 6H9.5M9.5 6L6.5 3M9.5 6L6.5 9" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </motion.button>
+      </div>
       </div>
     </motion.div>
   );

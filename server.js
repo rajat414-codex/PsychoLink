@@ -863,6 +863,180 @@ app.post('/api/send-sms', async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────
+// USER AUTH SYSTEM (Strict Password Hashing & Verification)
+// ─────────────────────────────────────────────────────────
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const AUTH_SECRET = process.env.AUTH_SECRET || 'equilibrium_secret_key_psycholink_2026';
+
+function hashPassword(password) {
+  return crypto.createHmac('sha256', AUTH_SECRET).update(String(password).trim()).digest('hex');
+}
+
+function loadUsers() {
+  try {
+    if (!fs.existsSync(USERS_FILE)) {
+      fs.writeFileSync(USERS_FILE, JSON.stringify([], null, 2));
+      return [];
+    }
+    return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+  } catch (err) {
+    console.error('Error reading users file:', err);
+    return [];
+  }
+}
+
+function saveUsers(users) {
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  } catch (err) {
+    console.error('Error saving users file:', err);
+  }
+}
+
+// Ensure users.json exists
+loadUsers();
+
+// ── REGISTER / SIGN UP ──
+app.post('/api/auth/register', (req, res) => {
+  const { email, name, nickname, password } = req.body || {};
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
+  }
+  if (!name || name.trim().length < 2) {
+    return res.status(400).json({ success: false, error: 'Please enter your full name.' });
+  }
+  if (!nickname || nickname.trim().length < 2) {
+    return res.status(400).json({ success: false, error: 'Please enter your nickname.' });
+  }
+  if (!password || password.length < 6) {
+    return res.status(400).json({ success: false, error: 'Password must be at least 6 characters.' });
+  }
+
+  const users = loadUsers();
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanNickname = nickname.trim().toLowerCase();
+
+  // Check if email already registered
+  const existingUser = users.find(u => u.email.toLowerCase() === cleanEmail);
+  if (existingUser) {
+    return res.status(400).json({ success: false, error: 'An account with this email already exists. Please sign in.' });
+  }
+
+  const newUser = {
+    id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    email: cleanEmail,
+    name: name.trim(),
+    nickname: nickname.trim(),
+    passwordHash: hashPassword(password),
+    createdAt: new Date().toISOString()
+  };
+
+  users.push(newUser);
+  saveUsers(users);
+
+  console.log(`✅ New user registered: ${newUser.name} (${newUser.email})`);
+  return res.json({
+    success: true,
+    user: {
+      id: newUser.id,
+      email: newUser.email,
+      name: newUser.name,
+      nickname: newUser.nickname,
+      initial: (newUser.name[0] || 'U').toUpperCase()
+    }
+  });
+});
+
+// ── LOGIN / SIGN IN (Strict Password Matching) ──
+app.post('/api/auth/login', (req, res) => {
+  const { identifier, password } = req.body || {};
+  if (!identifier || !identifier.trim()) {
+    return res.status(400).json({ success: false, error: 'Please enter your email or nickname.' });
+  }
+  if (!password) {
+    return res.status(400).json({ success: false, error: 'Please enter your password.' });
+  }
+
+  const users = loadUsers();
+  const cleanIdent = identifier.trim().toLowerCase();
+
+  // Find user by email OR nickname
+  const user = users.find(u => 
+    u.email.toLowerCase() === cleanIdent || 
+    (u.nickname && u.nickname.toLowerCase() === cleanIdent)
+  );
+
+  if (!user) {
+    return res.status(401).json({ 
+      success: false, 
+      error: 'No account found with this email or nickname. Please sign up first.' 
+    });
+  }
+
+  // Strict password hash comparison
+  const inputHash = hashPassword(password);
+  if (user.passwordHash !== inputHash) {
+    return res.status(401).json({ 
+      success: false, 
+      error: 'Incorrect password. Please enter the correct password.' 
+    });
+  }
+
+  console.log(`🔑 User logged in successfully: ${user.name} (${user.email})`);
+  return res.json({
+    success: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      nickname: user.nickname,
+      initial: (user.name[0] || 'U').toUpperCase()
+    }
+  });
+});
+
+// ── GOOGLE AUTH (Find or Register) ──
+app.post('/api/auth/google', (req, res) => {
+  const { email, name, picture } = req.body || {};
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ success: false, error: 'Invalid Google email.' });
+  }
+  const users = loadUsers();
+  const cleanEmail = email.trim().toLowerCase();
+  let user = users.find(u => u.email.toLowerCase() === cleanEmail);
+
+  if (!user) {
+    user = {
+      id: 'usr_g_' + Date.now(),
+      email: cleanEmail,
+      name: name || 'Google User',
+      nickname: (name || 'User').split(' ')[0],
+      picture: picture || '',
+      googleAuth: true,
+      createdAt: new Date().toISOString()
+    };
+    users.push(user);
+    saveUsers(users);
+    console.log(`🌐 Google user registered: ${user.name} (${user.email})`);
+  } else {
+    console.log(`🌐 Google user logged in: ${user.name} (${user.email})`);
+  }
+
+  return res.json({
+    success: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      nickname: user.nickname,
+      picture: user.picture || picture || '',
+      initial: (user.name[0] || 'G').toUpperCase()
+    }
+  });
+});
+
+
 
 // Email status check at startup
 if (process.env.RESEND_API_KEY) {
