@@ -1130,6 +1130,36 @@ export default function Auth({ onComplete }) {
                         Create an account
                       </span>
                     </p>
+
+                    {/* Explore as Guest Option */}
+                    <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const guest = {
+                            name: 'Guest Visitor',
+                            email: 'guest@equilibrium.com',
+                            nickname: 'Guest',
+                            initial: 'G'
+                          };
+                          goAIHub(guest);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'rgba(255, 255, 255, 0.4)',
+                          fontSize: '0.78rem',
+                          cursor: 'pointer',
+                          fontFamily: J,
+                          textDecoration: 'underline',
+                          transition: 'color 0.2s'
+                        }}
+                        onMouseOver={e => e.target.style.color = '#8b87f5'}
+                        onMouseOut={e => e.target.style.color = 'rgba(255, 255, 255, 0.4)'}
+                      >
+                        Explore website as Guest →
+                      </button>
+                    </div>
                   </motion.form>
                 ) : (
                   /* ═══════════════════════════════════════════
@@ -1495,6 +1525,36 @@ export default function Auth({ onComplete }) {
                         Sign in
                       </span>
                     </p>
+
+                    {/* Explore as Guest Option */}
+                    <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const guest = {
+                            name: 'Guest Visitor',
+                            email: 'guest@equilibrium.com',
+                            nickname: 'Guest',
+                            initial: 'G'
+                          };
+                          goAIHub(guest);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'rgba(255, 255, 255, 0.4)',
+                          fontSize: '0.78rem',
+                          cursor: 'pointer',
+                          fontFamily: J,
+                          textDecoration: 'underline',
+                          transition: 'color 0.2s'
+                        }}
+                        onMouseOver={e => e.target.style.color = '#8b87f5'}
+                        onMouseOut={e => e.target.style.color = 'rgba(255, 255, 255, 0.4)'}
+                      >
+                        Explore website as Guest →
+                      </button>
+                    </div>
                   </motion.form>
                 )}
               </AnimatePresence>
